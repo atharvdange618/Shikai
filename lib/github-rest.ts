@@ -56,15 +56,16 @@ export interface FetchReposResult {
 export async function fetchRepos(
   params: RepoListParams,
 ): Promise<FetchReposResult> {
-  const { page, per_page, sort = "updated", type = "all" } = params;
+  const { page, per_page, sort = "updated", type } = params;
 
   const { data, headers } = await githubAxios.get<GitHubRepo[]>("/user/repos", {
     params: {
       page,
       per_page,
       sort,
-      type,
-      affiliation: "owner,collaborator,organization_member",
+      ...(type
+        ? { type }
+        : { affiliation: "owner,collaborator,organization_member" }),
     },
   });
 

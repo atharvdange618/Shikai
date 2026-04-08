@@ -1,42 +1,12 @@
-import { useTheme } from "@/constants/theme";
-import { StyleSheet, Text, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { useAuthStore } from "@/stores/auth.store";
+import { Href, Redirect } from "expo-router";
 
 export default function Index() {
-  const { colors, typography, spacing } = useTheme();
+  const token = useAuthStore((s) => s.token);
 
-  return (
-    <SafeAreaView
-      style={[styles.container, { backgroundColor: colors.background }]}
-      edges={["top", "left", "right"]}
-    >
-      <View
-        style={[
-          styles.content,
-          { paddingHorizontal: spacing.lg, paddingVertical: spacing.xl },
-        ]}
-      >
-        <Text style={[typography.display, { color: colors.textPrimary }]}>
-          Shikai
-        </Text>
-        <Text
-          style={[
-            typography.body,
-            { color: colors.textSecondary, marginTop: spacing.sm },
-          ]}
-        >
-          Your GitHub companion
-        </Text>
-      </View>
-    </SafeAreaView>
-  );
+  if (token) {
+    return <Redirect href={"/(app)/(tabs)" as Href} />;
+  }
+
+  return <Redirect href="/token-setup" />;
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  content: {
-    paddingBottom: 40,
-  },
-});
