@@ -52,9 +52,18 @@ githubAxios.interceptors.request.use(
       config.headers.set("Authorization", `Bearer ${token}`);
     }
 
+    if (__DEV__) {
+      console.log("[API Request]", config.method?.toUpperCase(), config.url);
+    }
+
     return config;
   },
-  (error) => Promise.reject(error),
+  (error) => {
+    if (__DEV__) {
+      console.error("[API Request Error]", error);
+    }
+    return Promise.reject(error);
+  },
 );
 
 githubAxios.interceptors.response.use(
@@ -71,6 +80,16 @@ githubAxios.interceptors.response.use(
     if (resetVal) rateLimit.reset = new Date(parseInt(resetVal, 10) * 1000);
     if (usedVal) rateLimit.used = parseInt(usedVal, 10);
 
+    if (__DEV__) {
+      console.log("[API Response]", response.status, response.config.url);
+      if (rateLimit.remaining !== null) {
+        console.log(
+          "[Rate Limit]",
+          `${rateLimit.remaining}/${rateLimit.limit} remaining`,
+        );
+      }
+    }
+
     return response;
   },
 
@@ -79,6 +98,10 @@ githubAxios.interceptors.response.use(
     const data = error.response?.data as Record<string, unknown> | undefined;
     const message =
       (data?.message as string) ?? error.message ?? "Unknown error";
+
+    if (__DEV__) {
+      console.error("[API Error]", status, message);
+    }
 
     if (status === 401) {
       useAuthStore.getState().clearAuth();
