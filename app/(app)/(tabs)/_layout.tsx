@@ -1,83 +1,185 @@
-import { DarkColors, LightColors } from "@/constants/theme";
-import { useAuthStore } from "@/stores/auth.store";
-import { Octicons } from "@expo/vector-icons";
-import React from "react";
-import { StyleSheet, Text, useColorScheme, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { BlurView } from "expo-blur";
+import { Tabs } from "expo-router";
+import { useCallback } from "react";
+import { Platform, StyleSheet, useColorScheme } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-export default function AppLayout() {
+import { TabBarIcon } from "@/components/navigation/TabBarIcon";
+import {
+  BorderWidth,
+  DarkColors,
+  FontFamily,
+  Layout,
+  LightColors,
+  Spacing,
+} from "@/constants/theme";
+
+function IOSTabBarBackground() {
   const scheme = useColorScheme();
-  const colors = scheme === "dark" ? DarkColors : LightColors;
-  const user = useAuthStore((s) => s.user);
 
   return (
-    <SafeAreaView
-      style={[styles.container, { backgroundColor: colors.background }]}
-    >
-      <View style={styles.content}>
-        <View style={styles.iconContainer}>
-          <Octicons name="mark-github" size={64} color={colors.accent} />
-        </View>
-        <Text style={[styles.title, { color: colors.textPrimary }]}>
-          Welcome, {user?.login || "Developer"}! 👋
-        </Text>
-        <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
-          Your GitHub dashboard is being built...
-        </Text>
-        <View
-          style={[
-            styles.badge,
-            {
-              backgroundColor: colors.accentSubtle,
-              borderColor: colors.border,
-            },
-          ]}
-        >
-          <Octicons name="check-circle" size={16} color={colors.accent} />
-          <Text style={[styles.badgeText, { color: colors.accent }]}>
-            All systems connected
-          </Text>
-        </View>
-      </View>
-    </SafeAreaView>
+    <BlurView
+      tint={scheme === "dark" ? "dark" : "light"}
+      intensity={80}
+      style={StyleSheet.absoluteFill}
+    />
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  content: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 24,
-    gap: 16,
-  },
-  iconContainer: {
-    marginBottom: 8,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: "bold",
-    textAlign: "center",
-  },
-  subtitle: {
-    fontSize: 16,
-    textAlign: "center",
-  },
-  badge: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-    borderWidth: 1,
-    marginTop: 8,
-  },
-  badgeText: {
-    fontSize: 14,
-    fontWeight: "600",
-  },
-});
+export default function TabsLayout() {
+  const scheme = useColorScheme();
+  const isDark = scheme === "dark";
+  const colors = isDark ? DarkColors : LightColors;
+  const insets = useSafeAreaInsets();
+
+  const renderHomeIcon = useCallback(
+    ({
+      color,
+      size,
+      focused,
+    }: {
+      color: string;
+      size: number;
+      focused: boolean;
+    }) => (
+      <TabBarIcon
+        name="home"
+        filledName="home-fill"
+        color={color}
+        size={size}
+        focused={focused}
+      />
+    ),
+
+    [],
+  );
+
+  const renderReposIcon = useCallback(
+    ({
+      color,
+      size,
+      focused,
+    }: {
+      color: string;
+      size: number;
+      focused: boolean;
+    }) => (
+      <TabBarIcon name="repo" color={color} size={size} focused={focused} />
+    ),
+    [],
+  );
+
+  const renderStarsIcon = useCallback(
+    ({
+      color,
+      size,
+      focused,
+    }: {
+      color: string;
+      size: number;
+      focused: boolean;
+    }) => (
+      <TabBarIcon
+        name="star"
+        filledName="star-fill"
+        color={color}
+        size={size}
+        focused={focused}
+      />
+    ),
+    [],
+  );
+
+  const renderProfileIcon = useCallback(
+    ({
+      color,
+      size,
+      focused,
+    }: {
+      color: string;
+      size: number;
+      focused: boolean;
+    }) => (
+      <TabBarIcon
+        name="person"
+        filledName="person-fill"
+        color={color}
+        size={size}
+        focused={focused}
+      />
+    ),
+    [],
+  );
+
+  return (
+    <Tabs
+      screenOptions={{
+        headerShown: false,
+
+        tabBarActiveTintColor: colors.tabBarActive,
+        tabBarInactiveTintColor: colors.tabBarInactive,
+
+        tabBarLabelStyle: {
+          fontFamily: FontFamily.medium,
+          fontSize: 10,
+          marginTop: -2,
+          marginBottom: Platform.OS === "android" ? 4 : 0,
+        },
+
+        tabBarStyle: {
+          height: Layout.tabBarHeight + insets.bottom,
+          paddingBottom: insets.bottom,
+          backgroundColor: Platform.select({
+            ios: "transparent",
+            android: colors.tabBarBackground,
+          }),
+          borderTopWidth: Platform.select({
+            ios: 0,
+            android: BorderWidth.thin,
+          }),
+          borderTopColor: colors.border,
+          elevation: 0,
+        },
+
+        tabBarBackground:
+          Platform.OS === "ios" ? () => <IOSTabBarBackground /> : undefined,
+
+        tabBarIconStyle: {
+          marginTop: Spacing.xs,
+        },
+      }}
+    >
+      <Tabs.Screen
+        name="index"
+        options={{
+          title: "Overview",
+          tabBarIcon: renderHomeIcon,
+        }}
+      />
+
+      <Tabs.Screen
+        name="repos"
+        options={{
+          title: "Repos",
+          tabBarIcon: renderReposIcon,
+        }}
+      />
+
+      <Tabs.Screen
+        name="stars"
+        options={{
+          title: "Stars",
+          tabBarIcon: renderStarsIcon,
+        }}
+      />
+
+      <Tabs.Screen
+        name="profile"
+        options={{
+          title: "Profile",
+          tabBarIcon: renderProfileIcon,
+        }}
+      />
+    </Tabs>
+  );
+}
