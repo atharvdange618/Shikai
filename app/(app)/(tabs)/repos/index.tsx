@@ -1,9 +1,11 @@
 import { Card } from "@/components";
 import { DarkColors, LightColors, Spacing } from "@/constants/theme";
 import { useRepos } from "@/hooks/useRepos";
+import { useRouter } from "expo-router";
 import {
   ActivityIndicator,
   FlatList,
+  Pressable,
   StyleSheet,
   Text,
   useColorScheme,
@@ -14,6 +16,7 @@ export default function ReposScreen() {
   const scheme = useColorScheme();
   const isDark = scheme === "dark";
   const colors = isDark ? DarkColors : LightColors;
+  const router = useRouter();
 
   const { repos, isLoading, error } = useRepos();
 
@@ -58,6 +61,20 @@ export default function ReposScreen() {
                 {item.description}
               </Text>
             )}
+
+            <Pressable
+              style={[
+                styles.testButton,
+                { backgroundColor: colors.accentSubtle },
+              ]}
+              onPress={() =>
+                router.push(`/commits/${item.owner.login}__${item.name}`)
+              }
+            >
+              <Text style={[styles.testButtonText, { color: colors.accent }]}>
+                View Commits (Test)
+              </Text>
+            </Pressable>
           </Card>
         )}
       />
@@ -79,5 +96,16 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
     marginBottom: Spacing.xs,
+  },
+  testButton: {
+    marginTop: Spacing.sm,
+    paddingVertical: Spacing.xs,
+    paddingHorizontal: Spacing.sm,
+    borderRadius: 6,
+    alignItems: "center",
+  },
+  testButtonText: {
+    fontSize: 13,
+    fontWeight: "600",
   },
 });
