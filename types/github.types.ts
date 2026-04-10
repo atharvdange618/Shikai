@@ -9,6 +9,7 @@ export interface GitHubUser {
   blog: string | null;
   twitter_username: string | null;
   email: string | null;
+  hireable: boolean | null;
   html_url: string;
 
   public_repos: number;
@@ -180,3 +181,10 @@ export interface RepoListParams {
   type?: "all" | "public" | "private" | "forks" | "sources" | "member";
   language?: string;
 }
+
+export interface GitHubSocialAccount {
+  provider: string;
+  url: string;
+}
+
+export type SocialAccountProvider = "linkedin" | "twitter" | "generic";
