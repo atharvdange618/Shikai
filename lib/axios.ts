@@ -52,10 +52,6 @@ githubAxios.interceptors.request.use(
       config.headers.set("Authorization", `Bearer ${token}`);
     }
 
-    if (__DEV__) {
-      console.log("[API Request]", config.method?.toUpperCase(), config.url);
-    }
-
     return config;
   },
   (error) => {
@@ -79,16 +75,6 @@ githubAxios.interceptors.response.use(
     if (remainingVal) rateLimit.remaining = parseInt(remainingVal, 10);
     if (resetVal) rateLimit.reset = new Date(parseInt(resetVal, 10) * 1000);
     if (usedVal) rateLimit.used = parseInt(usedVal, 10);
-
-    if (__DEV__) {
-      console.log("[API Response]", response.status, response.config.url);
-      if (rateLimit.remaining !== null) {
-        console.log(
-          "[Rate Limit]",
-          `${rateLimit.remaining}/${rateLimit.limit} remaining`,
-        );
-      }
-    }
 
     return response;
   },
