@@ -24,7 +24,6 @@ export interface PinnedReposResponse {
 export interface ContributionDay {
   date: string;
   contributionCount: number;
-  color: string;
   weekday: number;
 }
 
@@ -58,5 +57,47 @@ export interface CommitCountResponse {
         };
       } | null;
     } | null;
+  };
+}
+
+export interface RecentCommitNode {
+  committedDate: string;
+  messageHeadline: string;
+  url: string;
+  author: {
+    name: string | null;
+    user: {
+      login: string;
+    } | null;
+  };
+}
+
+export interface RecentRepoNode {
+  id: string;
+  name: string;
+  url: string;
+  description: string | null;
+  isPrivate: boolean;
+  defaultBranchRef: {
+    name: string;
+    target: {
+      history: {
+        totalCount: number;
+        edges: {
+          node: RecentCommitNode;
+        }[];
+      };
+    };
+  } | null;
+}
+
+export interface RecentActivityResponse {
+  data: {
+    viewer: {
+      login: string;
+      repositories: {
+        nodes: RecentRepoNode[];
+      };
+    };
   };
 }
