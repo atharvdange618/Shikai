@@ -5,6 +5,8 @@ import type {
   ContributionGraphResponse,
   PinnedRepoNode,
   PinnedReposResponse,
+  RecentActivityResponse,
+  RecentRepoNode,
 } from "@/types/github-graphql.types";
 
 const GRAPHQL_ENDPOINT = "/graphql";
@@ -13,20 +15,17 @@ async function graphql<T>(
   query: string,
   variables?: Record<string, unknown>,
 ): Promise<T> {
-  const { data } = await githubAxios.post<
-    T & { errors?: { message: string }[] }
-  >(GRAPHQL_ENDPOINT, { query, variables });
+  const { data } = await githubAxios.post<{
+    data: T;
+    errors?: { message: string }[];
+  }>(GRAPHQL_ENDPOINT, { query, variables });
 
-  if (
-    "errors" in data &&
-    Array.isArray(data.errors) &&
-    data.errors.length > 0
-  ) {
+  if (Array.isArray(data.errors) && data.errors.length > 0) {
     const messages = data.errors.map((e) => e.message).join(", ");
     throw new Error(`GraphQL error: ${messages}`);
   }
 
-  return data;
+  return data.data;
 }
 
 const PINNED_REPOS_QUERY = `
@@ -53,9 +52,17 @@ const PINNED_REPOS_QUERY = `
 `;
 
 export async function fetchPinnedRepos(): Promise<PinnedRepoNode[]> {
-  const response =
-    await graphql<PinnedReposResponse["data"]>(PINNED_REPOS_QUERY);
-  return response.viewer.pinnedItems.nodes;
+  try {
+    const response =
+      await graphql<PinnedReposResponse["data"]>(PINNED_REPOS_QUERY);
+
+    return response.viewer.pinnedItems.nodes;
+  } catch (error) {
+    if (__DEV__) {
+      console.error("[Pinned Repos Error]", error);
+    }
+    throw error;
+  }
 }
 
 const CONTRIBUTION_GRAPH_QUERY = `
@@ -68,7 +75,6 @@ const CONTRIBUTION_GRAPH_QUERY = `
             contributionDays {
               date
               contributionCount
-              color
               weekday
             }
           }
@@ -79,10 +85,18 @@ const CONTRIBUTION_GRAPH_QUERY = `
 `;
 
 export async function fetchContributionGraph(): Promise<ContributionCalendar> {
-  const response = await graphql<ContributionGraphResponse["data"]>(
-    CONTRIBUTION_GRAPH_QUERY,
-  );
-  return response.viewer.contributionsCollection.contributionCalendar;
+  try {
+    const response = await graphql<ContributionGraphResponse["data"]>(
+      CONTRIBUTION_GRAPH_QUERY,
+    );
+
+    return response.viewer.contributionsCollection.contributionCalendar;
+  } catch (error) {
+    if (__DEV__) {
+      console.error("[Contribution Graph Error]", error);
+    }
+    throw error;
+  }
 }
 
 const COMMIT_COUNT_QUERY = `
@@ -116,4 +130,63 @@ export async function fetchCommitCount(
   return (
     response.repository?.defaultBranchRef?.target?.history?.totalCount ?? null
   );
+}
+
+const RECENT_ACTIVITY_QUERY = `
+  query RecentActivity {
+    viewer {
+      login
+      repositories(first: 20, orderBy: {field: PUSHED_AT, direction: DESC}) {
+        nodes {
+          id
+          name
+          url
+          description
+          isPrivate
+          defaultBranchRef {
+            name
+            target {
+              ... on Commit {
+                history(first: 1) {
+                  totalCount
+                  edges {
+                    node {
+                      committedDate
+                      messageHeadline
+                      url
+                      author {
+                        name
+                        user {
+                          login
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+`;
+
+export async function fetchRecentActivity(): Promise<RecentRepoNode[]> {
+  try {
+    const response = await graphql<RecentActivityResponse["data"]>(
+      RECENT_ACTIVITY_QUERY,
+    );
+
+    return response.viewer.repositories.nodes.filter(
+      (repo) =>
+        repo.defaultBranchRef &&
+        repo.defaultBranchRef.target.history.edges.length > 0,
+    );
+  } catch (error) {
+    if (__DEV__) {
+      console.error("[Recent Activity Error]", error);
+    }
+    throw error;
+  }
 }
