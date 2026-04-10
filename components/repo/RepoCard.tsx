@@ -1,0 +1,276 @@
+import { Octicons } from "@expo/vector-icons";
+import { memo, useMemo } from "react";
+import {
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  useColorScheme,
+  View,
+} from "react-native";
+
+import languageColors from "@/constants/language-colors.json";
+import {
+  DarkColors,
+  FontFamily,
+  FontSize,
+  LightColors,
+  Radius,
+  Shadows,
+  Spacing,
+} from "@/constants/theme";
+import type { GitHubRepo } from "@/types/github.types";
+
+interface RepoCardProps {
+  repo: GitHubRepo;
+  onPress?: () => void;
+}
+
+export const RepoCard = memo(function RepoCard({
+  repo,
+  onPress,
+}: RepoCardProps) {
+  const isDark = useColorScheme() === "dark";
+  const colors = isDark ? DarkColors : LightColors;
+  const s = useMemo(() => {
+    const shadows = isDark ? {} : Shadows.light.sm;
+    return buildStyles(colors, shadows);
+  }, [colors, isDark]);
+
+  const langColor = repo.language
+    ? ((languageColors as Record<string, { color: string | null }>)[
+        repo.language
+      ]?.color ?? colors.textMuted)
+    : null;
+
+  return (
+    <Pressable
+      style={({ pressed }) => [s.card, pressed && s.cardPressed]}
+      onPress={onPress}
+    >
+      <View style={s.titleRow}>
+        <Octicons
+          name="repo"
+          size={14}
+          color={colors.textSecondary}
+          style={s.repoIcon}
+        />
+        <Text style={s.repoName} numberOfLines={1}>
+          {repo.name}
+        </Text>
+        <VisibilityBadge isPrivate={repo.private} colors={colors} />
+      </View>
+
+      {repo.description ? (
+        <Text style={s.description} numberOfLines={2}>
+          {repo.description}
+        </Text>
+      ) : null}
+
+      <View style={s.metaRow}>
+        {repo.language ? (
+          <View style={s.metaItem}>
+            <View
+              style={[
+                s.langDot,
+                langColor ? { backgroundColor: langColor } : s.langDotDefault,
+              ]}
+            />
+            <Text style={s.metaText}>{repo.language}</Text>
+          </View>
+        ) : null}
+
+        {repo.license && (
+          <View style={s.metaItem}>
+            <Octicons name="law" size={11} color={colors.textMuted} />
+            <Text style={s.metaText}>{repo.license.spdx_id}</Text>
+          </View>
+        )}
+
+        <View style={[s.metaItem, s.metaRight]}>
+          <Text style={s.metaText}>
+            Updated {relativeTime(repo.updated_at)}
+          </Text>
+        </View>
+
+        {repo.stargazers_count > 0 && (
+          <View style={s.metaItem}>
+            <Octicons name="star" size={11} color={colors.star} />
+            <Text style={s.metaText}>{formatCount(repo.stargazers_count)}</Text>
+          </View>
+        )}
+      </View>
+
+      {repo.topics.length > 0 && (
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={s.topicsScroll}
+          contentContainerStyle={s.topicsContent}
+        >
+          {repo.topics.map((topic) => (
+            <View key={topic} style={s.topicPill}>
+              <Text style={s.topicText}>{topic}</Text>
+            </View>
+          ))}
+        </ScrollView>
+      )}
+    </Pressable>
+  );
+});
+
+function VisibilityBadge({
+  isPrivate,
+  colors,
+}: {
+  isPrivate: boolean;
+  colors: typeof LightColors | typeof DarkColors;
+}) {
+  return (
+    <View
+      style={{
+        backgroundColor: isPrivate
+          ? colors.badgePrivateBg
+          : colors.badgePublicBg,
+        borderRadius: Radius.full,
+        paddingHorizontal: 7,
+        paddingVertical: 2,
+        borderWidth: 1,
+        borderColor: isPrivate ? colors.border : colors.successSubtle,
+      }}
+    >
+      <Text
+        style={{
+          fontFamily: FontFamily.medium,
+          fontSize: 10,
+          color: isPrivate ? colors.badgePrivateText : colors.badgePublicText,
+        }}
+      >
+        {isPrivate ? "Private" : "Public"}
+      </Text>
+    </View>
+  );
+}
+
+function relativeTime(dateStr: string): string {
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const mins = Math.floor(diff / 60_000);
+  const hours = Math.floor(diff / 3_600_000);
+  const days = Math.floor(diff / 86_400_000);
+
+  if (mins < 1) return "just now";
+  if (mins < 60) return `${mins}m ago`;
+  if (hours < 24) return `${hours}h ago`;
+  if (days < 7) return `${days}d ago`;
+  if (days < 30) return `${Math.floor(days / 7)}w ago`;
+  if (days < 365) return `${Math.floor(days / 30)}mo ago`;
+  return `${Math.floor(days / 365)}y ago`;
+}
+
+function formatCount(n: number): string {
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}m`;
+  if (n >= 1_000) return `${(n / 1_000).toFixed(1)}k`;
+  return String(n);
+}
+
+function buildStyles(
+  colors: typeof LightColors | typeof DarkColors,
+  shadows: object,
+) {
+  return StyleSheet.create({
+    card: {
+      backgroundColor: colors.surface,
+      borderRadius: Radius.lg,
+      borderWidth: 1,
+      borderColor: colors.border,
+      padding: Spacing.md,
+      gap: Spacing.sm,
+      ...shadows,
+    },
+
+    cardPressed: {
+      opacity: 0.7,
+    },
+
+    titleRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: Spacing.sm,
+    },
+
+    repoIcon: {
+      flexShrink: 0,
+    },
+
+    repoName: {
+      flex: 1,
+      fontFamily: FontFamily.semiBold,
+      fontSize: FontSize.body,
+      color: colors.accent,
+    },
+
+    description: {
+      fontFamily: FontFamily.regular,
+      fontSize: FontSize.label,
+      color: colors.textSecondary,
+      lineHeight: FontSize.label * 1.5,
+    },
+
+    metaRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      flexWrap: "wrap",
+      gap: Spacing.sm,
+    },
+
+    metaItem: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 4,
+    },
+
+    metaRight: {
+      flex: 1,
+      justifyContent: "flex-end",
+    },
+
+    metaText: {
+      fontFamily: FontFamily.regular,
+      fontSize: FontSize.caption,
+      color: colors.textSecondary,
+    },
+
+    langDot: {
+      width: 10,
+      height: 10,
+      borderRadius: 5,
+    },
+
+    langDotDefault: {
+      backgroundColor: colors.textMuted,
+    },
+
+    topicsScroll: {
+      marginTop: Spacing.xs,
+    },
+
+    topicsContent: {
+      gap: Spacing.xs,
+    },
+
+    topicPill: {
+      backgroundColor: colors.accentSubtle,
+      borderRadius: Radius.full,
+      paddingHorizontal: Spacing.sm,
+      paddingVertical: 3,
+      borderWidth: 1,
+      borderColor: colors.accentMuted,
+    },
+
+    topicText: {
+      fontFamily: FontFamily.medium,
+      fontSize: 10,
+      color: colors.accent,
+    },
+  });
+}

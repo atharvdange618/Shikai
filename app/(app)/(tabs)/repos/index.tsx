@@ -9,6 +9,7 @@ import {
   StyleSheet,
   Text,
   useColorScheme,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -43,10 +44,7 @@ export default function ReposScreen() {
   }
 
   return (
-    <SafeAreaView
-      style={[styles.container, { backgroundColor: colors.background }]}
-      edges={["top"]}
-    >
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       <FlatList
         data={repos}
         keyExtractor={(item) => item.id.toString()}
@@ -78,7 +76,7 @@ export default function ReposScreen() {
           </Card>
         )}
       />
-    </SafeAreaView>
+    </View>
   );
 }
 
