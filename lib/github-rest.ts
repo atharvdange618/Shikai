@@ -8,6 +8,7 @@ import type {
   GitHubPagination,
   GitHubReadme,
   GitHubRepo,
+  GitHubSocialAccount,
   GitHubTree,
   GitHubUser,
   RepoListParams,
@@ -45,6 +46,13 @@ export async function validateToken(token: string): Promise<GitHubUser> {
   const { data } = await githubAxios.get<GitHubUser>("/user", {
     headers: { Authorization: `Bearer ${token}` },
   });
+  return data;
+}
+
+export async function fetchSocialAccounts(): Promise<GitHubSocialAccount[]> {
+  const { data } = await githubAxios.get<GitHubSocialAccount[]>(
+    "/user/social_accounts",
+  );
   return data;
 }
 
