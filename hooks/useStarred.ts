@@ -4,6 +4,8 @@
  * query params on the starred endpoint.
  */
 
+import { useMemo } from "react";
+
 import { fetchStarred } from "@/lib/github-rest";
 import { queryKeys } from "@/lib/query-client";
 import type { GitHubRepo } from "@/types/github.types";
@@ -31,31 +33,30 @@ export function useStarred(filters: StarredFilters = {}) {
     staleTime: 1000 * 60 * 5,
 
     select: (data) => {
-      const allRepos = data.pages.flatMap((page) => page.repos);
-
-      const filtered = allRepos.filter((repo: GitHubRepo) => {
-        const matchesLanguage =
-          !language || repo.language?.toLowerCase() === language.toLowerCase();
-
-        const matchesSearch =
-          !search ||
-          repo.name.toLowerCase().includes(search.toLowerCase()) ||
-          repo.description?.toLowerCase().includes(search.toLowerCase()) ||
-          repo.owner.login.toLowerCase().includes(search.toLowerCase());
-
-        return matchesLanguage && matchesSearch;
-      });
-
-      return {
-        repos: filtered,
-        pageParams: data.pageParams,
-        pages: data.pages,
-      };
+      return data.pages.flatMap((page) => page.repos);
     },
   });
 
+  const filteredRepos = useMemo(() => {
+    const allRepos = query.data ?? [];
+
+    return allRepos.filter((repo: GitHubRepo) => {
+      const matchesLanguage =
+        !language || repo.language?.toLowerCase() === language.toLowerCase();
+
+      const trimmedSearch = search?.trim();
+      const matchesSearch =
+        !trimmedSearch ||
+        repo.name.toLowerCase().includes(trimmedSearch.toLowerCase()) ||
+        repo.description?.toLowerCase().includes(trimmedSearch.toLowerCase()) ||
+        repo.owner.login.toLowerCase().includes(trimmedSearch.toLowerCase());
+
+      return matchesLanguage && matchesSearch;
+    });
+  }, [query.data, language, search]);
+
   return {
-    repos: query.data?.repos ?? [],
+    repos: filteredRepos,
     fetchNextPage: query.fetchNextPage,
     hasNextPage: query.hasNextPage,
     isFetchingNextPage: query.isFetchingNextPage,
