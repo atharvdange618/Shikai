@@ -24,6 +24,7 @@ export default function ReposLayout() {
     headerTintColor: colors.accent,
     headerShadowVisible: false,
     headerBackButtonDisplayMode: "minimal" as const,
+    headerBackTitle: "",
     headerBottomBorderColor: colors.border,
   };
 
@@ -48,6 +49,51 @@ export default function ReposLayout() {
 
       <Stack.Screen
         name="[repoId]/index"
+        options={{
+          ...sharedHeaderOptions,
+          title: "",
+          headerTransparent: Platform.OS === "ios",
+          headerBlurEffect:
+            Platform.OS === "ios" ? (isDark ? "dark" : "light") : undefined,
+          headerStyle:
+            Platform.OS === "ios"
+              ? undefined
+              : { backgroundColor: colors.background },
+        }}
+      />
+
+      <Stack.Screen
+        name="[repoId]/commits"
+        options={{
+          ...sharedHeaderOptions,
+          title: "Commits",
+          headerTransparent: Platform.OS === "ios",
+          headerBlurEffect:
+            Platform.OS === "ios" ? (isDark ? "dark" : "light") : undefined,
+          headerStyle:
+            Platform.OS === "ios"
+              ? undefined
+              : { backgroundColor: colors.background },
+        }}
+      />
+
+      <Stack.Screen
+        name="[repoId]/files"
+        options={{
+          ...sharedHeaderOptions,
+          title: "Files",
+          headerTransparent: Platform.OS === "ios",
+          headerBlurEffect:
+            Platform.OS === "ios" ? (isDark ? "dark" : "light") : undefined,
+          headerStyle:
+            Platform.OS === "ios"
+              ? undefined
+              : { backgroundColor: colors.background },
+        }}
+      />
+
+      <Stack.Screen
+        name="[repoId]/file"
         options={{
           ...sharedHeaderOptions,
           title: "",
