@@ -21,6 +21,7 @@ import {
 import type { PinnedRepoNode } from "@/types/github-graphql.types";
 
 import languageColors from "@/constants/language-colors.json";
+import { formatCount } from "@/lib/utils";
 
 const CARD_WIDTH = 220;
 
@@ -107,11 +108,6 @@ export function PinnedRepoCard({ repo }: PinnedRepoCardProps) {
       </View>
     </Pressable>
   );
-}
-
-function formatCount(n: number): string {
-  if (n >= 1000) return `${(n / 1000).toFixed(1)}k`;
-  return String(n);
 }
 
 function buildStyles(
