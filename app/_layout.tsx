@@ -14,6 +14,7 @@ import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect, useState } from "react";
 
+import { AnimatedSplashScreen } from "@/components/AnimatedSplashScreen";
 import { fetchAuthenticatedUser } from "@/lib/github-rest";
 import { queryClient, setupFocusManager } from "@/lib/query-client";
 import { getStoredToken } from "@/lib/secure-storage";
@@ -28,6 +29,7 @@ export default function RootLayout() {
   const setUser = useAuthStore((s) => s.setUser);
 
   const [bootComplete, setBootComplete] = useState(false);
+  const [showSplash, setShowSplash] = useState(true);
 
   const [fontsLoaded, fontError] = useFonts({
     Inter_400Regular,
@@ -65,19 +67,27 @@ export default function RootLayout() {
   }, [fontsLoaded, fontError, setToken, setUser]);
 
   useEffect(() => {
-    if (bootComplete && (fontsLoaded || fontError)) {
+    if (fontsLoaded || fontError) {
       SplashScreen.hideAsync();
     }
-  }, [bootComplete, fontsLoaded, fontError]);
+  }, [fontsLoaded, fontError]);
 
-  if (!bootComplete) return null;
+  const appReady = bootComplete && Boolean(fontsLoaded || fontError);
 
   return (
     <QueryClientProvider client={queryClient}>
-      <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="token-setup" />
-        <Stack.Screen name="(app)" />
-      </Stack>
+      {showSplash && (
+        <AnimatedSplashScreen
+          isReady={appReady}
+          onComplete={() => setShowSplash(false)}
+        />
+      )}
+      {!showSplash && (
+        <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="token-setup" />
+          <Stack.Screen name="(app)" />
+        </Stack>
+      )}
     </QueryClientProvider>
   );
 }
