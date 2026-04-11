@@ -2,5 +2,5 @@
  * Shikai Component Library
  */
 
-export { Button } from "./Button";
+export { AnimatedSplashScreen } from "./AnimatedSplashScreen";
 export { Card } from "./Card";
