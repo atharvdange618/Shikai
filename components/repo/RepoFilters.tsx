@@ -29,15 +29,14 @@ interface RepoFiltersProps {
 }
 
 const SORT_OPTIONS: { label: string; value: SortOption }[] = [
-  { label: "Updated", value: "updated" },
-  { label: "Latest", value: "pushed" },
+  { label: "Recently Updated", value: "updated" },
+  { label: "Recently Pushed", value: "pushed" },
 ];
 
 const TYPE_OPTIONS: { label: string; value: TypeOption }[] = [
   { label: "All", value: "all" },
   { label: "Public", value: "public" },
   { label: "Private", value: "private" },
-  { label: "Forks", value: "forks" },
 ];
 
 export function RepoFilters({
@@ -141,7 +140,11 @@ function FilterPill({
       onPress={onPress}
       style={({ pressed }) => [
         pillStyles.base,
-        active ? pillStyles.active : pressed ? pillStyles.pressed : pillStyles.inactive,
+        active
+          ? pillStyles.active
+          : pressed
+            ? pillStyles.pressed
+            : pillStyles.inactive,
       ]}
     >
       <Text style={textStyle}>{label}</Text>
