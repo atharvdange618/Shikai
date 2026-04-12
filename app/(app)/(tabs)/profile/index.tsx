@@ -139,7 +139,7 @@ export default function ProfileScreen() {
 
       <View style={[s.statsCard, shadows]}>
         <StatBlock
-          value={user?.public_repos ?? 0}
+          value={(user?.public_repos ?? 0) + (user?.total_private_repos ?? 0)}
           label="Repositories"
           colors={colors}
           isLoading={isLoading}

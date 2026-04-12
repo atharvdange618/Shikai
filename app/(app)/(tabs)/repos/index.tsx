@@ -2,6 +2,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { useCallback, useState } from "react";
 import {
+  ActivityIndicator,
   RefreshControl,
   StyleSheet,
   Text,
@@ -89,7 +90,12 @@ export default function ReposScreen() {
     </View>
   );
 
-  const ListEmpty = isLoading ? null : (
+  const ListEmpty = isLoading ? (
+    <View style={s.loadingContainer}>
+      <ActivityIndicator size="large" color={colors.accent} />
+      <Text style={s.loadingText}>Loading repositories…</Text>
+    </View>
+  ) : (
     <View style={s.emptyContainer}>
       {isError ? (
         <>
@@ -175,6 +181,18 @@ function buildStyles(colors: typeof LightColors | typeof DarkColors) {
 
     separator: {
       height: Spacing.sm,
+    },
+
+    loadingContainer: {
+      paddingTop: Spacing["3xl"],
+      alignItems: "center",
+      gap: Spacing.md,
+    },
+
+    loadingText: {
+      fontFamily: FontFamily.medium,
+      fontSize: FontSize.body,
+      color: colors.textSecondary,
     },
 
     emptyContainer: {
