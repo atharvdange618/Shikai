@@ -2,6 +2,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { memo, useCallback, useMemo, useState } from "react";
 import {
+  ActivityIndicator,
   FlatList,
   RefreshControl,
   StyleSheet,
@@ -104,7 +105,14 @@ export default function StarsScreen() {
   );
 
   const ListEmpty = useMemo(() => {
-    if (isLoading) return null;
+    if (isLoading) {
+      return (
+        <View style={s.loadingContainer}>
+          <ActivityIndicator size="large" color={colors.accent} />
+          <Text style={s.loadingText}>Loading starred repositories…</Text>
+        </View>
+      );
+    }
     return (
       <View style={s.emptyContainer}>
         {isError ? (
@@ -250,6 +258,18 @@ function buildStyles(colors: typeof LightColors | typeof DarkColors) {
 
     separator: {
       height: Spacing.sm,
+    },
+
+    loadingContainer: {
+      paddingTop: Spacing["3xl"],
+      alignItems: "center",
+      gap: Spacing.md,
+    },
+
+    loadingText: {
+      fontFamily: FontFamily.medium,
+      fontSize: FontSize.body,
+      color: colors.textSecondary,
     },
 
     emptyContainer: {

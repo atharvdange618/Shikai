@@ -6,7 +6,6 @@ import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
 import { useCallback, useEffect, useState } from "react";
 import {
-  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -75,16 +74,12 @@ export default function RepoDetailsScreen() {
   }, [lastCommit?.sha]);
 
   const handleCommitsPress = useCallback(() => {
-    if (Platform.OS === "ios") {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    }
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     router.push(`/(app)/(tabs)/repos/${repoId}/commits`);
   }, [router, repoId]);
 
   const handleCodePress = useCallback(() => {
-    if (Platform.OS === "ios") {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    }
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     router.push(`/(app)/(tabs)/repos/${repoId}/files`);
   }, [router, repoId]);
 
