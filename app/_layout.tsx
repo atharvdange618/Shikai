@@ -13,6 +13,7 @@ import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect, useState } from "react";
+import { StatusBar, useColorScheme } from "react-native";
 
 import { AnimatedSplashScreen } from "@/components/AnimatedSplashScreen";
 import { fetchAuthenticatedUser } from "@/lib/github-rest";
@@ -27,6 +28,7 @@ setupFocusManager();
 export default function RootLayout() {
   const setToken = useAuthStore((s) => s.setToken);
   const setUser = useAuthStore((s) => s.setUser);
+  const scheme = useColorScheme();
 
   const [bootComplete, setBootComplete] = useState(false);
   const [showSplash, setShowSplash] = useState(true);
@@ -76,6 +78,11 @@ export default function RootLayout() {
 
   return (
     <QueryClientProvider client={queryClient}>
+      <StatusBar
+        barStyle={scheme === "dark" ? "light-content" : "dark-content"}
+        backgroundColor="transparent"
+        translucent
+      />
       {showSplash && (
         <AnimatedSplashScreen
           isReady={appReady}
