@@ -103,7 +103,7 @@ export default function FileViewerScreen() {
         {isLoading && (
           <View style={s.centered}>
             <ActivityIndicator size="large" color={colors.accent} />
-            <Text style={s.loadingText}>Loading file...</Text>
+            <Text style={s.loadingText}>{`Loading ${fileName}...`}</Text>
           </View>
         )}
 

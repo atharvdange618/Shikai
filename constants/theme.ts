@@ -145,7 +145,7 @@ const Palette = {
   yellow400: "#FACC15",
   yellow500: "#EAB308",
 
-  white: "#FFFFFF",
+  white: "#F5F5F5",
   gray50: "#F8FAFC",
   gray100: "#F0F4F8",
   gray200: "#E2EAF1",
@@ -170,7 +170,7 @@ const Palette = {
 } as const;
 
 export const LightColors = {
-  background: Palette.gray100,
+  background: Palette.white,
   backgroundSubtle: Palette.gray50,
 
   surface: Palette.white,
