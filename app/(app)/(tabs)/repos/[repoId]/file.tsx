@@ -1,9 +1,12 @@
 import { Octicons } from "@expo/vector-icons";
+import * as Clipboard from "expo-clipboard";
+import * as Haptics from "expo-haptics";
 import { useLocalSearchParams, useNavigation } from "expo-router";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Image,
+  Pressable,
   ScrollView,
   StyleSheet,
   Text,
@@ -53,6 +56,7 @@ export default function FileViewerScreen() {
   const [owner, repoName] = (repoId ?? "").split("__");
   const [imageLoading, setImageLoading] = useState(true);
   const [imageError, setImageError] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   const isImage = useMemo(
     () => (fileName ? isImageFile(fileName) : false),
@@ -78,6 +82,14 @@ export default function FileViewerScreen() {
     path ?? "",
     true,
   );
+
+  const handleCopy = useCallback(async () => {
+    if (!data?.content) return;
+    await Clipboard.setStringAsync(data.content);
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  }, [data?.content]);
 
   const s = buildStyles(colors);
 
@@ -150,6 +162,30 @@ export default function FileViewerScreen() {
               </View>
             ) : (
               <View style={s.contentWrapper}>
+                <View style={s.codeHeader}>
+                  <Pressable
+                    style={({ pressed }) => [
+                      s.copyButton,
+                      pressed && s.copyButtonPressed,
+                      copied && s.copyButtonCopied,
+                    ]}
+                    onPress={handleCopy}
+                  >
+                    <Octicons
+                      name={copied ? "check" : "copy"}
+                      size={IconSize.sm}
+                      color={copied ? colors.success : colors.textPrimary}
+                    />
+                    <Text
+                      style={[
+                        s.copyButtonText,
+                        copied && s.copyButtonTextCopied,
+                      ]}
+                    >
+                      {copied ? "Copied!" : "Copy"}
+                    </Text>
+                  </Pressable>
+                </View>
                 <Text style={s.fileContent} selectable>
                   {data.content}
                 </Text>
@@ -179,6 +215,44 @@ function buildStyles(colors: typeof LightColors | typeof DarkColors) {
 
     contentWrapper: {
       padding: Spacing.lg,
+    },
+
+    codeHeader: {
+      flexDirection: "row",
+      justifyContent: "flex-end",
+      marginBottom: Spacing.sm,
+    },
+
+    copyButton: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: Spacing.xs,
+      paddingHorizontal: Spacing.md,
+      paddingVertical: Spacing.sm,
+      backgroundColor: colors.surface,
+      borderRadius: Radius.sm,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+
+    copyButtonPressed: {
+      opacity: 0.7,
+      backgroundColor: colors.surfaceSecondary,
+    },
+
+    copyButtonCopied: {
+      backgroundColor: colors.successSubtle,
+      borderColor: colors.success,
+    },
+
+    copyButtonText: {
+      fontFamily: FontFamily.medium,
+      fontSize: FontSize.label,
+      color: colors.textPrimary,
+    },
+
+    copyButtonTextCopied: {
+      color: colors.success,
     },
 
     fileContent: {

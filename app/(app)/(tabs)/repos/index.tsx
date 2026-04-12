@@ -2,7 +2,6 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { useCallback, useState } from "react";
 import {
-  FlatList,
   RefreshControl,
   StyleSheet,
   Text,
@@ -26,6 +25,7 @@ import {
   LightColors,
   Spacing,
 } from "@/constants/theme";
+import { FlashList } from "@shopify/flash-list";
 
 export default function ReposScreen() {
   const isDark = useColorScheme() === "dark";
@@ -127,7 +127,7 @@ export default function ReposScreen() {
 
   return (
     <View style={s.container}>
-      <FlatList
+      <FlashList
         data={repos}
         renderItem={renderItem}
         keyExtractor={keyExtractor}
@@ -149,6 +149,7 @@ export default function ReposScreen() {
           />
         }
         removeClippedSubviews
+        drawDistance={200}
       />
     </View>
   );
