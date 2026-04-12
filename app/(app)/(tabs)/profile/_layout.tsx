@@ -35,7 +35,7 @@ export default function ProfileLayout() {
         screenOptions={{
           ...sharedHeaderOptions,
           drawerPosition: "right",
-          drawerType: "front", // slides over content, not push
+          drawerType: "front",
           drawerStyle: {
             backgroundColor: colors.surface,
             width: width * 0.72,
@@ -60,8 +60,6 @@ export default function ProfileLayout() {
           options={{
             ...sharedHeaderOptions,
             title: "Settings",
-            headerLeft: undefined,
-            swipeEnabled: false,
           }}
         />
       </Drawer>
