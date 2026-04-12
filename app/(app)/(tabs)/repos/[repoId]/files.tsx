@@ -229,7 +229,7 @@ export default function FileExplorerScreen() {
       {isLoading ? (
         <View style={s.loadingContainer}>
           <ActivityIndicator color={colors.accent} />
-          <Text style={s.loadingText}>Loading file tree…</Text>
+          <Text style={s.loadingText}>{`Loading ${repoName} file tree…`}</Text>
         </View>
       ) : flattenedTree.length === 0 ? (
         <View style={s.loadingContainer}>
