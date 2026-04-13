@@ -7,6 +7,8 @@ import type {
   PinnedReposResponse,
   RecentActivityResponse,
   RecentRepoNode,
+  RepoIssuesPRStats,
+  RepoIssuesPRStatsResponse,
 } from "@/types/github-graphql.types";
 
 const GRAPHQL_ENDPOINT = "/graphql";
@@ -189,4 +191,41 @@ export async function fetchRecentActivity(): Promise<RecentRepoNode[]> {
     }
     throw error;
   }
+}
+
+const REPO_ISSUES_PR_STATS_QUERY = `
+  query RepoIssuesPRStats($owner: String!, $name: String!) {
+    repository(owner: $owner, name: $name) {
+      openIssues: issues(states: OPEN) {
+        totalCount
+      }
+      closedIssues: issues(states: CLOSED) {
+        totalCount
+      }
+      openPullRequests: pullRequests(states: OPEN) {
+        totalCount
+      }
+      mergedPullRequests: pullRequests(states: MERGED) {
+        totalCount
+      }
+    }
+  }
+`;
+
+export async function fetchRepoIssuesPRStats(
+  owner: string,
+  repo: string,
+): Promise<RepoIssuesPRStats> {
+  const response = await graphql<RepoIssuesPRStatsResponse["data"]>(
+    REPO_ISSUES_PR_STATS_QUERY,
+    { owner, name: repo },
+  );
+
+  const r = response.repository;
+  return {
+    openIssues: r?.openIssues.totalCount ?? 0,
+    closedIssues: r?.closedIssues.totalCount ?? 0,
+    openPullRequests: r?.openPullRequests.totalCount ?? 0,
+    mergedPullRequests: r?.mergedPullRequests.totalCount ?? 0,
+  };
 }
