@@ -106,6 +106,36 @@ export default function ReposLayout() {
               : { backgroundColor: colors.background },
         }}
       />
+
+      <Stack.Screen
+        name="[repoId]/issues"
+        options={{
+          ...sharedHeaderOptions,
+          title: "Issues",
+          headerTransparent: Platform.OS === "ios",
+          headerBlurEffect:
+            Platform.OS === "ios" ? (isDark ? "dark" : "light") : undefined,
+          headerStyle:
+            Platform.OS === "ios"
+              ? undefined
+              : { backgroundColor: colors.background },
+        }}
+      />
+
+      <Stack.Screen
+        name="[repoId]/pull-requests"
+        options={{
+          ...sharedHeaderOptions,
+          title: "Pull Requests",
+          headerTransparent: Platform.OS === "ios",
+          headerBlurEffect:
+            Platform.OS === "ios" ? (isDark ? "dark" : "light") : undefined,
+          headerStyle:
+            Platform.OS === "ios"
+              ? undefined
+              : { backgroundColor: colors.background },
+        }}
+      />
     </Stack>
   );
 }
