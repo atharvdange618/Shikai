@@ -70,6 +70,7 @@ export const RepoCard = memo(function RepoCard({
         <Text style={s.repoName} numberOfLines={1}>
           {repo.name}
         </Text>
+        {repo.fork && <ForkBadge colors={colors} />}
         <VisibilityBadge isPrivate={repo.private} colors={colors} />
       </View>
 
@@ -146,6 +147,35 @@ export const RepoCard = memo(function RepoCard({
     </Pressable>
   );
 });
+
+function ForkBadge({
+  colors,
+}: {
+  colors: typeof LightColors | typeof DarkColors;
+}) {
+  return (
+    <View
+      style={{
+        backgroundColor: colors.badgeForkBg,
+        borderRadius: Radius.full,
+        paddingHorizontal: 7,
+        paddingVertical: 2,
+        borderWidth: 1,
+        borderColor: colors.accentMuted,
+      }}
+    >
+      <Text
+        style={{
+          fontFamily: FontFamily.medium,
+          fontSize: 10,
+          color: colors.badgeForkText,
+        }}
+      >
+        Fork
+      </Text>
+    </View>
+  );
+}
 
 function VisibilityBadge({
   isPrivate,
