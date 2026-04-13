@@ -189,3 +189,49 @@ export interface GitHubSocialAccount {
 }
 
 export type SocialAccountProvider = "linkedin" | "twitter" | "generic";
+
+export interface GitHubLabel {
+  id: number;
+  name: string;
+  color: string;
+  description: string | null;
+}
+
+export interface GitHubIssue {
+  id: number;
+  number: number;
+  title: string;
+  state: "open" | "closed";
+  html_url: string;
+  body: string | null;
+  user: GitHubUserSummary;
+  labels: GitHubLabel[];
+  assignees: GitHubUserSummary[];
+  comments: number;
+  created_at: string;
+  updated_at: string;
+  closed_at: string | null;
+  pull_request?: { merged_at: string | null };
+}
+
+export interface GitHubPullRequest {
+  id: number;
+  number: number;
+  title: string;
+  state: "open" | "closed";
+  draft: boolean;
+  html_url: string;
+  body: string | null;
+  user: GitHubUserSummary;
+  labels: GitHubLabel[];
+  assignees: GitHubUserSummary[];
+  comments: number;
+  review_comments: number;
+  created_at: string;
+  updated_at: string;
+  closed_at: string | null;
+  merged_at: string | null;
+  merged: boolean;
+  head: { ref: string; label: string };
+  base: { ref: string; label: string };
+}

@@ -101,3 +101,21 @@ export interface RecentActivityResponse {
     };
   };
 }
+
+export interface RepoIssuesPRStats {
+  openIssues: number;
+  closedIssues: number;
+  openPullRequests: number;
+  mergedPullRequests: number;
+}
+
+export interface RepoIssuesPRStatsResponse {
+  data: {
+    repository: {
+      openIssues: { totalCount: number };
+      closedIssues: { totalCount: number };
+      openPullRequests: { totalCount: number };
+      mergedPullRequests: { totalCount: number };
+    } | null;
+  };
+}
