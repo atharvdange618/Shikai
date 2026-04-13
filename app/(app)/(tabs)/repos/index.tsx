@@ -111,7 +111,9 @@ export default function ReposScreen() {
         </>
       ) : type !== "all" ? (
         <>
-          <Text style={s.emptyTitle}>No {type} repositories</Text>
+          <Text style={s.emptyTitle}>
+            No {type === "forks" ? "forked" : type} repositories
+          </Text>
           <Text style={s.emptySubtitle}>Try changing the type filter</Text>
         </>
       ) : (

@@ -38,6 +38,7 @@ const TYPE_OPTIONS: { label: string; value: TypeOption }[] = [
   { label: "All", value: "all" },
   { label: "Public", value: "public" },
   { label: "Private", value: "private" },
+  { label: "Forks", value: "forks" },
 ];
 
 export function RepoFilters({

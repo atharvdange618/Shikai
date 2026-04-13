@@ -23,15 +23,17 @@ export interface RepoFilters {
 export function useRepos(filters: RepoFilters = {}) {
   const { sort = "pushed", type, language, search } = filters;
 
+  const apiType = type === "forks" ? "all" : type;
+
   const query = useInfiniteQuery({
-    queryKey: [...queryKeys.repos(), { sort, type }] as const,
+    queryKey: [...queryKeys.repos(), { sort, type: apiType }] as const,
 
     queryFn: ({ pageParam }) =>
       fetchRepos({
         page: pageParam,
         per_page: PER_PAGE,
         sort,
-        type,
+        type: apiType,
       }),
 
     initialPageParam: 1,
@@ -58,9 +60,11 @@ export function useRepos(filters: RepoFilters = {}) {
         repo.name.toLowerCase().includes(trimmedSearch.toLowerCase()) ||
         repo.description?.toLowerCase().includes(trimmedSearch.toLowerCase());
 
-      return matchesLanguage && matchesSearch;
+      const matchesType = type === "forks" ? repo.fork === true : true;
+
+      return matchesLanguage && matchesSearch && matchesType;
     });
-  }, [query.data, language, search]);
+  }, [query.data, language, search, type]);
 
   return {
     repos: filteredRepos,
