@@ -1,13 +1,13 @@
 /**
  * Why separate hooks instead of one big hook?
  * Each piece of data has a different staleTime and loading state.
- * The README is big and slow — it shouldn't block the stats from showing.
+ * The README is big and slow - it shouldn't block the stats from showing.
  * The file tree is only fetched when the user opens the code panel.
  * Splitting them means each query loads independently and the screen
  * progressively fills in rather than waiting for everything at once.
  */
 
-import { fetchCommitCount } from "@/lib/github-graphql";
+import { fetchCommitCount, fetchRepoIssuesPRStats } from "@/lib/github-graphql";
 import {
   fetchCommits,
   fetchContributors,
@@ -179,6 +179,7 @@ export function useRepoDetailsScreen(owner: string, repo: string) {
   const languagesQuery = useRepoLanguages(owner, repo);
   const commitCountQuery = useCommitCount(owner, repo);
   const lastCommitQuery = useLastCommit(owner, repo);
+  const issuesPRStatsQuery = useRepoIssuesPRStats(owner, repo);
   const contributorsQuery = useContributors(owner, repo);
   const readmeQuery = useReadme(owner, repo);
 
@@ -192,6 +193,7 @@ export function useRepoDetailsScreen(owner: string, repo: string) {
     languages: languagesQuery.data ?? [],
     commitCount: commitCountQuery.data ?? null,
     lastCommit: lastCommitQuery.data,
+    issuesPRStats: issuesPRStatsQuery.data ?? null,
     contributors: contributorsQuery.data ?? [],
     readme: readmeQuery.data,
     isLoading: {
@@ -205,4 +207,15 @@ export function useRepoDetailsScreen(owner: string, repo: string) {
     error: repoQuery.error,
     refetch: repoQuery.refetch,
   };
+}
+
+export function useRepoIssuesPRStats(owner: string, repo: string) {
+  return useQuery(
+    queryOptions({
+      queryKey: queryKeys.repoIssuesPRStats(owner, repo),
+      queryFn: () => fetchRepoIssuesPRStats(owner, repo),
+      enabled: Boolean(owner && repo),
+      staleTime: 1000 * 60 * 5,
+    }),
+  );
 }
