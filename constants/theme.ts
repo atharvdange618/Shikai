@@ -196,11 +196,14 @@ export const LightColors = {
   dangerSubtle: "#FEE2E2",
   warning: Palette.orange500,
   warningSubtle: "#FFF7ED",
+  merged: Palette.purple500,
 
   badgePublicBg: Palette.green100,
   badgePublicText: Palette.green700,
   badgePrivateBg: Palette.gray200,
   badgePrivateText: Palette.gray600,
+  badgeForkBg: Palette.blue100,
+  badgeForkText: Palette.blue700,
 
   star: Palette.yellow500,
 
@@ -243,11 +246,14 @@ export const DarkColors = {
   dangerSubtle: "#2D1217",
   warning: Palette.orange400,
   warningSubtle: "#2D1B00",
+  merged: "#A371F7",
 
   badgePublicBg: "#0C2D1A",
   badgePublicText: Palette.green400,
   badgePrivateBg: Palette.dark600,
   badgePrivateText: Palette.dark200,
+  badgeForkBg: "#1C2D3F",
+  badgeForkText: Palette.githubBlue,
 
   star: Palette.yellow400,
 
