@@ -21,7 +21,7 @@ export interface RepoFilters {
 }
 
 export function useRepos(filters: RepoFilters = {}) {
-  const { sort = "updated", type, language, search } = filters;
+  const { sort = "pushed", type, language, search } = filters;
 
   const query = useInfiniteQuery({
     queryKey: [...queryKeys.repos(), { sort, type }] as const,

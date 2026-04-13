@@ -20,15 +20,17 @@ import {
   Spacing,
 } from "@/constants/theme";
 import { formatCount, relativeTime } from "@/lib/utils";
-import type { GitHubRepo } from "@/types/github.types";
+import type { GitHubRepo, RepoListParams } from "@/types/github.types";
 
 interface RepoCardProps {
   repo: GitHubRepo;
+  sort?: RepoListParams["sort"];
   onPress?: () => void;
 }
 
 export const RepoCard = memo(function RepoCard({
   repo,
+  sort = "pushed",
   onPress,
 }: RepoCardProps) {
   const isDark = useColorScheme() === "dark";
@@ -43,6 +45,15 @@ export const RepoCard = memo(function RepoCard({
         repo.language
       ]?.color ?? colors.textMuted)
     : null;
+
+  const timestampLabel =
+    sort === "pushed" ? "Pushed" : sort === "created" ? "Created" : "Updated";
+  const timestampValue =
+    sort === "pushed"
+      ? repo.pushed_at
+      : sort === "created"
+        ? repo.created_at
+        : repo.updated_at;
 
   return (
     <Pressable
@@ -81,6 +92,29 @@ export const RepoCard = memo(function RepoCard({
           </View>
         ) : null}
 
+        {repo.stargazers_count > 0 && (
+          <View style={s.metaItem}>
+            <Octicons name="star" size={11} color={colors.star} />
+            <Text style={s.metaText}>{formatCount(repo.stargazers_count)}</Text>
+          </View>
+        )}
+
+        {repo.forks_count > 0 && (
+          <View style={s.metaItem}>
+            <Octicons name="repo-forked" size={11} color={colors.textMuted} />
+            <Text style={s.metaText}>{formatCount(repo.forks_count)}</Text>
+          </View>
+        )}
+
+        {repo.open_issues_count > 0 && (
+          <View style={s.metaItem}>
+            <Octicons name="issue-opened" size={11} color={colors.textMuted} />
+            <Text style={s.metaText}>
+              {formatCount(repo.open_issues_count)}
+            </Text>
+          </View>
+        )}
+
         {repo.license && (
           <View style={s.metaItem}>
             <Octicons name="law" size={11} color={colors.textMuted} />
@@ -90,16 +124,9 @@ export const RepoCard = memo(function RepoCard({
 
         <View style={[s.metaItem, s.metaRight]}>
           <Text style={s.metaText}>
-            Updated {relativeTime(repo.updated_at)}
+            {timestampLabel} {relativeTime(timestampValue)}
           </Text>
         </View>
-
-        {repo.stargazers_count > 0 && (
-          <View style={s.metaItem}>
-            <Octicons name="star" size={11} color={colors.star} />
-            <Text style={s.metaText}>{formatCount(repo.stargazers_count)}</Text>
-          </View>
-        )}
       </View>
 
       {repo.topics.length > 0 && (
