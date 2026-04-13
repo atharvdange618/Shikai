@@ -62,4 +62,10 @@ export const queryKeys = {
     ["repo", owner, repo, "readme"] as const,
   repoCommitCount: (owner: string, repo: string) =>
     ["repo", owner, repo, "commitCount"] as const,
+  repoIssuesPRStats: (owner: string, repo: string) =>
+    ["repo", owner, repo, "issuesPRStats"] as const,
+  repoIssues: (owner: string, repo: string, state: string) =>
+    ["repo", owner, repo, "issues", state] as const,
+  repoPullRequests: (owner: string, repo: string, state: string) =>
+    ["repo", owner, repo, "pullRequests", state] as const,
 } as const;

@@ -4,8 +4,10 @@ import type {
   GitHubContent,
   GitHubContributor,
   GitHubEvent,
+  GitHubIssue,
   GitHubLanguages,
   GitHubPagination,
+  GitHubPullRequest,
   GitHubReadme,
   GitHubRepo,
   GitHubSocialAccount,
@@ -223,4 +225,52 @@ export async function fetchUserEvents(
     { params: { per_page: 20 } },
   );
   return data;
+}
+
+export interface FetchIssuesResult {
+  issues: GitHubIssue[];
+  pagination: GitHubPagination;
+}
+
+export async function fetchIssues(
+  owner: string,
+  repo: string,
+  page: number,
+  per_page: number = 10,
+  state: "open" | "closed" | "all" = "open",
+): Promise<FetchIssuesResult> {
+  const { data, headers } = await githubAxios.get<GitHubIssue[]>(
+    `/repos/${owner}/${repo}/issues`,
+    { params: { page, per_page, state } },
+  );
+
+  const issues = data.filter((item) => !item.pull_request);
+
+  return {
+    issues,
+    pagination: parseLinkHeader(headers["link"]),
+  };
+}
+
+export interface FetchPullRequestsResult {
+  pullRequests: GitHubPullRequest[];
+  pagination: GitHubPagination;
+}
+
+export async function fetchPullRequests(
+  owner: string,
+  repo: string,
+  page: number,
+  per_page: number = 10,
+  state: "open" | "closed" | "all" = "open",
+): Promise<FetchPullRequestsResult> {
+  const { data, headers } = await githubAxios.get<GitHubPullRequest[]>(
+    `/repos/${owner}/${repo}/pulls`,
+    { params: { page, per_page, state } },
+  );
+
+  return {
+    pullRequests: data,
+    pagination: parseLinkHeader(headers["link"]),
+  };
 }
