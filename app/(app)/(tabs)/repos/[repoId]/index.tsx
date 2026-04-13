@@ -49,6 +49,7 @@ export default function RepoDetailsScreen() {
     languages,
     commitCount,
     lastCommit,
+    issuesPRStats,
     contributors,
     readme,
     isLoading,
@@ -88,6 +89,16 @@ export default function RepoDetailsScreen() {
     WebBrowser.openBrowserAsync(`${repo.html_url}#readme`);
   }, [repo?.html_url]);
 
+  const handleIssuesPress = useCallback(() => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    router.push(`/(app)/(tabs)/repos/${repoId}/issues`);
+  }, [router, repoId]);
+
+  const handlePRsPress = useCallback(() => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    router.push(`/(app)/(tabs)/repos/${repoId}/pull-requests`);
+  }, [router, repoId]);
+
   const s = buildStyles(colors, shadows);
 
   if (isError) {
@@ -126,6 +137,27 @@ export default function RepoDetailsScreen() {
               <Text style={s.repoName} numberOfLines={1}>
                 {repo?.name}
               </Text>
+            )}
+            {repo && repo.fork && (
+              <View
+                style={[
+                  s.badge,
+                  {
+                    backgroundColor: colors.badgeForkBg,
+                  },
+                ]}
+              >
+                <Text
+                  style={[
+                    s.badgeText,
+                    {
+                      color: colors.badgeForkText,
+                    },
+                  ]}
+                >
+                  Fork
+                </Text>
+              </View>
             )}
             {repo && (
               <View
@@ -223,6 +255,69 @@ export default function RepoDetailsScreen() {
             isLoading={isLoading.commitCount}
           />
         </Animated.View>
+
+        {issuesPRStats && (
+          <Animated.View
+            entering={FadeInDown.duration(400).delay(250)}
+            style={[s.card, s.issuesPRCard]}
+          >
+            <Pressable
+              style={({ pressed }) => [
+                s.issuesPRItem,
+                pressed && { opacity: 0.6 },
+              ]}
+              onPress={handleIssuesPress}
+            >
+              <Octicons
+                name="issue-opened"
+                size={14}
+                color={
+                  issuesPRStats.openIssues > 0
+                    ? colors.success
+                    : colors.textMuted
+                }
+              />
+              <Text style={s.issuesPRCount}>{issuesPRStats.openIssues}</Text>
+              <Text style={s.issuesPRLabel}>open issues</Text>
+              <Octicons
+                name="chevron-right"
+                size={12}
+                color={colors.textMuted}
+                style={{ marginLeft: "auto" }}
+              />
+            </Pressable>
+
+            <View style={s.statDivider} />
+
+            <Pressable
+              style={({ pressed }) => [
+                s.issuesPRItem,
+                pressed && { opacity: 0.6 },
+              ]}
+              onPress={handlePRsPress}
+            >
+              <Octicons
+                name="git-pull-request"
+                size={14}
+                color={
+                  issuesPRStats.openPullRequests > 0
+                    ? colors.accent
+                    : colors.textMuted
+                }
+              />
+              <Text style={s.issuesPRCount}>
+                {issuesPRStats.openPullRequests}
+              </Text>
+              <Text style={s.issuesPRLabel}>open pull requests</Text>
+              <Octicons
+                name="chevron-right"
+                size={12}
+                color={colors.textMuted}
+                style={{ marginLeft: "auto" }}
+              />
+            </Pressable>
+          </Animated.View>
+        )}
 
         {(lastCommit || isLoading.core) && (
           <Animated.View
@@ -560,6 +655,27 @@ function buildStyles(
       width: 1,
       height: 32,
       backgroundColor: colors.border,
+    },
+
+    issuesPRCard: {
+      overflow: "hidden",
+    },
+    issuesPRItem: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: Spacing.sm,
+      padding: Spacing.md,
+    },
+    issuesPRCount: {
+      fontFamily: FontFamily.semiBold,
+      fontSize: FontSize.body,
+      color: colors.textPrimary,
+      fontVariant: ["tabular-nums"],
+    },
+    issuesPRLabel: {
+      fontFamily: FontFamily.regular,
+      fontSize: FontSize.label,
+      color: colors.textSecondary,
     },
 
     commitCard: {
