@@ -178,7 +178,7 @@ export interface GitHubPagination {
 export interface RepoListParams {
   page: number;
   per_page: number;
-  sort?: "updated" | "pushed" | "full_name" | "created";
+  sort?: "pushed" | "created" | "full_name";
   type?: "all" | "public" | "private" | "forks" | "sources" | "member";
   language?: string;
 }

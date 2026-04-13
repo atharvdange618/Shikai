@@ -35,7 +35,7 @@ export default function ReposScreen() {
   const queryClient = useQueryClient();
 
   const [search, setSearch] = useState("");
-  const [sort, setSort] = useState<SortOption>("updated");
+  const [sort, setSort] = useState<SortOption>("pushed");
   const [type, setType] = useState<TypeOption>("all");
 
   const {
@@ -65,9 +65,9 @@ export default function ReposScreen() {
 
   const renderItem = useCallback(
     ({ item }: { item: GitHubRepo }) => (
-      <RepoCard repo={item} onPress={() => handleRepoPress(item)} />
+      <RepoCard repo={item} sort={sort} onPress={() => handleRepoPress(item)} />
     ),
-    [handleRepoPress],
+    [handleRepoPress, sort],
   );
 
   const keyExtractor = useCallback((item: GitHubRepo) => String(item.id), []);

@@ -29,8 +29,9 @@ interface RepoFiltersProps {
 }
 
 const SORT_OPTIONS: { label: string; value: SortOption }[] = [
-  { label: "Recently Updated", value: "updated" },
   { label: "Recently Pushed", value: "pushed" },
+  { label: "Recently Created", value: "created" },
+  { label: "Alphabetically", value: "full_name" },
 ];
 
 const TYPE_OPTIONS: { label: string; value: TypeOption }[] = [
