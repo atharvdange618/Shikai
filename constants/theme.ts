@@ -106,6 +106,12 @@ export const BorderWidth = {
 } as const;
 
 const Palette = {
+  warmWhite: "#FAF9F6",
+  beige50: "#F8F6F0",
+  beige100: "#F5F1E8",
+  beige200: "#EBE6DC",
+  beige300: "#D9D3C7",
+
   blue50: "#EFF6FF",
   blue100: "#DBEAFE",
   blue300: "#93C5FD",
@@ -170,15 +176,15 @@ const Palette = {
 } as const;
 
 export const LightColors = {
-  background: Palette.white,
-  backgroundSubtle: Palette.gray50,
+  background: Palette.warmWhite,
+  backgroundSubtle: Palette.beige50,
 
-  surface: Palette.white,
-  surfaceSecondary: Palette.gray200,
-  surfaceInset: Palette.gray100,
+  surface: Palette.warmWhite,
+  surfaceSecondary: Palette.beige200,
+  surfaceInset: Palette.beige100,
 
-  border: Palette.gray300,
-  borderSubtle: Palette.gray200,
+  border: Palette.beige300,
+  borderSubtle: Palette.beige200,
 
   accent: Palette.blue500,
   accentSubtle: Palette.blue100,
@@ -213,8 +219,8 @@ export const LightColors = {
   contributeL3: Palette.contributeL3Light,
   contributeL4: Palette.contributeL4Light,
 
-  tabBarBackground: Palette.white,
-  tabBarBorder: Palette.gray300,
+  tabBarBackground: Palette.warmWhite,
+  tabBarBorder: Palette.beige300,
   tabBarActive: Palette.blue500,
   tabBarInactive: Palette.gray400,
 } as const;
