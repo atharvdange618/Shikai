@@ -1,8 +1,8 @@
 # Shikai
 
-> Your GitHub profile, always in your pocket.
+> **視界** — Your GitHub profile, refined and always in your pocket.
 
-Shikai is a mobile-first GitHub dashboard designed for developers who want to stay connected with their work without the noise. It's a read-only companion app that gives you a beautiful, distraction-free view of your repositories, contributions, and activity-all from your phone.
+Shikai is an elegantly designed, mobile-first GitHub companion for developers who value clarity and sophistication. It's a read-only dashboard that gives you a beautiful, distraction-free view of your repositories, contributions, and activity—all with a refined aesthetic that feels at home on your device.
 
 ---
 

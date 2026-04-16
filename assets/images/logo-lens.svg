@@ -1,0 +1,39 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none"
+    xmlns="http://www.w3.org/2000/svg">
+    <!-- Background -->
+    <rect width="1024" height="1024" fill="#FAF9F6" />
+
+    <!-- Safe zone: 88px from edges, content area: 848x848 centered -->
+
+    <!-- Outer circle (subtle border) -->
+    <circle cx="512" cy="512" r="320" fill="none" stroke="#D9D3C7" stroke-width="2" />
+
+    <!-- Main lens gradient circle -->
+    <defs>
+        <linearGradient id="blueGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#58A6FF;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#3B82F6;stop-opacity:1" />
+        </linearGradient>
+    </defs>
+
+    <circle cx="512" cy="512" r="280" fill="url(#blueGradient)" />
+
+    <!-- Inner circle (lighter blue) -->
+    <circle cx="512" cy="512" r="200" fill="#DBEAFE" opacity="0.4" />
+
+    <!-- Center viewfinder -->
+    <circle cx="512" cy="512" r="120" fill="none" stroke="#FAF9F6" stroke-width="16" />
+
+    <!-- Crosshair detail (optional) -->
+    <line x1="512" y1="402" x2="512" y2="442" stroke="#FAF9F6" stroke-width="8"
+        stroke-linecap="round" />
+    <line x1="512" y1="582" x2="512" y2="622" stroke="#FAF9F6" stroke-width="8"
+        stroke-linecap="round" />
+    <line x1="402" y1="512" x2="442" y2="512" stroke="#FAF9F6" stroke-width="8"
+        stroke-linecap="round" />
+    <line x1="582" y1="512" x2="622" y2="512" stroke="#FAF9F6" stroke-width="8"
+        stroke-linecap="round" />
+
+    <!-- Center focus point -->
+    <circle cx="512" cy="512" r="24" fill="#FAF9F6" />
+</svg>

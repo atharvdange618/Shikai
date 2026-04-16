@@ -85,7 +85,7 @@ export function AnimatedSplashScreen({
     <Animated.View
       style={[
         styles.container,
-        { backgroundColor: isDark ? "#000000" : "#ffffff" },
+        { backgroundColor: isDark ? "#0D1117" : "#FAF9F6" },
         containerAnimatedStyle,
       ]}
     >
