@@ -217,14 +217,25 @@ export async function fetchStarred(
   };
 }
 
+export interface FetchEventsResult {
+  events: GitHubEvent[];
+  pagination: GitHubPagination;
+}
+
 export async function fetchUserEvents(
   username: string,
-): Promise<GitHubEvent[]> {
-  const { data } = await githubAxios.get<GitHubEvent[]>(
+  page: number,
+  per_page: number = 20,
+): Promise<FetchEventsResult> {
+  const { data, headers } = await githubAxios.get<GitHubEvent[]>(
     `/users/${username}/events`,
-    { params: { per_page: 20 } },
+    { params: { page, per_page } },
   );
-  return data;
+
+  return {
+    events: data,
+    pagination: parseLinkHeader(headers["link"]),
+  };
 }
 
 export interface FetchIssuesResult {
