@@ -19,3 +19,35 @@ export function formatCount(n: number): string {
   if (n >= 1_000) return `${(n / 1_000).toFixed(1)}k`;
   return String(n);
 }
+
+export function format24HourTime(isoDate: string): string {
+  const date = new Date(isoDate);
+  const now = new Date();
+  const isToday = date.toDateString() === now.toDateString();
+
+  const hours = date.getHours().toString().padStart(2, "0");
+  const minutes = date.getMinutes().toString().padStart(2, "0");
+
+  if (isToday) {
+    return `${hours}:${minutes}`;
+  }
+
+  const months = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+  ];
+  const month = months[date.getMonth()];
+  const day = date.getDate();
+
+  return `${month} ${day}, ${hours}:${minutes}`;
+}

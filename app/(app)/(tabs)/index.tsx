@@ -13,8 +13,8 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { useContributions } from "@/hooks/useContributions";
+import { useEvents } from "@/hooks/useEvents";
 import { usePinnedRepos } from "@/hooks/usePinnedRepos";
-import { useRecentActivity } from "@/hooks/useRecentActivity";
 import { useUser } from "@/hooks/useUser";
 import { queryKeys } from "@/lib/query-client";
 
@@ -45,7 +45,13 @@ export default function OverviewScreen() {
     totalContributions,
     isLoading: contribLoading,
   } = useContributions();
-  const { data: recentRepos, isLoading: activityLoading } = useRecentActivity();
+  const {
+    events,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading: activityLoading,
+  } = useEvents(user?.login ?? "");
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -53,11 +59,13 @@ export default function OverviewScreen() {
     await queryClient.invalidateQueries({
       queryKey: queryKeys.contributions(),
     });
-    await queryClient.invalidateQueries({
-      queryKey: ["recentActivity"],
-    });
+    if (user?.login) {
+      await queryClient.invalidateQueries({
+        queryKey: queryKeys.events(user.login),
+      });
+    }
     setRefreshing(false);
-  }, [queryClient]);
+  }, [queryClient, user?.login]);
 
   const s = buildStyles(colors);
 
@@ -143,7 +151,13 @@ export default function OverviewScreen() {
         </View>
 
         <View style={s.section}>
-          <ActivityFeed repos={recentRepos ?? []} isLoading={activityLoading} />
+          <ActivityFeed
+            events={events}
+            isLoading={activityLoading}
+            onLoadMore={fetchNextPage}
+            hasNextPage={hasNextPage}
+            isLoadingMore={isFetchingNextPage}
+          />
         </View>
       </ScrollView>
     </SafeAreaView>
