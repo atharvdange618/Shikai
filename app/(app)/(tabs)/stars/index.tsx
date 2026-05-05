@@ -35,7 +35,7 @@ export default function StarsScreen() {
   const queryClient = useQueryClient();
 
   const [search, setSearch] = useState("");
-  const [sort, setSort] = useState<SortOption>("updated");
+  const [sort, setSort] = useState<SortOption>("pushed");
 
   const {
     repos,
@@ -44,7 +44,7 @@ export default function StarsScreen() {
     isFetchingNextPage,
     isLoading,
     isError,
-  } = useStarred({ search, sort: sort === "updated" ? "updated" : "created" });
+  } = useStarred({ search, sort });
 
   const [refreshing, setRefreshing] = useState(false);
 
