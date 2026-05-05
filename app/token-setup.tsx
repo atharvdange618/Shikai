@@ -14,6 +14,7 @@ import {
   useColorScheme,
   View,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Animated, {
   FadeInDown,
   useAnimatedStyle,
@@ -50,6 +51,7 @@ export default function TokenSetupScreen() {
 
   const setToken = useAuthStore((s) => s.setToken);
   const setUser = useAuthStore((s) => s.setUser);
+  const insets = useSafeAreaInsets();
 
   const [token, setTokenInput] = useState("");
   const [isLoading, setLoading] = useState(false);
@@ -133,11 +135,17 @@ export default function TokenSetupScreen() {
   return (
     <KeyboardAvoidingView
       style={s.flex}
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
       <ScrollView
         style={s.scroll}
-        contentContainerStyle={s.scrollContent}
+        contentContainerStyle={[
+          s.scrollContent,
+          {
+            paddingTop: Math.max(insets.top, Spacing.xxl),
+            paddingBottom: Math.max(insets.bottom, Spacing.xxl),
+          },
+        ]}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
