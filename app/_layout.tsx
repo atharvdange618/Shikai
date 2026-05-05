@@ -12,10 +12,12 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
+import * as SystemUI from "expo-system-ui";
 import { useEffect, useState } from "react";
-import { StatusBar, useColorScheme } from "react-native";
+import { StatusBar, useColorScheme, View } from "react-native";
 
 import { AnimatedSplashScreen } from "@/components/AnimatedSplashScreen";
+import { DarkColors, LightColors } from "@/constants/theme";
 import { fetchAuthenticatedUser } from "@/lib/github-rest";
 import { queryClient, setupFocusManager } from "@/lib/query-client";
 import { getStoredToken } from "@/lib/secure-storage";
@@ -41,6 +43,12 @@ export default function RootLayout() {
     JetBrainsMono_400Regular,
     JetBrainsMono_500Medium,
   });
+
+  useEffect(() => {
+    SystemUI.setBackgroundColorAsync(
+      scheme === "dark" ? DarkColors.background : LightColors.background,
+    );
+  }, [scheme]);
 
   useEffect(() => {
     if (!fontsLoaded && !fontError) return;
