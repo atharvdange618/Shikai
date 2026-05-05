@@ -202,7 +202,7 @@ export interface FetchStarredResult {
 export async function fetchStarred(
   page: number,
   per_page: number = 10,
-  sort: "created" | "updated" = "created",
+  sort: NonNullable<RepoListParams["sort"]> = "created",
 ): Promise<FetchStarredResult> {
   const { data, headers } = await githubAxios.get<GitHubRepo[]>(
     "/user/starred",

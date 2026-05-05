@@ -13,8 +13,10 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 
 const PER_PAGE = 10;
 
+import type { RepoListParams } from "@/types/github.types";
+
 export interface StarredFilters {
-  sort?: "created" | "updated";
+  sort?: NonNullable<RepoListParams["sort"]>;
   language?: string;
   search?: string;
 }
