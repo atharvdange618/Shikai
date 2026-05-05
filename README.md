@@ -6,6 +6,12 @@ Shikai is an elegantly designed, mobile-first GitHub companion for developers wh
 
 ---
 
+## 🎉 v1.0 Released
+
+Beta testing is complete and Shikai v1 is now live. Thank you to everyone who participated in the beta and helped shape this app. This release marks the stable, production-ready version of Shikai.
+
+---
+
 ## Why Shikai?
 
 GitHub's mobile experience is built for doing work: reviewing PRs, responding to issues, managing projects. But sometimes you just want to _check in_-see how your repos are doing, admire your contribution streak, or share your profile with someone at a meetup.
@@ -37,7 +43,7 @@ That's where Shikai comes in. No notifications. No write operations. No anxiety 
 ### **Starred Repos**
 
 - Keep tabs on projects you've starred with the same powerful filtering as your repos
-- Sort by recently starred or creation date
+- Sort by recently pushed, recently updated, creation date, or full name
 - Quick access to repos you care about
 - Search through your starred collection
 
