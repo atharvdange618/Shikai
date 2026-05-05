@@ -15,6 +15,11 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import SyntaxHighlighter from "react-native-syntax-highlighter";
+import {
+  atomDark,
+  ghcolors,
+} from "react-syntax-highlighter/dist/esm/styles/prism";
 
 import {
   DarkColors,
@@ -26,21 +31,7 @@ import {
   Spacing,
 } from "@/constants/theme";
 import { useFileContent } from "@/hooks/useRepoDetails";
-
-const IMAGE_EXTENSIONS = [
-  ".png",
-  ".jpg",
-  ".jpeg",
-  ".gif",
-  ".svg",
-  ".webp",
-  ".bmp",
-  ".ico",
-];
-
-function isImageFile(filename: string): boolean {
-  return IMAGE_EXTENSIONS.some((ext) => filename.toLowerCase().endsWith(ext));
-}
+import { getLanguage, isImageFile } from "@/lib/utils";
 
 export default function FileViewerScreen() {
   const { repoId, path, fileName } = useLocalSearchParams<{
@@ -186,9 +177,21 @@ export default function FileViewerScreen() {
                     </Text>
                   </Pressable>
                 </View>
-                <Text style={s.fileContent} selectable>
+                <SyntaxHighlighter
+                  language={fileName ? getLanguage(fileName) : "text"}
+                  style={isDark ? atomDark : ghcolors}
+                  customStyle={{
+                    backgroundColor: "transparent",
+                    padding: 0,
+                  }}
+                  PreTag={View}
+                  CodeTag={Text}
+                  fontSize={FontSize.body}
+                  highlighter="prism"
+                  fontFamily={FontFamily.regular}
+                >
                   {data.content}
-                </Text>
+                </SyntaxHighlighter>
               </View>
             )}
           </>
@@ -253,16 +256,6 @@ function buildStyles(colors: typeof LightColors | typeof DarkColors) {
 
     copyButtonTextCopied: {
       color: colors.success,
-    },
-
-    fileContent: {
-      fontFamily: FontFamily.mono,
-      fontSize: FontSize.body,
-      lineHeight: FontSize.body * 1.6,
-      padding: Spacing.md,
-      borderRadius: Radius.md,
-      color: colors.textPrimary,
-      backgroundColor: colors.surface,
     },
 
     centered: {
