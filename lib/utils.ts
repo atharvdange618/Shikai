@@ -51,3 +51,79 @@ export function format24HourTime(isoDate: string): string {
 
   return `${month} ${day}, ${hours}:${minutes}`;
 }
+
+const IMAGE_EXTENSIONS = [
+  ".png",
+  ".jpg",
+  ".jpeg",
+  ".gif",
+  ".svg",
+  ".webp",
+  ".bmp",
+  ".ico",
+];
+
+export function isImageFile(filename: string): boolean {
+  return IMAGE_EXTENSIONS.some((ext) => filename.toLowerCase().endsWith(ext));
+}
+
+export function getLanguage(filename: string): string {
+  const ext = filename.split(".").pop()?.toLowerCase();
+  switch (ext) {
+    case "js":
+    case "jsx":
+      return "javascript";
+    case "ts":
+    case "tsx":
+      return "typescript";
+    case "py":
+      return "python";
+    case "rb":
+      return "ruby";
+    case "java":
+      return "java";
+    case "cpp":
+    case "cxx":
+    case "cc":
+      return "cpp";
+    case "c":
+      return "c";
+    case "go":
+      return "go";
+    case "rs":
+      return "rust";
+    case "php":
+      return "php";
+    case "cs":
+      return "csharp";
+    case "swift":
+      return "swift";
+    case "kt":
+    case "kts":
+      return "kotlin";
+    case "scala":
+      return "scala";
+    case "html":
+      return "html";
+    case "css":
+      return "css";
+    case "scss":
+      return "scss";
+    case "json":
+      return "json";
+    case "md":
+      return "markdown";
+    case "yml":
+    case "yaml":
+      return "yaml";
+    case "xml":
+      return "xml";
+    case "sql":
+      return "sql";
+    case "sh":
+    case "bash":
+      return "bash";
+    default:
+      return "text";
+  }
+}
