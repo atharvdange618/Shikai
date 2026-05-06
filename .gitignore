@@ -44,3 +44,5 @@ app-example
 
 # misc dir for myself
 /misc
+
+.env

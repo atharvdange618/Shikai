@@ -25,7 +25,7 @@
 **Name:** Shikai
 **Platform:** iOS + Android (Expo SDK 55, Expo Router)
 **Nature:** Read-only. The app only fetches and displays data. No GitHub write operations.
-**Auth model:** Single logged-in user via GitHub Personal Access Token (PAT). Not multi-user.
+**Auth model:** Single logged-in user via GitHub OAuth (Sign in with GitHub). Not multi-user.
 **Offline support:** None in v1.
 
 ---
@@ -122,11 +122,11 @@ Shadow spec (dark mode): No shadow. Use border (`#30363D`) to define card edges 
 
 ```
 Root Stack (_layout.tsx)
-├── /token-setup                  ← First launch, no token stored
+├── /sign-in                      ← First launch, no token stored
 │
 └── /(app)/
     ├── Guard: checks expo-secure-store for token
-    │   └── If missing → <Redirect href="/token-setup" />
+    │   └── If missing → <Redirect href="/sign-in" />
     │
     └── /(tabs)/                  ← Native bottom tabs
         ├── / (index)             ← Overview / Home tab
@@ -150,7 +150,7 @@ Root Stack (_layout.tsx)
 
 | Navigator               | Location         | Why                                                |
 | ----------------------- | ---------------- | -------------------------------------------------- |
-| Stack                   | Root             | Handles token-setup → app transition               |
+| Stack                   | Root             | Handles sign-in → app transition                   |
 | Native Bottom Tabs      | `(tabs)`         | Main 4-tab navigation                              |
 | Stack                   | Inside repos tab | Repos list → Repo details navigation               |
 | Drawer                  | Profile tab      | Profile → Settings                                 |
@@ -168,7 +168,7 @@ A Drawer Navigator is a navigation primitive that manages routes and history. Th
 shikai/
 ├── app/
 │   ├── _layout.tsx                     ← Root stack layout
-│   ├── token-setup.tsx                 ← Token entry screen
+│   ├── sign-in.tsx                     ← GitHub OAuth sign-in screen
 │   │
 │   └── (app)/
 │       ├── _layout.tsx                 ← Auth guard (checks token)
@@ -191,7 +191,7 @@ shikai/
 │       │   └── profile/
 │       │       ├── _layout.tsx         ← Drawer layout
 │       │       ├── index.tsx           ← Profile screen
-│       │       └── settings.tsx        ← Settings screen
+│       │       └── about.tsx           ← About screen
 │       │
 │       └── commits/
 │           └── [repoId].tsx            ← Full commits history
@@ -293,9 +293,11 @@ expo-font
 ### Storage & Utilities
 
 ```
-expo-secure-store             ← For GitHub PAT - never AsyncStorage for secrets
+expo-secure-store             ← For OAuth token storage - never AsyncStorage for secrets
 expo-linking                  ← Opening external URLs
 expo-clipboard                ← Copy commit hashes, clone URLs
+expo-auth-session             ← GitHub OAuth flow
+expo-web-browser              ← Auth session browser
 ```
 
 ---
@@ -304,13 +306,13 @@ expo-clipboard                ← Copy commit hashes, clone URLs
 
 ### Auth Model
 
-User enters a GitHub Personal Access Token (PAT) on first launch. Stored in `expo-secure-store`. All API requests attach it as:
+User signs in with GitHub OAuth on first launch. Access token is obtained via `expo-auth-session` and `expo-web-browser`. Token is stored in `expo-secure-store`. All API requests attach it as:
 
 ```
 Authorization: Bearer <token>
 ```
 
-Rate limits with a PAT:
+Rate limits with OAuth token:
 
 - REST API: 5000 requests/hour
 - GraphQL API: 5000 points/hour
@@ -524,14 +526,14 @@ query CommitCount($owner: String!, $name: String!) {
 
 ---
 
-### Settings Screen (`/profile/settings`)
+### About Screen (`/profile/about`)
 
 **Layout:**
 
-1. GitHub Token section: masked input showing last 4 chars of stored token, with "Update Token" button
-2. On update: validate token by calling `/user`, if 200 save to `expo-secure-store` and update Zustand store, if 401 show error
-3. "Sign Out" button: clears `expo-secure-store` and Zustand, redirects to `/token-setup`
-4. App version footer
+1. Shikai logo and app description
+2. Section: About the App - description of Shikai's purpose and features
+3. Section: About the Developer - Atharv Dange info with links to GitHub and X
+4. Footer with app version
 
 ---
 
@@ -547,15 +549,14 @@ query CommitCount($owner: String!, $name: String!) {
 
 ---
 
-### Token Setup Screen (`/token-setup`)
+### Sign In Screen (`/sign-in`)
 
 **Layout:**
 
 1. Shikai logo
-2. Short explanation of why a token is needed and what permissions to grant (`read:user`, `repo`)
-3. Link to GitHub token creation page (`expo-linking`)
-4. Token input field (secureTextEntry)
-5. "Connect" button: calls `/user` to validate, on success saves to `expo-secure-store` + Zustand, navigates to `/(app)/(tabs)`
+2. Short explanation of why GitHub authorization is needed and what permissions are requested (`read:user`, `repo`)
+3. "Sign in with GitHub" button: opens GitHub OAuth flow via `expo-web-browser`
+4. On success: receives authorization code, exchanges for access token, saves to `expo-secure-store` + Zustand, navigates to `/(app)/(tabs)`
 
 ---
 
@@ -574,6 +575,8 @@ interface AuthStore {
 ```
 
 That's the only Zustand store needed. Everything else (repos, stars, commits, etc.) is server state owned by TanStack Query. Don't put server state in Zustand.
+
+Note: Token is obtained via OAuth flow, not manual entry.
 
 ### TanStack Query Owns All Server State
 
@@ -598,6 +601,7 @@ That's the only Zustand store needed. Everything else (repos, stars, commits, et
 | Routing            | Expo Router                    | File-based routing, native tabs built-in, automatic deep linking     |
 | List rendering     | FlashList (Shopify)            | Better perf than FlatList - native item recycling                    |
 | Image rendering    | expo-image                     | Better caching, progressive loading, blurhash support                |
+| Auth flow          | expo-auth-session              | GitHub OAuth with code exchange                                      |
 | Token storage      | expo-secure-store              | Never AsyncStorage for secrets                                       |
 | REST client        | Axios                          | Familiar, interceptor support for auth header injection              |
 | GraphQL client     | Raw Axios POST                 | Only 3 queries - Apollo/URQL would be overkill                       |

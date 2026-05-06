@@ -67,7 +67,7 @@ export default function ProfileScreen() {
           style={{ marginRight: Spacing.sm, padding: Spacing.xs }}
         >
           <Octicons
-            name="gear"
+            name="three-bars"
             size={IconSize.md}
             color={colors.textSecondary}
           />
