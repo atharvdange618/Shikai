@@ -3,8 +3,8 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  useColorScheme,
   View,
+  useColorScheme,
 } from "react-native";
 import Svg, { Rect, Text as SvgText } from "react-native-svg";
 
@@ -18,18 +18,15 @@ import {
 } from "@/constants/theme";
 import type { ContributionWeek } from "@/types/github-graphql.types";
 
-const CELL = Layout.heatmapCellSize; // 11
-const GAP = Layout.heatmapCellGap; // 2
-const STEP = CELL + GAP; // 13
+const CELL = Layout.heatmapCellSize;
+const GAP = Layout.heatmapCellGap;
+const STEP = CELL + GAP;
 const DAYS = 7;
 const WEEKS = 52;
 
-// Height of the month label row above the grid
 const MONTH_LABEL_HEIGHT = 16;
-// Total SVG height
 const SVG_HEIGHT = MONTH_LABEL_HEIGHT + DAYS * STEP;
 
-// Day labels on the left (only show Mon / Wed / Fri to avoid clutter)
 const DAY_LABELS: { label: string; row: number }[] = [
   { label: "Mon", row: 1 },
   { label: "Wed", row: 3 },
@@ -63,7 +60,6 @@ export function ContributionGraph({
   const colors = isDark ? DarkColors : LightColors;
   const scrollRef = useRef<ScrollView>(null);
 
-  // Snap to end on mount so most recent week is visible
   const handleContentSizeChange = useCallback(() => {
     scrollRef.current?.scrollToEnd({ animated: false });
   }, []);
@@ -83,8 +79,6 @@ export function ContributionGraph({
     );
   }
 
-  // Build month label positions
-  // GitHub's API returns weeks in chronological order
   const monthLabels: { label: string; x: number }[] = [];
   let lastMonth = -1;
 

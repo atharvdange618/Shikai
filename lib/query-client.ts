@@ -2,10 +2,10 @@
  * lib/query-client.ts
  *
  * staleTime decisions:
- *   5 min  — repos, stars (change occasionally)
- *   10 min — user profile, contributors (very stable)
- *   15 min — contribution graph, pinned repos (changes rarely)
- *   1 min  — commits, events (most likely to be fresh)
+ *   5 min  - repos, stars (change occasionally)
+ *   10 min - user profile, contributors (very stable)
+ *   15 min - contribution graph, pinned repos (changes rarely)
+ *   1 min  - commits, events (most likely to be fresh)
  */
 
 import { GitHubApiError } from "@/lib/axios";

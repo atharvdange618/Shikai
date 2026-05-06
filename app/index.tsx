@@ -8,5 +8,5 @@ export default function Index() {
     return <Redirect href={"/(app)/(tabs)" as Href} />;
   }
 
-  return <Redirect href="/token-setup" />;
+  return <Redirect href="/sign-in" />;
 }
