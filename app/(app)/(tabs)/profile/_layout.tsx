@@ -56,10 +56,10 @@ export default function ProfileLayout() {
         />
 
         <Drawer.Screen
-          name="settings"
+          name="about"
           options={{
             ...sharedHeaderOptions,
-            title: "Settings",
+            title: "About",
           }}
         />
       </Drawer>

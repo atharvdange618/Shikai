@@ -7,8 +7,8 @@ import {
   Pressable,
   StyleSheet,
   Text,
-  useColorScheme,
   View,
+  useColorScheme,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -39,8 +39,8 @@ export function ProfileDrawerContent(props: DrawerContentComponentProps) {
     clearAuth();
   }
 
-  function handleSettings() {
-    router.push("/(app)/(tabs)/profile/settings" as Href);
+  function handleAbout() {
+    router.push("/(app)/(tabs)/profile/about" as Href);
     props.navigation.closeDrawer();
   }
 
@@ -75,10 +75,10 @@ export function ProfileDrawerContent(props: DrawerContentComponentProps) {
 
         <View style={s.userText}>
           <Text style={s.displayName} numberOfLines={1}>
-            {user?.name ?? user?.login ?? "—"}
+            {user?.name ?? user?.login ?? "-"}
           </Text>
           <Text style={s.username} numberOfLines={1}>
-            @{user?.login ?? "—"}
+            @{user?.login ?? "-"}
           </Text>
         </View>
       </View>
@@ -88,17 +88,17 @@ export function ProfileDrawerContent(props: DrawerContentComponentProps) {
       <View style={s.navSection}>
         <Pressable
           style={({ pressed }) => [s.navItem, pressed && s.navItemPressed]}
-          onPress={handleSettings}
+          onPress={handleAbout}
           hitSlop={4}
         >
           <View style={s.navIconWrap}>
             <Octicons
-              name="gear"
+              name="info"
               size={IconSize.md}
               color={colors.textSecondary}
             />
           </View>
-          <Text style={s.navLabel}>Settings</Text>
+          <Text style={s.navLabel}>About</Text>
           <Octicons
             name="chevron-right"
             size={IconSize.sm}

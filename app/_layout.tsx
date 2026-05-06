@@ -14,7 +14,7 @@ import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import * as SystemUI from "expo-system-ui";
 import { useEffect, useState } from "react";
-import { StatusBar, useColorScheme, View } from "react-native";
+import { StatusBar, useColorScheme } from "react-native";
 
 import { AnimatedSplashScreen } from "@/components/AnimatedSplashScreen";
 import { DarkColors, LightColors } from "@/constants/theme";
@@ -52,6 +52,7 @@ export default function RootLayout() {
 
   useEffect(() => {
     if (!fontsLoaded && !fontError) return;
+
     async function boot() {
       try {
         const storedToken = await getStoredToken();
@@ -67,13 +68,17 @@ export default function RootLayout() {
           }
         }
       } catch {
-        // no need to do anything here, we'll just show the login screen
+        // No stored token - routing handles sending user to sign-in
       } finally {
         setBootComplete(true);
       }
     }
 
-    boot();
+    if (!useAuthStore.getState().token) {
+      boot();
+    } else {
+      setBootComplete(true);
+    }
   }, [fontsLoaded, fontError, setToken, setUser]);
 
   useEffect(() => {
@@ -99,7 +104,7 @@ export default function RootLayout() {
       )}
       {!showSplash && (
         <Stack screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="token-setup" />
+          <Stack.Screen name="sign-in" />
           <Stack.Screen name="(app)" />
         </Stack>
       )}

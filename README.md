@@ -6,7 +6,7 @@ Shikai is an elegantly designed, mobile-first GitHub companion for developers wh
 
 ---
 
-## 🎉 v1.0 Released
+## v1.0 Released
 
 Beta testing is complete and Shikai v1 is now live. Thank you to everyone who participated in the beta and helped shape this app. This release marks the stable, production-ready version of Shikai.
 
@@ -79,27 +79,16 @@ Shikai is built around three principles:
 
 ## Getting Started
 
-### Setting Up Your Access Token
+### Sign In with GitHub
 
-Shikai uses a GitHub Personal Access Token (PAT) to securely access your data. Here's how to get started:
+Shikai uses GitHub OAuth to securely access your data. Here's how to get started:
 
-1. **Generate a PAT** on GitHub:
-   - Go to Settings → Developer settings → Personal access tokens → Tokens (classic)
-   - Click "Generate new token (classic)"
-   - Give it a descriptive name like "Shikai Mobile App"
-   - Select the following scopes:
-     - `repo` (for private repository access)
-     - `read:user` (to read your profile information)
-     - `read:org` (if you want to see organization repos)
+1. **Open the app** for the first time
+2. **Tap "Sign in with GitHub"** - you'll be redirected to GitHub's authorization page
+3. **Authorize the app** with the requested permissions (`read:user`, `repo`)
+4. **You're all set!** You'll be redirected back to Shikai and can start exploring
 
-2. **Enter the token in Shikai**:
-   - Open the app for the first time
-   - Paste your token when prompted
-   - The token is stored securely on your device using `expo-secure-store`
-
-3. **You're all set!** Start exploring your GitHub world.
-
-**Security Note:** Your token never leaves your device. All API requests go directly from your phone to GitHub. No servers, no third-party storage, just you and GitHub's API.
+**Security Note:** Your access token never leaves your device. All API requests go directly from your phone to GitHub. No servers, no third-party storage, just you and GitHub's API. Tokens are stored securely on your device using `expo-secure-store`.
 
 ---
 
