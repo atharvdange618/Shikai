@@ -39,9 +39,47 @@ export function decodeBase64(encoded: string): string {
   return atob(cleaned);
 }
 
-export async function fetchAuthenticatedUser(): Promise<GitHubUser> {
-  const { data } = await githubAxios.get<GitHubUser>("/user");
+export async function fetchAuthenticatedUser(
+  token?: string,
+): Promise<GitHubUser> {
+  const config = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
+  const { data } = await githubAxios.get<GitHubUser>("/user", config);
   return data;
+}
+
+export interface GitHubInstallation {
+  id: number;
+  account: {
+    login: string;
+    id: number;
+    type: "User" | "Organization";
+  };
+  access_tokens_url: string;
+  repositories_url: string;
+  html_url: string;
+  app_id: number;
+  target_id: number;
+  target_type: "User" | "Organization";
+  permissions: Record<string, string>;
+  events: string[];
+  created_at: string;
+  updated_at: string;
+  single_file_name: string | null;
+  has_multiple_single_files: boolean;
+  single_file_paths: string[];
+  suspended_by: string | null;
+  suspended_at: string | null;
+}
+
+export async function fetchUserInstallations(
+  token?: string,
+): Promise<GitHubInstallation[]> {
+  const config = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
+  const { data } = await githubAxios.get<{
+    total_count: number;
+    installations: GitHubInstallation[];
+  }>("/user/installations", config);
+  return data.installations;
 }
 
 export async function validateToken(token: string): Promise<GitHubUser> {
@@ -61,6 +99,18 @@ export async function fetchSocialAccounts(): Promise<GitHubSocialAccount[]> {
 export interface FetchReposResult {
   repos: GitHubRepo[];
   pagination: GitHubPagination;
+}
+
+export async function fetchRepoCount(): Promise<number> {
+  const { headers } = await githubAxios.get<GitHubRepo[]>("/user/repos", {
+    params: {
+      per_page: 1,
+    },
+  });
+
+  const pagination = parseLinkHeader(headers["link"]);
+  if (pagination.last) return pagination.last;
+  return 1;
 }
 
 export async function fetchRepos(

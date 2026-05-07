@@ -119,3 +119,13 @@ export interface RepoIssuesPRStatsResponse {
     } | null;
   };
 }
+
+export interface RepoCountResponse {
+  data: {
+    viewer: {
+      repositories: {
+        totalCount: number;
+      } | null;
+    } | null;
+  };
+}
