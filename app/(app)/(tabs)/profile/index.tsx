@@ -16,6 +16,7 @@ import {
 } from "react-native";
 
 import { useUser } from "@/hooks/useUser";
+import { fetchRepoCount } from "@/lib/github-graphql";
 import { queryKeys } from "@/lib/query-client";
 
 import {
@@ -42,6 +43,12 @@ export default function ProfileScreen() {
 
   const { data: user, isLoading } = useUser();
   const { data: socialAccounts } = useSocialAccounts();
+
+  const [repoCount, setRepoCount] = useState<number | null>(null);
+
+  useEffect(() => {
+    fetchRepoCount().then(setRepoCount);
+  }, []);
 
   const linkedInUrl = socialAccounts?.find((account) =>
     account.url.includes("linkedin.com"),
@@ -78,7 +85,10 @@ export default function ProfileScreen() {
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    await queryClient.invalidateQueries({ queryKey: queryKeys.user() });
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: queryKeys.user() }),
+      fetchRepoCount().then(setRepoCount),
+    ]);
     setRefreshing(false);
   }, [queryClient]);
 
@@ -139,7 +149,7 @@ export default function ProfileScreen() {
 
       <View style={[s.statsCard, shadows]}>
         <StatBlock
-          value={(user?.public_repos ?? 0) + (user?.total_private_repos ?? 0)}
+          value={repoCount ?? user?.public_repos ?? 0}
           label="Repositories"
           colors={colors}
           isLoading={isLoading}
