@@ -1,8 +1,10 @@
 import { Octicons } from "@expo/vector-icons";
 import { useQueryClient } from "@tanstack/react-query";
 import { Image } from "expo-image";
+import { useRouter, Href } from "expo-router";
 import { useCallback, useState } from "react";
 import {
+  Pressable,
   RefreshControl,
   ScrollView,
   StyleSheet,
@@ -32,6 +34,7 @@ import {
 } from "@/constants/theme";
 
 export default function OverviewScreen() {
+  const router = useRouter();
   const isDark = useColorScheme() === "dark";
   const colors = isDark ? DarkColors : LightColors;
 
@@ -85,18 +88,22 @@ export default function OverviewScreen() {
             <Text style={s.greeting}>{getGreeting()}</Text>
             <Text style={s.userName}>{user?.name || user?.login || "..."}</Text>
           </View>
-          {user?.avatar_url ? (
-            <Image
-              source={{ uri: user.avatar_url }}
-              style={s.avatar}
-              contentFit="cover"
-              transition={200}
-            />
-          ) : (
-            <View style={[s.avatar, s.avatarFallback]}>
-              <Octicons name="person" size={20} color={colors.textMuted} />
-            </View>
-          )}
+          <Pressable
+            onPress={() => router.push("/(app)/(tabs)/profile" as Href)}
+          >
+            {user?.avatar_url ? (
+              <Image
+                source={{ uri: user.avatar_url }}
+                style={s.avatar}
+                contentFit="cover"
+                transition={200}
+              />
+            ) : (
+              <View style={[s.avatar, s.avatarFallback]}>
+                <Octicons name="person" size={20} color={colors.textMuted} />
+              </View>
+            )}
+          </Pressable>
         </View>
       </View>
 

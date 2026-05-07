@@ -7,6 +7,7 @@ import type {
   PinnedReposResponse,
   RecentActivityResponse,
   RecentRepoNode,
+  RepoCountResponse,
   RepoIssuesPRStats,
   RepoIssuesPRStatsResponse,
 } from "@/types/github-graphql.types";
@@ -52,6 +53,28 @@ const PINNED_REPOS_QUERY = `
     }
   }
 `;
+
+const REPO_COUNT_QUERY = `
+  query RepoCount {
+    viewer {
+      repositories(affiliations: [OWNER, COLLABORATOR, ORGANIZATION_MEMBER]) {
+        totalCount
+      }
+    }
+  }
+`;
+
+export async function fetchRepoCount(): Promise<number> {
+  try {
+    const response = await graphql<RepoCountResponse["data"]>(REPO_COUNT_QUERY);
+    return response.viewer?.repositories?.totalCount ?? 0;
+  } catch (error) {
+    if (__DEV__) {
+      console.error("[Repo Count Error]", error);
+    }
+    return 0;
+  }
+}
 
 export async function fetchPinnedRepos(): Promise<PinnedRepoNode[]> {
   try {

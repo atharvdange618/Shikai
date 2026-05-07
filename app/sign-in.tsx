@@ -1,9 +1,10 @@
 import { Octicons } from "@expo/vector-icons";
 import { makeRedirectUri } from "expo-auth-session";
+import * as Crypto from "expo-crypto";
 import * as Linking from "expo-linking";
 import { Href, useRouter } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
-import { useCallback, useState } from "react";
+import { useCallback } from "react";
 import {
   ActivityIndicator,
   Pressable,
@@ -29,12 +30,17 @@ import {
   Shadows,
   Spacing,
 } from "@/constants/theme";
-import { fetchAuthenticatedUser } from "@/lib/github-rest";
+import {
+  fetchAuthenticatedUser,
+  fetchUserInstallations,
+} from "@/lib/github-rest";
 import { saveToken } from "@/lib/secure-storage";
 import { useAuthStore } from "@/stores/auth.store";
+import { useSignInStore } from "@/stores/signin.store";
 
 const CLIENT_ID = process.env.EXPO_PUBLIC_GITHUB_CLIENT_ID!;
-const CLIENT_SECRET = process.env.EXPO_PUBLIC_GITHUB_CLIENT_SECRET!;
+const APP_SLUG = process.env.EXPO_PUBLIC_GITHUB_APP_SLUG!;
+const OAUTH_PROXY_URL = process.env.EXPO_PUBLIC_OAUTH_PROXY_URL!;
 const SCOPES = ["read:user", "user:email", "repo"].join(",");
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
@@ -50,8 +56,9 @@ export default function SignInScreen() {
   const setToken = useAuthStore((s) => s.setToken);
   const setUser = useAuthStore((s) => s.setUser);
 
-  const [isLoading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const isLoading = useSignInStore((s) => s.isLoading);
+  const error = useSignInStore((s) => s.error);
+  const needsInstall = useSignInStore((s) => s.needsInstall);
 
   const redirectUri = makeRedirectUri({ scheme: "shikai" });
 
@@ -68,15 +75,41 @@ export default function SignInScreen() {
   }
 
   const handleSignIn = useCallback(async () => {
+    const { setLoading, setError, setNeedsInstall, setPendingToken } =
+      useSignInStore.getState();
+
     setLoading(true);
     setError(null);
+    setNeedsInstall(false);
 
     try {
+      const codeVerifier = btoa(
+        String.fromCharCode(...Crypto.getRandomBytes(32)),
+      )
+        .replace(/=/g, "")
+        .replace(/\+/g, "-")
+        .replace(/\//g, "_");
+
+      const hexDigest = await Crypto.digestStringAsync(
+        Crypto.CryptoDigestAlgorithm.SHA256,
+        codeVerifier,
+      );
+      const digestBytes = new Uint8Array(hexDigest.length / 2);
+      for (let i = 0; i < hexDigest.length; i += 2) {
+        digestBytes[i / 2] = parseInt(hexDigest.slice(i, i + 2), 16);
+      }
+      const codeChallenge = btoa(String.fromCharCode(...digestBytes))
+        .replace(/=/g, "")
+        .replace(/\+/g, "-")
+        .replace(/\//g, "_");
+
       const authUrl =
         `https://github.com/login/oauth/authorize` +
         `?client_id=${CLIENT_ID}` +
         `&scope=${encodeURIComponent(SCOPES)}` +
-        `&redirect_uri=${encodeURIComponent(redirectUri)}`;
+        `&redirect_uri=${encodeURIComponent(redirectUri)}` +
+        `&code_challenge=${codeChallenge}` +
+        `&code_challenge_method=S256`;
 
       const result = await WebBrowser.openAuthSessionAsync(
         authUrl,
@@ -84,6 +117,7 @@ export default function SignInScreen() {
       );
 
       if (result.type !== "success") {
+        setLoading(false);
         return;
       }
 
@@ -92,45 +126,71 @@ export default function SignInScreen() {
 
       if (!code) {
         setError("Authorization failed. Please try again.");
+        setLoading(false);
         return;
       }
 
-      const tokenResponse = await fetch(
-        "https://github.com/login/oauth/access_token",
-        {
-          method: "POST",
-          headers: {
-            Accept: "application/json",
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            client_id: CLIENT_ID,
-            client_secret: CLIENT_SECRET,
-            code,
-            redirect_uri: redirectUri,
-          }),
+      const tokenResponse = await fetch(OAUTH_PROXY_URL, {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
         },
-      );
+        body: JSON.stringify({
+          client_id: CLIENT_ID,
+          code,
+          redirect_uri: redirectUri,
+          code_verifier: codeVerifier,
+        }),
+      });
 
       const tokenData = await tokenResponse.json();
 
       if (tokenData.error || !tokenData.access_token) {
         setError("Could not get access token. Please try again.");
+        setLoading(false);
         return;
       }
 
       const accessToken: string = tokenData.access_token;
 
-      setToken(accessToken);
+      if (__DEV__) {
+        console.log(
+          "[GitHub OAuth] Access token obtained, checking installations...",
+        );
+      }
 
+      const installations = await fetchUserInstallations(accessToken);
+
+      if (__DEV__) {
+        console.log(
+          "[GitHub OAuth] Installations found:",
+          JSON.stringify(installations, null, 2),
+        );
+      }
+
+      if (installations.length === 0) {
+        if (__DEV__) {
+          console.log(
+            "[GitHub OAuth] No installations — showing install prompt",
+          );
+        }
+        setPendingToken(accessToken);
+        setLoading(false);
+        setNeedsInstall(true);
+        return;
+      }
+
+      if (__DEV__) {
+        console.log("[GitHub OAuth] Has installations — proceeding to app");
+      }
+
+      setToken(accessToken);
       setLoading(false);
 
       router.replace("/(app)/(tabs)" as Href);
 
-      Promise.all([
-        saveToken(accessToken),
-        fetchAuthenticatedUser(),
-      ])
+      Promise.all([saveToken(accessToken), fetchAuthenticatedUser()])
         .then(([, user]) => setUser(user))
         .catch(() => {
           useAuthStore.getState().clearAuth();
@@ -140,10 +200,75 @@ export default function SignInScreen() {
         console.error("[GitHub OAuth Error]", err);
       }
       setError("Something went wrong. Check your connection and try again.");
-    } finally {
       setLoading(false);
     }
   }, [redirectUri, setToken, setUser, router]);
+
+  const handleInstall = useCallback(async () => {
+    const { setLoading, setError, setNeedsInstall, setPendingToken } =
+      useSignInStore.getState();
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const installUrl = `https://github.com/apps/${APP_SLUG}/installations/new`;
+
+      if (__DEV__) {
+        console.log("[GitHub Install] Opening install URL:", installUrl);
+      }
+
+      const result = await WebBrowser.openAuthSessionAsync(
+        installUrl,
+        redirectUri,
+      );
+
+      if (__DEV__) {
+        console.log("[GitHub Install] Result:", result.type);
+      }
+
+      if (result.type !== "success") {
+        setLoading(false);
+        return;
+      }
+
+      if (__DEV__) {
+        console.log("[GitHub Install] Install succeeded, proceeding to app");
+      }
+
+      const pendingToken = useSignInStore.getState().pendingToken;
+      if (pendingToken) {
+        setPendingToken(null);
+      }
+
+      if (!pendingToken) {
+        if (__DEV__) {
+          console.error("[GitHub Install] No pending token found");
+        }
+        setLoading(false);
+        setNeedsInstall(false);
+        return;
+      }
+
+      setToken(pendingToken);
+      setLoading(false);
+      setNeedsInstall(false);
+
+      router.replace("/(app)/(tabs)" as Href);
+
+      Promise.all([saveToken(pendingToken), fetchAuthenticatedUser()])
+        .then(([, user]) => setUser(user))
+        .catch(() => {
+          useAuthStore.getState().clearAuth();
+        });
+    } catch (err) {
+      if (__DEV__) {
+        console.error("[GitHub Install Error]", err);
+      }
+      setError("Installation failed. You can set it up later from settings.");
+      setLoading(false);
+    }
+  }, [redirectUri, setUser, router]);
 
   const s = buildStyles(colors, isDark, shadows, insets.top, insets.bottom);
 
@@ -175,27 +300,49 @@ export default function SignInScreen() {
         entering={FadeInDown.delay(160).duration(400).springify()}
         style={s.ctaBlock}
       >
-        <AnimatedPressable
-          style={[s.button, isLoading && s.buttonLoading, buttonStyle]}
-          onPress={handleSignIn}
-          onPressIn={handlePressIn}
-          onPressOut={handlePressOut}
-          disabled={isLoading}
-        >
-          {isLoading ? (
-            <ActivityIndicator color="#fff" size="small" />
-          ) : (
-            <>
-              <Octicons
-                name="mark-github"
-                size={18}
-                color="#fff"
-                style={s.buttonIcon}
-              />
-              <Text style={s.buttonText}>Sign in with GitHub</Text>
-            </>
-          )}
-        </AnimatedPressable>
+        {needsInstall ? (
+          <>
+            <Text style={s.installTitle}>One more step</Text>
+            <Text style={s.installDesc}>
+              Choose which repositories Shikai can access on GitHub.
+            </Text>
+            <AnimatedPressable
+              style={[s.button, isLoading && s.buttonLoading, buttonStyle]}
+              onPress={handleInstall}
+              onPressIn={handlePressIn}
+              onPressOut={handlePressOut}
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <ActivityIndicator color="#fff" size="small" />
+              ) : (
+                <Text style={s.buttonText}>Set up repo access</Text>
+              )}
+            </AnimatedPressable>
+          </>
+        ) : (
+          <AnimatedPressable
+            style={[s.button, isLoading && s.buttonLoading, buttonStyle]}
+            onPress={handleSignIn}
+            onPressIn={handlePressIn}
+            onPressOut={handlePressOut}
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <ActivityIndicator color="#fff" size="small" />
+            ) : (
+              <>
+                <Octicons
+                  name="mark-github"
+                  size={18}
+                  color="#fff"
+                  style={s.buttonIcon}
+                />
+                <Text style={s.buttonText}>Sign in with GitHub</Text>
+              </>
+            )}
+          </AnimatedPressable>
+        )}
 
         {error && (
           <Animated.View entering={FadeInDown.duration(200)}>
@@ -318,6 +465,22 @@ function buildStyles(
       color: colors.danger,
       textAlign: "center",
       lineHeight: FontSize.caption * 1.5,
+    },
+
+    installTitle: {
+      fontFamily: FontFamily.semiBold,
+      fontSize: FontSize.title,
+      color: colors.textPrimary,
+      textAlign: "center",
+    },
+
+    installDesc: {
+      fontFamily: FontFamily.regular,
+      fontSize: FontSize.body,
+      color: colors.textSecondary,
+      textAlign: "center",
+      lineHeight: FontSize.body * 1.5,
+      marginBottom: Spacing.xs,
     },
 
     footerNote: {
