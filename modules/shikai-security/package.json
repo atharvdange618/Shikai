@@ -1,0 +1,9 @@
+{
+  "name": "shikai-security",
+  "version": "1.0.0",
+  "description": "Security checks for Shikai app",
+  "main": "index.ts",
+  "peerDependencies": {
+    "expo": "*"
+  }
+}

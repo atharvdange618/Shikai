@@ -13,15 +13,16 @@ import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import * as SystemUI from "expo-system-ui";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { StatusBar, useColorScheme } from "react-native";
 
-import { AnimatedSplashScreen } from "@/components/AnimatedSplashScreen";
+import { AnimatedSplashScreen, BlockingScreen } from "@/components";
 import { DarkColors, LightColors } from "@/constants/theme";
 import { fetchAuthenticatedUser } from "@/lib/github-rest";
 import { queryClient, setupFocusManager } from "@/lib/query-client";
 import { getStoredToken } from "@/lib/secure-storage";
 import { useAuthStore } from "@/stores/auth.store";
+import { runSecurityChecks } from "shikai-security";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -34,6 +35,11 @@ export default function RootLayout() {
 
   const [bootComplete, setBootComplete] = useState(false);
   const [showSplash, setShowSplash] = useState(true);
+
+  const [securityStatus, setSecurityStatus] = useState<
+    "pending" | "passed" | "blocked"
+  >("pending");
+  const [securityReasons, setSecurityReasons] = useState<string[]>([]);
 
   const [fontsLoaded, fontError] = useFonts({
     Inter_400Regular,
@@ -89,6 +95,45 @@ export default function RootLayout() {
 
   const appReady = bootComplete && Boolean(fontsLoaded || fontError);
 
+  useEffect(() => {
+    if (appReady && securityStatus === "pending") {
+      runSecurityChecks().then((result) => {
+        if (result.isBlocked) {
+          setSecurityStatus("blocked");
+          setSecurityReasons(result.reasons);
+        } else {
+          setSecurityStatus("passed");
+        }
+      });
+    }
+  }, [appReady, securityStatus]);
+
+  const handleRecheck = useCallback(async () => {
+    const result = await runSecurityChecks();
+    if (result.isBlocked) {
+      setSecurityReasons(result.reasons);
+      setSecurityStatus("blocked");
+    } else {
+      setSecurityStatus("passed");
+    }
+  }, []);
+
+  const recheckRef = useRef(handleRecheck);
+  recheckRef.current = handleRecheck;
+
+  useEffect(() => {
+    if (securityStatus !== "blocked") return;
+
+    const interval = setInterval(() => {
+      recheckRef.current();
+    }, 10000);
+
+    return () => clearInterval(interval);
+  }, [securityStatus]);
+
+  const securityReady = securityStatus !== "pending";
+  const allReady = appReady && securityReady;
+
   return (
     <QueryClientProvider client={queryClient}>
       <StatusBar
@@ -98,11 +143,17 @@ export default function RootLayout() {
       />
       {showSplash && (
         <AnimatedSplashScreen
-          isReady={appReady}
+          isReady={allReady}
           onComplete={() => setShowSplash(false)}
         />
       )}
-      {!showSplash && (
+      {!showSplash && securityStatus === "blocked" && (
+        <BlockingScreen
+          reasons={securityReasons}
+          onRecheck={handleRecheck}
+        />
+      )}
+      {!showSplash && securityStatus === "passed" && (
         <Stack screenOptions={{ headerShown: false }}>
           <Stack.Screen name="sign-in" />
           <Stack.Screen name="(app)" />
