@@ -68,22 +68,26 @@ export default function PullRequestsScreen() {
         : allPRs;
 
   useEffect(() => {
-    navigation.setOptions({
-      title: "Pull Requests",
-      headerRight: () => (
-        <Pressable
-          hitSlop={12}
-          style={{ marginRight: Spacing.sm, padding: Spacing.xs }}
-          onPress={() =>
-            WebBrowser.openBrowserAsync(
-              `https://github.com/${owner}/${repoName}/pulls`,
-            )
-          }
-        >
-          <Octicons name="link-external" size={16} color={colors.accent} />
-        </Pressable>
-      ),
-    });
+    try {
+      navigation.setOptions({
+        title: "Pull Requests",
+        headerRight: () => (
+          <Pressable
+            hitSlop={12}
+            style={{ marginRight: Spacing.sm, padding: Spacing.xs }}
+            onPress={() =>
+              WebBrowser.openBrowserAsync(
+                `https://github.com/${owner}/${repoName}/pulls`,
+              )
+            }
+          >
+            <Octicons name="link-external" size={16} color={colors.accent} />
+          </Pressable>
+        ),
+      });
+    } catch {
+      /* navigator not ready yet */
+    }
   }, [navigation, owner, repoName, colors.accent]);
 
   const onRefresh = useCallback(async () => {

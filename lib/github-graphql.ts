@@ -68,10 +68,7 @@ export async function fetchRepoCount(): Promise<number> {
   try {
     const response = await graphql<RepoCountResponse["data"]>(REPO_COUNT_QUERY);
     return response.viewer?.repositories?.totalCount ?? 0;
-  } catch (error) {
-    if (__DEV__) {
-      console.error("[Repo Count Error]", error);
-    }
+    } catch (error) {
     return 0;
   }
 }
@@ -83,9 +80,6 @@ export async function fetchPinnedRepos(): Promise<PinnedRepoNode[]> {
 
     return response.viewer.pinnedItems.nodes;
   } catch (error) {
-    if (__DEV__) {
-      console.error("[Pinned Repos Error]", error);
-    }
     throw error;
   }
 }
@@ -117,9 +111,6 @@ export async function fetchContributionGraph(): Promise<ContributionCalendar> {
 
     return response.viewer.contributionsCollection.contributionCalendar;
   } catch (error) {
-    if (__DEV__) {
-      console.error("[Contribution Graph Error]", error);
-    }
     throw error;
   }
 }
@@ -209,9 +200,6 @@ export async function fetchRecentActivity(): Promise<RecentRepoNode[]> {
         repo.defaultBranchRef.target.history.edges.length > 0,
     );
   } catch (error) {
-    if (__DEV__) {
-      console.error("[Recent Activity Error]", error);
-    }
     throw error;
   }
 }

@@ -1,7 +1,7 @@
 import { Octicons } from "@expo/vector-icons";
 import { useQueryClient } from "@tanstack/react-query";
 import { Image } from "expo-image";
-import { useRouter, Href } from "expo-router";
+import { Href, useRouter } from "expo-router";
 import { useCallback, useState } from "react";
 import {
   Pressable,
@@ -18,6 +18,7 @@ import { useContributions } from "@/hooks/useContributions";
 import { useEvents } from "@/hooks/useEvents";
 import { usePinnedRepos } from "@/hooks/usePinnedRepos";
 import { useUser } from "@/hooks/useUser";
+import { prefetchProfile, prefetchRoute } from "@/lib/prefetch";
 import { queryKeys } from "@/lib/query-client";
 
 import { ActivityFeed } from "@/components/overview/ActivityFeed";
@@ -40,6 +41,11 @@ export default function OverviewScreen() {
 
   const queryClient = useQueryClient();
   const [refreshing, setRefreshing] = useState(false);
+
+  const handleAvatarPressIn = useCallback(() => {
+    prefetchRoute("/(app)/(tabs)/profile");
+    prefetchProfile(queryClient);
+  }, [queryClient]);
 
   const { data: user } = useUser();
   const { data: pinnedRepos, isLoading: pinnedLoading } = usePinnedRepos();
@@ -90,6 +96,7 @@ export default function OverviewScreen() {
           </View>
           <Pressable
             onPress={() => router.push("/(app)/(tabs)/profile" as Href)}
+            onPressIn={handleAvatarPressIn}
           >
             {user?.avatar_url ? (
               <Image

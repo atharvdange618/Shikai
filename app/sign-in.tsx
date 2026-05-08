@@ -154,35 +154,13 @@ export default function SignInScreen() {
 
       const accessToken: string = tokenData.access_token;
 
-      if (__DEV__) {
-        console.log(
-          "[GitHub OAuth] Access token obtained, checking installations...",
-        );
-      }
-
       const installations = await fetchUserInstallations(accessToken);
 
-      if (__DEV__) {
-        console.log(
-          "[GitHub OAuth] Installations found:",
-          JSON.stringify(installations, null, 2),
-        );
-      }
-
       if (installations.length === 0) {
-        if (__DEV__) {
-          console.log(
-            "[GitHub OAuth] No installations — showing install prompt",
-          );
-        }
         setPendingToken(accessToken);
         setLoading(false);
         setNeedsInstall(true);
         return;
-      }
-
-      if (__DEV__) {
-        console.log("[GitHub OAuth] Has installations — proceeding to app");
       }
 
       setToken(accessToken);
@@ -195,10 +173,7 @@ export default function SignInScreen() {
         .catch(() => {
           useAuthStore.getState().clearAuth();
         });
-    } catch (err) {
-      if (__DEV__) {
-        console.error("[GitHub OAuth Error]", err);
-      }
+    } catch {
       setError("Something went wrong. Check your connection and try again.");
       setLoading(false);
     }
@@ -214,26 +189,14 @@ export default function SignInScreen() {
     try {
       const installUrl = `https://github.com/apps/${APP_SLUG}/installations/new`;
 
-      if (__DEV__) {
-        console.log("[GitHub Install] Opening install URL:", installUrl);
-      }
-
       const result = await WebBrowser.openAuthSessionAsync(
         installUrl,
         redirectUri,
       );
 
-      if (__DEV__) {
-        console.log("[GitHub Install] Result:", result.type);
-      }
-
       if (result.type !== "success") {
         setLoading(false);
         return;
-      }
-
-      if (__DEV__) {
-        console.log("[GitHub Install] Install succeeded, proceeding to app");
       }
 
       const pendingToken = useSignInStore.getState().pendingToken;
@@ -242,9 +205,6 @@ export default function SignInScreen() {
       }
 
       if (!pendingToken) {
-        if (__DEV__) {
-          console.error("[GitHub Install] No pending token found");
-        }
         setLoading(false);
         setNeedsInstall(false);
         return;
@@ -261,14 +221,11 @@ export default function SignInScreen() {
         .catch(() => {
           useAuthStore.getState().clearAuth();
         });
-    } catch (err) {
-      if (__DEV__) {
-        console.error("[GitHub Install Error]", err);
-      }
+    } catch {
       setError("Installation failed. You can set it up later from settings.");
       setLoading(false);
     }
-  }, [redirectUri, setUser, router]);
+  }, [redirectUri, setUser, router, setToken]);
 
   const s = buildStyles(colors, isDark, shadows, insets.top, insets.bottom);
 

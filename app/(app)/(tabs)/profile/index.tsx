@@ -66,21 +66,23 @@ export default function ProfileScreen() {
   const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
-    navigation.setOptions({
-      headerRight: () => (
-        <Pressable
-          onPress={() => navigation.openDrawer()}
-          hitSlop={12}
-          style={{ marginRight: Spacing.sm, padding: Spacing.xs }}
-        >
-          <Octicons
-            name="three-bars"
-            size={IconSize.md}
-            color={colors.textSecondary}
-          />
-        </Pressable>
-      ),
-    });
+    try {
+      navigation.setOptions({
+        headerRight: () => (
+          <Pressable
+            onPress={() => navigation.openDrawer()}
+            hitSlop={12}
+            style={{ marginRight: Spacing.sm, padding: Spacing.xs }}
+          >
+            <Octicons
+              name="three-bars"
+              size={IconSize.md}
+              color={colors.textSecondary}
+            />
+          </Pressable>
+        ),
+      });
+    } catch {}
   }, [navigation, colors.textSecondary]);
 
   const onRefresh = useCallback(async () => {

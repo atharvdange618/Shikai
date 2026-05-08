@@ -1,6 +1,6 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
-import { memo, useCallback, useMemo, useState } from "react";
+import { memo, useCallback, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
@@ -16,6 +16,7 @@ import type { SortOption } from "@/components/repo/RepoFilters";
 import { RepoFilters } from "@/components/repo/RepoFilters";
 import { SearchBar } from "@/components/shared/SearchBar";
 import { useStarred } from "@/hooks/useStarred";
+import { prefetchRepoDetails, prefetchRoute } from "@/lib/prefetch";
 import { queryKeys } from "@/lib/query-client";
 import type { GitHubRepo } from "@/types/github.types";
 
@@ -36,6 +37,9 @@ export default function StarsScreen() {
 
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState<SortOption>("pushed");
+
+  const prefetchMap = useRef(new Set<number>());
+  const viewportTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const {
     repos,
@@ -61,6 +65,15 @@ export default function StarsScreen() {
     [router],
   );
 
+  const handleRepoPressIn = useCallback(
+    (owner: string, name: string) => {
+      const repoId = `${owner}__${name}`;
+      prefetchRoute(`/(app)/(tabs)/repos/${repoId}`);
+      prefetchRepoDetails(queryClient, owner, name);
+    },
+    [queryClient],
+  );
+
   const renderItem = useCallback(
     ({ item }: { item: GitHubRepo }) => (
       <MemoizedRepoCard
@@ -75,9 +88,10 @@ export default function StarsScreen() {
         topics={item.topics}
         isPrivate={item.private}
         onPress={handleRepoPress}
+        onPressIn={handleRepoPressIn}
       />
     ),
-    [handleRepoPress],
+    [handleRepoPress, handleRepoPressIn],
   );
 
   const keyExtractor = useCallback((item: GitHubRepo) => String(item.id), []);
@@ -85,6 +99,23 @@ export default function StarsScreen() {
   const onEndReached = useCallback(() => {
     if (hasNextPage) fetchNextPage();
   }, [hasNextPage, fetchNextPage]);
+
+  const onViewableItemsChanged = useCallback(
+    ({ viewableItems }: { viewableItems: { item: GitHubRepo }[] }) => {
+      if (viewportTimer.current) {
+        clearTimeout(viewportTimer.current);
+      }
+      viewportTimer.current = setTimeout(() => {
+        for (const { item } of viewableItems) {
+          if (!prefetchMap.current.has(item.id)) {
+            prefetchMap.current.add(item.id);
+            prefetchRepoDetails(queryClient, item.owner.login, item.name);
+          }
+        }
+      }, 200);
+    },
+    [queryClient],
+  );
 
   const s = useMemo(() => buildStyles(colors), [colors]);
 
@@ -162,6 +193,8 @@ export default function StarsScreen() {
         ListFooterComponent={ListFooter}
         onEndReached={onEndReached}
         onEndReachedThreshold={0.5}
+        onViewableItemsChanged={onViewableItemsChanged}
+        viewabilityConfig={{ itemVisiblePercentThreshold: 50 }}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
@@ -188,6 +221,7 @@ interface MemoizedRepoCardProps {
   topics: string[];
   isPrivate: boolean;
   onPress: (repoId: string) => void;
+  onPressIn?: (owner: string, name: string) => void;
 }
 
 const MemoizedRepoCard = memo(function MemoizedRepoCard({
@@ -202,6 +236,7 @@ const MemoizedRepoCard = memo(function MemoizedRepoCard({
   topics,
   isPrivate,
   onPress,
+  onPressIn,
 }: MemoizedRepoCardProps) {
   const repo: GitHubRepo = useMemo(
     () => ({
@@ -235,7 +270,13 @@ const MemoizedRepoCard = memo(function MemoizedRepoCard({
     onPress(repoId);
   }, [ownerLogin, name, onPress]);
 
-  return <RepoCard repo={repo} onPress={handlePress} />;
+  const handlePressIn = useCallback(() => {
+    onPressIn?.(ownerLogin, name);
+  }, [ownerLogin, name, onPressIn]);
+
+  return (
+    <RepoCard repo={repo} onPress={handlePress} onPressIn={handlePressIn} />
+  );
 });
 
 function buildStyles(colors: typeof LightColors | typeof DarkColors) {
