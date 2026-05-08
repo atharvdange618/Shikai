@@ -42,6 +42,9 @@ app-example
 /ios
 /android
 
+# local module build artifacts
+modules/*/android/build/
+
 # misc dir for myself
 /misc
 
