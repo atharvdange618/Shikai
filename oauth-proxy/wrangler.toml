@@ -1,0 +1,6 @@
+name = "shikai-oauth-proxy"
+main = "worker.ts"
+compatibility_date = "2025-01-01"
+
+[vars]
+GITHUB_CLIENT_ID = "Iv23liA5f2hKEDDogpFV"
