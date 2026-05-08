@@ -57,22 +57,26 @@ export default function IssuesScreen() {
   } = useIssues(owner, repoName, state);
 
   useEffect(() => {
-    navigation.setOptions({
-      title: "Issues",
-      headerRight: () => (
-        <Pressable
-          hitSlop={12}
-          style={{ marginRight: Spacing.sm, padding: Spacing.xs }}
-          onPress={() =>
-            WebBrowser.openBrowserAsync(
-              `https://github.com/${owner}/${repoName}/issues`,
-            )
-          }
-        >
-          <Octicons name="link-external" size={16} color={colors.accent} />
-        </Pressable>
-      ),
-    });
+    try {
+      navigation.setOptions({
+        title: "Issues",
+        headerRight: () => (
+          <Pressable
+            hitSlop={12}
+            style={{ marginRight: Spacing.sm, padding: Spacing.xs }}
+            onPress={() =>
+              WebBrowser.openBrowserAsync(
+                `https://github.com/${owner}/${repoName}/issues`,
+              )
+            }
+          >
+            <Octicons name="link-external" size={16} color={colors.accent} />
+          </Pressable>
+        ),
+      });
+    } catch {
+      /* navigator not ready yet */
+    }
   }, [navigation, owner, repoName, colors.accent]);
 
   const onRefresh = useCallback(async () => {

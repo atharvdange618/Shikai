@@ -26,12 +26,14 @@ interface RepoCardProps {
   repo: GitHubRepo;
   sort?: RepoListParams["sort"];
   onPress?: () => void;
+  onPressIn?: () => void;
 }
 
 export const RepoCard = memo(function RepoCard({
   repo,
   sort = "pushed",
   onPress,
+  onPressIn,
 }: RepoCardProps) {
   const isDark = useColorScheme() === "dark";
   const colors = isDark ? DarkColors : LightColors;
@@ -59,6 +61,7 @@ export const RepoCard = memo(function RepoCard({
     <Pressable
       style={({ pressed }) => [s.card, pressed && s.cardPressed]}
       onPress={onPress}
+      onPressIn={onPressIn}
     >
       <View style={s.titleRow}>
         <Octicons

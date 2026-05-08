@@ -2,9 +2,11 @@ import { Octicons } from "@expo/vector-icons";
 import * as Clipboard from "expo-clipboard";
 import * as Haptics from "expo-haptics";
 import { useLocalSearchParams, useNavigation } from "expo-router";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
+  Animated,
+  Easing,
   Image,
   Pressable,
   ScrollView,
@@ -33,6 +35,99 @@ import {
 import { useFileContent } from "@/hooks/useRepoDetails";
 import { getLanguage, isImageFile } from "@/lib/utils";
 
+interface LoadingProgressProps {
+  isLoading: boolean;
+  fileName: string;
+  colors: typeof LightColors | typeof DarkColors;
+}
+
+function LoadingProgress({
+  isLoading,
+  fileName,
+  colors,
+}: LoadingProgressProps) {
+  const animatedProgress = useRef(new Animated.Value(0)).current;
+  const [displayProgress, setDisplayProgress] = useState(0);
+  const [visible, setVisible] = useState(true);
+
+  useEffect(() => {
+    let animation: Animated.CompositeAnimation;
+
+    if (isLoading) {
+      setVisible(true);
+      animatedProgress.setValue(0);
+      animation = Animated.sequence([
+        Animated.timing(animatedProgress, {
+          toValue: 0.4,
+          duration: 800,
+          easing: Easing.out(Easing.quad),
+          useNativeDriver: false,
+        }),
+        Animated.timing(animatedProgress, {
+          toValue: 0.8,
+          duration: 3200,
+          easing: Easing.out(Easing.quad),
+          useNativeDriver: false,
+        }),
+        Animated.timing(animatedProgress, {
+          toValue: 0.98,
+          duration: 20000,
+          easing: Easing.out(Easing.quad),
+          useNativeDriver: false,
+        }),
+      ]);
+      animation.start();
+    } else {
+      animation = Animated.timing(animatedProgress, {
+        toValue: 1,
+        duration: 400,
+        easing: Easing.out(Easing.quad),
+        useNativeDriver: false,
+      });
+      animation.start(({ finished }) => {
+        if (finished) {
+          setTimeout(() => setVisible(false), 200);
+        }
+      });
+    }
+
+    const listenerId = animatedProgress.addListener(({ value }) => {
+      setDisplayProgress(Math.round(value * 100));
+    });
+
+    return () => {
+      animation?.stop();
+      animatedProgress.removeListener(listenerId);
+    };
+  }, [isLoading, animatedProgress]);
+
+  if (!visible) return null;
+
+  const s = buildStyles(colors);
+
+  return (
+    <View style={s.centered}>
+      <View style={s.progressContainer}>
+        <View style={s.progressTrack}>
+          <Animated.View
+            style={[
+              s.progressFill,
+              {
+                width: animatedProgress.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: ["0%", "100%"],
+                }),
+              },
+            ]}
+          />
+        </View>
+        <Text style={s.loadingText}>{displayProgress}%</Text>
+      </View>
+      <Text style={s.loadingText}>{`Loading ${fileName}...`}</Text>
+    </View>
+  );
+}
+
 export default function FileViewerScreen() {
   const { repoId, path, fileName } = useLocalSearchParams<{
     repoId: string;
@@ -56,9 +151,13 @@ export default function FileViewerScreen() {
 
   useEffect(() => {
     if (fileName) {
-      navigation.setOptions({
-        title: fileName,
-      });
+      try {
+        navigation.setOptions({
+          title: fileName,
+        });
+      } catch {
+        /* navigator not ready yet */
+      }
     }
   }, [navigation, fileName]);
 
@@ -84,6 +183,8 @@ export default function FileViewerScreen() {
 
   const s = buildStyles(colors);
 
+  const showContent = data && !isLoading && !isError;
+
   return (
     <SafeAreaView style={s.container} edges={["bottom"]}>
       <ScrollView
@@ -91,12 +192,11 @@ export default function FileViewerScreen() {
         contentContainerStyle={isImage ? s.scrollContentImage : undefined}
         showsVerticalScrollIndicator={false}
       >
-        {isLoading && (
-          <View style={s.centered}>
-            <ActivityIndicator size="large" color={colors.accent} />
-            <Text style={s.loadingText}>{`Loading ${fileName}...`}</Text>
-          </View>
-        )}
+        <LoadingProgress
+          isLoading={isLoading}
+          fileName={fileName ?? ""}
+          colors={colors}
+        />
 
         {isError && (
           <View style={s.centered}>
@@ -106,7 +206,7 @@ export default function FileViewerScreen() {
           </View>
         )}
 
-        {data && !isLoading && !isError && (
+        {showContent && (
           <>
             {isImage ? (
               <View style={s.imageWrapper}>
@@ -265,6 +365,27 @@ function buildStyles(colors: typeof LightColors | typeof DarkColors) {
       padding: Spacing.xl,
       gap: Spacing.md,
       minHeight: 300,
+    },
+
+    progressContainer: {
+      width: "100%",
+      maxWidth: 280,
+      alignItems: "center",
+      gap: Spacing.sm,
+    },
+
+    progressTrack: {
+      width: "100%",
+      height: 6,
+      backgroundColor: colors.surfaceSecondary,
+      borderRadius: Radius.full,
+      overflow: "hidden",
+    },
+
+    progressFill: {
+      height: "100%",
+      backgroundColor: colors.accent,
+      borderRadius: Radius.full,
     },
 
     loadingText: {

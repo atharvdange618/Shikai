@@ -1,6 +1,6 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   RefreshControl,
@@ -15,6 +15,7 @@ import type { SortOption, TypeOption } from "@/components/repo/RepoFilters";
 import { RepoFilters } from "@/components/repo/RepoFilters";
 import { SearchBar } from "@/components/shared/SearchBar";
 import { useRepos } from "@/hooks/useRepos";
+import { prefetchRepoDetails, prefetchRoute } from "@/lib/prefetch";
 import { queryKeys } from "@/lib/query-client";
 import type { GitHubRepo } from "@/types/github.types";
 
@@ -37,6 +38,9 @@ export default function ReposScreen() {
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState<SortOption>("pushed");
   const [type, setType] = useState<TypeOption>("all");
+
+  const prefetchMap = useRef(new Set<number>());
+  const viewportTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const {
     repos,
@@ -63,11 +67,43 @@ export default function ReposScreen() {
     [router],
   );
 
+  const handleRepoPressIn = useCallback(
+    (repo: GitHubRepo) => {
+      const repoId = `${repo.owner.login}__${repo.name}`;
+      prefetchRoute(`/(app)/(tabs)/repos/${repoId}`);
+      prefetchRepoDetails(queryClient, repo.owner.login, repo.name);
+    },
+    [queryClient],
+  );
+
   const renderItem = useCallback(
     ({ item }: { item: GitHubRepo }) => (
-      <RepoCard repo={item} sort={sort} onPress={() => handleRepoPress(item)} />
+      <RepoCard
+        repo={item}
+        sort={sort}
+        onPress={() => handleRepoPress(item)}
+        onPressIn={() => handleRepoPressIn(item)}
+      />
     ),
-    [handleRepoPress, sort],
+    [handleRepoPress, handleRepoPressIn, sort],
+  );
+
+  const onViewableItemsChanged = useMemo(
+    () =>
+      ({ viewableItems }: { viewableItems: { item: GitHubRepo }[] }) => {
+        if (viewportTimer.current) {
+          clearTimeout(viewportTimer.current);
+        }
+        viewportTimer.current = setTimeout(() => {
+          for (const { item } of viewableItems) {
+            if (!prefetchMap.current.has(item.id)) {
+              prefetchMap.current.add(item.id);
+              prefetchRepoDetails(queryClient, item.owner.login, item.name);
+            }
+          }
+        }, 200);
+      },
+    [queryClient],
   );
 
   const keyExtractor = useCallback((item: GitHubRepo) => String(item.id), []);
@@ -148,6 +184,8 @@ export default function ReposScreen() {
           if (hasNextPage) fetchNextPage();
         }}
         onEndReachedThreshold={0.5}
+        onViewableItemsChanged={onViewableItemsChanged}
+        viewabilityConfig={{ itemVisiblePercentThreshold: 50 }}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}

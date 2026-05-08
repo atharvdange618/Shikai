@@ -1,4 +1,5 @@
 import { Octicons } from "@expo/vector-icons";
+import { useQueryClient } from "@tanstack/react-query";
 import * as Clipboard from "expo-clipboard";
 import * as Haptics from "expo-haptics";
 import * as Linking from "expo-linking";
@@ -30,12 +31,18 @@ import {
   Shadows,
   Spacing,
 } from "@/constants/theme";
+import {
+  prefetchFileTree,
+  prefetchRepoCommits,
+  prefetchRoute,
+} from "@/lib/prefetch";
 import { formatCount, relativeTime } from "@/lib/utils";
 
 export default function RepoDetailsScreen() {
   const { repoId } = useLocalSearchParams<{ repoId: string }>();
   const navigation = useNavigation();
   const router = useRouter();
+  const queryClient = useQueryClient();
   const isDark = useColorScheme() === "dark";
   const colors = isDark ? DarkColors : LightColors;
   const shadows = isDark ? {} : Shadows.light.sm;
@@ -60,10 +67,14 @@ export default function RepoDetailsScreen() {
 
   useEffect(() => {
     if (repo?.name) {
-      navigation.setOptions({
-        title: repo.name,
-        headerBackVisible: true,
-      });
+      try {
+        navigation.setOptions({
+          title: repo.name,
+          headerBackVisible: true,
+        });
+      } catch {
+        /* navigator not ready yet */
+      }
     }
   }, [repo?.name, navigation]);
 
@@ -79,10 +90,22 @@ export default function RepoDetailsScreen() {
     router.push(`/(app)/(tabs)/repos/${repoId}/commits`);
   }, [router, repoId]);
 
+  const handleCommitsPressIn = useCallback(() => {
+    if (!owner || !repoName) return;
+    prefetchRoute(`/(app)/(tabs)/repos/${repoId}/commits`);
+    prefetchRepoCommits(queryClient, owner, repoName);
+  }, [queryClient, owner, repoName, repoId]);
+
   const handleCodePress = useCallback(() => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     router.push(`/(app)/(tabs)/repos/${repoId}/files`);
   }, [router, repoId]);
+
+  const handleCodePressIn = useCallback(() => {
+    if (!owner || !repoName) return;
+    prefetchRoute(`/(app)/(tabs)/repos/${repoId}/files`);
+    prefetchFileTree(queryClient, owner, repoName);
+  }, [queryClient, owner, repoName, repoId]);
 
   const handleViewOnGitHub = useCallback(() => {
     if (!repo?.html_url) return;
@@ -94,10 +117,20 @@ export default function RepoDetailsScreen() {
     router.push(`/(app)/(tabs)/repos/${repoId}/issues`);
   }, [router, repoId]);
 
+  const handleIssuesPressIn = useCallback(() => {
+    if (!owner || !repoName) return;
+    prefetchRoute(`/(app)/(tabs)/repos/${repoId}/issues`);
+  }, [repoId]);
+
   const handlePRsPress = useCallback(() => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     router.push(`/(app)/(tabs)/repos/${repoId}/pull-requests`);
   }, [router, repoId]);
+
+  const handlePRsPressIn = useCallback(() => {
+    if (!owner || !repoName) return;
+    prefetchRoute(`/(app)/(tabs)/repos/${repoId}/pull-requests`);
+  }, [repoId]);
 
   const s = buildStyles(colors, shadows);
 
@@ -267,6 +300,7 @@ export default function RepoDetailsScreen() {
                 pressed && { opacity: 0.6 },
               ]}
               onPress={handleIssuesPress}
+              onPressIn={handleIssuesPressIn}
             >
               <Octicons
                 name="issue-opened"
@@ -295,6 +329,7 @@ export default function RepoDetailsScreen() {
                 pressed && { opacity: 0.6 },
               ]}
               onPress={handlePRsPress}
+              onPressIn={handlePRsPressIn}
             >
               <Octicons
                 name="git-pull-request"
@@ -392,6 +427,7 @@ export default function RepoDetailsScreen() {
               pressed && s.actionButtonPressed,
             ]}
             onPress={handleCodePress}
+            onPressIn={handleCodePressIn}
           >
             <Octicons
               name="code"
@@ -408,6 +444,7 @@ export default function RepoDetailsScreen() {
               pressed && s.actionButtonPressed,
             ]}
             onPress={handleCommitsPress}
+            onPressIn={handleCommitsPressIn}
           >
             <Octicons name="history" size={IconSize.sm} color="#fff" />
             <Text style={s.actionButtonFilledText}>Commits</Text>
