@@ -1,5 +1,7 @@
 import { Octicons } from "@expo/vector-icons";
+import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
+import { useCallback } from "react";
 import {
   Pressable,
   StyleSheet,
@@ -21,6 +23,7 @@ import {
 import type { PinnedRepoNode } from "@/types/github-graphql.types";
 
 import languageColors from "@/constants/language-colors.json";
+import { prefetchRepoDetails, prefetchRoute } from "@/lib/prefetch";
 import { formatCount } from "@/lib/utils";
 
 const CARD_WIDTH = 220;
@@ -34,14 +37,21 @@ export function PinnedRepoCard({ repo }: PinnedRepoCardProps) {
   const colors = isDark ? DarkColors : LightColors;
   const shadows = isDark ? {} : Shadows.light.sm;
   const router = useRouter();
+  const queryClient = useQueryClient();
 
   const urlParts = repo.url.split("/");
   const owner = urlParts[urlParts.length - 2] ?? "";
   const repoId = `${owner}__${repo.name}`;
+  const route = `/(app)/(tabs)/repos/${repoId}`;
 
-  function handlePress() {
-    router.push(`/(app)/(tabs)/repos/${repoId}`);
-  }
+  const handlePress = useCallback(() => {
+    router.push(route as any);
+  }, [router, route]);
+
+  const handlePressIn = useCallback(() => {
+    prefetchRoute(route);
+    prefetchRepoDetails(queryClient, owner, repo.name);
+  }, [queryClient, owner, repo.name, route]);
 
   const langColor = repo.primaryLanguage?.name
     ? ((languageColors as Record<string, { color: string | null }>)[
@@ -55,6 +65,7 @@ export function PinnedRepoCard({ repo }: PinnedRepoCardProps) {
     <Pressable
       style={({ pressed }) => [s.card, pressed && s.cardPressed]}
       onPress={handlePress}
+      onPressIn={handlePressIn}
     >
       <View style={s.topRow}>
         <Octicons name="repo" size={IconSize.sm} color={colors.textSecondary} />

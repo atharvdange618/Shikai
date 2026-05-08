@@ -1,7 +1,8 @@
 import { Octicons } from "@expo/vector-icons";
 import { FlashList } from "@shopify/flash-list";
+import { useQueryClient } from "@tanstack/react-query";
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
-import { memo, useCallback, useEffect, useMemo, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Pressable,
@@ -20,6 +21,7 @@ import {
   Spacing,
 } from "@/constants/theme";
 import { useFileTree, useRepo } from "@/hooks/useRepoDetails";
+import { prefetchCommonFiles, prefetchFileContent } from "@/lib/prefetch";
 import type { GitHubTreeItem } from "@/types/github.types";
 
 interface TreeNode {
@@ -73,11 +75,13 @@ const TreeItem = memo(function TreeItem({
   item,
   onToggle,
   onFileSelect,
+  onFilePressIn,
   colors,
 }: {
   item: FlatTreeItem;
   onToggle: (path: string) => void;
   onFileSelect: (path: string) => void;
+  onFilePressIn?: (path: string) => void;
   colors: typeof LightColors | typeof DarkColors;
 }) {
   const { node, depth, isExpanded } = item;
@@ -96,6 +100,9 @@ const TreeItem = memo(function TreeItem({
         gap: Spacing.sm,
       })}
       onPress={() => (isDir ? onToggle(node.path) : onFileSelect(node.path))}
+      onPressIn={() => {
+        if (!isDir && onFilePressIn) onFilePressIn(node.path);
+      }}
     >
       {isDir && (
         <Octicons
@@ -137,19 +144,25 @@ export default function FileExplorerScreen() {
   const { repoId } = useLocalSearchParams<{ repoId: string }>();
   const router = useRouter();
   const navigation = useNavigation();
+  const queryClient = useQueryClient();
   const isDark = useColorScheme() === "dark";
   const colors = isDark ? DarkColors : LightColors;
 
   const [owner, repoName] = (repoId ?? "").split("__");
   const [expandedPaths, setExpandedPaths] = useState<Set<string>>(new Set());
+  const commonFilesPrefetched = useRef(false);
 
   const { data: repo } = useRepo(owner, repoName);
 
   useEffect(() => {
-    navigation.setOptions({
-      title: `${repo?.name ?? "Repository"} Files`,
-      headerBackTitle: repo?.name ?? "Back",
-    });
+    try {
+      navigation.setOptions({
+        title: `${repo?.name ?? "Repository"} Files`,
+        headerBackTitle: repo?.name ?? "Back",
+      });
+    } catch {
+      /* navigator not ready yet */
+    }
   }, [navigation, repo?.name]);
 
   const { data: fileTreeData, isLoading } = useFileTree(
@@ -158,6 +171,17 @@ export default function FileExplorerScreen() {
     repo?.default_branch ?? "",
     true,
   );
+
+  useEffect(() => {
+    if (
+      fileTreeData?.tree &&
+      fileTreeData.tree.length > 0 &&
+      !commonFilesPrefetched.current
+    ) {
+      commonFilesPrefetched.current = true;
+      prefetchCommonFiles(queryClient, owner, repoName, fileTreeData.tree);
+    }
+  }, [fileTreeData, queryClient, owner, repoName]);
 
   const toggleFolder = useCallback((path: string) => {
     setExpandedPaths((prev) => {
@@ -180,6 +204,14 @@ export default function FileExplorerScreen() {
       });
     },
     [router, repoId],
+  );
+
+  const handleFilePressIn = useCallback(
+    (path: string) => {
+      if (!owner || !repoName) return;
+      prefetchFileContent(queryClient, owner, repoName, path);
+    },
+    [queryClient, owner, repoName],
   );
 
   const tree = useMemo(
@@ -211,10 +243,11 @@ export default function FileExplorerScreen() {
         item={item}
         onToggle={toggleFolder}
         onFileSelect={handleFileSelect}
+        onFilePressIn={handleFilePressIn}
         colors={colors}
       />
     ),
-    [toggleFolder, handleFileSelect, colors],
+    [toggleFolder, handleFileSelect, handleFilePressIn, colors],
   );
 
   const getItemType = useCallback(

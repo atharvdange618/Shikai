@@ -55,9 +55,6 @@ githubAxios.interceptors.request.use(
     return config;
   },
   (error) => {
-    if (__DEV__) {
-      console.error("[API Request Error]", error);
-    }
     return Promise.reject(error);
   },
 );
@@ -84,10 +81,6 @@ githubAxios.interceptors.response.use(
     const data = error.response?.data as Record<string, unknown> | undefined;
     const message =
       (data?.message as string) ?? error.message ?? "Unknown error";
-
-    if (__DEV__) {
-      console.error("[API Error]", status, message);
-    }
 
     if (status === 401) {
       useAuthStore.getState().clearAuth();

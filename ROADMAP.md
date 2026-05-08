@@ -24,6 +24,8 @@ This document outlines the planned and proposed features for Shikai, categorized
 - **Description:** A feed for items needing immediate attention.
 - **Scope:** Show open PRs, open issues, stale repos, or recent mentions.
 
+### 5. Implement prefetch if it exists in expo and if it doesn't exist we will implement our own version prefetch
+
 ---
 
 ## Smaller Features

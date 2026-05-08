@@ -1,6 +1,7 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { BlurView } from "expo-blur";
 import { Tabs } from "expo-router";
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
 import { Platform, StyleSheet, useColorScheme } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -13,6 +14,7 @@ import {
   LightColors,
   Spacing,
 } from "@/constants/theme";
+import { prefetchOverview, prefetchProfile } from "@/lib/prefetch";
 
 function IOSTabBarBackground() {
   const scheme = useColorScheme();
@@ -31,6 +33,12 @@ export default function TabsLayout() {
   const isDark = scheme === "dark";
   const colors = isDark ? DarkColors : LightColors;
   const insets = useSafeAreaInsets();
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    prefetchProfile(queryClient);
+    prefetchOverview(queryClient);
+  }, [queryClient]);
 
   const renderHomeIcon = useCallback(
     ({
