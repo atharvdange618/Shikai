@@ -130,29 +130,39 @@ export default function SignInScreen() {
         return;
       }
 
-      const tokenResponse = await fetch(OAUTH_PROXY_URL, {
-        method: "POST",
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          client_id: CLIENT_ID,
-          code,
-          redirect_uri: redirectUri,
-          code_verifier: codeVerifier,
-        }),
-      });
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000);
 
-      const tokenData = await tokenResponse.json();
+      let accessToken: string;
 
-      if (tokenData.error || !tokenData.access_token) {
-        setError("Could not get access token. Please try again.");
-        setLoading(false);
-        return;
+      try {
+        const tokenResponse = await fetch(OAUTH_PROXY_URL, {
+          signal: controller.signal,
+          method: "POST",
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            client_id: CLIENT_ID,
+            code,
+            redirect_uri: redirectUri,
+            code_verifier: codeVerifier,
+          }),
+        });
+
+        const tokenData = await tokenResponse.json();
+
+        if (tokenData.error || !tokenData.access_token) {
+          setError("Could not get access token. Please try again.");
+          setLoading(false);
+          return;
+        }
+
+        accessToken = tokenData.access_token;
+      } finally {
+        clearTimeout(timeoutId);
       }
-
-      const accessToken: string = tokenData.access_token;
 
       const installations = await fetchUserInstallations(accessToken);
 

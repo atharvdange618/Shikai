@@ -22,16 +22,24 @@ export default {
     if (redirect_uri) params.set("redirect_uri", redirect_uri);
     if (code_verifier) params.set("code_verifier", code_verifier);
 
-    const response = await fetch("https://github.com/login/oauth/access_token", {
-      method: "POST",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-      body: params.toString(),
-    });
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000);
 
-    const data = await response.json();
-    return Response.json(data, { status: response.status });
+    try {
+      const response = await fetch("https://github.com/login/oauth/access_token", {
+        signal: controller.signal,
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: params.toString(),
+      });
+
+      const data = await response.json();
+      return Response.json(data, { status: response.status });
+    } finally {
+      clearTimeout(timeoutId);
+    }
   },
 };
