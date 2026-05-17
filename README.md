@@ -6,9 +6,9 @@ Shikai is an elegantly designed, mobile-first GitHub companion for developers wh
 
 ---
 
-## v1.0 Released
+## v1.1.0 Released
 
-Beta testing is complete and Shikai v1 is now live. Thank you to everyone who participated in the beta and helped shape this app. This release marks the stable, production-ready version of Shikai.
+Following the successful launch of v1.0, Shikai v1.1.0 introduces enhanced performance with a new three-layer prefetch architecture, robust app security hardening (detecting rooted devices and debuggers), and a smooth, fully secure GitHub OAuth authentication flow.
 
 ---
 
@@ -84,11 +84,11 @@ Shikai is built around three principles:
 Shikai uses GitHub OAuth to securely access your data. Here's how to get started:
 
 1. **Open the app** for the first time
-2. **Tap "Sign in with GitHub"** - you'll be redirected to GitHub's authorization page
+2. **Tap "Sign in with GitHub"** - you'll be redirected to GitHub's authorization page via our secure Cloudflare Worker proxy
 3. **Authorize the app** with the requested permissions (`read:user`, `repo`)
-4. **You're all set!** You'll be redirected back to Shikai and can start exploring
+4. **You're all set!** You'll be redirected back to Shikai and can start exploring instantly thanks to the intelligent prefetch engine
 
-**Security Note:** Your access token never leaves your device. All API requests go directly from your phone to GitHub. No servers, no third-party storage, just you and GitHub's API. Tokens are stored securely on your device using `expo-secure-store`.
+**Security Note:** Your access token is handled entirely via secure proxy and never leaves your device after the initial exchange. All subsequent API requests go directly from your phone to GitHub. The app implements native security hardening to prevent usage on compromised devices. Tokens are stored securely on your device using `expo-secure-store`.
 
 ---
 
