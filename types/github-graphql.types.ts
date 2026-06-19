@@ -36,6 +36,12 @@ export interface ContributionCalendar {
   weeks: ContributionWeek[];
 }
 
+export interface ContributionStats {
+  currentStreak: number;
+  longestStreak: number;
+  mostActiveDay: string;
+}
+
 export interface ContributionGraphResponse {
   data: {
     viewer: {
