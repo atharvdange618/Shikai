@@ -16,7 +16,11 @@ import {
   LightColors,
   Spacing,
 } from "@/constants/theme";
-import type { ContributionWeek } from "@/types/github-graphql.types";
+import type {
+  ContributionStats,
+  ContributionWeek,
+} from "@/types/github-graphql.types";
+import { ContributionStatsRow } from "./ContributionStatsRow";
 
 const CELL = Layout.heatmapCellSize;
 const GAP = Layout.heatmapCellGap;
@@ -49,12 +53,14 @@ interface ContributionGraphProps {
   weeks: ContributionWeek[];
   totalContributions: number;
   isLoading?: boolean;
+  stats?: ContributionStats | null;
 }
 
 export function ContributionGraph({
   weeks,
   totalContributions,
   isLoading = false,
+  stats,
 }: ContributionGraphProps) {
   const isDark = useColorScheme() === "dark";
   const colors = isDark ? DarkColors : LightColors;
@@ -107,6 +113,8 @@ export function ContributionGraph({
           {totalContributions.toLocaleString()} this year
         </Text>
       </View>
+
+      {stats && <ContributionStatsRow stats={stats} />}
 
       <View style={s.graphRow}>
         <View style={[s.dayLabels, { height: SVG_HEIGHT }]}>
