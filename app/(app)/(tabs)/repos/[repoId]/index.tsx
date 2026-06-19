@@ -1,10 +1,26 @@
+import { ContributorRow } from "@/components/repo/ContributorRow";
+import { LanguageBar } from "@/components/repo/LanguageBar";
+import {
+  BorderWidth,
+  DarkColors,
+  FontFamily,
+  FontSize,
+  IconSize,
+  Layout,
+  LightColors,
+  Radius,
+  Shadows,
+  Spacing,
+} from "@/constants/theme";
+import { useRepoDetailsScreen } from "@/hooks/useRepoDetails";
+import { prefetchFileTree, prefetchRepoCommits } from "@/lib/prefetch";
+import { formatCount, relativeTime } from "@/lib/utils";
 import { Octicons } from "@expo/vector-icons";
 import { useQueryClient } from "@tanstack/react-query";
 import * as Clipboard from "expo-clipboard";
 import * as Haptics from "expo-haptics";
 import * as Linking from "expo-linking";
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
-import * as WebBrowser from "expo-web-browser";
 import { useCallback, useEffect, useState } from "react";
 import {
   Pressable,
@@ -17,27 +33,22 @@ import {
 } from "react-native";
 import Animated, { FadeInDown } from "react-native-reanimated";
 
-import { ContributorRow } from "@/components/repo/ContributorRow";
-import { LanguageBar } from "@/components/repo/LanguageBar";
-import { useRepoDetailsScreen } from "@/hooks/useRepoDetails";
+const ANIM_DELAYS = {
+  hero: 0,
+  stats: 60,
+  activity: 120,
+  commitSpotlight: 180,
+  languages: 240,
+  contributors: 300,
+  actionBar: 360,
+  readme: 420,
+} as const;
 
-import {
-  DarkColors,
-  FontFamily,
-  FontSize,
-  IconSize,
-  Layout,
-  LightColors,
-  Radius,
-  Shadows,
-  Spacing,
-} from "@/constants/theme";
-import {
-  prefetchFileTree,
-  prefetchRepoCommits,
-  prefetchRoute,
-} from "@/lib/prefetch";
-import { formatCount, relativeTime } from "@/lib/utils";
+function formatBytes(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1048576) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / 1048576).toFixed(1)} MB`;
+}
 
 export default function RepoDetailsScreen() {
   const { repoId } = useLocalSearchParams<{ repoId: string }>();
@@ -59,7 +70,6 @@ export default function RepoDetailsScreen() {
     lastCommit,
     issuesPRStats,
     contributors,
-    readme,
     isLoading,
     isError,
     error,
@@ -79,6 +89,12 @@ export default function RepoDetailsScreen() {
     }
   }, [repo?.name, navigation]);
 
+  useEffect(() => {
+    if (!isLoading.core) return;
+    const timer = setTimeout(() => refetch(), 10_000);
+    return () => clearTimeout(timer);
+  }, [isLoading.core, refetch]);
+
   const handleCopyHash = useCallback(async () => {
     if (!lastCommit?.sha) return;
     await Clipboard.setStringAsync(lastCommit.sha);
@@ -93,9 +109,8 @@ export default function RepoDetailsScreen() {
 
   const handleCommitsPressIn = useCallback(() => {
     if (!owner || !repoName) return;
-    prefetchRoute(`/(app)/(tabs)/repos/${repoId}/commits`);
     prefetchRepoCommits(queryClient, owner, repoName);
-  }, [queryClient, owner, repoName, repoId]);
+  }, [queryClient, owner, repoName]);
 
   const handleCodePress = useCallback(() => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -104,14 +119,8 @@ export default function RepoDetailsScreen() {
 
   const handleCodePressIn = useCallback(() => {
     if (!owner || !repoName) return;
-    prefetchRoute(`/(app)/(tabs)/repos/${repoId}/files`);
     prefetchFileTree(queryClient, owner, repoName);
-  }, [queryClient, owner, repoName, repoId]);
-
-  const handleViewOnGitHub = useCallback(() => {
-    if (!repo?.html_url) return;
-    WebBrowser.openBrowserAsync(repo.html_url);
-  }, [repo?.html_url]);
+  }, [queryClient, owner, repoName]);
 
   const handleShare = useCallback(async () => {
     if (!repo) return;
@@ -132,8 +141,7 @@ export default function RepoDetailsScreen() {
 
   const handleIssuesPressIn = useCallback(() => {
     if (!owner || !repoName) return;
-    prefetchRoute(`/(app)/(tabs)/repos/${repoId}/issues`);
-  }, [owner, repoName, repoId]);
+  }, [owner, repoName]);
 
   const handlePRsPress = useCallback(() => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -142,8 +150,7 @@ export default function RepoDetailsScreen() {
 
   const handlePRsPressIn = useCallback(() => {
     if (!owner || !repoName) return;
-    prefetchRoute(`/(app)/(tabs)/repos/${repoId}/pull-requests`);
-  }, [owner, repoName, repoId]);
+  }, [owner, repoName]);
 
   const s = buildStyles(colors, shadows);
 
@@ -161,40 +168,29 @@ export default function RepoDetailsScreen() {
   }
 
   return (
-    <>
-      <ScrollView
-        style={s.scroll}
-        contentContainerStyle={s.content}
-        showsVerticalScrollIndicator={false}
+    <ScrollView
+      style={s.scroll}
+      contentContainerStyle={s.content}
+      showsVerticalScrollIndicator={false}
+    >
+      <Animated.View
+        entering={FadeInDown.duration(400).delay(ANIM_DELAYS.hero)}
+        style={[s.card, s.headerCard]}
       >
-        <Animated.View
-          entering={FadeInDown.duration(400).delay(0)}
-          style={[s.card, s.headerCard]}
-        >
-          {isLoading.core ? (
+        {isLoading.core ? (
+          <>
             <View style={[s.skeleton, { width: 80, height: 12 }]} />
-          ) : (
+            <View style={[s.skeleton, { width: 160, height: 22 }]} />
+            <View style={[s.skeleton, { width: "100%", height: 40 }]} />
+          </>
+        ) : (
+          <>
             <Text style={s.ownerText}>{owner}</Text>
-          )}
-
-          <View style={s.titleRow}>
-            <Octicons
-              name="repo"
-              size={IconSize.md}
-              color={colors.textSecondary}
-            />
-            {isLoading.core ? (
-              <View style={[s.skeleton, { flex: 1, height: 22 }]} />
-            ) : (
+            <View style={s.titleRow}>
               <Text style={s.repoName} numberOfLines={1}>
                 {repo?.name}
               </Text>
-            )}
-          </View>
-
-          {repo && (
-            <View style={s.badgeRow}>
-              {repo.fork && (
+              {repo?.fork && (
                 <View
                   style={[
                     s.badge,
@@ -204,349 +200,357 @@ export default function RepoDetailsScreen() {
                     },
                   ]}
                 >
-                  <Text
-                    style={[s.badgeText, { color: colors.badgeForkText }]}
-                  >
+                  <Text style={[s.badgeText, { color: colors.badgeForkText }]}>
                     Fork
                   </Text>
                 </View>
               )}
-              <View
-                style={[
-                  s.badge,
-                  {
-                    backgroundColor: repo.private
-                      ? colors.badgePrivateBg
-                      : colors.badgePublicBg,
-                    borderColor: repo.private
-                      ? colors.border
-                      : colors.successSubtle,
-                  },
-                ]}
-              >
-                <Text
+              {repo && (
+                <View
                   style={[
-                    s.badgeText,
+                    s.badge,
                     {
-                      color: repo.private
-                        ? colors.badgePrivateText
-                        : colors.badgePublicText,
+                      backgroundColor: repo.private
+                        ? colors.badgePrivateBg
+                        : colors.badgePublicBg,
+                      borderColor: repo.private
+                        ? colors.border
+                        : colors.successSubtle,
                     },
                   ]}
                 >
-                  {repo.private ? "Private" : "Public"}
-                </Text>
-              </View>
-            </View>
-          )}
-
-          {repo?.description && (
-            <Text style={s.description} selectable>
-              {repo.description}
-            </Text>
-          )}
-
-          {repo?.homepage && (
-            <Pressable
-              style={s.websiteRow}
-              onPress={() => Linking.openURL(repo.homepage!)}
-            >
-              <Octicons name="link" size={13} color={colors.accent} />
-              <Text style={s.websiteText} numberOfLines={1}>
-                {repo.homepage.replace(/^https?:\/\//, "")}
-              </Text>
-            </Pressable>
-          )}
-
-          {repo?.topics && repo.topics.length > 0 && (
-            <View style={s.topicsRow}>
-              {repo.topics.map((topic) => (
-                <View key={topic} style={s.topicPill}>
-                  <Text style={s.topicText}>{topic}</Text>
-                </View>
-              ))}
-            </View>
-          )}
-        </Animated.View>
-
-        <Animated.View
-          entering={FadeInDown.duration(400).delay(80)}
-          style={[s.card, s.statsCard]}
-        >
-          <StatItem
-            icon="star"
-            value={repo?.stargazers_count ?? 0}
-            label="Stars"
-            colors={colors}
-            isLoading={isLoading.core}
-            iconColor={colors.star}
-          />
-          <View style={s.statDivider} />
-          <StatItem
-            icon="repo-forked"
-            value={repo?.forks_count ?? 0}
-            label="Forks"
-            colors={colors}
-            isLoading={isLoading.core}
-          />
-          <View style={s.statDivider} />
-          <StatItem
-            icon="eye"
-            value={repo?.watchers_count ?? 0}
-            label="Watching"
-            colors={colors}
-            isLoading={isLoading.core}
-          />
-          <View style={s.statDivider} />
-          <StatItem
-            icon="git-commit"
-            value={commitCount ?? 0}
-            label="Commits"
-            colors={colors}
-            isLoading={isLoading.commitCount}
-          />
-        </Animated.View>
-
-        <Animated.View
-          entering={FadeInDown.duration(400).delay(160)}
-          style={[s.card, s.activityCard]}
-        >
-          {issuesPRStats ? (
-            <>
-              <Pressable
-                style={({ pressed }) => [
-                  s.activityRow,
-                  pressed && { opacity: 0.6 },
-                ]}
-                onPress={handleIssuesPress}
-                onPressIn={handleIssuesPressIn}
-              >
-                <Octicons
-                  name="issue-opened"
-                  size={14}
-                  color={
-                    issuesPRStats.openIssues > 0
-                      ? colors.success
-                      : colors.textMuted
-                  }
-                />
-                <Text style={s.activityCount}>
-                  {issuesPRStats.openIssues}
-                </Text>
-                <Text style={s.activityLabel}>open issues</Text>
-                <Octicons
-                  name="chevron-right"
-                  size={12}
-                  color={colors.textMuted}
-                  style={{ marginLeft: "auto" }}
-                />
-              </Pressable>
-
-              <View style={s.activityDivider} />
-
-              <Pressable
-                style={({ pressed }) => [
-                  s.activityRow,
-                  pressed && { opacity: 0.6 },
-                ]}
-                onPress={handlePRsPress}
-                onPressIn={handlePRsPressIn}
-              >
-                <Octicons
-                  name="git-pull-request"
-                  size={14}
-                  color={
-                    issuesPRStats.openPullRequests > 0
-                      ? colors.accent
-                      : colors.textMuted
-                  }
-                />
-                <Text style={s.activityCount}>
-                  {issuesPRStats.openPullRequests}
-                </Text>
-                <Text style={s.activityLabel}>open pull requests</Text>
-                <Octicons
-                  name="chevron-right"
-                  size={12}
-                  color={colors.textMuted}
-                  style={{ marginLeft: "auto" }}
-                />
-              </Pressable>
-            </>
-          ) : isLoading.core ? (
-            <>
-              <View style={s.activityRow}>
-                <View style={[s.skeleton, { width: 14, height: 14 }]} />
-                <View style={[s.skeleton, { width: 24, height: 14 }]} />
-                <View style={[s.skeleton, { width: 80, height: 12 }]} />
-              </View>
-              <View style={s.activityDivider} />
-              <View style={s.activityRow}>
-                <View style={[s.skeleton, { width: 14, height: 14 }]} />
-                <View style={[s.skeleton, { width: 24, height: 14 }]} />
-                <View style={[s.skeleton, { width: 120, height: 12 }]} />
-              </View>
-            </>
-          ) : null}
-
-          {(lastCommit || isLoading.core) && (
-            <>
-              <View style={s.activityDivider} />
-              <View style={s.commitSection}>
-                <View style={s.commitHeader}>
-                  <Octicons
-                    name="git-commit"
-                    size={14}
-                    color={colors.textMuted}
-                  />
-                  <Text style={s.commitSectionLabel}>Latest commit</Text>
-                </View>
-                {isLoading.core ? (
-                  <View style={s.commitContent}>
-                    <View
-                      style={[s.skeleton, { width: "80%", height: 15 }]}
-                    />
-                    <View
-                      style={[
-                        s.skeleton,
-                        { width: "50%", height: 12, marginTop: 4 },
-                      ]}
-                    />
-                  </View>
-                ) : (
-                  <View style={s.commitContent}>
-                    <Text
-                      style={s.commitMessage}
-                      numberOfLines={2}
-                      selectable
-                    >
-                      {lastCommit?.commit.message.split("\n")[0]}
-                    </Text>
-                    <View style={s.commitMetaRow}>
-                      <Text style={s.commitMeta} selectable>
-                        {lastCommit?.commit.author.name} ·{" "}
-                        {relativeTime(
-                          lastCommit?.commit.author.date ?? "",
-                        )}
-                      </Text>
-                      {lastCommit && (
-                        <Pressable
-                          onPress={handleCopyHash}
-                          hitSlop={8}
-                          style={s.hashButton}
-                        >
-                          <Text style={s.hashText}>
-                            {copiedHash
-                              ? "Copied!"
-                              : lastCommit.sha.slice(0, 7)}
-                          </Text>
-                        </Pressable>
-                      )}
-                    </View>
-                  </View>
-                )}
-              </View>
-            </>
-          )}
-        </Animated.View>
-
-        <Animated.View
-          entering={FadeInDown.duration(400).delay(240)}
-          style={s.section}
-        >
-          <Text style={s.sectionLabel}>Languages</Text>
-          <LanguageBar languages={languages} isLoading={isLoading.core} />
-        </Animated.View>
-
-        <Animated.View
-          entering={FadeInDown.duration(400).delay(240)}
-          style={s.section}
-        >
-          <Text style={s.sectionLabel}>Contributors</Text>
-          <ContributorRow
-            contributors={contributors}
-            isLoading={isLoading.contributors}
-          />
-        </Animated.View>
-
-        <Animated.View
-          entering={FadeInDown.duration(400).delay(320)}
-          style={s.actionRow}
-        >
-          <Pressable
-            style={({ pressed }) => [
-              s.actionButton,
-              s.actionButtonOutline,
-              pressed && s.actionButtonPressed,
-            ]}
-            onPress={handleCodePress}
-            onPressIn={handleCodePressIn}
-          >
-            <Octicons
-              name="code"
-              size={IconSize.sm}
-              color={colors.textPrimary}
-            />
-            <Text style={s.actionButtonOutlineText}>Code</Text>
-          </Pressable>
-
-          <Pressable
-            style={({ pressed }) => [
-              s.actionButton,
-              s.actionButtonFilled,
-              pressed && s.actionButtonPressed,
-            ]}
-            onPress={handleCommitsPress}
-            onPressIn={handleCommitsPressIn}
-          >
-            <Octicons name="history" size={IconSize.sm} color="#fff" />
-            <Text style={s.actionButtonFilledText}>Commits</Text>
-          </Pressable>
-
-          <Pressable
-            style={({ pressed }) => [
-              s.actionButton,
-              s.actionButtonOutline,
-              pressed && s.actionButtonPressed,
-            ]}
-            onPress={handleShare}
-          >
-            <Octicons
-              name="share"
-              size={IconSize.sm}
-              color={colors.textPrimary}
-            />
-            <Text style={s.actionButtonOutlineText}>Share</Text>
-          </Pressable>
-        </Animated.View>
-
-        {readme && (
-          <Animated.View
-            entering={FadeInDown.duration(400).delay(320)}
-          >
-            <Pressable
-              style={[s.card, s.viewReadmeButton]}
-              onPress={handleViewOnGitHub}
-            >
-              <View style={s.viewReadmeContent}>
-                <Octicons name="book" size={20} color={colors.accent} />
-                <View style={s.viewReadmeText}>
-                  <Text style={s.viewReadmeTitle}>View README</Text>
-                  <Text style={s.viewReadmeSubtitle}>
-                    Open on GitHub to read documentation
+                  <Text
+                    style={[
+                      s.badgeText,
+                      {
+                        color: repo.private
+                          ? colors.badgePrivateText
+                          : colors.badgePublicText,
+                      },
+                    ]}
+                  >
+                    {repo.private ? "Private" : "Public"}
                   </Text>
                 </View>
+              )}
+            </View>
+
+            {repo?.description && (
+              <Text style={s.description} numberOfLines={3} selectable>
+                {repo.description}
+              </Text>
+            )}
+
+            {repo?.homepage && (
+              <Pressable
+                style={s.websiteRow}
+                onPress={() => {
+                  try {
+                    Linking.openURL(repo.homepage!);
+                  } catch {
+                    /* suppressed */
+                  }
+                }}
+              >
+                <Octicons
+                  name="link"
+                  size={IconSize.xs}
+                  color={colors.textLink}
+                />
+                <Text style={s.websiteText} numberOfLines={1}>
+                  {repo.homepage.replace(/^https?:\/\//, "")}
+                </Text>
+              </Pressable>
+            )}
+
+            {repo?.topics && repo.topics.length > 0 && (
+              <View style={s.topicsRow}>
+                {repo.topics.map((topic) => (
+                  <View key={topic} style={s.topicPill}>
+                    <Text style={s.topicText}>{topic}</Text>
+                  </View>
+                ))}
               </View>
+            )}
+
+            {repo?.license?.spdx_id &&
+              repo.license.spdx_id !== "NOASSERTION" && (
+                <View style={s.licenseRow}>
+                  <Octicons
+                    name="law"
+                    size={IconSize.xs}
+                    color={colors.textMuted}
+                  />
+                  <Text style={s.licenseText}>{repo.license.spdx_id}</Text>
+                </View>
+              )}
+          </>
+        )}
+      </Animated.View>
+
+      <Animated.View
+        entering={FadeInDown.duration(400).delay(ANIM_DELAYS.stats)}
+        style={[s.card, s.statsCard]}
+      >
+        <StatItem
+          icon="star"
+          value={repo?.stargazers_count ?? 0}
+          label="Stars"
+          colors={colors}
+          isLoading={isLoading.core}
+          iconColor={colors.star}
+        />
+        <View style={s.statDivider} />
+        <StatItem
+          icon="repo-forked"
+          value={repo?.forks_count ?? 0}
+          label="Forks"
+          colors={colors}
+          isLoading={isLoading.core}
+        />
+        <View style={s.statDivider} />
+        <StatItem
+          icon="eye"
+          value={repo?.watchers_count ?? 0}
+          label="Watching"
+          colors={colors}
+          isLoading={isLoading.core}
+        />
+        <View style={s.statDivider} />
+        <StatItem
+          icon="git-commit"
+          value={commitCount ?? 0}
+          label="Commits"
+          colors={colors}
+          isLoading={isLoading.core || isLoading.commitCount}
+        />
+      </Animated.View>
+
+      <Animated.View
+        entering={FadeInDown.duration(400).delay(ANIM_DELAYS.activity)}
+        style={[s.card, s.activityCard]}
+      >
+        {isLoading.core ? (
+          <>
+            <View style={s.activityRow}>
+              <View style={[s.skeleton, { width: 14, height: 14 }]} />
+              <View style={[s.skeleton, { width: 24, height: 14 }]} />
+              <View style={[s.skeleton, { width: 80, height: 12 }]} />
+            </View>
+            <View style={s.activityDivider} />
+            <View style={s.activityRow}>
+              <View style={[s.skeleton, { width: 14, height: 14 }]} />
+              <View style={[s.skeleton, { width: 24, height: 14 }]} />
+              <View style={[s.skeleton, { width: 120, height: 12 }]} />
+            </View>
+          </>
+        ) : (
+          <>
+            <Pressable
+              style={({ pressed }) => [
+                s.activityRow,
+                pressed && { opacity: 0.6 },
+              ]}
+              onPress={handleIssuesPress}
+              onPressIn={handleIssuesPressIn}
+            >
+              <Octicons
+                name="issue-opened"
+                size={14}
+                color={
+                  (issuesPRStats?.openIssues ?? 0) > 0
+                    ? colors.success
+                    : colors.textMuted
+                }
+              />
+              <Text style={s.activityCount}>
+                {issuesPRStats?.openIssues ?? 0}
+              </Text>
+              <Text style={s.activityLabel}>Issues</Text>
               <Octicons
                 name="chevron-right"
-                size={16}
+                size={12}
                 color={colors.textMuted}
+                style={{ marginLeft: "auto" }}
               />
             </Pressable>
-          </Animated.View>
+
+            <View style={s.activityDivider} />
+
+            <Pressable
+              style={({ pressed }) => [
+                s.activityRow,
+                pressed && { opacity: 0.6 },
+              ]}
+              onPress={handlePRsPress}
+              onPressIn={handlePRsPressIn}
+            >
+              <Octicons
+                name="git-pull-request"
+                size={14}
+                color={
+                  (issuesPRStats?.openPullRequests ?? 0) > 0
+                    ? colors.accent
+                    : colors.textMuted
+                }
+              />
+              <Text style={s.activityCount}>
+                {issuesPRStats?.openPullRequests ?? 0}
+              </Text>
+              <Text style={s.activityLabel}>Pull Requests</Text>
+              <Octicons
+                name="chevron-right"
+                size={12}
+                color={colors.textMuted}
+                style={{ marginLeft: "auto" }}
+              />
+            </Pressable>
+          </>
         )}
-      </ScrollView>
-    </>
+      </Animated.View>
+
+      {(lastCommit || isLoading.core) && (
+        <Animated.View
+          entering={FadeInDown.duration(400).delay(ANIM_DELAYS.commitSpotlight)}
+          style={[s.card, s.commitSpotlightCard]}
+        >
+          {isLoading.core ? (
+            <View style={s.commitSpotlightContent}>
+              <View style={[s.skeleton, { width: "80%", height: 15 }]} />
+              <View
+                style={[s.skeleton, { width: "50%", height: 12, marginTop: 4 }]}
+              />
+            </View>
+          ) : (
+            <View style={s.commitSpotlightContent}>
+              <Text style={s.commitMessage} numberOfLines={2} selectable>
+                {lastCommit?.commit.message.split("\n")[0]}
+              </Text>
+              <View style={s.commitMetaRow}>
+                <Text style={s.commitMeta} selectable>
+                  {lastCommit?.commit.author.name} ·{" "}
+                  {relativeTime(lastCommit?.commit.author.date ?? "")}
+                </Text>
+                {lastCommit && (
+                  <Pressable
+                    onPress={handleCopyHash}
+                    hitSlop={8}
+                    style={s.hashButton}
+                  >
+                    <Text style={s.hashText}>
+                      {copiedHash ? "Copied!" : lastCommit.sha.slice(0, 7)}
+                    </Text>
+                  </Pressable>
+                )}
+              </View>
+            </View>
+          )}
+        </Animated.View>
+      )}
+
+      {!(languages.length === 0 && !isLoading.core) && (
+        <Animated.View
+          entering={FadeInDown.duration(400).delay(ANIM_DELAYS.languages)}
+          style={[s.card, s.languageCard]}
+        >
+          <View style={s.languageCardHeader}>
+            <Text style={s.sectionLabel}>Languages</Text>
+            {!isLoading.core && languages.length > 0 && (
+              <Text style={s.languageTotalBytes}>
+                {formatBytes(languages.reduce((sum, l) => sum + l.bytes, 0))}
+              </Text>
+            )}
+          </View>
+          <LanguageBar languages={languages} isLoading={isLoading.core} />
+        </Animated.View>
+      )}
+
+      <Animated.View
+        entering={FadeInDown.duration(400).delay(ANIM_DELAYS.contributors)}
+        style={s.section}
+      >
+        <Text style={s.sectionLabel}>Contributors</Text>
+        {isLoading.contributors ? (
+          <View style={s.skeletonAvatars}>
+            {Array.from({ length: 5 }).map((_, i) => (
+              <View
+                key={i}
+                style={[
+                  s.skeleton,
+                  {
+                    width: IconSize.xl,
+                    height: IconSize.xl,
+                    borderRadius: Radius.full,
+                  },
+                ]}
+              />
+            ))}
+          </View>
+        ) : contributors.length === 0 ? (
+          <Text style={s.noContributors}>No contributors</Text>
+        ) : (
+          <>
+            <ContributorRow contributors={contributors} />
+            <Text style={s.contributorCount}>
+              {contributors.length === 1
+                ? "1 contributor"
+                : `${contributors.length} contributors`}
+            </Text>
+          </>
+        )}
+      </Animated.View>
+
+      <Animated.View
+        entering={FadeInDown.duration(400).delay(ANIM_DELAYS.actionBar)}
+        style={s.actionRow}
+      >
+        <Pressable
+          style={({ pressed }) => [
+            s.actionButton,
+            s.actionButtonOutline,
+            pressed && s.actionButtonPressed,
+          ]}
+          onPress={handleCodePress}
+          onPressIn={handleCodePressIn}
+        >
+          <Octicons name="code" size={IconSize.sm} color={colors.textPrimary} />
+          <Text style={s.actionButtonOutlineText}>Code</Text>
+        </Pressable>
+
+        <Pressable
+          style={({ pressed }) => [
+            s.actionButton,
+            s.actionButtonFilled,
+            pressed && s.actionButtonPressed,
+          ]}
+          onPress={handleCommitsPress}
+          onPressIn={handleCommitsPressIn}
+        >
+          <Octicons
+            name="history"
+            size={IconSize.sm}
+            color={colors.textOnAccent}
+          />
+          <Text style={s.actionButtonFilledText}>Commits</Text>
+        </Pressable>
+
+        <Pressable
+          style={({ pressed }) => [
+            s.actionButton,
+            s.actionButtonOutline,
+            pressed && s.actionButtonPressed,
+          ]}
+          onPress={handleShare}
+        >
+          <Octicons
+            name="share"
+            size={IconSize.sm}
+            color={colors.textPrimary}
+          />
+          <Text style={s.actionButtonOutlineText}>Share</Text>
+        </Pressable>
+      </Animated.View>
+    </ScrollView>
   );
 }
 
@@ -572,7 +576,7 @@ function StatItem({
           style={{
             width: 40,
             height: 16,
-            borderRadius: 4,
+            borderRadius: Radius.sm,
             backgroundColor: colors.surfaceSecondary,
           }}
         />
@@ -580,7 +584,7 @@ function StatItem({
           style={{
             width: 30,
             height: 11,
-            borderRadius: 4,
+            borderRadius: Radius.sm,
             backgroundColor: colors.surfaceSecondary,
           }}
         />
@@ -656,33 +660,13 @@ function buildStyles(
       letterSpacing: 0.5,
     },
 
-    readmeHeader: {
-      flexDirection: "row",
-      alignItems: "center",
-      justifyContent: "space-between",
-    },
-
-    viewOnGitHubButton: {
-      flexDirection: "row",
-      alignItems: "center",
-      gap: 4,
-      paddingHorizontal: Spacing.sm,
-      paddingVertical: 4,
-    },
-
-    viewOnGitHubText: {
-      fontFamily: FontFamily.medium,
-      fontSize: FontSize.caption,
-      color: colors.accent,
-    },
-
     headerCard: {
       padding: Spacing.md,
       gap: Spacing.sm,
     },
 
     ownerText: {
-      fontFamily: FontFamily.medium,
+      fontFamily: FontFamily.regular,
       fontSize: FontSize.caption,
       color: colors.textMuted,
     },
@@ -690,26 +674,22 @@ function buildStyles(
     titleRow: {
       flexDirection: "row",
       alignItems: "center",
-      gap: Spacing.sm,
+      flexWrap: "wrap",
+      gap: Spacing.xs,
     },
 
     repoName: {
-      flex: 1,
+      flexShrink: 1,
       fontFamily: FontFamily.bold,
       fontSize: FontSize.heading,
       color: colors.textPrimary,
     },
 
-    badgeRow: {
-      flexDirection: "row",
-      gap: Spacing.xs,
-    },
-
     badge: {
       borderRadius: Radius.full,
-      paddingHorizontal: 8,
+      paddingHorizontal: Spacing.sm,
       paddingVertical: 3,
-      borderWidth: 1,
+      borderWidth: BorderWidth.normal,
     },
 
     badgeText: {
@@ -733,7 +713,7 @@ function buildStyles(
     websiteText: {
       fontFamily: FontFamily.regular,
       fontSize: FontSize.label,
-      color: colors.accent,
+      color: colors.textLink,
       flex: 1,
     },
 
@@ -746,10 +726,10 @@ function buildStyles(
     topicPill: {
       backgroundColor: colors.accentSubtle,
       borderRadius: Radius.full,
-      borderWidth: 1,
+      borderWidth: BorderWidth.normal,
       borderColor: colors.accentMuted,
       paddingHorizontal: Spacing.sm,
-      paddingVertical: 4,
+      paddingVertical: Spacing.xs,
     },
 
     topicText: {
@@ -758,10 +738,22 @@ function buildStyles(
       color: colors.accent,
     },
 
+    licenseRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: Spacing.xs,
+    },
+
+    licenseText: {
+      fontFamily: FontFamily.regular,
+      fontSize: FontSize.caption,
+      color: colors.textMuted,
+    },
+
     card: {
       backgroundColor: colors.surface,
       borderRadius: Radius.lg,
-      borderWidth: 1,
+      borderWidth: BorderWidth.normal,
       borderColor: colors.border,
       ...shadows,
     },
@@ -809,24 +801,12 @@ function buildStyles(
       marginHorizontal: Spacing.md,
     },
 
-    commitSection: {
+    commitSpotlightCard: {
       padding: Spacing.md,
+      gap: Spacing.sm,
     },
 
-    commitHeader: {
-      flexDirection: "row",
-      alignItems: "center",
-      gap: Spacing.xs,
-      marginBottom: Spacing.sm,
-    },
-
-    commitSectionLabel: {
-      fontFamily: FontFamily.medium,
-      fontSize: FontSize.caption,
-      color: colors.textMuted,
-    },
-
-    commitContent: {
+    commitSpotlightContent: {
       gap: Spacing.xs,
     },
 
@@ -854,14 +834,48 @@ function buildStyles(
       backgroundColor: colors.surfaceSecondary,
       borderRadius: Radius.sm,
       paddingHorizontal: Spacing.sm,
-      paddingVertical: 4,
-      borderWidth: 1,
+      paddingVertical: Spacing.xs,
+      borderWidth: BorderWidth.normal,
       borderColor: colors.border,
     },
 
     hashText: {
       fontFamily: FontFamily.mono,
       fontSize: FontSize.caption,
+      color: colors.textSecondary,
+    },
+
+    languageCard: {
+      padding: Spacing.md,
+      gap: Spacing.sm,
+    },
+
+    languageCardHeader: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+    },
+
+    languageTotalBytes: {
+      fontFamily: FontFamily.regular,
+      fontSize: FontSize.label,
+      color: colors.textMuted,
+    },
+
+    skeletonAvatars: {
+      flexDirection: "row",
+      gap: Spacing.sm,
+    },
+
+    noContributors: {
+      fontFamily: FontFamily.regular,
+      fontSize: FontSize.label,
+      color: colors.textMuted,
+    },
+
+    contributorCount: {
+      fontFamily: FontFamily.medium,
+      fontSize: FontSize.label,
       color: colors.textSecondary,
     },
 
@@ -876,7 +890,7 @@ function buildStyles(
       alignItems: "center",
       justifyContent: "center",
       gap: Spacing.sm,
-      height: 40,
+      height: 44,
       borderRadius: Radius.md,
     },
 
@@ -886,7 +900,7 @@ function buildStyles(
     },
 
     actionButtonOutline: {
-      borderWidth: 1,
+      borderWidth: BorderWidth.normal,
       borderColor: colors.border,
       backgroundColor: colors.surface,
     },
@@ -939,7 +953,7 @@ function buildStyles(
     },
 
     skeleton: {
-      borderRadius: 4,
+      borderRadius: Radius.sm,
       backgroundColor: colors.surfaceSecondary,
     },
 
