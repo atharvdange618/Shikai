@@ -13,6 +13,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { BranchSelector } from "@/components/repo/BranchSelector";
 import { SearchBar } from "@/components/shared/SearchBar";
 import {
   DarkColors,
@@ -21,7 +22,7 @@ import {
   LightColors,
   Spacing,
 } from "@/constants/theme";
-import { useFileTree, useRepo } from "@/hooks/useRepoDetails";
+import { useBranches, useFileTree, useRepo } from "@/hooks/useRepoDetails";
 import { prefetchCommonFiles, prefetchFileContent } from "@/lib/prefetch";
 import type { GitHubTreeItem } from "@/types/github.types";
 
@@ -156,9 +157,20 @@ export default function FileExplorerScreen() {
   const [owner, repoName] = (repoId ?? "").split("__");
   const [expandedPaths, setExpandedPaths] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedBranch, setSelectedBranch] = useState("");
   const commonFilesPrefetched = useRef(false);
 
   const { data: repo } = useRepo(owner, repoName);
+  const { data: branches, isLoading: branchesLoading } = useBranches(
+    owner,
+    repoName,
+  );
+
+  useEffect(() => {
+    if (repo?.default_branch && !selectedBranch) {
+      setSelectedBranch(repo.default_branch);
+    }
+  }, [repo?.default_branch, selectedBranch]);
 
   useEffect(() => {
     try {
@@ -174,7 +186,7 @@ export default function FileExplorerScreen() {
   const { data: fileTreeData, isLoading } = useFileTree(
     owner,
     repoName,
-    repo?.default_branch ?? "",
+    selectedBranch,
     true,
   );
 
@@ -288,6 +300,17 @@ export default function FileExplorerScreen() {
 
   return (
     <SafeAreaView style={s.container} edges={["bottom"]}>
+      <BranchSelector
+        branches={branches ?? []}
+        selectedBranch={selectedBranch}
+        onBranchChange={(branch) => {
+          setSelectedBranch(branch);
+          setExpandedPaths(new Set());
+          setSearchQuery("");
+          commonFilesPrefetched.current = false;
+        }}
+        isLoading={branchesLoading}
+      />
       {isLoading ? (
         <View style={s.loadingContainer}>
           <ActivityIndicator color={colors.accent} />
