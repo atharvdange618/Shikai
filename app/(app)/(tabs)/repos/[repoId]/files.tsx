@@ -13,6 +13,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { SearchBar } from "@/components/shared/SearchBar";
 import {
   DarkColors,
   FontFamily,
@@ -77,12 +78,14 @@ const TreeItem = memo(function TreeItem({
   onFileSelect,
   onFilePressIn,
   colors,
+  searchMode,
 }: {
   item: FlatTreeItem;
   onToggle: (path: string) => void;
   onFileSelect: (path: string) => void;
   onFilePressIn?: (path: string) => void;
   colors: typeof LightColors | typeof DarkColors;
+  searchMode?: boolean;
 }) {
   const { node, depth, isExpanded } = item;
   const isDir = node.type === "tree";
@@ -104,7 +107,7 @@ const TreeItem = memo(function TreeItem({
         if (!isDir && onFilePressIn) onFilePressIn(node.path);
       }}
     >
-      {isDir && (
+      {isDir && !searchMode && (
         <Octicons
           name={isExpanded ? "chevron-down" : "chevron-right"}
           size={12}
@@ -114,15 +117,17 @@ const TreeItem = memo(function TreeItem({
 
       <Octicons
         name={
-          isDir
-            ? isExpanded
-              ? "file-directory-open-fill"
-              : "file-directory-fill"
-            : "file"
+          searchMode
+            ? "file"
+            : isDir
+              ? isExpanded
+                ? "file-directory-open-fill"
+                : "file-directory-fill"
+              : "file"
         }
         size={14}
-        color={isDir ? colors.star : colors.textSecondary}
-        style={!isDir ? { marginLeft: 12 } : undefined}
+        color={isDir && !searchMode ? colors.star : colors.textSecondary}
+        style={!isDir || searchMode ? { marginLeft: 12 } : undefined}
       />
 
       <Text
@@ -134,7 +139,7 @@ const TreeItem = memo(function TreeItem({
         }}
         numberOfLines={1}
       >
-        {node.name}
+        {searchMode ? node.path : node.name}
       </Text>
     </Pressable>
   );
@@ -150,6 +155,7 @@ export default function FileExplorerScreen() {
 
   const [owner, repoName] = (repoId ?? "").split("__");
   const [expandedPaths, setExpandedPaths] = useState<Set<string>>(new Set());
+  const [searchQuery, setSearchQuery] = useState("");
   const commonFilesPrefetched = useRef(false);
 
   const { data: repo } = useRepo(owner, repoName);
@@ -237,6 +243,28 @@ export default function FileExplorerScreen() {
     return result;
   }, [tree, expandedPaths]);
 
+  const displayTree = useMemo(() => {
+    if (searchQuery.length === 0) return flattenedTree;
+
+    const query = searchQuery.toLowerCase();
+    const results: FlatTreeItem[] = [];
+
+    function traverse(nodes: TreeNode[]) {
+      for (const node of nodes) {
+        if (
+          node.name.toLowerCase().includes(query) ||
+          node.path.toLowerCase().includes(query)
+        ) {
+          results.push({ node, depth: 0, isExpanded: false });
+        }
+        if (node.children) traverse(node.children);
+      }
+    }
+
+    traverse(tree);
+    return results;
+  }, [tree, flattenedTree, searchQuery]);
+
   const renderItem = useCallback(
     ({ item }: { item: FlatTreeItem }) => (
       <TreeItem
@@ -245,9 +273,10 @@ export default function FileExplorerScreen() {
         onFileSelect={handleFileSelect}
         onFilePressIn={handleFilePressIn}
         colors={colors}
+        searchMode={searchQuery.length > 0}
       />
     ),
-    [toggleFolder, handleFileSelect, handleFilePressIn, colors],
+    [toggleFolder, handleFileSelect, handleFilePressIn, colors, searchQuery],
   );
 
   const getItemType = useCallback(
@@ -268,9 +297,15 @@ export default function FileExplorerScreen() {
         <View style={s.loadingContainer}>
           <Text style={s.loadingText}>No files found</Text>
         </View>
+      ) : displayTree.length === 0 ? (
+        <View style={s.loadingContainer}>
+          <Text style={s.loadingText}>
+            No results for &ldquo;{searchQuery}&rdquo;
+          </Text>
+        </View>
       ) : (
         <FlashList
-          data={flattenedTree}
+          data={displayTree}
           renderItem={renderItem}
           getItemType={getItemType}
           keyExtractor={(item) => item.node.path}
@@ -278,6 +313,21 @@ export default function FileExplorerScreen() {
           contentContainerStyle={{
             paddingBottom: Spacing.lg,
           }}
+          ListHeaderComponent={
+            <View
+              style={{
+                paddingHorizontal: Spacing.md,
+                paddingTop: Spacing.sm,
+                paddingBottom: Spacing.xs,
+              }}
+            >
+              <SearchBar
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+                placeholder="Search files…"
+              />
+            </View>
+          }
         />
       )}
     </SafeAreaView>
