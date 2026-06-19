@@ -29,6 +29,7 @@ SplashScreen.preventAutoHideAsync();
 setupFocusManager();
 
 export default function RootLayout() {
+  const token = useAuthStore((s) => s.token);
   const setToken = useAuthStore((s) => s.setToken);
   const setUser = useAuthStore((s) => s.setUser);
   const scheme = useColorScheme();
@@ -155,8 +156,11 @@ export default function RootLayout() {
       )}
       {!showSplash && securityStatus === "passed" && (
         <Stack screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="sign-in" />
-          <Stack.Screen name="(app)" />
+          {token ? (
+            <Stack.Screen name="(app)" />
+          ) : (
+            <Stack.Screen name="sign-in" />
+          )}
         </Stack>
       )}
     </QueryClientProvider>
