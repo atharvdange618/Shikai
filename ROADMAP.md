@@ -2,40 +2,45 @@
 
 This document outlines the planned and proposed features for Shikai, categorized by impact and priority.
 
-## High-Impact Additions
+## Completed
 
-### 1. Global Search
+- [x] **Prefetch Implementation** - Custom prefetch system in `lib/prefetch.ts` with `usePrefetchOnPress` hook, used across 8+ screens for speculative data loading.
+- [x] **File Tree Search** - `SearchBar` in `app/(app)/(tabs)/repos/[repoId]/files.tsx` filters the flattened file tree by name/path.
+- [x] **Contribution Stats Summary** - `useContributions` hook computes streaks and most active day; displayed via `ContributionStatsRow` on the Overview tab.
+- [x] **Repo Health Badges** - `getHealthBadges()` in repo detail screen flags missing License, Topics, README, and stale repos (>90 days). Warning/danger pill badges in title row.
 
-- **Description:** A dedicated search tab or command palette.
-- **Scope:** Search across repositories, lookup other users, starred repos, issues, and PRs from a single entry point.
+## Partially Done
 
-### 2. In-App Repo README Preview (currently dropped because of complexity)
-
-- **Description:** Render README markdown directly inside the app.
-- **Scope:** Currently, repo details link to README on GitHub. Moving this in-app makes the experience feel complete.
-
-### 3. Saved / Watchlist Repositories
-
-- **Description:** Locally pinned repositories independent of GitHub's pinned repos.
-- **Scope:** Allow users to "save" repos they care about. This stays local (no GitHub write ops).
-
-### 4. Notifications-Lite / Attention Feed
-
-- **Description:** A feed for items needing immediate attention.
-- **Scope:** Show open PRs, open issues, stale repos, or recent mentions.
-
-### 5. Implement prefetch if it exists in expo and if it doesn't exist we will implement our own version prefetch
+- [ ] **Native Issue/PR Details** - Full list screens exist (`issues.tsx`, `pull-requests.tsx`) but tapping still opens external browser. Needs dedicated detail screens with comments/body.
+- [ ] **Share as Image/Link** - Share as text+link works on repo detail. No image generation, no profile sharing.
 
 ---
 
-## Smaller Features
+## Prioritized Backlog
 
-- **File Tree Search:** Filter `flattenedTree` in `app/(app)/(tabs)/repos/[repoId]/files.tsx`.
-- **Clone URL Support:** Add a "Copy Clone URL" button on the repo detail screen.
-- **Branch Selector:** Branch selector for the file tree and commits view.
-- **Native Issue/PR Details:** Dedicated detail screens for Issues/PRs instead of external links.
-- **Contribution Stats Summary:** Show current streak, best day, and most active weekday.
-- **Repo Health Badges:** Visual indicators for missing License, Topics, README, or Stale status.
-- **Share as Image/Link:** Share profile or repo cards as generated images or deep links.
+### Tier 1 - Quick Wins (< 1 hour each)
+
+_(All complete!)_
+
+### Tier 2 - Medium Features (1-3 hours each)
+
+1. **Branch Selector** - Branch picker for file tree and commits views. Needs branch list API call + dropdown UI. ~150 LOC.
+2. **Native Issue Detail Screen** - Detail view with markdown body + comments for individual issues. ~200 LOC.
+3. **Native PR Detail Screen** - Same pattern as issues, can reuse comment components. ~200 LOC.
+4. **Saved/Watchlist Repos** - Local save via AsyncStorage + save button on repo cards + dedicated list screen. ~150 LOC.
+
+### Tier 3 - Large Features (3+ hours each)
+
+5. **Global Search** - New search tab, GitHub search API integration, result cards for repos/users/issues/PRs. ~400 LOC.
+6. **Notifications-Lite / Attention Feed** - GitHub notifications API, attention-worthy items logic, new screen. ~300 LOC.
+7. **In-App README Preview** - Needs markdown rendering library, README fetch + render component. ~200 LOC.
+8. **Share as Image** - `react-native-view-shot` card capture, image generation for repos/profiles. ~150 LOC.
 
 ---
+
+## Not Started
+
+- Global Search (#5)
+- In-App README Preview (#7)
+- Saved / Watchlist Repositories (#4)
+- Notifications-Lite / Attention Feed (#6)

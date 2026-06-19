@@ -50,6 +50,49 @@ function formatBytes(bytes: number): string {
   return `${(bytes / 1048576).toFixed(1)} MB`;
 }
 
+type HealthBadge = { label: string; icon: string; color: "warning" | "danger" };
+
+function getHealthBadges(
+  repo:
+    | {
+        license: { spdx_id: string } | null;
+        topics: string[];
+        pushed_at: string;
+      }
+    | undefined,
+  readme: string | undefined,
+  isLoading: boolean,
+): HealthBadge[] {
+  if (isLoading || !repo) return [];
+  const badges: HealthBadge[] = [];
+
+  if (!repo.license || repo.license.spdx_id === "NOASSERTION") {
+    badges.push({ label: "No license", icon: "law", color: "warning" });
+  }
+  if (repo.topics.length === 0) {
+    badges.push({ label: "No topics", icon: "tag", color: "warning" });
+  }
+  if (readme === undefined) {
+    badges.push({
+      label: "No README",
+      icon: "file-directory",
+      color: "warning",
+    });
+  }
+
+  const daysSincePush =
+    (Date.now() - new Date(repo.pushed_at).getTime()) / 86_400_000;
+  if (daysSincePush > 90) {
+    badges.push({
+      label: "Stale",
+      icon: "alert",
+      color: daysSincePush > 180 ? "danger" : "warning",
+    });
+  }
+
+  return badges;
+}
+
 export default function RepoDetailsScreen() {
   const { repoId } = useLocalSearchParams<{ repoId: string }>();
   const navigation = useNavigation();
@@ -70,6 +113,7 @@ export default function RepoDetailsScreen() {
     lastCommit,
     issuesPRStats,
     contributors,
+    readme,
     isLoading,
     isError,
     error,
@@ -234,6 +278,41 @@ export default function RepoDetailsScreen() {
                 </View>
               )}
             </View>
+            {getHealthBadges(repo, readme, isLoading.core).length > 0 && (
+              <View style={s.healthBadgeRow}>
+                {getHealthBadges(repo, readme, isLoading.core).map((badge) => {
+                  const isD = badge.color === "danger";
+                  const badgeColor = isD ? colors.danger : colors.warning;
+                  const badgeBg = isD
+                    ? colors.dangerSubtle
+                    : colors.warningSubtle;
+                  return (
+                    <View
+                      key={badge.label}
+                      style={[
+                        s.healthBadge,
+                        { backgroundColor: badgeBg, borderColor: badgeColor },
+                      ]}
+                    >
+                      <View
+                        style={[
+                          s.healthBadgeDot,
+                          { backgroundColor: badgeColor },
+                        ]}
+                      />
+                      <Octicons
+                        name={badge.icon as any}
+                        size={11}
+                        color={badgeColor}
+                      />
+                      <Text style={[s.healthBadgeText, { color: badgeColor }]}>
+                        {badge.label}
+                      </Text>
+                    </View>
+                  );
+                })}
+              </View>
+            )}
 
             {repo?.description && (
               <Text style={s.description} numberOfLines={3} selectable>
@@ -686,6 +765,8 @@ function buildStyles(
     },
 
     badge: {
+      flexDirection: "row",
+      alignItems: "center",
       borderRadius: Radius.full,
       paddingHorizontal: Spacing.sm,
       paddingVertical: 3,
@@ -695,6 +776,34 @@ function buildStyles(
     badgeText: {
       fontFamily: FontFamily.medium,
       fontSize: 10,
+    },
+
+    healthBadgeRow: {
+      flexDirection: "row",
+      flexWrap: "wrap",
+      gap: Spacing.xs,
+      marginTop: 2,
+    },
+
+    healthBadge: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 5,
+      borderRadius: Radius.md,
+      paddingHorizontal: Spacing.sm,
+      paddingVertical: 5,
+      borderWidth: BorderWidth.normal,
+    },
+
+    healthBadgeDot: {
+      width: 6,
+      height: 6,
+      borderRadius: 3,
+    },
+
+    healthBadgeText: {
+      fontFamily: FontFamily.medium,
+      fontSize: FontSize.caption,
     },
 
     description: {
