@@ -52,6 +52,7 @@ export default function OverviewScreen() {
   const {
     weeks,
     totalContributions,
+    stats,
     isLoading: contribLoading,
   } = useContributions();
   const {
@@ -161,6 +162,7 @@ export default function OverviewScreen() {
             weeks={weeks}
             totalContributions={totalContributions}
             isLoading={contribLoading}
+            stats={stats}
           />
         </View>
 
