@@ -54,8 +54,10 @@ export const queryKeys = {
     ["repo", owner, repo, "lastCommit"] as const,
   repoContributors: (owner: string, repo: string) =>
     ["repo", owner, repo, "contributors"] as const,
-  repoFileTree: (owner: string, repo: string) =>
-    ["repo", owner, repo, "tree"] as const,
+  repoFileTree: (owner: string, repo: string, branch: string) =>
+    ["repo", owner, repo, "tree", branch] as const,
+  repoBranches: (owner: string, repo: string) =>
+    ["repo", owner, repo, "branches"] as const,
   repoFile: (owner: string, repo: string, path: string) =>
     ["repo", owner, repo, "file", path] as const,
   repoReadme: (owner: string, repo: string) =>

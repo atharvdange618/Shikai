@@ -78,7 +78,7 @@ export function prefetchFileTree(
 
   if (defaultBranch) {
     queryClient.prefetchQuery({
-      queryKey: queryKeys.repoFileTree(owner, repo),
+      queryKey: queryKeys.repoFileTree(owner, repo, defaultBranch),
       queryFn: () => fetchFileTree(owner, repo, defaultBranch),
       staleTime: 1000 * 60 * 15,
     });
@@ -95,7 +95,11 @@ export function prefetchFileTree(
         );
         if (updatedRepo?.default_branch) {
           queryClient.prefetchQuery({
-            queryKey: queryKeys.repoFileTree(owner, repo),
+            queryKey: queryKeys.repoFileTree(
+              owner,
+              repo,
+              updatedRepo.default_branch,
+            ),
             queryFn: () =>
               fetchFileTree(owner, repo, updatedRepo.default_branch),
             staleTime: 1000 * 60 * 15,

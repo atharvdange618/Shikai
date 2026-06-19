@@ -191,6 +191,12 @@ export interface GitHubSocialAccount {
 
 export type SocialAccountProvider = "linkedin" | "twitter" | "generic";
 
+export interface GitHubBranch {
+  name: string;
+  commit: { sha: string };
+  protected: boolean;
+}
+
 export interface GitHubLabel {
   id: number;
   name: string;

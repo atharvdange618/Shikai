@@ -1,5 +1,6 @@
 import { githubAxios } from "@/lib/axios";
 import type {
+  GitHubBranch,
   GitHubCommit,
   GitHubContent,
   GitHubContributor,
@@ -143,6 +144,17 @@ export async function fetchRepo(
   return data;
 }
 
+export async function fetchBranches(
+  owner: string,
+  repo: string,
+): Promise<GitHubBranch[]> {
+  const { data } = await githubAxios.get<GitHubBranch[]>(
+    `/repos/${owner}/${repo}/branches`,
+    { params: { per_page: 100 } },
+  );
+  return data;
+}
+
 export async function fetchLanguages(
   owner: string,
   repo: string,
@@ -163,10 +175,11 @@ export async function fetchCommits(
   repo: string,
   page: number,
   per_page: number = 10,
+  branch?: string,
 ): Promise<FetchCommitsResult> {
   const { data, headers } = await githubAxios.get<GitHubCommit[]>(
     `/repos/${owner}/${repo}/commits`,
-    { params: { page, per_page } },
+    { params: { page, per_page, sha: branch } },
   );
 
   return {

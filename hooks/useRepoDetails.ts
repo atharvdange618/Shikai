@@ -9,6 +9,7 @@
 
 import { fetchCommitCount, fetchRepoIssuesPRStats } from "@/lib/github-graphql";
 import {
+  fetchBranches,
   fetchCommits,
   fetchContributors,
   fetchFileContent,
@@ -90,11 +91,12 @@ export function useLastCommit(owner: string, repo: string) {
   );
 }
 
-export function useCommits(owner: string, repo: string) {
+export function useCommits(owner: string, repo: string, branch?: string) {
   const query = useInfiniteQuery({
     queryKey: queryKeys.repoCommits(owner, repo),
 
-    queryFn: ({ pageParam }) => fetchCommits(owner, repo, pageParam, PER_PAGE),
+    queryFn: ({ pageParam }) =>
+      fetchCommits(owner, repo, pageParam, PER_PAGE, branch),
 
     initialPageParam: 1,
     getNextPageParam: (lastPage) => lastPage.pagination.next ?? undefined,
@@ -134,10 +136,21 @@ export function useFileTree(
 ) {
   return useQuery(
     queryOptions({
-      queryKey: queryKeys.repoFileTree(owner, repo),
+      queryKey: queryKeys.repoFileTree(owner, repo, branch),
       queryFn: () => fetchFileTree(owner, repo, branch),
       enabled: Boolean(owner && repo && branch && open),
       staleTime: 1000 * 60 * 15,
+    }),
+  );
+}
+
+export function useBranches(owner: string, repo: string) {
+  return useQuery(
+    queryOptions({
+      queryKey: queryKeys.repoBranches(owner, repo),
+      queryFn: () => fetchBranches(owner, repo),
+      enabled: Boolean(owner && repo),
+      staleTime: 1000 * 60 * 10,
     }),
   );
 }
