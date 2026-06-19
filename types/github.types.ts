@@ -31,6 +31,7 @@ export interface GitHubRepo {
   fork: boolean;
   html_url: string;
   clone_url: string;
+  ssh_url: string;
   homepage: string | null;
 
   stargazers_count: number;
