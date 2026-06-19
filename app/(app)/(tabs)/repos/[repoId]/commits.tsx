@@ -4,7 +4,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import * as Clipboard from "expo-clipboard";
 import { Image } from "expo-image";
 import { useLocalSearchParams } from "expo-router";
-import { memo, useCallback, useMemo, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useState } from "react";
 
 import {
   ActivityIndicator,
@@ -16,10 +16,11 @@ import {
   View,
 } from "react-native";
 
-import { useCommits } from "@/hooks/useRepoDetails";
+import { useBranches, useCommits, useRepo } from "@/hooks/useRepoDetails";
 import { queryKeys } from "@/lib/query-client";
 import type { GitHubCommit } from "@/types/github.types";
 
+import { BranchSelector } from "@/components/repo/BranchSelector";
 import {
   AvatarSize,
   DarkColors,
@@ -41,6 +42,19 @@ export default function CommitsScreen() {
   const shadows = useMemo(() => (isDark ? {} : Shadows.light.sm), [isDark]);
 
   const [owner, repoName] = (repoId ?? "").split("__");
+  const [selectedBranch, setSelectedBranch] = useState("");
+
+  const { data: repo } = useRepo(owner, repoName);
+  const { data: branches, isLoading: branchesLoading } = useBranches(
+    owner,
+    repoName,
+  );
+
+  useEffect(() => {
+    if (repo?.default_branch && !selectedBranch) {
+      setSelectedBranch(repo.default_branch);
+    }
+  }, [repo?.default_branch, selectedBranch]);
 
   const {
     commits,
@@ -50,7 +64,7 @@ export default function CommitsScreen() {
     isLoading,
     isError,
     refetch,
-  } = useCommits(owner, repoName);
+  } = useCommits(owner, repoName, selectedBranch);
 
   const [refreshing, setRefreshing] = useState(false);
 
@@ -97,6 +111,14 @@ export default function CommitsScreen() {
 
   return (
     <View style={s.container}>
+      <BranchSelector
+        branches={branches ?? []}
+        selectedBranch={selectedBranch}
+        onBranchChange={(branch) => {
+          setSelectedBranch(branch);
+        }}
+        isLoading={branchesLoading}
+      />
       <FlashList
         data={commits}
         renderItem={renderItem}
