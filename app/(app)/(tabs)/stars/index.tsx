@@ -168,7 +168,7 @@ export default function StarsScreen() {
         )}
       </View>
     );
-  }, [isLoading, isError, search, s]);
+  },     [isLoading, isError, search, s, colors.accent]);
 
   const ListFooter = useMemo(
     () =>
