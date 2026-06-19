@@ -63,5 +63,20 @@
     "typescript": "~5.9.2",
     "wrangler": "^4.88.0"
   },
-  "private": true
+  "overrides": {
+    "react-native": "0.81.5"
+  },
+  "private": true,
+  "allowScripts": {
+    "browser-tabs-lock@1.3.0": true,
+    "core-js@2.6.12": true,
+    "core-js@3.47.0": true,
+    "esbuild@0.27.3": true,
+    "esbuild@0.28.1": true,
+    "sharp@0.34.5": true,
+    "unrs-resolver@1.11.1": true,
+    "workerd@1.20260504.1": true,
+    "workerd@1.20260617.1": true,
+    "@clerk/shared@4.10.0": true
+  }
 }
