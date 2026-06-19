@@ -133,6 +133,47 @@ export default function RepoDetailsScreen() {
     }
   }, [repo?.name, navigation]);
 
+  // When arriving from a different tab (e.g. Overview pinned repos), there is no
+  // screen beneath this one in the repos Stack, so the native back button never
+  // appears. Detect this on mount and inject a manual "Repos" back button.
+  useEffect(() => {
+    if (navigation.canGoBack()) return;
+    try {
+      navigation.setOptions({
+        headerLeft: () => (
+          <Pressable
+            onPress={() => router.replace("/(app)/(tabs)/repos" as any)}
+            hitSlop={8}
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 4,
+              paddingRight: 8,
+            }}
+          >
+            <Octicons
+              name="chevron-left"
+              size={IconSize.md}
+              color={colors.accent}
+            />
+            <Text
+              style={{
+                fontFamily: FontFamily.regular,
+                fontSize: FontSize.body,
+                color: colors.accent,
+              }}
+            >
+              Repos
+            </Text>
+          </Pressable>
+        ),
+      });
+    } catch {
+      /* navigator not ready yet */
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   useEffect(() => {
     if (!isLoading.core) return;
     const timer = setTimeout(() => refetch(), 10_000);
