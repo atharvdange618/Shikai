@@ -1,4 +1,5 @@
 import { Octicons } from "@expo/vector-icons";
+import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import Constants from "expo-constants";
 import { Image } from "expo-image";
 import { useMemo } from "react";
@@ -23,9 +24,49 @@ import {
   Shadows,
   Spacing,
 } from "@/constants/theme";
-import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 
 const APP_VERSION = Constants.expoConfig?.version ?? "1.0.0";
+
+const FEATURES = [
+  { icon: "repo" as const, text: "Browse repos, files, and branches" },
+  { icon: "graph" as const, text: "Contribution graphs and streaks" },
+  { icon: "heart" as const, text: "Starred repos with search and filter" },
+  { icon: "bell" as const, text: "Issues and pull requests" },
+  { icon: "history" as const, text: "Commit history per branch" },
+  {
+    icon: "mark-github" as const,
+    text: "Read-only \u00B7 No data leaves your device",
+  },
+];
+
+const CREDITS = [
+  { name: "Expo", url: "https://expo.dev", desc: "React Native toolchain" },
+  {
+    name: "FlashList",
+    url: "https://shopify.github.io/flash-list/",
+    desc: "High-performance virtualized lists",
+  },
+  {
+    name: "React Query",
+    url: "https://tanstack.com/query",
+    desc: "Server state management",
+  },
+  {
+    name: "Zustand",
+    url: "https://zustand-demo.pmnd.rs",
+    desc: "Lightweight state management",
+  },
+  {
+    name: "Reanimated",
+    url: "https://docs.swmansion.com/react-native-reanimated/",
+    desc: "Fluid animations",
+  },
+  {
+    name: "Prism Highlighter",
+    url: "https://github.com/react-syntax-highlighter/react-syntax-highlighter",
+    desc: "Syntax highlighting",
+  },
+];
 
 export default function AboutScreen() {
   const isDark = useColorScheme() === "dark";
@@ -54,79 +95,125 @@ export default function AboutScreen() {
         </View>
       </View>
 
-      <View style={s.sectionGroup}>
-        <Text style={s.sectionTitle}>About Me</Text>
-        <View style={s.card}>
-          <View style={s.devBlock}>
-            <Image
-              source={{ uri: "https://github.com/atharvdange618.png" }}
-              style={s.devAvatar}
-              contentFit="cover"
-              transition={200}
-            />
-            <View style={s.devInfo}>
-              <Text style={s.devName}>Atharv Dange</Text>
-              <Text style={s.devHandle}>@atharvdangedev</Text>
-            </View>
+      <View style={s.card}>
+        <Text style={s.cardTitle}>Features</Text>
+        {FEATURES.map((f, i) => (
+          <View key={i} style={s.featureRow}>
+            <View style={s.featureDot} />
+            <Text style={s.featureText}>{f.text}</Text>
           </View>
-          <View style={s.divider} />
-          <Text style={s.bodyText}>
-            I&apos;m full-stack engineer who loves building tools/products that
-            make my life as a dev easier. I created Shikai to provide a
-            beautiful mobile experience for GitHub users.
-          </Text>
-          <View style={s.divider} />
-          <Pressable
-            style={({ pressed }) => [s.linkRow, pressed && { opacity: 0.7 }]}
-            onPress={() => Linking.openURL("https://github.com/atharvdange618")}
-          >
-            <Octicons
-              name="mark-github"
-              size={IconSize.sm}
-              color={colors.accent}
-            />
-            <Text style={s.linkText}>atharvdange618</Text>
-            <Octicons name="link-external" size={12} color={colors.textMuted} />
-          </Pressable>
-          <Pressable
-            style={({ pressed }) => [s.linkRow, pressed && { opacity: 0.7 }]}
-            onPress={() => Linking.openURL("https://x.com/atharvdangedev")}
-          >
-            <FontAwesome6
-              name="x-twitter"
-              size={IconSize.sm}
-              color={colors.accent}
-            />
-            <Text style={s.linkText}>atharvdangedev</Text>
-            <Octicons name="link-external" size={12} color={colors.textMuted} />
-          </Pressable>
-        </View>
+        ))}
       </View>
 
-      <View style={s.sectionGroup}>
-        <Text style={s.sectionTitle}>About the App</Text>
-        <View style={s.card}>
-          <Text style={s.bodyText}>
-            Shikai brings GitHub&apos;s web experience to mobile. The official
-            GitHub app is great for reviews and issues, but it&apos;s missing
-            the web features developers love.
-          </Text>
-          <View style={s.divider} />
-          <Text style={s.bodyText}>
-            Pinned repositories, contribution graphs, recent activity - these
-            make GitHub&apos;s web version so useful. Shikai delivers that same
-            experience, beautifully crafted for mobile.
-          </Text>
-          <View style={s.divider} />
+      <View style={s.card}>
+        <Text style={s.cardTitle}>About</Text>
+        <Text style={s.bodyText}>
+          Shikai brings GitHub&apos;s web experience to mobile. Pinned repos,
+          contribution graphs, recent activity, the features that make
+          GitHub&apos;s web version so useful, beautifully crafted for mobile.
+        </Text>
+        <View style={s.divider} />
+        <Text style={s.bodyText}>
+          Built by a developer who wanted a better way to check GitHub on the
+          go. Read-only by design, your data never leaves your device.
+        </Text>
+      </View>
+
+      <View style={s.card}>
+        <Text style={s.cardTitle}>Developer</Text>
+        <View style={s.devBlock}>
+          <Image
+            source={{ uri: "https://github.com/atharvdange618.png" }}
+            style={s.devAvatar}
+            contentFit="cover"
+            transition={200}
+          />
+          <View style={s.devInfo}>
+            <Text style={s.devName}>Atharv Dange</Text>
+            <Text style={s.devHandle}>@atharvdangedev</Text>
+          </View>
         </View>
+        <View style={s.divider} />
+        <Pressable
+          style={({ pressed }) => [s.linkRow, pressed && { opacity: 0.7 }]}
+          onPress={() => Linking.openURL("https://atharvdangedev.in")}
+        >
+          <Octicons name="globe" size={IconSize.sm} color={colors.accent} />
+          <Text style={s.linkText}>atharvdangedev.in</Text>
+          <Octicons name="link-external" size={12} color={colors.textMuted} />
+        </Pressable>
+        <Pressable
+          style={({ pressed }) => [s.linkRow, pressed && { opacity: 0.7 }]}
+          onPress={() => Linking.openURL("https://github.com/atharvdange618")}
+        >
+          <Octicons
+            name="mark-github"
+            size={IconSize.sm}
+            color={colors.accent}
+          />
+          <Text style={s.linkText}>atharvdange618</Text>
+          <Octicons name="link-external" size={12} color={colors.textMuted} />
+        </Pressable>
+        <Pressable
+          style={({ pressed }) => [s.linkRow, pressed && { opacity: 0.7 }]}
+          onPress={() => Linking.openURL("https://x.com/atharvdangedev")}
+        >
+          <FontAwesome6
+            name="x-twitter"
+            size={IconSize.sm}
+            color={colors.accent}
+          />
+          <Text style={s.linkText}>@atharvdangedev</Text>
+          <Octicons name="link-external" size={12} color={colors.textMuted} />
+        </Pressable>
+      </View>
+
+      <View style={s.card}>
+        <Text style={s.cardTitle}>Open Source</Text>
+        <Text style={s.bodyText}>
+          Shikai is open source. Found a bug or want to contribute? Check out
+          the repository on GitHub.
+        </Text>
+        <Pressable
+          style={({ pressed }) => [
+            s.openSourceButton,
+            pressed && { opacity: 0.7 },
+          ]}
+          onPress={() =>
+            Linking.openURL("https://github.com/atharvdange618/shikai")
+          }
+        >
+          <Octicons
+            name="mark-github"
+            size={IconSize.sm}
+            color={colors.textPrimary}
+          />
+          <Text style={s.openSourceButtonText}>View on GitHub</Text>
+          <Octicons name="link-external" size={12} color={colors.textMuted} />
+        </Pressable>
+      </View>
+
+      <View style={s.card}>
+        <Text style={s.cardTitle}>Credits</Text>
+        <Text style={[s.bodyText, { marginBottom: Spacing.xs }]}>
+          Built with these amazing open source libraries:
+        </Text>
+        {CREDITS.map((lib, i) => (
+          <Pressable
+            key={i}
+            style={({ pressed }) => [s.linkRow, pressed && { opacity: 0.7 }]}
+            onPress={() => Linking.openURL(lib.url)}
+          >
+            <Text style={s.creditName}>{lib.name}</Text>
+            <Text style={s.creditDesc}>{lib.desc}</Text>
+            <Octicons name="link-external" size={12} color={colors.textMuted} />
+          </Pressable>
+        ))}
       </View>
 
       <View style={s.footer}>
         <Text style={s.footerText}>
           Built with care for the developer community
-        </Text>
-        <Text style={s.footerSubtext}>
-          Read-only · No data leaves your device
         </Text>
       </View>
     </ScrollView>
@@ -147,12 +234,13 @@ function buildStyles(
       paddingHorizontal: Layout.screenPadding,
       paddingTop: Spacing.xl,
       paddingBottom: Spacing.xxl,
-      gap: Spacing.xl,
+      gap: Spacing.lg,
     },
 
     heroSection: {
       alignItems: "center",
       gap: Spacing.md,
+      paddingVertical: Spacing.xl,
     },
 
     logoImage: {
@@ -187,27 +275,21 @@ function buildStyles(
       color: colors.textMuted,
     },
 
-    sectionGroup: {
-      gap: Spacing.md,
-    },
-
-    sectionTitle: {
-      fontFamily: FontFamily.medium,
-      fontSize: FontSize.label,
-      color: colors.textMuted,
-      textTransform: "uppercase",
-      letterSpacing: 0.6,
-      paddingHorizontal: Spacing.xs,
-    },
-
     card: {
       backgroundColor: colors.surface,
       borderRadius: Radius.lg,
       borderWidth: 1,
       borderColor: colors.border,
       padding: Spacing.lg,
-      gap: Spacing.md,
+      gap: Spacing.sm,
       ...shadows,
+    },
+
+    cardTitle: {
+      fontFamily: FontFamily.semiBold,
+      fontSize: FontSize.title,
+      color: colors.textPrimary,
+      marginBottom: Spacing.xs,
     },
 
     bodyText: {
@@ -220,16 +302,21 @@ function buildStyles(
     divider: {
       height: StyleSheet.hairlineWidth,
       backgroundColor: colors.border,
+      marginVertical: Spacing.xs,
     },
 
-    featureList: {
-      gap: Spacing.sm,
+    featureRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: Spacing.md,
+      paddingVertical: 2,
     },
 
-    checkDot: {
+    featureDot: {
       width: 6,
       height: 6,
       borderRadius: 3,
+      backgroundColor: colors.accent,
     },
 
     featureText: {
@@ -237,14 +324,6 @@ function buildStyles(
       fontFamily: FontFamily.regular,
       fontSize: FontSize.body,
       color: colors.textSecondary,
-    },
-
-    sectionSubtitle: {
-      fontFamily: FontFamily.medium,
-      fontSize: FontSize.label,
-      color: colors.textMuted,
-      textTransform: "uppercase",
-      letterSpacing: 0.5,
     },
 
     devBlock: {
@@ -292,20 +371,45 @@ function buildStyles(
       color: colors.accent,
     },
 
-    footer: {
+    openSourceButton: {
+      flexDirection: "row",
       alignItems: "center",
+      justifyContent: "center",
       gap: Spacing.sm,
-      paddingTop: Spacing.xl,
+      backgroundColor: colors.surfaceSecondary,
+      borderRadius: Radius.md,
+      padding: Spacing.md,
+      marginTop: Spacing.xs,
     },
 
-    footerText: {
+    openSourceButtonText: {
       fontFamily: FontFamily.medium,
+      fontSize: FontSize.body,
+      color: colors.textPrimary,
+    },
+
+    creditName: {
+      fontFamily: FontFamily.medium,
+      fontSize: FontSize.body,
+      color: colors.accent,
+      minWidth: 120,
+    },
+
+    creditDesc: {
+      flex: 1,
+      fontFamily: FontFamily.regular,
       fontSize: FontSize.caption,
       color: colors.textMuted,
     },
 
-    footerSubtext: {
-      fontFamily: FontFamily.regular,
+    footer: {
+      alignItems: "center",
+      paddingTop: Spacing.md,
+      paddingBottom: Spacing.lg,
+    },
+
+    footerText: {
+      fontFamily: FontFamily.medium,
       fontSize: FontSize.caption,
       color: colors.textMuted,
     },
