@@ -155,19 +155,92 @@ export type GitHubEventType =
   | "PublicEvent"
   | "MemberEvent";
 
-export interface GitHubEvent {
-  id: string;
-  type: GitHubEventType;
-  actor: GitHubUserSummary;
-  repo: {
-    id: number;
-    name: string;
+interface PushEventPayload {
+  size: number;
+  ref: string;
+  head: string;
+  before: string;
+  commits: Array<{
+    sha: string;
+    message: string;
     url: string;
+    author: { name: string; email: string; username: string };
+  }>;
+}
+
+interface ForkEventPayload {
+  forkee: {
+    full_name: string;
+    html_url: string;
+    name: string;
+    owner: GitHubUserSummary;
   };
+}
+
+interface CreateEventPayload {
+  ref_type: "repository" | "branch" | "tag";
+  ref: string | null;
+  master_branch: string;
+}
+
+interface PullRequestEventPayload {
+  action: string;
+  pull_request: {
+    number: number;
+    merged: boolean;
+    html_url: string;
+    title: string;
+    user: GitHubUserSummary;
+  };
+}
+
+interface IssuesEventPayload {
+  action: string;
+  issue: {
+    number: number;
+    html_url: string;
+    title: string;
+    user: GitHubUserSummary;
+  };
+}
+
+interface ReleaseEventPayload {
+  action: string;
+  release: {
+    tag_name: string;
+    html_url: string;
+    name: string | null;
+  };
+}
+
+interface WatchEventPayload {
+  action: "started";
+}
+
+interface PublicEventPayload {}
+
+type KnownEventPayload =
+  | { type: "PushEvent"; payload: PushEventPayload }
+  | { type: "ForkEvent"; payload: ForkEventPayload }
+  | { type: "CreateEvent"; payload: CreateEventPayload }
+  | { type: "PullRequestEvent"; payload: PullRequestEventPayload }
+  | { type: "IssuesEvent"; payload: IssuesEventPayload }
+  | { type: "ReleaseEvent"; payload: ReleaseEventPayload }
+  | { type: "WatchEvent"; payload: WatchEventPayload }
+  | { type: "PublicEvent"; payload: PublicEventPayload };
+
+type UnknownEventPayload = {
+  type: Exclude<GitHubEventType, KnownEventPayload["type"]>;
   payload: Record<string, unknown>;
+};
+
+export type GitHubEvent = {
+  id: string;
+  actor: GitHubUserSummary;
+  repo: { id: number; name: string; url: string };
   public: boolean;
   created_at: string;
-}
+} & (KnownEventPayload | UnknownEventPayload);
 
 export interface GitHubPagination {
   next?: number;
