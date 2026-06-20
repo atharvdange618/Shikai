@@ -2,10 +2,10 @@
  * lib/query-client.ts
  *
  * staleTime decisions:
- *   5 min  - repos, stars (change occasionally)
- *   10 min - user profile, contributors (very stable)
- *   15 min - contribution graph, pinned repos (changes rarely)
- *   1 min  - commits, events (most likely to be fresh)
+ *   5 min   - repos, stars (change occasionally)
+ *   30 min  - user profile, social accounts, repo count (very stable)
+ *   15 min  - contribution graph, pinned repos (changes rarely)
+ *   1 min   - commits, events (most likely to be fresh)
  */
 
 import { GitHubApiError } from "@/lib/axios";
@@ -72,4 +72,5 @@ export const queryKeys = {
     ["repo", owner, repo, "pullRequests", state] as const,
   recentActivity: () => ["recentActivity"] as const,
   socialAccounts: () => ["socialAccounts"] as const,
+  repoCount: () => ["repoCount"] as const,
 } as const;

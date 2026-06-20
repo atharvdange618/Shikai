@@ -6,6 +6,6 @@ export function useSocialAccounts() {
   return useQuery({
     queryKey: queryKeys.socialAccounts(),
     queryFn: fetchSocialAccounts,
-    staleTime: 1000 * 60 * 10,
+    staleTime: 1000 * 60 * 30,
   });
 }
