@@ -34,7 +34,7 @@ const FEATURES = [
   { icon: "bell" as const, text: "Issues and pull requests" },
   { icon: "history" as const, text: "Commit history per branch" },
   {
-    icon: "mark-github" as const,
+    icon: "lock" as const,
     text: "Read-only \u00B7 No data leaves your device",
   },
 ];
