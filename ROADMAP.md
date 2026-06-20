@@ -33,19 +33,25 @@ _(All complete!)_
 1. **Native Issue Detail Screen** - Detail view with markdown body + comments for individual issues. ~200 LOC.
 2. **Native PR Detail Screen** - Same pattern as issues, can reuse comment components. ~200 LOC.
 3. **Saved/Watchlist Repos** - Local save via AsyncStorage + save button on repo cards + dedicated list screen. ~150 LOC.
+4. **User Profile Screen** - View any GitHub user's profile (repos, contributions, bio). Tappable from starred repo headers, contributor lists, etc. Reuses existing profile layout patterns. ~250 LOC.
 
 ### Tier 3 - Large Features (3+ hours each)
 
-4. **Global Search** - New search tab, GitHub search API integration, result cards for repos/users/issues/PRs. ~400 LOC.
-5. **Notifications-Lite / Attention Feed** - GitHub notifications API, attention-worthy items logic, new screen. ~300 LOC.
-6. **In-App README Preview** - Needs markdown rendering library, README fetch + render component. ~200 LOC.
-7. **Share as Image** - `react-native-view-shot` card capture, image generation for repos/profiles. ~150 LOC.
+5. **Global Search** - New search tab, GitHub search API integration, result cards for repos/users/issues/PRs. ~400 LOC.
+6. **Notifications-Lite / Attention Feed** - GitHub notifications API, attention-worthy items logic, new screen. ~300 LOC.
+7. **In-App README Preview** - Needs markdown rendering library, README fetch + render component. ~200 LOC.
+8. **Share as Image** - `react-native-view-shot` card capture, image generation for repos/profiles. ~150 LOC.
+9. **Explore Tab / User Discovery** - New tab for searching and discovering GitHub users. User cards with repo count, followers, bio. ~350 LOC.
+10. **Following Activity Feed** - Dashboard-style feed showing recent activity from users you follow on GitHub. ~300 LOC.
 
 ---
 
 ## Not Started
 
-- Global Search (#4)
-- In-App README Preview (#6)
+- Global Search (#5)
+- In-App README Preview (#7)
 - Saved / Watchlist Repositories (#3)
-- Notifications-Lite / Attention Feed (#5)
+- Notifications-Lite / Attention Feed (#6)
+- User Profile Screen (#4)
+- Explore Tab / User Discovery (#9)
+- Following Activity Feed (#10)
