@@ -1,97 +1,69 @@
 # Shikai
 
-> **視界** - Your GitHub profile, refined and always in your pocket.
+**Your GitHub profile, refined and always in your pocket.**
 
-Shikai is an elegantly designed, mobile-first GitHub companion for developers who value clarity and sophistication. It's a read-only dashboard that gives you a beautiful, distraction-free view of your repositories, contributions, and activity-all with a refined aesthetic that feels at home on your device.
-
----
-
-## v1.1.0 Released
-
-Following the successful launch of v1.0, Shikai v1.1.0 introduces enhanced performance with a new three-layer prefetch architecture, robust app security hardening (detecting rooted devices and debuggers), and a smooth, fully secure GitHub OAuth authentication flow.
+> **視界** - "field of vision" in Japanese. See what matters - your work, your progress, your impact - without distractions.
 
 ---
 
-## Why Shikai?
+GitHub is where you build your career. But the mobile experience is built for _work_ - reviewing PRs, responding to issues, managing projects. What about when you just want to _check in_?
 
-GitHub's mobile experience is built for doing work: reviewing PRs, responding to issues, managing projects. But sometimes you just want to _check in_-see how your repos are doing, admire your contribution streak, or share your profile with someone at a meetup.
-
-That's where Shikai comes in. No notifications. No write operations. No anxiety about accidentally merging something on a tiny screen. Just your GitHub data, presented clearly and beautifully.
-
-**The name:** _Shikai_ (視界) means "field of vision" in Japanese. It's about seeing what matters-your work, your progress, your impact-without distractions.
+Shikai is a read-only GitHub companion that shows you your GitHub data the way it deserves to be seen. No notifications. No write operations. No anxiety about accidentally merging something on a tiny screen. Just your repos, your contributions, and your activity - presented clearly and beautifully.
 
 ---
 
-## What You Can Do
+## Overview
 
-### **Overview Dashboard**
+Your dashboard at a glance. See pinned repos, browse your contribution graph, and catch up on recent activity - pushes, stars, forks, releases, PRs, and issues - all in one place. Tap any activity item to jump straight to the relevant repo.
 
-- See your contribution graph at a glance with the last 52 weeks of activity
-- Browse your pinned repositories with quick stats
-- Catch up on recent activity: pushes, stars, forks, releases, PRs, and issues
-- Tap on activity items to navigate directly to the relevant repo or details
+## Repositories
 
-### **Repositories**
+Browse all your repos with smart filters - by language, type, or sort order. Dive into any repo to explore its file tree, view files with syntax highlighting, browse commit history per branch, and track issues and pull requests with state filtering. Every detail, from contributor avatars to repo health badges (missing license, no topics, stale repos), is right where you need it.
 
-- View all your repos with smart filters (by language, type, or sort order)
-- Dive into repo details: stats, contributors, languages, topics
-- Explore the full file tree and view individual files (with image preview support)
-- Browse commit history with clean, readable formatting
-- Track issues with filtering by open/closed state, complete with labels and assignees
-- Monitor pull requests with merged/open/closed filters and review status
+## Stars
 
-### **Starred Repos**
+Keep tabs on the projects you've starred. Search, sort by recent activity or name, and quickly access the repos that inspire you. Same powerful filtering as your own repos.
 
-- Keep tabs on projects you've starred with the same powerful filtering as your repos
-- Sort by recently pushed, recently updated, creation date, or full name
-- Quick access to repos you care about
-- Search through your starred collection
+## Profile
 
-### **Profile**
-
-- Your GitHub profile card, always ready to share
-- Comprehensive stats: repos, followers, following, stars, contributions
-- Social accounts integration (Twitter, LinkedIn, personal website)
-- Quick access to settings
+Your GitHub card, always ready to share. See your stats - repos, followers, following - along with your social links, location, and hireable status. Perfect for meetups, interviews, or just admiring your streak.
 
 ---
 
-## Who Is This For?
-
-- **Developers who want a quick GitHub check** without opening a browser or laptop
-- **Students and learners** who want to track their coding progress and maintain their streak
-- **Open source contributors** who want to monitor their repos, stars, and community engagement
-- **Tech leads and maintainers** who need to keep an eye on issues and PRs across projects
-- **Anyone who's proud of their GitHub activity** and wants a beautiful way to view it throughout the day
-- **Developers in interviews or meetups** who want to quickly share their GitHub profile
-
----
-
-## Design Philosophy
+## Design
 
 Shikai is built around three principles:
 
-1. **Read-only by design** - No write operations means no accidental mistakes. This is your safe viewing space.
-2. **Mobile-first, native feel** - Smooth animations, thoughtful spacing, and a UI that feels at home on your phone.
-3. **Information at the right density** - Not too sparse, not overwhelming. Just enough detail to be useful, with deeper views when you need them.
+- **Read-only by design.** No write operations means no accidental mistakes. This is your safe viewing space.
+- **Mobile-first, native feel.** Smooth animations, haptic feedback, frosted glass tab bar on iOS, and a UI that feels at home on your phone.
+- **Information at the right density.** Not too sparse, not overwhelming. Just enough detail to be useful, with deeper views when you need them.
+
+The app supports light and dark themes - a warm, paper-like aesthetic in light mode and a GitHub-inspired dark palette in dark mode. Typography uses Inter for body text and JetBrains Mono for code.
 
 ---
 
-## Getting Started
+## Security
 
-### Sign In with GitHub
+Your token is handled via a secure Cloudflare Worker proxy and never leaves your device after the initial exchange. All subsequent API requests go directly from your phone to GitHub. The app detects rooted devices and debuggers to prevent usage on compromised environments. Tokens are encrypted on-device using `expo-secure-store`.
 
-Shikai uses GitHub OAuth to securely access your data. Here's how to get started:
-
-1. **Open the app** for the first time
-2. **Tap "Sign in with GitHub"** - you'll be redirected to GitHub's authorization page via our secure Cloudflare Worker proxy
-3. **Authorize the app** with the requested permissions (`read:user`, `repo`)
-4. **You're all set!** You'll be redirected back to Shikai and can start exploring instantly thanks to the intelligent prefetch engine
-
-**Security Note:** Your access token is handled entirely via secure proxy and never leaves your device after the initial exchange. All subsequent API requests go directly from your phone to GitHub. The app implements native security hardening to prevent usage on compromised devices. Tokens are stored securely on your device using `expo-secure-store`.
+Shikai requests only read-only access to your GitHub data. It cannot modify, create, or delete anything.
 
 ---
 
-Built with care by yours truly [Atharv Dange](https://x.com/atharvdangedev)(Midnightcoder).
+## Built with
 
-Designed for developers who want to stay inspired by their work, wherever they are.
+React Native · Expo · TypeScript · React Query · Zustand · Reanimated · FlashList
+
+GitHub REST & GraphQL APIs · GitHub OAuth (PKCE) · Cloudflare Workers
+
+---
+
+## Getting started
+
+1. Open Shikai and tap **Sign in with GitHub**
+2. Authorize the app - it only requests read permissions
+3. You're in. Your dashboard loads instantly.
+
+---
+
+Built with care by [Atharv Dange](https://x.com/atharvdangedev).
