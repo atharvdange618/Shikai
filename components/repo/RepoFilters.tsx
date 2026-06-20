@@ -148,6 +148,8 @@ function FilterPill({
             ? pillStyles.pressed
             : pillStyles.inactive,
       ]}
+      accessibilityRole="button"
+      accessibilityState={{ selected: active }}
     >
       <Text style={textStyle}>{label}</Text>
     </Pressable>

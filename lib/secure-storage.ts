@@ -4,9 +4,15 @@ const KEYS = {
   GITHUB_TOKEN: "shikai_github_token",
 } as const;
 
+function isValidToken(token: string | null): token is string {
+  if (!token || token.length < 10 || token.length > 500) return false;
+  return /^[\w\-\.]+$/.test(token);
+}
+
 export async function getStoredToken(): Promise<string | null> {
   try {
-    return await SecureStore.getItemAsync(KEYS.GITHUB_TOKEN);
+    const token = await SecureStore.getItemAsync(KEYS.GITHUB_TOKEN);
+    return isValidToken(token) ? token : null;
   } catch {
     return null;
   }
