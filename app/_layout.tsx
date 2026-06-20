@@ -65,9 +65,8 @@ export default function RootLayout() {
         const storedToken = await getStoredToken();
 
         if (storedToken) {
-          setToken(storedToken);
-
           try {
+            useAuthStore.getState().setToken(storedToken);
             const user = await fetchAuthenticatedUser();
             setUser(user);
           } catch {

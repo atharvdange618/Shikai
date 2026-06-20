@@ -174,15 +174,15 @@ export default function SignInScreen() {
       }
 
       setToken(accessToken);
+
+      const [, user] = await Promise.all([
+        saveToken(accessToken),
+        fetchAuthenticatedUser(),
+      ]);
+      setUser(user);
+
       setLoading(false);
-
       router.replace("/(app)/(tabs)" as Href);
-
-      Promise.all([saveToken(accessToken), fetchAuthenticatedUser()])
-        .then(([, user]) => setUser(user))
-        .catch(() => {
-          useAuthStore.getState().clearAuth();
-        });
     } catch {
       setError("Something went wrong. Check your connection and try again.");
       setLoading(false);
@@ -219,16 +219,16 @@ export default function SignInScreen() {
       setPendingToken(null);
 
       setToken(pendingToken);
+
+      const [, user] = await Promise.all([
+        saveToken(pendingToken),
+        fetchAuthenticatedUser(),
+      ]);
+      setUser(user);
+
       setLoading(false);
       setNeedsInstall(false);
-
       router.replace("/(app)/(tabs)" as Href);
-
-      Promise.all([saveToken(pendingToken), fetchAuthenticatedUser()])
-        .then(([, user]) => setUser(user))
-        .catch(() => {
-          useAuthStore.getState().clearAuth();
-        });
     } catch {
       setError("Installation failed. You can set it up later from settings.");
       setLoading(false);
