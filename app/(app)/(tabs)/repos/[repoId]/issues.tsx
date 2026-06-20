@@ -186,7 +186,9 @@ const IssueItem = memo(function IssueItem({
   colors: typeof LightColors | typeof DarkColors;
 }) {
   const handlePress = useCallback(() => {
-    Linking.openURL(issue.html_url);
+    if (issue.html_url.startsWith("https://github.com/")) {
+      Linking.openURL(issue.html_url);
+    }
   }, [issue.html_url]);
 
   const isOpen = issue.state === "open";

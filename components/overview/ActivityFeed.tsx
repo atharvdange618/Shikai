@@ -332,6 +332,7 @@ export function ActivityFeed({
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
 
   const handleEventPress = async (url: string) => {
+    if (!url.startsWith("https://github.com/")) return;
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     await WebBrowser.openBrowserAsync(url);
   };
