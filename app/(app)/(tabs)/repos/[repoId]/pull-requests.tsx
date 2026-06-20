@@ -1,5 +1,6 @@
 import { Octicons } from "@expo/vector-icons";
 import { FlashList } from "@shopify/flash-list";
+import { ListItemSeparator } from "@/components/shared/ListItemSeparator";
 import { useQueryClient } from "@tanstack/react-query";
 import { Image } from "expo-image";
 import * as Linking from "expo-linking";
@@ -158,7 +159,7 @@ export default function PullRequestsScreen() {
         renderItem={renderItem}
         keyExtractor={keyExtractor}
         contentContainerStyle={s.listContent}
-        ItemSeparatorComponent={() => <View style={s.separator} />}
+        ItemSeparatorComponent={ListItemSeparator}
         ListHeaderComponent={ListHeader}
         ListEmptyComponent={ListEmpty}
         ListFooterComponent={ListFooter}
