@@ -72,10 +72,10 @@ function getEventDisplay(
 
   switch (event.type) {
     case "PushEvent": {
-      const payload = event.payload as any;
+      const payload = event.payload;
       const commitCount = payload.size ?? 1;
       const branch =
-        (payload.ref as string)?.replace("refs/heads/", "") ?? "main";
+        payload.ref?.replace("refs/heads/", "") ?? "main";
       return {
         icon: "repo-push",
         iconColor: colors.accent,
@@ -98,7 +98,7 @@ function getEventDisplay(
       };
 
     case "ForkEvent": {
-      const payload = event.payload as any;
+      const payload = event.payload;
       const forkName = payload.forkee?.full_name;
       return {
         icon: "repo-forked",
@@ -112,7 +112,7 @@ function getEventDisplay(
     }
 
     case "CreateEvent": {
-      const payload = event.payload as any;
+      const payload = event.payload;
       const refType = payload.ref_type;
       const ref = payload.ref;
 
@@ -136,7 +136,7 @@ function getEventDisplay(
     }
 
     case "PullRequestEvent": {
-      const payload = event.payload as any;
+      const payload = event.payload;
       const action = payload.action;
       const prNumber = payload.pull_request?.number;
       const merged = payload.pull_request?.merged;
@@ -161,7 +161,7 @@ function getEventDisplay(
     }
 
     case "IssuesEvent": {
-      const payload = event.payload as any;
+      const payload = event.payload;
       const action = payload.action;
       const issueNumber = payload.issue?.number;
 
@@ -175,7 +175,7 @@ function getEventDisplay(
     }
 
     case "ReleaseEvent": {
-      const payload = event.payload as any;
+      const payload = event.payload;
       const tagName = payload.release?.tag_name;
 
       return {
@@ -206,9 +206,9 @@ function getGroupKey(event: GitHubEvent): string {
 
   switch (event.type) {
     case "PushEvent": {
-      const payload = event.payload as any;
+      const payload = event.payload;
       const branch =
-        (payload.ref as string)?.replace("refs/heads/", "") ?? "main";
+        payload.ref?.replace("refs/heads/", "") ?? "main";
       return `${event.type}:${repoName}:${branch}`;
     }
     default:
@@ -246,7 +246,7 @@ function groupEvents(
           } else {
             const totalCommits = currentGroup.reduce((sum, e) => {
               if (e.type === "PushEvent") {
-                const payload = e.payload as any;
+                const payload = e.payload;
                 return sum + (payload.size ?? 1);
               }
               return sum + 1;
@@ -291,7 +291,7 @@ function groupEvents(
       } else {
         const totalCommits = currentGroup.reduce((sum, e) => {
           if (e.type === "PushEvent") {
-            const payload = e.payload as any;
+            const payload = e.payload;
             return sum + (payload.size ?? 1);
           }
           return sum + 1;
@@ -451,7 +451,7 @@ export function ActivityFeed({
 
                   let itemText = display.primaryText;
                   if (event.type === "PushEvent") {
-                    const payload = event.payload as any;
+                    const payload = event.payload;
                     const commitSha =
                       payload.head?.substring(0, 7) ??
                       payload.commits?.[0]?.sha?.substring(0, 7);
