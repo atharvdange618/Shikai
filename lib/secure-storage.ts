@@ -22,7 +22,7 @@ export async function saveToken(token: string): Promise<void> {
   try {
     await SecureStore.setItemAsync(KEYS.GITHUB_TOKEN, token);
   } catch {
-    // Silent fail — token is still in Zustand for this session
+    // Silent fail - token is still in Zustand for this session
   }
 }
 
@@ -30,6 +30,6 @@ export async function deleteToken(): Promise<void> {
   try {
     await SecureStore.deleteItemAsync(KEYS.GITHUB_TOKEN);
   } catch {
-    // Silent fail — token is cleared from Zustand regardless
+    // Silent fail - token is cleared from Zustand regardless
   }
 }
