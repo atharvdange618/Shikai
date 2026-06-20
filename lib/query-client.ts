@@ -66,8 +66,10 @@ export const queryKeys = {
     ["repo", owner, repo, "commitCount"] as const,
   repoIssuesPRStats: (owner: string, repo: string) =>
     ["repo", owner, repo, "issuesPRStats"] as const,
-  repoIssues: (owner: string, repo: string, state: string) =>
+  repoIssues: (owner: string, repo: string, state: "open" | "closed" | "all") =>
     ["repo", owner, repo, "issues", state] as const,
-  repoPullRequests: (owner: string, repo: string, state: string) =>
+  repoPullRequests: (owner: string, repo: string, state: "open" | "closed" | "all") =>
     ["repo", owner, repo, "pullRequests", state] as const,
+  recentActivity: () => ["recentActivity"] as const,
+  socialAccounts: () => ["socialAccounts"] as const,
 } as const;
