@@ -17,12 +17,8 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import SyntaxHighlighter from "react-native-syntax-highlighter";
-import {
-  atomDark,
-  ghcolors,
-} from "react-syntax-highlighter/dist/esm/styles/prism";
 
+import { VirtualizedCodeViewer } from "@/components/repo/VirtualizedCodeViewer";
 import {
   DarkColors,
   FontFamily,
@@ -185,83 +181,102 @@ export default function FileViewerScreen() {
 
   const showContent = data && !isLoading && !isError;
 
-  const MAX_LINES = 500;
-  const contentLines = showContent ? data.content.split("\n") : [];
-  const isTruncated = contentLines.length > MAX_LINES;
-  const displayContent = isTruncated
-    ? contentLines.slice(0, MAX_LINES).join("\n")
-    : showContent
-      ? data.content
-      : "";
-
   return (
     <SafeAreaView style={s.container} edges={["bottom"]}>
-      <ScrollView
-        style={s.contentScroll}
-        contentContainerStyle={isImage ? s.scrollContentImage : undefined}
-        showsVerticalScrollIndicator={false}
-      >
-        <LoadingProgress
-          isLoading={isLoading}
-          fileName={fileName ?? ""}
-          colors={colors}
-        />
+      {isImage && (
+        <ScrollView
+          style={s.contentScroll}
+          contentContainerStyle={s.scrollContentImage}
+          showsVerticalScrollIndicator={false}
+        >
+          <LoadingProgress
+            isLoading={isLoading}
+            fileName={fileName ?? ""}
+            colors={colors}
+          />
 
-        {isError && (
-          <View style={s.centered}>
-            <Octicons name="alert" size={IconSize.lg} color={colors.danger} />
-            <Text style={s.errorText}>Failed to load file</Text>
-            <Text style={s.errorSubtext}>{(error as Error)?.message}</Text>
-          </View>
-        )}
+          {isError && (
+            <View style={s.centered}>
+              <Octicons name="alert" size={IconSize.lg} color={colors.danger} />
+              <Text style={s.errorText}>Failed to load file</Text>
+              <Text style={s.errorSubtext}>{(error as Error)?.message}</Text>
+            </View>
+          )}
 
-        {showContent && (
-          <>
-            {isImage ? (
-              <View style={s.imageWrapper}>
-                {(imageLoading || imageError) && (
-                  <View style={s.centered}>
-                    {imageLoading && (
-                      <>
-                        <ActivityIndicator size="large" color={colors.accent} />
-                        <Text style={s.loadingText}>Loading image...</Text>
-                      </>
-                    )}
-                    {imageError && (
-                      <>
-                        <Octicons
-                          name="alert"
-                          size={IconSize.lg}
-                          color={colors.danger}
-                        />
-                        <Text style={s.errorText}>Failed to load image</Text>
-                      </>
-                    )}
-                  </View>
-                )}
-                {data.meta.download_url && !imageError && (
-                  <Image
-                    source={{ uri: data.meta.download_url }}
-                    style={[
-                      s.image,
-                      {
-                        width: screenWidth - Spacing.lg * 2,
-                        maxHeight: 600,
-                        opacity: imageLoading ? 0 : 1,
-                      },
-                    ]}
-                    resizeMode="contain"
-                    onLoadStart={() => setImageLoading(true)}
-                    onLoadEnd={() => setImageLoading(false)}
-                    onError={() => {
-                      setImageLoading(false);
-                      setImageError(true);
-                    }}
+          {showContent && (
+            <View style={s.imageWrapper}>
+              {(imageLoading || imageError) && (
+                <View style={s.centered}>
+                  {imageLoading && (
+                    <>
+                      <ActivityIndicator size="large" color={colors.accent} />
+                      <Text style={s.loadingText}>Loading image...</Text>
+                    </>
+                  )}
+                  {imageError && (
+                    <>
+                      <Octicons
+                        name="alert"
+                        size={IconSize.lg}
+                        color={colors.danger}
+                      />
+                      <Text style={s.errorText}>Failed to load image</Text>
+                    </>
+                  )}
+                </View>
+              )}
+              {data?.meta.download_url && !imageError && (
+                <Image
+                  source={{ uri: data.meta.download_url }}
+                  style={[
+                    s.image,
+                    {
+                      width: screenWidth - Spacing.lg * 2,
+                      maxHeight: 600,
+                      opacity: imageLoading ? 0 : 1,
+                    },
+                  ]}
+                  resizeMode="contain"
+                  onLoadStart={() => setImageLoading(true)}
+                  onLoadEnd={() => setImageLoading(false)}
+                  onError={() => {
+                    setImageLoading(false);
+                    setImageError(true);
+                  }}
+                />
+              )}
+            </View>
+          )}
+        </ScrollView>
+      )}
+
+      {!isImage && (
+        <VirtualizedCodeViewer
+          content={showContent ? data.content : ""}
+          language={fileName ? getLanguage(fileName) : "text"}
+          ListHeaderComponent={
+            <>
+              <LoadingProgress
+                isLoading={isLoading}
+                fileName={fileName ?? ""}
+                colors={colors}
+              />
+
+              {isError && (
+                <View style={s.centered}>
+                  <Octicons
+                    name="alert"
+                    size={IconSize.lg}
+                    color={colors.danger}
                   />
-                )}
-              </View>
-            ) : (
-              <View style={s.contentWrapper}>
+                  <Text style={s.errorText}>Failed to load file</Text>
+                  <Text style={s.errorSubtext}>
+                    {(error as Error)?.message}
+                  </Text>
+                </View>
+              )}
+
+              {showContent && (
                 <View style={s.codeHeader}>
                   <Pressable
                     style={({ pressed }) => [
@@ -278,34 +293,11 @@ export default function FileViewerScreen() {
                     />
                   </Pressable>
                 </View>
-                <SyntaxHighlighter
-                  language={fileName ? getLanguage(fileName) : "text"}
-                  style={isDark ? atomDark : ghcolors}
-                  customStyle={{
-                    backgroundColor: "transparent",
-                    padding: 0,
-                  }}
-                  PreTag={View}
-                  CodeTag={Text}
-                  fontSize={FontSize.body}
-                  highlighter="prism"
-                  fontFamily={FontFamily.regular}
-                >
-                  {displayContent}
-                </SyntaxHighlighter>
-                {isTruncated && (
-                  <View style={s.truncationNotice}>
-                    <Text style={s.truncationText}>
-                      File truncated - {contentLines.length} lines total.
-                      Showing first {MAX_LINES} lines.
-                    </Text>
-                  </View>
-                )}
-              </View>
-            )}
-          </>
-        )}
-      </ScrollView>
+              )}
+            </>
+          }
+        />
+      )}
     </SafeAreaView>
   );
 }
@@ -323,10 +315,6 @@ function buildStyles(colors: typeof LightColors | typeof DarkColors) {
 
     scrollContentImage: {
       flexGrow: 1,
-    },
-
-    contentWrapper: {
-      padding: Spacing.lg,
     },
 
     codeHeader: {
@@ -421,22 +409,6 @@ function buildStyles(colors: typeof LightColors | typeof DarkColors) {
       backgroundColor: colors.surface,
       borderWidth: 1,
       borderColor: colors.border,
-    },
-
-    truncationNotice: {
-      padding: Spacing.md,
-      marginTop: Spacing.sm,
-      backgroundColor: colors.surfaceSecondary,
-      borderRadius: Radius.md,
-      borderWidth: 1,
-      borderColor: colors.border,
-    },
-
-    truncationText: {
-      fontFamily: FontFamily.regular,
-      fontSize: FontSize.caption,
-      color: colors.textMuted,
-      textAlign: "center",
     },
   });
 }
