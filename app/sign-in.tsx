@@ -164,7 +164,8 @@ export default function SignInScreen() {
         clearTimeout(timeoutId);
       }
 
-      const installations = await fetchUserInstallations(accessToken);
+      setToken(accessToken);
+      const installations = await fetchUserInstallations();
 
       if (installations.length === 0) {
         setPendingToken(accessToken);
@@ -172,8 +173,6 @@ export default function SignInScreen() {
         setNeedsInstall(true);
         return;
       }
-
-      setToken(accessToken);
 
       const [, user] = await Promise.all([
         saveToken(accessToken),

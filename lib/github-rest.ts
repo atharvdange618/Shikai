@@ -1,4 +1,5 @@
 import { githubAxios } from "@/lib/axios";
+import { useAuthStore } from "@/stores/auth.store";
 import type {
   GitHubBranch,
   GitHubCommit,
@@ -40,11 +41,8 @@ export function decodeBase64(encoded: string): string {
   return atob(cleaned);
 }
 
-export async function fetchAuthenticatedUser(
-  token?: string,
-): Promise<GitHubUser> {
-  const config = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
-  const { data } = await githubAxios.get<GitHubUser>("/user", config);
+export async function fetchAuthenticatedUser(): Promise<GitHubUser> {
+  const { data } = await githubAxios.get<GitHubUser>("/user");
   return data;
 }
 
@@ -72,22 +70,27 @@ export interface GitHubInstallation {
   suspended_at: string | null;
 }
 
-export async function fetchUserInstallations(
-  token?: string,
-): Promise<GitHubInstallation[]> {
-  const config = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
+export async function fetchUserInstallations(): Promise<GitHubInstallation[]> {
   const { data } = await githubAxios.get<{
     total_count: number;
     installations: GitHubInstallation[];
-  }>("/user/installations", config);
+  }>("/user/installations");
   return data.installations;
 }
 
 export async function validateToken(token: string): Promise<GitHubUser> {
-  const { data } = await githubAxios.get<GitHubUser>("/user", {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  return data;
+  const prevToken = useAuthStore.getState().token;
+  useAuthStore.getState().setToken(token);
+  try {
+    const { data } = await githubAxios.get<GitHubUser>("/user");
+    return data;
+  } finally {
+    if (prevToken) {
+      useAuthStore.getState().setToken(prevToken);
+    } else {
+      useAuthStore.getState().clearAuth();
+    }
+  }
 }
 
 export async function fetchSocialAccounts(): Promise<GitHubSocialAccount[]> {
