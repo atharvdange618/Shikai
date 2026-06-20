@@ -3,6 +3,7 @@ import type { DrawerContentComponentProps } from "@react-navigation/drawer";
 import { DrawerContentScrollView } from "@react-navigation/drawer";
 import { Image } from "expo-image";
 import { Href, useRouter } from "expo-router";
+import { useMemo } from "react";
 import {
   Pressable,
   StyleSheet,
@@ -44,7 +45,7 @@ export function ProfileDrawerContent(props: DrawerContentComponentProps) {
     props.navigation.closeDrawer();
   }
 
-  const s = buildStyles(colors);
+  const s = useMemo(() => buildStyles(colors), [colors]);
 
   return (
     <DrawerContentScrollView

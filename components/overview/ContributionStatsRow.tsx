@@ -1,5 +1,6 @@
 import { Octicons } from "@expo/vector-icons";
-import { StyleSheet, Text, View, useColorScheme } from "react-native";
+import { useMemo } from "react";
+import { StyleSheet, Text, useColorScheme, View } from "react-native";
 
 import {
   DarkColors,
@@ -18,7 +19,7 @@ interface Props {
 export function ContributionStatsRow({ stats }: Props) {
   const isDark = useColorScheme() === "dark";
   const colors = isDark ? DarkColors : LightColors;
-  const s = buildStyles(colors);
+  const s = useMemo(() => buildStyles(colors), [colors]);
 
   return (
     <View style={s.row}>

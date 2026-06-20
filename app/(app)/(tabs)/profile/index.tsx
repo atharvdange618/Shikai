@@ -3,7 +3,7 @@ import { DrawerNavigationProp } from "@react-navigation/drawer";
 import { useQueryClient } from "@tanstack/react-query";
 import { Image } from "expo-image";
 import { useNavigation } from "expo-router";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Linking,
   Pressable,
@@ -94,7 +94,7 @@ export default function ProfileScreen() {
     setRefreshing(false);
   }, [queryClient]);
 
-  const s = buildStyles(colors, shadows);
+  const s = useMemo(() => buildStyles(colors, shadows), [colors, shadows]);
 
   return (
     <ScrollView

@@ -85,7 +85,7 @@ export default function CommitsScreen() {
 
   const keyExtractor = useCallback((item: GitHubCommit) => item.sha, []);
 
-  const s = buildStyles(colors);
+  const s = useMemo(() => buildStyles(colors), [colors]);
 
   const ListFooter = isFetchingNextPage ? (
     <View style={s.footerLoader}>
@@ -168,7 +168,7 @@ const CommitItem = memo(function CommitItem({
   const timestamp = relativeTime(commit.commit.author.date);
   const avatarUrl = commit.author?.avatar_url;
 
-  const s = buildStyles(colors);
+  const s = useMemo(() => buildStyles(colors), [colors]);
 
   return (
     <View style={[s.item, shadows]}>

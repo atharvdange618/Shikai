@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { StyleSheet, Text, useColorScheme, View } from "react-native";
 
 import {
@@ -24,7 +25,7 @@ export function LanguageBar({
 }: LanguageBarProps) {
   const isDark = useColorScheme() === "dark";
   const colors = isDark ? DarkColors : LightColors;
-  const s = buildStyles(colors);
+  const s = useMemo(() => buildStyles(colors), [colors]);
 
   if (isLoading) {
     return (

@@ -108,7 +108,7 @@ export default function ReposScreen() {
 
   const keyExtractor = useCallback((item: GitHubRepo) => String(item.id), []);
 
-  const s = buildStyles(colors);
+  const s = useMemo(() => buildStyles(colors), [colors]);
 
   const ListHeader = (
     <View style={s.listHeader}>
