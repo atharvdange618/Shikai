@@ -43,6 +43,7 @@ _(All complete!)_
 8. **Share as Image** - `react-native-view-shot` card capture, image generation for repos/profiles. ~150 LOC.
 9. **Explore Tab / User Discovery** - New tab for searching and discovering GitHub users. User cards with repo count, followers, bio. ~350 LOC.
 10. **Following Activity Feed** - Dashboard-style feed showing recent activity from users you follow on GitHub. ~300 LOC.
+11. **Custom Theme Engine** - User-selectable themes: Tokyo Night, Dracula, Atom One Dark. Theme picker in settings, persistent preference via AsyncStorage. Work on a separate experimental branch (`feat/themes`) to validate all three before merging. ~400 LOC.
 
 ---
 
@@ -55,3 +56,4 @@ _(All complete!)_
 - User Profile Screen (#4)
 - Explore Tab / User Discovery (#9)
 - Following Activity Feed (#10)
+- Custom Theme Engine (#11) — experimental, separate `feat/themes` branch
