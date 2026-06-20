@@ -140,7 +140,9 @@ export async function fetchRepo(
   owner: string,
   repo: string,
 ): Promise<GitHubRepo> {
-  const { data } = await githubAxios.get<GitHubRepo>(`/repos/${owner}/${repo}`);
+  const { data } = await githubAxios.get<GitHubRepo>(
+    `/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}`,
+  );
   return data;
 }
 
@@ -149,7 +151,7 @@ export async function fetchBranches(
   repo: string,
 ): Promise<GitHubBranch[]> {
   const { data } = await githubAxios.get<GitHubBranch[]>(
-    `/repos/${owner}/${repo}/branches`,
+    `/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/branches`,
     { params: { per_page: 100 } },
   );
   return data;
@@ -160,7 +162,7 @@ export async function fetchLanguages(
   repo: string,
 ): Promise<GitHubLanguages> {
   const { data } = await githubAxios.get<GitHubLanguages>(
-    `/repos/${owner}/${repo}/languages`,
+    `/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/languages`,
   );
   return data;
 }
@@ -178,7 +180,7 @@ export async function fetchCommits(
   branch?: string,
 ): Promise<FetchCommitsResult> {
   const { data, headers } = await githubAxios.get<GitHubCommit[]>(
-    `/repos/${owner}/${repo}/commits`,
+    `/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/commits`,
     { params: { page, per_page, sha: branch } },
   );
 
@@ -193,7 +195,7 @@ export async function fetchLastCommit(
   repo: string,
 ): Promise<GitHubCommit | null> {
   const { data } = await githubAxios.get<GitHubCommit[]>(
-    `/repos/${owner}/${repo}/commits`,
+    `/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/commits`,
     { params: { per_page: 1 } },
   );
   return data[0] ?? null;
@@ -204,7 +206,7 @@ export async function fetchContributors(
   repo: string,
 ): Promise<GitHubContributor[]> {
   const { data } = await githubAxios.get<GitHubContributor[]>(
-    `/repos/${owner}/${repo}/contributors`,
+    `/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/contributors`,
     { params: { per_page: 20 } },
   );
   return data;
@@ -216,12 +218,12 @@ export async function fetchFileTree(
   branch: string,
 ): Promise<GitHubTree> {
   const { data: branchData } = await githubAxios.get(
-    `/repos/${owner}/${repo}/branches/${branch}`,
+    `/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/branches/${encodeURIComponent(branch)}`,
   );
   const treeSha = branchData.commit.commit.tree.sha;
 
   const { data } = await githubAxios.get<GitHubTree>(
-    `/repos/${owner}/${repo}/git/trees/${treeSha}`,
+    `/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/git/trees/${encodeURIComponent(treeSha)}`,
     { params: { recursive: 1 } },
   );
 
@@ -234,7 +236,7 @@ export async function fetchFileContent(
   path: string,
 ): Promise<{ content: string; meta: GitHubContent }> {
   const { data } = await githubAxios.get<GitHubContent>(
-    `/repos/${owner}/${repo}/contents/${encodeURIComponent(path)}`,
+    `/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/contents/${encodeURIComponent(path)}`,
   );
 
   if (data.type !== "file" || !data.content) {
@@ -252,7 +254,7 @@ export async function fetchReadme(
   repo: string,
 ): Promise<string> {
   const { data } = await githubAxios.get<GitHubReadme>(
-    `/repos/${owner}/${repo}/readme`,
+    `/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/readme`,
   );
   return decodeBase64(data.content);
 }
@@ -314,7 +316,7 @@ export async function fetchIssues(
   state: "open" | "closed" | "all" = "open",
 ): Promise<FetchIssuesResult> {
   const { data, headers } = await githubAxios.get<GitHubIssue[]>(
-    `/repos/${owner}/${repo}/issues`,
+    `/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/issues`,
     { params: { page, per_page, state } },
   );
 
@@ -339,7 +341,7 @@ export async function fetchPullRequests(
   state: "open" | "closed" | "all" = "open",
 ): Promise<FetchPullRequestsResult> {
   const { data, headers } = await githubAxios.get<GitHubPullRequest[]>(
-    `/repos/${owner}/${repo}/pulls`,
+    `/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/pulls`,
     { params: { page, per_page, state } },
   );
 
