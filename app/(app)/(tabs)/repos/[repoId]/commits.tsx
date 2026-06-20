@@ -1,5 +1,6 @@
 import { Octicons } from "@expo/vector-icons";
 import { FlashList } from "@shopify/flash-list";
+import { ListItemSeparator } from "@/components/shared/ListItemSeparator";
 import { useQueryClient } from "@tanstack/react-query";
 import * as Clipboard from "expo-clipboard";
 import { Image } from "expo-image";
@@ -124,7 +125,7 @@ export default function CommitsScreen() {
         renderItem={renderItem}
         keyExtractor={keyExtractor}
         contentContainerStyle={s.listContent}
-        ItemSeparatorComponent={() => <View style={s.separator} />}
+        ItemSeparatorComponent={ListItemSeparator}
         ListEmptyComponent={ListEmpty}
         ListFooterComponent={ListFooter}
         onEndReached={() => {

@@ -1,4 +1,5 @@
 import { useQueryClient } from "@tanstack/react-query";
+import { ListItemSeparator } from "@/components/shared/ListItemSeparator";
 import { useRouter } from "expo-router";
 import { useCallback, useMemo, useRef, useState } from "react";
 import {
@@ -176,7 +177,7 @@ export default function ReposScreen() {
         renderItem={renderItem}
         keyExtractor={keyExtractor}
         contentContainerStyle={s.listContent}
-        ItemSeparatorComponent={() => <View style={s.separator} />}
+        ItemSeparatorComponent={ListItemSeparator}
         ListHeaderComponent={ListHeader}
         ListEmptyComponent={ListEmpty}
         ListFooterComponent={ListFooter}
