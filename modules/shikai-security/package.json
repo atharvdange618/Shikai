@@ -4,6 +4,6 @@
   "description": "Security checks for Shikai app",
   "main": "index.ts",
   "peerDependencies": {
-    "expo": "*"
+    "expo": ">=50.0.0"
   }
 }
