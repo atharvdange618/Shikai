@@ -151,7 +151,7 @@ const Palette = {
   yellow400: "#FACC15",
   yellow500: "#EAB308",
 
-  white: "#F5F5F5",
+  offWhite: "#F5F5F5",
   gray50: "#F8FAFC",
   gray100: "#F0F4F8",
   gray200: "#E2EAF1",
@@ -193,7 +193,7 @@ export const LightColors = {
   textPrimary: Palette.gray800,
   textSecondary: Palette.gray500,
   textMuted: Palette.gray400,
-  textOnAccent: Palette.white,
+  textOnAccent: Palette.offWhite,
   textLink: Palette.blue600,
 
   success: Palette.green500,
