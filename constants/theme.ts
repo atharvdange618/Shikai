@@ -346,7 +346,6 @@ export const Easing = {
   standard: "easeInOut",
   decelerate: "easeOut",
   accelerate: "easeIn",
-  spring: "spring",
 } as const;
 
 export const Layout = {
