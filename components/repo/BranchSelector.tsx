@@ -63,6 +63,9 @@ export function BranchSelector({
           s.trigger,
           pressed && { backgroundColor: colors.surfaceSecondary },
         ]}
+        accessibilityRole="button"
+        accessibilityState={{ expanded: open }}
+        accessibilityLabel={`Branch: ${selectedBranch || "Select branch"}`}
       >
         <Octicons
           name="git-branch"
