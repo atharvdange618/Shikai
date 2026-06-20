@@ -47,7 +47,7 @@ export default function ProfileScreen() {
   const [repoCount, setRepoCount] = useState<number | null>(null);
 
   useEffect(() => {
-    fetchRepoCount().then(setRepoCount);
+    fetchRepoCount().then(setRepoCount).catch(() => {});
   }, []);
 
   const linkedInUrl = socialAccounts?.find((account) =>
@@ -89,7 +89,7 @@ export default function ProfileScreen() {
     setRefreshing(true);
     await Promise.all([
       queryClient.invalidateQueries({ queryKey: queryKeys.user() }),
-      fetchRepoCount().then(setRepoCount),
+      fetchRepoCount().then(setRepoCount).catch(() => {}),
     ]);
     setRefreshing(false);
   }, [queryClient]);
