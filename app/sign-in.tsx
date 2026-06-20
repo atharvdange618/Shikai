@@ -1,6 +1,7 @@
 import { Octicons } from "@expo/vector-icons";
 import { makeRedirectUri } from "expo-auth-session";
 import * as Crypto from "expo-crypto";
+import { Image } from "expo-image";
 import * as Linking from "expo-linking";
 import { Href, useRouter } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
@@ -249,7 +250,11 @@ export default function SignInScreen() {
         style={s.logoBlock}
       >
         <View style={s.logoMark}>
-          <Octicons name="mark-github" size={40} color={colors.accent} />
+          <Image
+            source={require("@/assets/images/splash-icon.png")}
+            style={s.logoImage}
+            contentFit="contain"
+          />
         </View>
         <Text style={s.appName}>Shikai</Text>
         <Text style={s.tagline}>Your GitHub dashboard, at a glance.</Text>
@@ -363,7 +368,13 @@ function buildStyles(
       justifyContent: "center",
       borderWidth: 1,
       borderColor: colors.border,
+      overflow: "hidden",
       ...shadows,
+    },
+
+    logoImage: {
+      width: 56,
+      height: 56,
     },
 
     appName: {
