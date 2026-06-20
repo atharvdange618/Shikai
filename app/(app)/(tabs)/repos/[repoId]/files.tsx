@@ -296,7 +296,7 @@ export default function FileExplorerScreen() {
     [],
   );
 
-  const s = buildStyles(colors);
+  const s = useMemo(() => buildStyles(colors), [colors]);
 
   return (
     <SafeAreaView style={s.container} edges={["bottom"]}>

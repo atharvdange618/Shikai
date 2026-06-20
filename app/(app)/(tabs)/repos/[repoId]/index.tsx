@@ -21,7 +21,7 @@ import * as Clipboard from "expo-clipboard";
 import * as Haptics from "expo-haptics";
 import * as Linking from "expo-linking";
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Pressable,
   ScrollView,
@@ -237,7 +237,7 @@ export default function RepoDetailsScreen() {
     if (!owner || !repoName) return;
   }, [owner, repoName]);
 
-  const s = buildStyles(colors, shadows);
+  const s = useMemo(() => buildStyles(colors, shadows), [colors, shadows]);
 
   if (isError) {
     return (

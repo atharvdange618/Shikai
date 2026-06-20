@@ -2,7 +2,7 @@ import { Octicons } from "@expo/vector-icons";
 import { useQueryClient } from "@tanstack/react-query";
 import { Image } from "expo-image";
 import { Href, useRouter } from "expo-router";
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import {
   Pressable,
   RefreshControl,
@@ -77,7 +77,7 @@ export default function OverviewScreen() {
     setRefreshing(false);
   }, [queryClient, user?.login]);
 
-  const s = buildStyles(colors);
+  const s = useMemo(() => buildStyles(colors), [colors]);
 
   const getGreeting = () => {
     const hour = new Date().getHours();
