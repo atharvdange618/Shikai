@@ -171,7 +171,7 @@ export function prefetchProfile(queryClient: QueryClient) {
     staleTime: 1000 * 60 * 10,
   });
   queryClient.prefetchQuery({
-    queryKey: ["socialAccounts"],
+    queryKey: queryKeys.socialAccounts(),
     queryFn: fetchSocialAccounts,
     staleTime: 1000 * 60 * 10,
   });

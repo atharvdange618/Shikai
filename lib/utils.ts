@@ -1,6 +1,8 @@
 export function relativeTime(dateStr: string): string {
   if (!dateStr) return "";
-  const diff = Date.now() - new Date(dateStr).getTime();
+  const dateMs = new Date(dateStr).getTime();
+  if (Number.isNaN(dateMs)) return "";
+  const diff = Date.now() - dateMs;
   const mins = Math.floor(diff / 60_000);
   const hours = Math.floor(diff / 3_600_000);
   const days = Math.floor(diff / 86_400_000);
