@@ -101,9 +101,9 @@ function LoadingProgress({
     };
   }, [isLoading, animatedProgress]);
 
-  if (!visible) return null;
-
   const s = useMemo(() => buildStyles(colors), [colors]);
+
+  if (!visible) return null;
 
   return (
     <View style={s.centered}>
@@ -123,7 +123,7 @@ function LoadingProgress({
         </View>
         <Text style={s.loadingText}>{displayProgress}%</Text>
       </View>
-      <Text style={s.loadingText}>{`Loading ${fileName}...`}</Text>
+      <Text style={s.loadingText}>{`Downloading ${fileName}...`}</Text>
     </View>
   );
 }
@@ -276,14 +276,6 @@ export default function FileViewerScreen() {
                       size={IconSize.sm}
                       color={copied ? colors.success : colors.textPrimary}
                     />
-                    <Text
-                      style={[
-                        s.copyButtonText,
-                        copied && s.copyButtonTextCopied,
-                      ]}
-                    >
-                      {copied ? "Copied!" : "Copy"}
-                    </Text>
                   </Pressable>
                 </View>
                 <SyntaxHighlighter
@@ -304,7 +296,8 @@ export default function FileViewerScreen() {
                 {isTruncated && (
                   <View style={s.truncationNotice}>
                     <Text style={s.truncationText}>
-                      File truncated — {contentLines.length} lines total. Showing first {MAX_LINES} lines.
+                      File truncated - {contentLines.length} lines total.
+                      Showing first {MAX_LINES} lines.
                     </Text>
                   </View>
                 )}
@@ -339,7 +332,7 @@ function buildStyles(colors: typeof LightColors | typeof DarkColors) {
     codeHeader: {
       flexDirection: "row",
       justifyContent: "flex-end",
-      marginBottom: Spacing.sm,
+      marginBottom: Spacing.xs,
     },
 
     copyButton: {
@@ -362,16 +355,6 @@ function buildStyles(colors: typeof LightColors | typeof DarkColors) {
     copyButtonCopied: {
       backgroundColor: colors.successSubtle,
       borderColor: colors.success,
-    },
-
-    copyButtonText: {
-      fontFamily: FontFamily.medium,
-      fontSize: FontSize.label,
-      color: colors.textPrimary,
-    },
-
-    copyButtonTextCopied: {
-      color: colors.success,
     },
 
     centered: {
