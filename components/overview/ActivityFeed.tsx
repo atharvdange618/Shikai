@@ -18,7 +18,7 @@
 import { Octicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import * as WebBrowser from "expo-web-browser";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Pressable,
@@ -327,7 +327,7 @@ export function ActivityFeed({
 }: ActivityFeedProps) {
   const isDark = useColorScheme() === "dark";
   const colors = isDark ? DarkColors : LightColors;
-  const s = buildStyles(colors);
+  const s = useMemo(() => buildStyles(colors), [colors]);
 
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
 

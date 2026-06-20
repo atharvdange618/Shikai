@@ -1,7 +1,7 @@
 import { Octicons } from "@expo/vector-icons";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import {
   Pressable,
   StyleSheet,
@@ -59,7 +59,7 @@ export function PinnedRepoCard({ repo }: PinnedRepoCardProps) {
       ]?.color ?? colors.textMuted)
     : null;
 
-  const s = buildStyles(colors, shadows);
+  const s = useMemo(() => buildStyles(colors, shadows), [colors, shadows]);
 
   return (
     <Pressable

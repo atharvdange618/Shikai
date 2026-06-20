@@ -1,4 +1,4 @@
-import { useCallback, useRef } from "react";
+import { useCallback, useMemo, useRef } from "react";
 import {
   ScrollView,
   StyleSheet,
@@ -70,7 +70,7 @@ export function ContributionGraph({
     scrollRef.current?.scrollToEnd({ animated: false });
   }, []);
 
-  const s = buildStyles(colors);
+  const s = useMemo(() => buildStyles(colors), [colors]);
 
   if (isLoading) {
     return <ContributionGraphSkeleton colors={colors} />;

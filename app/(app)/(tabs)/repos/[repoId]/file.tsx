@@ -103,7 +103,7 @@ function LoadingProgress({
 
   if (!visible) return null;
 
-  const s = buildStyles(colors);
+  const s = useMemo(() => buildStyles(colors), [colors]);
 
   return (
     <View style={s.centered}>
@@ -181,7 +181,7 @@ export default function FileViewerScreen() {
     setTimeout(() => setCopied(false), 2000);
   }, [data?.content]);
 
-  const s = buildStyles(colors);
+  const s = useMemo(() => buildStyles(colors), [colors]);
 
   const showContent = data && !isLoading && !isError;
 

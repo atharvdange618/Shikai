@@ -5,7 +5,7 @@ import { Image } from "expo-image";
 import * as Linking from "expo-linking";
 import { useLocalSearchParams, useNavigation } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
-import { memo, useCallback, useEffect, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Pressable,
@@ -110,7 +110,7 @@ export default function PullRequestsScreen() {
     [],
   );
 
-  const s = buildStyles(colors);
+  const s = useMemo(() => buildStyles(colors), [colors]);
 
   const ListHeader = (
     <View style={s.filterRow}>
@@ -194,7 +194,7 @@ const PRItem = memo(function PRItem({
     }
   }, [pr.html_url]);
 
-  const s = buildStyles(colors);
+  const s = useMemo(() => buildStyles(colors), [colors]);
 
   const isMerged = pr.merged_at !== null;
   const isOpen = pr.state === "open";

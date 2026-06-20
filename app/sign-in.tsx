@@ -240,7 +240,7 @@ export default function SignInScreen() {
     }
   }, [redirectUri, setUser, router, setToken]);
 
-  const s = buildStyles(colors, isDark, shadows, insets.top, insets.bottom);
+  const s = useMemo(() => buildStyles(colors, isDark, shadows, insets.top, insets.bottom), [colors, isDark, shadows, insets.top, insets.bottom]);
 
   return (
     <View style={s.container}>

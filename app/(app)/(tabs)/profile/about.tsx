@@ -1,6 +1,7 @@
 import { Octicons } from "@expo/vector-icons";
 import Constants from "expo-constants";
 import { Image } from "expo-image";
+import { useMemo } from "react";
 import {
   Linking,
   Pressable,
@@ -31,7 +32,7 @@ export default function AboutScreen() {
   const colors = isDark ? DarkColors : LightColors;
   const shadows = isDark ? {} : Shadows.light.sm;
 
-  const s = buildStyles(colors, shadows);
+  const s = useMemo(() => buildStyles(colors, shadows), [colors, shadows]);
 
   return (
     <ScrollView
