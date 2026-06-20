@@ -15,8 +15,8 @@ import {
   View,
 } from "react-native";
 
+import { useRepoCount } from "@/hooks/useRepoCount";
 import { useUser } from "@/hooks/useUser";
-import { fetchRepoCount } from "@/lib/github-graphql";
 import { queryKeys } from "@/lib/query-client";
 
 import {
@@ -43,12 +43,7 @@ export default function ProfileScreen() {
 
   const { data: user, isLoading } = useUser();
   const { data: socialAccounts } = useSocialAccounts();
-
-  const [repoCount, setRepoCount] = useState<number | null>(null);
-
-  useEffect(() => {
-    fetchRepoCount().then(setRepoCount).catch(() => {});
-  }, []);
+  const { data: repoCount } = useRepoCount();
 
   const linkedInUrl = socialAccounts?.find((account) =>
     account.url.includes("linkedin.com"),
@@ -89,7 +84,8 @@ export default function ProfileScreen() {
     setRefreshing(true);
     await Promise.all([
       queryClient.invalidateQueries({ queryKey: queryKeys.user() }),
-      fetchRepoCount().then(setRepoCount).catch(() => {}),
+      queryClient.invalidateQueries({ queryKey: queryKeys.socialAccounts() }),
+      queryClient.invalidateQueries({ queryKey: queryKeys.repoCount() }),
     ]);
     setRefreshing(false);
   }, [queryClient]);

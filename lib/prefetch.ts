@@ -5,6 +5,7 @@ import {
   fetchCommitCount,
   fetchContributionGraph,
   fetchPinnedRepos,
+  fetchRepoCount,
   fetchRepoIssuesPRStats,
 } from "@/lib/github-graphql";
 import {
@@ -169,12 +170,17 @@ export function prefetchProfile(queryClient: QueryClient) {
   queryClient.prefetchQuery({
     queryKey: queryKeys.user(),
     queryFn: () => fetchAuthenticatedUser(),
-    staleTime: 1000 * 60 * 10,
+    staleTime: 1000 * 60 * 30,
   });
   queryClient.prefetchQuery({
     queryKey: queryKeys.socialAccounts(),
     queryFn: fetchSocialAccounts,
-    staleTime: 1000 * 60 * 10,
+    staleTime: 1000 * 60 * 30,
+  });
+  queryClient.prefetchQuery({
+    queryKey: queryKeys.repoCount(),
+    queryFn: () => fetchRepoCount(),
+    staleTime: 1000 * 60 * 30,
   });
 }
 
