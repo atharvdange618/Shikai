@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Shikai",
-    "slug": "Shikai",
+    "slug": "shikai",
     "version": "1.1.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",

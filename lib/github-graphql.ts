@@ -70,14 +70,10 @@ export async function fetchRepoCount(): Promise<number> {
 }
 
 export async function fetchPinnedRepos(): Promise<PinnedRepoNode[]> {
-  try {
-    const response =
-      await graphql<PinnedReposResponse["data"]>(PINNED_REPOS_QUERY);
+  const response =
+    await graphql<PinnedReposResponse["data"]>(PINNED_REPOS_QUERY);
 
-    return response.viewer.pinnedItems.nodes;
-  } catch (error) {
-    throw error;
-  }
+  return response.viewer.pinnedItems.nodes;
 }
 
 const CONTRIBUTION_GRAPH_QUERY = `
@@ -100,15 +96,11 @@ const CONTRIBUTION_GRAPH_QUERY = `
 `;
 
 export async function fetchContributionGraph(): Promise<ContributionCalendar> {
-  try {
-    const response = await graphql<ContributionGraphResponse["data"]>(
-      CONTRIBUTION_GRAPH_QUERY,
-    );
+  const response = await graphql<ContributionGraphResponse["data"]>(
+    CONTRIBUTION_GRAPH_QUERY,
+  );
 
-    return response.viewer.contributionsCollection.contributionCalendar;
-  } catch (error) {
-    throw error;
-  }
+  return response.viewer.contributionsCollection.contributionCalendar;
 }
 
 const COMMIT_COUNT_QUERY = `
@@ -185,19 +177,15 @@ const RECENT_ACTIVITY_QUERY = `
 `;
 
 export async function fetchRecentActivity(): Promise<RecentRepoNode[]> {
-  try {
-    const response = await graphql<RecentActivityResponse["data"]>(
-      RECENT_ACTIVITY_QUERY,
-    );
+  const response = await graphql<RecentActivityResponse["data"]>(
+    RECENT_ACTIVITY_QUERY,
+  );
 
-    return response.viewer.repositories.nodes.filter(
-      (repo) =>
-        repo.defaultBranchRef &&
-        repo.defaultBranchRef.target.history.edges.length > 0,
-    );
-  } catch (error) {
-    throw error;
-  }
+  return response.viewer.repositories.nodes.filter(
+    (repo) =>
+      repo.defaultBranchRef &&
+      repo.defaultBranchRef.target.history.edges.length > 0,
+  );
 }
 
 const REPO_ISSUES_PR_STATS_QUERY = `

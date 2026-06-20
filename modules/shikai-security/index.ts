@@ -8,7 +8,8 @@ export interface SecurityCheckResult {
 export async function runSecurityChecks(): Promise<SecurityCheckResult> {
   try {
     return await ShikaiSecurityModule.runChecks();
-  } catch {
+  } catch (e) {
+    console.error("Security check failed:", e);
     return { isBlocked: true, reasons: ["Security check failed"] };
   }
 }
