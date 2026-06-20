@@ -9,6 +9,11 @@ This document outlines the planned and proposed features for Shikai, categorized
 - [x] **Contribution Stats Summary** - `useContributions` hook computes streaks and most active day; displayed via `ContributionStatsRow` on the Overview tab.
 - [x] **Repo Health Badges** - `getHealthBadges()` in repo detail screen flags missing License, Topics, README, and stale repos (>90 days). Warning/danger pill badges in title row.
 - [x] **Branch Selector** - Horizontal pill-based branch picker in file tree and commits views. Fetches branches via `fetchBranches()`, resets tree on switch.
+- [x] **Virtualized File Viewer** - Replaced 500-line truncation with chunk-based FlashList. Files of any length now render smoothly via `VirtualizedCodeViewer` component.
+- [x] **Profile Page Caching** - Heavy caching (30 min staleTime) for user profile, social accounts, and repo count. Pull-to-refresh invalidates all profile queries.
+- [x] **About Screen Redesign** - Hero-focused layout with features list, developer card, open source section, and credits/acknowledgments.
+- [x] **Brand Compliance** - Replaced GitHub octocat with Shikai's own logo on sign-in screen. Octocat only used where it links to or indicates GitHub as a service.
+- [x] **React Hooks Bug Fixes** - Fixed hooks-before-early-return in LoadingProgress, missing useMemo import in sign-in screen.
 
 ## Partially Done
 
