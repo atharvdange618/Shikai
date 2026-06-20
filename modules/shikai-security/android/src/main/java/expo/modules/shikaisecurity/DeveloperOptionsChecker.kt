@@ -12,28 +12,27 @@ class DeveloperOptionsChecker {
     try {
       val devOptionsEnabled = Settings.Secure.getInt(
         context.contentResolver,
-        "developer_options_enabled",
+        "development_settings_enabled",
         0
       ) != 0
       if (devOptionsEnabled) {
         reasons.add("Developer options enabled")
       }
     } catch (_: Exception) {
-      // Some OEMs (Samsung, Xiaomi) may not expose this setting
-      // Fall through to USB/ADB checks
+      // Some OEMs may not expose this setting
     }
 
     try {
       val usbDebuggingEnabled = Settings.Secure.getInt(
         context.contentResolver,
-        "usb_debugging",
+        "adb_enabled",
         0
       ) != 0
       if (usbDebuggingEnabled) {
         reasons.add("USB debugging enabled")
       }
     } catch (_: Exception) {
-      reasons.add("USB debugging check failed")
+      // Setting may not exist on all devices
     }
 
     try {
@@ -46,7 +45,7 @@ class DeveloperOptionsChecker {
         reasons.add("ADB enabled")
       }
     } catch (_: Exception) {
-      reasons.add("ADB check failed")
+      // Setting may not exist on all devices
     }
 
     return CheckResult(passed = reasons.isEmpty(), reasons = reasons)
