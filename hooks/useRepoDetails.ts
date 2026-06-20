@@ -93,7 +93,7 @@ export function useLastCommit(owner: string, repo: string) {
 
 export function useCommits(owner: string, repo: string, branch?: string) {
   const query = useInfiniteQuery({
-    queryKey: queryKeys.repoCommits(owner, repo),
+    queryKey: queryKeys.repoCommits(owner, repo, branch),
 
     queryFn: ({ pageParam }) =>
       fetchCommits(owner, repo, pageParam, PER_PAGE, branch),
