@@ -189,7 +189,9 @@ const PRItem = memo(function PRItem({
   colors: typeof LightColors | typeof DarkColors;
 }) {
   const handlePress = useCallback(() => {
-    Linking.openURL(pr.html_url);
+    if (pr.html_url.startsWith("https://github.com/")) {
+      Linking.openURL(pr.html_url);
+    }
   }, [pr.html_url]);
 
   const s = buildStyles(colors);
