@@ -209,16 +209,14 @@ export default function SignInScreen() {
         return;
       }
 
-      const pendingToken = useSignInStore.getState().pendingToken;
-      if (pendingToken) {
+      const { pendingToken, pendingTokenExpiry } = useSignInStore.getState();
+      if (!pendingToken || (pendingTokenExpiry && Date.now() > pendingTokenExpiry)) {
         setPendingToken(null);
-      }
-
-      if (!pendingToken) {
         setLoading(false);
         setNeedsInstall(false);
         return;
       }
+      setPendingToken(null);
 
       setToken(pendingToken);
       setLoading(false);
