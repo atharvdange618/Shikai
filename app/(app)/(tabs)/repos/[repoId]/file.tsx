@@ -185,6 +185,15 @@ export default function FileViewerScreen() {
 
   const showContent = data && !isLoading && !isError;
 
+  const MAX_LINES = 500;
+  const contentLines = showContent ? data.content.split("\n") : [];
+  const isTruncated = contentLines.length > MAX_LINES;
+  const displayContent = isTruncated
+    ? contentLines.slice(0, MAX_LINES).join("\n")
+    : showContent
+      ? data.content
+      : "";
+
   return (
     <SafeAreaView style={s.container} edges={["bottom"]}>
       <ScrollView
@@ -290,8 +299,15 @@ export default function FileViewerScreen() {
                   highlighter="prism"
                   fontFamily={FontFamily.regular}
                 >
-                  {data.content}
+                  {displayContent}
                 </SyntaxHighlighter>
+                {isTruncated && (
+                  <View style={s.truncationNotice}>
+                    <Text style={s.truncationText}>
+                      File truncated — {contentLines.length} lines total. Showing first {MAX_LINES} lines.
+                    </Text>
+                  </View>
+                )}
               </View>
             )}
           </>
@@ -422,6 +438,22 @@ function buildStyles(colors: typeof LightColors | typeof DarkColors) {
       backgroundColor: colors.surface,
       borderWidth: 1,
       borderColor: colors.border,
+    },
+
+    truncationNotice: {
+      padding: Spacing.md,
+      marginTop: Spacing.sm,
+      backgroundColor: colors.surfaceSecondary,
+      borderRadius: Radius.md,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+
+    truncationText: {
+      fontFamily: FontFamily.regular,
+      fontSize: FontSize.caption,
+      color: colors.textMuted,
+      textAlign: "center",
     },
   });
 }
