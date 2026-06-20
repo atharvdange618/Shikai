@@ -25,7 +25,8 @@ export function useContributions() {
 
     const allDays = query.data.weeks.flatMap((w) => w.contributionDays);
 
-    const todayStr = new Date().toISOString().slice(0, 10);
+    const now = new Date();
+    const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
     let i = allDays.length - 1;
     while (i >= 0 && allDays[i].date > todayStr) {
       i--;
