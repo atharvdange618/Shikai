@@ -41,7 +41,7 @@ import { useSignInStore } from "@/stores/signin.store";
 const CLIENT_ID = process.env.EXPO_PUBLIC_GITHUB_CLIENT_ID!;
 const APP_SLUG = process.env.EXPO_PUBLIC_GITHUB_APP_SLUG!;
 const OAUTH_PROXY_URL = process.env.EXPO_PUBLIC_OAUTH_PROXY_URL!;
-const SCOPES = ["read:user", "user:email", "repo"].join(",");
+const SCOPES = ["read:user", "user:email", "repo:status", "read:repo"].join(",");
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
