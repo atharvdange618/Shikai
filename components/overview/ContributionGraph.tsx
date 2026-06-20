@@ -106,7 +106,11 @@ export function ContributionGraph({
   const svgWidth = WEEKS * STEP;
 
   return (
-    <View style={s.container}>
+    <View
+      style={s.container}
+      accessibilityLabel={`Contribution graph: ${totalContributions.toLocaleString()} contributions this year`}
+      accessibilityRole="summary"
+    >
       <View style={s.header}>
         <Text style={s.sectionTitle}>Contributions</Text>
         <Text style={s.totalCount}>

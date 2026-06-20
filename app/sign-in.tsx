@@ -4,7 +4,7 @@ import * as Crypto from "expo-crypto";
 import * as Linking from "expo-linking";
 import { Href, useRouter } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
 import {
   ActivityIndicator,
   Pressable,
@@ -59,6 +59,12 @@ export default function SignInScreen() {
   const isLoading = useSignInStore((s) => s.isLoading);
   const error = useSignInStore((s) => s.error);
   const needsInstall = useSignInStore((s) => s.needsInstall);
+
+  useEffect(() => {
+    return () => {
+      useSignInStore.getState().reset();
+    };
+  }, []);
 
   const redirectUri = makeRedirectUri({ scheme: "shikai" });
 

@@ -51,6 +51,7 @@ export function SearchBar({
         autoCorrect={false}
         returnKeyType="search"
         clearButtonMode="never"
+        accessibilityLabel={placeholder}
       />
 
       {value.length > 0 && (
@@ -58,6 +59,8 @@ export function SearchBar({
           onPress={() => onChangeText("")}
           hitSlop={12}
           style={s.clearButton}
+          accessibilityLabel="Clear search"
+          accessibilityRole="button"
         >
           <Octicons name="x-circle-fill" size={15} color={colors.textMuted} />
         </Pressable>

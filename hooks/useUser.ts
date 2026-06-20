@@ -1,6 +1,5 @@
 import { fetchAuthenticatedUser } from "@/lib/github-rest";
 import { queryKeys } from "@/lib/query-client";
-import type { GitHubUser } from "@/types/github.types";
 import { queryOptions, useQuery } from "@tanstack/react-query";
 
 export const userQueryOptions = queryOptions({
@@ -14,15 +13,9 @@ export function useUser() {
 }
 
 export function useUsername(): string | undefined {
-  return useQuery({
-    ...userQueryOptions,
-    select: (user: GitHubUser) => user.login,
-  }).data;
+  return useQuery(userQueryOptions).data?.login;
 }
 
 export function useUserAvatarUrl(): string | undefined {
-  return useQuery({
-    ...userQueryOptions,
-    select: (user: GitHubUser) => user.avatar_url,
-  }).data;
+  return useQuery(userQueryOptions).data?.avatar_url;
 }

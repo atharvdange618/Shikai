@@ -21,7 +21,7 @@ import { queryKeys } from "@/lib/query-client";
 import type { GitHubRepo, GitHubTreeItem } from "@/types/github.types";
 
 export function prefetchRoute(href: string) {
-  router.prefetch(href as any);
+  router.prefetch(href as Parameters<typeof router.prefetch>[0]);
 }
 
 export function prefetchRepoDetails(
@@ -103,9 +103,10 @@ export function prefetchFileTree(
             queryFn: () =>
               fetchFileTree(owner, repo, updatedRepo.default_branch),
             staleTime: 1000 * 60 * 15,
-          });
+          }).catch(() => {});
         }
-      });
+      })
+      .catch(() => {});
   }
 }
 
