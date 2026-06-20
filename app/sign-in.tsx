@@ -4,7 +4,7 @@ import * as Crypto from "expo-crypto";
 import * as Linking from "expo-linking";
 import { Href, useRouter } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import {
   ActivityIndicator,
   Pressable,
