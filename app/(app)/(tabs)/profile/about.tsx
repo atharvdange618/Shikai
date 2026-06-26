@@ -191,6 +191,25 @@ export default function AboutScreen() {
           <Text style={s.openSourceButtonText}>View on GitHub</Text>
           <Octicons name="link-external" size={12} color={colors.textMuted} />
         </Pressable>
+        <View style={s.divider} />
+        <Text style={s.bodyText}>
+          Enjoying Shikai? A star on the repo helps others discover it and
+          keeps the project going.
+        </Text>
+        <Pressable
+          style={({ pressed }) => [
+            s.starButton,
+            pressed && { opacity: 0.7 },
+          ]}
+          onPress={() =>
+            Linking.openURL(
+              "https://github.com/atharvdange618/shikai#readme",
+            )
+          }
+        >
+          <Octicons name="star" size={IconSize.sm} color={colors.accent} />
+          <Text style={s.starButtonText}>Star on GitHub</Text>
+        </Pressable>
       </View>
 
       <View style={s.card}>
@@ -386,6 +405,23 @@ function buildStyles(
       fontFamily: FontFamily.medium,
       fontSize: FontSize.body,
       color: colors.textPrimary,
+    },
+
+    starButton: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: Spacing.sm,
+      backgroundColor: colors.surfaceSecondary,
+      borderRadius: Radius.md,
+      padding: Spacing.md,
+      marginTop: Spacing.xs,
+    },
+
+    starButtonText: {
+      fontFamily: FontFamily.medium,
+      fontSize: FontSize.body,
+      color: colors.accent,
     },
 
     creditName: {
