@@ -333,3 +333,11 @@ export interface GitHubRelease {
     size: number;
   }>;
 }
+
+export interface GitHubComment {
+  id: number;
+  body: string;
+  user: GitHubUserSummary;
+  created_at: string;
+  updated_at: string;
+}
