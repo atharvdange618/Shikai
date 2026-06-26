@@ -1,5 +1,6 @@
 import { ContributorRow } from "@/components/repo/ContributorRow";
 import { LanguageBar } from "@/components/repo/LanguageBar";
+import { MarkdownRenderer } from "@/components/shared/MarkdownRenderer";
 import {
   BorderWidth,
   DarkColors,
@@ -32,6 +33,7 @@ import {
   useColorScheme,
 } from "react-native";
 import Animated, { FadeInDown } from "react-native-reanimated";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const ANIM_DELAYS = {
   hero: 0,
@@ -237,7 +239,11 @@ export default function RepoDetailsScreen() {
     if (!owner || !repoName) return;
   }, [owner, repoName]);
 
-  const s = useMemo(() => buildStyles(colors, shadows), [colors, shadows]);
+  const insets = useSafeAreaInsets();
+  const s = useMemo(
+    () => buildStyles(colors, shadows, insets.bottom),
+    [colors, shadows, insets.bottom],
+  );
 
   if (isError) {
     return (
@@ -620,6 +626,23 @@ export default function RepoDetailsScreen() {
         )}
       </Animated.View>
 
+      {readme && (
+        <Animated.View
+          entering={FadeInDown.duration(400).delay(ANIM_DELAYS.readme)}
+          style={[s.card, s.readmeCard]}
+        >
+          <View style={s.readmeHeader}>
+            <Octicons
+              name="file-directory"
+              size={IconSize.sm}
+              color={colors.textSecondary}
+            />
+            <Text style={s.readmeTitle}>README</Text>
+          </View>
+          <MarkdownRenderer markdown={readme} />
+        </Animated.View>
+      )}
+
       <Animated.View
         entering={FadeInDown.duration(400).delay(ANIM_DELAYS.actionBar)}
         style={s.actionRow}
@@ -745,6 +768,7 @@ function StatItem({
 function buildStyles(
   colors: typeof LightColors | typeof DarkColors,
   shadows: object,
+  bottomInset: number,
 ) {
   return StyleSheet.create({
     scroll: {
@@ -756,7 +780,7 @@ function buildStyles(
       paddingHorizontal: Layout.screenPadding,
       paddingVertical: Spacing.lg,
       gap: Spacing.lg,
-      paddingBottom: Spacing.xxl,
+      paddingBottom: bottomInset,
     },
 
     centered: {
@@ -1027,6 +1051,28 @@ function buildStyles(
       fontFamily: FontFamily.medium,
       fontSize: FontSize.label,
       color: colors.textSecondary,
+    },
+
+    readmeCard: {
+      overflow: "hidden",
+    },
+
+    readmeHeader: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: Spacing.sm,
+      paddingHorizontal: Spacing.lg,
+      paddingVertical: Spacing.md,
+      borderBottomWidth: BorderWidth.normal,
+      borderBottomColor: colors.border,
+    },
+
+    readmeTitle: {
+      fontFamily: FontFamily.semiBold,
+      fontSize: FontSize.label,
+      color: colors.textSecondary,
+      textTransform: "uppercase",
+      letterSpacing: 0.5,
     },
 
     actionRow: {
