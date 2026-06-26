@@ -21,6 +21,7 @@ This document tracks the feature backlog and development progress for Shikai.
 | Brand Compliance | Replaced GitHub octocat with Shikai's own logo on sign-in screen. Octocat only used where it links to or indicates GitHub as a service. | Done |
 | React Hooks Bug Fixes | Fixed hooks-before-early-return in LoadingProgress, missing useMemo import in sign-in screen. | Done |
 | In-App Version Check | Fetches latest GitHub release on mount, compares semver against installed version, shows dismissible update banner. Dismiss state persisted via expo-secure-store. | Done |
+| In-App README Preview | WebView-based markdown renderer (`MarkdownRenderer` component) using GitHub's `/markdown` API for 100% GFM fidelity. Renders inline on repo detail screen with themed CSS. Fixed UTF-8 decoding for Japanese/emoji support. | Done |
 
 ---
 
@@ -50,7 +51,6 @@ This document tracks the feature backlog and development progress for Shikai.
 |---|---------|-------------|----------|
 | 5 | Global Search | New search tab, GitHub search API integration, result cards for repos/users/issues/PRs. | ~400 |
 | 6 | Notifications-Lite / Attention Feed | GitHub notifications API, attention-worthy items logic, new screen. | ~300 |
-| 7 | In-App README Preview | Needs markdown rendering library, README fetch + render component. | ~200 |
 | 8 | Share as Image | `react-native-view-shot` card capture, image generation for repos/profiles. | ~150 |
 | 9 | Explore Tab / User Discovery | New tab for searching and discovering GitHub users. User cards with repo count, followers, bio. | ~350 |
 | 10 | Following Activity Feed | Dashboard-style feed showing recent activity from users you follow on GitHub. | ~300 |
@@ -66,7 +66,6 @@ This document tracks the feature backlog and development progress for Shikai.
 | 4 | User Profile Screen | - |
 | 5 | Global Search | - |
 | 6 | Notifications-Lite / Attention Feed | - |
-| 7 | In-App README Preview | - |
 | 9 | Explore Tab / User Discovery | - |
 | 10 | Following Activity Feed | - |
 | 11 | Custom Theme Engine | Experimental - separate `feat/themes` branch |

@@ -39,7 +39,12 @@ function parseLinkHeader(linkHeader: string | undefined): GitHubPagination {
 
 export function decodeBase64(encoded: string): string {
   const cleaned = encoded.replace(/\n/g, "");
-  return atob(cleaned);
+  const binary = atob(cleaned);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+  return new TextDecoder("utf-8").decode(bytes);
 }
 
 export async function fetchAuthenticatedUser(): Promise<GitHubUser> {
