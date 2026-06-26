@@ -22,6 +22,7 @@ This document tracks the feature backlog and development progress for Shikai.
 | React Hooks Bug Fixes | Fixed hooks-before-early-return in LoadingProgress, missing useMemo import in sign-in screen. | Done |
 | In-App Version Check | Fetches latest GitHub release on mount, compares semver against installed version, shows dismissible update banner. Dismiss state persisted via expo-secure-store. | Done |
 | In-App README Preview | WebView-based markdown renderer (`MarkdownRenderer` component) using GitHub's `/markdown` API for 100% GFM fidelity. Renders inline on repo detail screen with themed CSS. Fixed UTF-8 decoding for Japanese/emoji support. | Done |
+| Native Issue/PR Detail Screens | In-app detail screens for issues and PRs with markdown body + comments rendering via MarkdownRenderer. Navigates from list screens instead of opening external browser. | Done |
 
 ---
 
@@ -29,7 +30,6 @@ This document tracks the feature backlog and development progress for Shikai.
 
 | Feature | Description | Blocker |
 |---------|-------------|---------|
-| Native Issue/PR Details | Full list screens exist (`issues.tsx`, `pull-requests.tsx`) but tapping opens external browser. Needs dedicated detail screens with comments/body. | Detail screens not yet built |
 | Share as Image/Link | Share as text+link works on repo detail. No image generation, no profile sharing. | Image generation pending |
 
 ---
@@ -40,8 +40,6 @@ This document tracks the feature backlog and development progress for Shikai.
 
 | # | Feature | Description | Est. LOC |
 |---|---------|-------------|----------|
-| 1 | Native Issue Detail Screen | Detail view with markdown body + comments for individual issues. | ~200 |
-| 2 | Native PR Detail Screen | Same pattern as issues, can reuse comment components. | ~200 |
 | 3 | Saved/Watchlist Repos | Local save via AsyncStorage + save button on repo cards + dedicated list screen. | ~150 |
 | 4 | User Profile Screen | View any GitHub user's profile (repos, contributions, bio). Tappable from starred repo headers, contributor lists. Reuses existing profile layout patterns. | ~250 |
 
