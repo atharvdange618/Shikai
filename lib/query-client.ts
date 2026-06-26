@@ -73,4 +73,5 @@ export const queryKeys = {
   recentActivity: () => ["recentActivity"] as const,
   socialAccounts: () => ["socialAccounts"] as const,
   repoCount: () => ["repoCount"] as const,
+  latestRelease: () => ["latestRelease"] as const,
 } as const;
