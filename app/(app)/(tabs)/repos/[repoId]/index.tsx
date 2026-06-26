@@ -535,6 +535,57 @@ export default function RepoDetailsScreen() {
         )}
       </Animated.View>
 
+      <Animated.View
+        entering={FadeInDown.duration(400).delay(ANIM_DELAYS.actionBar)}
+        style={s.actionRow}
+      >
+        <Pressable
+          style={({ pressed }) => [
+            s.actionButton,
+            s.actionButtonOutline,
+            pressed && s.actionButtonPressed,
+          ]}
+          onPress={handleCodePress}
+          onPressIn={handleCodePressIn}
+        >
+          <Octicons name="code" size={IconSize.sm} color={colors.textPrimary} />
+          <Text style={s.actionButtonOutlineText}>Code</Text>
+        </Pressable>
+
+        <Pressable
+          style={({ pressed }) => [
+            s.actionButton,
+            s.actionButtonFilled,
+            pressed && s.actionButtonPressed,
+          ]}
+          onPress={handleCommitsPress}
+          onPressIn={handleCommitsPressIn}
+        >
+          <Octicons
+            name="history"
+            size={IconSize.sm}
+            color={colors.textOnAccent}
+          />
+          <Text style={s.actionButtonFilledText}>Commits</Text>
+        </Pressable>
+
+        <Pressable
+          style={({ pressed }) => [
+            s.actionButton,
+            s.actionButtonOutline,
+            pressed && s.actionButtonPressed,
+          ]}
+          onPress={handleShare}
+        >
+          <Octicons
+            name="share"
+            size={IconSize.sm}
+            color={colors.textPrimary}
+          />
+          <Text style={s.actionButtonOutlineText}>Share</Text>
+        </Pressable>
+      </Animated.View>
+
       {(lastCommit || isLoading.core) && (
         <Animated.View
           entering={FadeInDown.duration(400).delay(ANIM_DELAYS.commitSpotlight)}
@@ -642,57 +693,6 @@ export default function RepoDetailsScreen() {
           <MarkdownRenderer markdown={readme} />
         </Animated.View>
       )}
-
-      <Animated.View
-        entering={FadeInDown.duration(400).delay(ANIM_DELAYS.actionBar)}
-        style={s.actionRow}
-      >
-        <Pressable
-          style={({ pressed }) => [
-            s.actionButton,
-            s.actionButtonOutline,
-            pressed && s.actionButtonPressed,
-          ]}
-          onPress={handleCodePress}
-          onPressIn={handleCodePressIn}
-        >
-          <Octicons name="code" size={IconSize.sm} color={colors.textPrimary} />
-          <Text style={s.actionButtonOutlineText}>Code</Text>
-        </Pressable>
-
-        <Pressable
-          style={({ pressed }) => [
-            s.actionButton,
-            s.actionButtonFilled,
-            pressed && s.actionButtonPressed,
-          ]}
-          onPress={handleCommitsPress}
-          onPressIn={handleCommitsPressIn}
-        >
-          <Octicons
-            name="history"
-            size={IconSize.sm}
-            color={colors.textOnAccent}
-          />
-          <Text style={s.actionButtonFilledText}>Commits</Text>
-        </Pressable>
-
-        <Pressable
-          style={({ pressed }) => [
-            s.actionButton,
-            s.actionButtonOutline,
-            pressed && s.actionButtonPressed,
-          ]}
-          onPress={handleShare}
-        >
-          <Octicons
-            name="share"
-            size={IconSize.sm}
-            color={colors.textPrimary}
-          />
-          <Text style={s.actionButtonOutlineText}>Share</Text>
-        </Pressable>
-      </Animated.View>
     </ScrollView>
   );
 }
