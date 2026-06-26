@@ -70,6 +70,14 @@ export const queryKeys = {
     ["repo", owner, repo, "issues", state] as const,
   repoPullRequests: (owner: string, repo: string, state: "open" | "closed" | "all") =>
     ["repo", owner, repo, "pullRequests", state] as const,
+  issueDetail: (owner: string, repo: string, number: number) =>
+    ["repo", owner, repo, "issue", number] as const,
+  issueComments: (owner: string, repo: string, number: number) =>
+    ["repo", owner, repo, "issue", number, "comments"] as const,
+  prDetail: (owner: string, repo: string, number: number) =>
+    ["repo", owner, repo, "pr", number] as const,
+  prComments: (owner: string, repo: string, number: number) =>
+    ["repo", owner, repo, "pr", number, "comments"] as const,
   recentActivity: () => ["recentActivity"] as const,
   socialAccounts: () => ["socialAccounts"] as const,
   repoCount: () => ["repoCount"] as const,

@@ -2,6 +2,7 @@ import { githubAxios } from "@/lib/axios";
 import { useAuthStore } from "@/stores/auth.store";
 import type {
   GitHubBranch,
+  GitHubComment,
   GitHubCommit,
   GitHubContent,
   GitHubContributor,
@@ -372,4 +373,60 @@ export async function fetchLatestRelease(): Promise<GitHubRelease | null> {
   } catch {
     return null;
   }
+}
+
+export async function fetchIssue(
+  owner: string,
+  repo: string,
+  issueNumber: number,
+): Promise<GitHubIssue> {
+  const { data } = await githubAxios.get<GitHubIssue>(
+    `/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/issues/${issueNumber}`,
+  );
+  return data;
+}
+
+export async function fetchIssueComments(
+  owner: string,
+  repo: string,
+  issueNumber: number,
+  page: number = 1,
+  per_page: number = 30,
+): Promise<{ comments: GitHubComment[]; pagination: GitHubPagination }> {
+  const { data, headers } = await githubAxios.get<GitHubComment[]>(
+    `/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/issues/${issueNumber}/comments`,
+    { params: { page, per_page } },
+  );
+  return {
+    comments: data,
+    pagination: parseLinkHeader(headers["link"]),
+  };
+}
+
+export async function fetchPullRequestDetail(
+  owner: string,
+  repo: string,
+  prNumber: number,
+): Promise<GitHubPullRequest> {
+  const { data } = await githubAxios.get<GitHubPullRequest>(
+    `/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/pulls/${prNumber}`,
+  );
+  return data;
+}
+
+export async function fetchPullRequestComments(
+  owner: string,
+  repo: string,
+  prNumber: number,
+  page: number = 1,
+  per_page: number = 30,
+): Promise<{ comments: GitHubComment[]; pagination: GitHubPagination }> {
+  const { data, headers } = await githubAxios.get<GitHubComment[]>(
+    `/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/pulls/${prNumber}/comments`,
+    { params: { page, per_page } },
+  );
+  return {
+    comments: data,
+    pagination: parseLinkHeader(headers["link"]),
+  };
 }
