@@ -136,6 +136,36 @@ export default function ReposLayout() {
               : { backgroundColor: colors.background },
         }}
       />
+
+      <Stack.Screen
+        name="[repoId]/issue/[number]"
+        options={{
+          ...sharedHeaderOptions,
+          title: "",
+          headerTransparent: Platform.OS === "ios",
+          headerBlurEffect:
+            Platform.OS === "ios" ? (isDark ? "dark" : "light") : undefined,
+          headerStyle:
+            Platform.OS === "ios"
+              ? undefined
+              : { backgroundColor: colors.background },
+        }}
+      />
+
+      <Stack.Screen
+        name="[repoId]/pr/[number]"
+        options={{
+          ...sharedHeaderOptions,
+          title: "",
+          headerTransparent: Platform.OS === "ios",
+          headerBlurEffect:
+            Platform.OS === "ios" ? (isDark ? "dark" : "light") : undefined,
+          headerStyle:
+            Platform.OS === "ios"
+              ? undefined
+              : { backgroundColor: colors.background },
+        }}
+      />
     </Stack>
   );
 }
