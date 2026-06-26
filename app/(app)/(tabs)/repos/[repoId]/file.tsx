@@ -19,11 +19,13 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { VirtualizedCodeViewer } from "@/components/repo/VirtualizedCodeViewer";
+import { MarkdownRenderer } from "@/components/shared/MarkdownRenderer";
 import {
   DarkColors,
   FontFamily,
   FontSize,
   IconSize,
+  Layout,
   LightColors,
   Radius,
   Spacing,
@@ -145,6 +147,12 @@ export default function FileViewerScreen() {
     [fileName],
   );
 
+  const isMarkdown = useMemo(() => {
+    if (!fileName) return false;
+    const lower = fileName.toLowerCase();
+    return lower.endsWith(".md") || lower.endsWith(".mdx") || lower.endsWith(".markdown");
+  }, [fileName]);
+
   useEffect(() => {
     if (fileName) {
       try {
@@ -250,7 +258,51 @@ export default function FileViewerScreen() {
         </ScrollView>
       )}
 
-      {!isImage && (
+      {!isImage && isMarkdown && (
+        <ScrollView
+          style={s.contentScroll}
+          contentContainerStyle={s.markdownContent}
+          showsVerticalScrollIndicator={false}
+        >
+          <LoadingProgress
+            isLoading={isLoading}
+            fileName={fileName ?? ""}
+            colors={colors}
+          />
+
+          {isError && (
+            <View style={s.centered}>
+              <Octicons name="alert" size={IconSize.lg} color={colors.danger} />
+              <Text style={s.errorText}>Failed to load file</Text>
+              <Text style={s.errorSubtext}>{(error as Error)?.message}</Text>
+            </View>
+          )}
+
+          {showContent && (
+            <>
+              <View style={s.codeHeader}>
+                <Pressable
+                  style={({ pressed }) => [
+                    s.copyButton,
+                    pressed && s.copyButtonPressed,
+                    copied && s.copyButtonCopied,
+                  ]}
+                  onPress={handleCopy}
+                >
+                  <Octicons
+                    name={copied ? "check" : "copy"}
+                    size={IconSize.sm}
+                    color={copied ? colors.success : colors.textPrimary}
+                  />
+                </Pressable>
+              </View>
+              <MarkdownRenderer markdown={data.content} />
+            </>
+          )}
+        </ScrollView>
+      )}
+
+      {!isImage && !isMarkdown && (
         <VirtualizedCodeViewer
           content={showContent ? data.content : ""}
           language={fileName ? getLanguage(fileName) : "text"}
@@ -315,6 +367,11 @@ function buildStyles(colors: typeof LightColors | typeof DarkColors) {
 
     scrollContentImage: {
       flexGrow: 1,
+    },
+
+    markdownContent: {
+      padding: Layout.screenPadding,
+      paddingBottom: Spacing.xxl,
     },
 
     codeHeader: {
