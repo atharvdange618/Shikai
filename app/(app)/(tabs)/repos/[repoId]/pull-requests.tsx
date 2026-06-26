@@ -1,9 +1,8 @@
+import { ListItemSeparator } from "@/components/shared/ListItemSeparator";
 import { Octicons } from "@expo/vector-icons";
 import { FlashList } from "@shopify/flash-list";
-import { ListItemSeparator } from "@/components/shared/ListItemSeparator";
 import { useQueryClient } from "@tanstack/react-query";
 import { Image } from "expo-image";
-import * as Linking from "expo-linking";
 import { useLocalSearchParams, useNavigation } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
@@ -33,6 +32,7 @@ import {
   Spacing,
 } from "@/constants/theme";
 import { relativeTime } from "@/lib/utils";
+import { useRouter } from "expo-router";
 
 type PRState = "open" | "closed";
 
@@ -101,9 +101,9 @@ export default function PullRequestsScreen() {
 
   const renderItem = useCallback(
     ({ item }: { item: GitHubPullRequest }) => (
-      <PRItem pr={item} colors={colors} />
+      <PRItem pr={item} colors={colors} repoId={repoId ?? ""} />
     ),
-    [colors],
+    [colors, repoId],
   );
 
   const keyExtractor = useCallback(
@@ -185,15 +185,17 @@ export default function PullRequestsScreen() {
 const PRItem = memo(function PRItem({
   pr,
   colors,
+  repoId,
 }: {
   pr: GitHubPullRequest;
   colors: typeof LightColors | typeof DarkColors;
+  repoId: string;
 }) {
+  const router = useRouter();
+
   const handlePress = useCallback(() => {
-    if (pr.html_url.startsWith("https://github.com/")) {
-      Linking.openURL(pr.html_url);
-    }
-  }, [pr.html_url]);
+    router.push(`/(app)/(tabs)/repos/${repoId}/pr/${pr.number}` as any);
+  }, [router, repoId, pr.number]);
 
   const s = useMemo(() => buildStyles(colors), [colors]);
 

@@ -1,10 +1,9 @@
+import { ListItemSeparator } from "@/components/shared/ListItemSeparator";
 import { Octicons } from "@expo/vector-icons";
 import { FlashList } from "@shopify/flash-list";
-import { ListItemSeparator } from "@/components/shared/ListItemSeparator";
 import { useQueryClient } from "@tanstack/react-query";
 import { Image } from "expo-image";
-import * as Linking from "expo-linking";
-import { useLocalSearchParams, useNavigation } from "expo-router";
+import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import {
@@ -94,9 +93,9 @@ export default function IssuesScreen() {
 
   const renderItem = useCallback(
     ({ item }: { item: GitHubIssue }) => (
-      <IssueItem issue={item} colors={colors} />
+      <IssueItem issue={item} colors={colors} repoId={repoId ?? ""} />
     ),
-    [colors],
+    [colors, repoId],
   );
 
   const keyExtractor = useCallback((item: GitHubIssue) => String(item.id), []);
@@ -182,15 +181,17 @@ export default function IssuesScreen() {
 const IssueItem = memo(function IssueItem({
   issue,
   colors,
+  repoId,
 }: {
   issue: GitHubIssue;
   colors: typeof LightColors | typeof DarkColors;
+  repoId: string;
 }) {
+  const router = useRouter();
+
   const handlePress = useCallback(() => {
-    if (issue.html_url.startsWith("https://github.com/")) {
-      Linking.openURL(issue.html_url);
-    }
-  }, [issue.html_url]);
+    router.push(`/(app)/(tabs)/repos/${repoId}/issue/${issue.number}` as any);
+  }, [router, repoId, issue.number]);
 
   const isOpen = issue.state === "open";
   const iconColor = isOpen ? colors.success : colors.textMuted;
