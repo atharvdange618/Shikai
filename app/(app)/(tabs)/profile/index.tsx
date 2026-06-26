@@ -36,7 +36,7 @@ import { useSocialAccounts } from "@/hooks/useSocialAccounts";
 export default function ProfileScreen() {
   const isDark = useColorScheme() === "dark";
   const colors = isDark ? DarkColors : LightColors;
-  const shadows = isDark ? {} : Shadows.light.sm;
+  const shadows = useMemo(() => (isDark ? {} : Shadows.light.sm), [isDark]);
   const navigation =
     useNavigation<DrawerNavigationProp<Record<string, undefined>>>();
   const queryClient = useQueryClient();

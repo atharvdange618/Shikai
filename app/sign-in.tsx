@@ -42,7 +42,9 @@ import { useSignInStore } from "@/stores/signin.store";
 const CLIENT_ID = process.env.EXPO_PUBLIC_GITHUB_CLIENT_ID!;
 const APP_SLUG = process.env.EXPO_PUBLIC_GITHUB_APP_SLUG!;
 const OAUTH_PROXY_URL = process.env.EXPO_PUBLIC_OAUTH_PROXY_URL!;
-const SCOPES = ["read:user", "user:email", "repo:status", "read:repo"].join(",");
+const SCOPES = ["read:user", "user:email", "repo:status", "read:repo"].join(
+  ",",
+);
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
@@ -51,7 +53,7 @@ export default function SignInScreen() {
   const scheme = useColorScheme();
   const isDark = scheme === "dark";
   const colors = isDark ? DarkColors : LightColors;
-  const shadows = isDark ? {} : Shadows.light.md;
+  const shadows = useMemo(() => (isDark ? {} : Shadows.light.md), [isDark]);
   const insets = useSafeAreaInsets();
 
   const setToken = useAuthStore((s) => s.setToken);
@@ -216,7 +218,10 @@ export default function SignInScreen() {
       }
 
       const { pendingToken, pendingTokenExpiry } = useSignInStore.getState();
-      if (!pendingToken || (pendingTokenExpiry && Date.now() > pendingTokenExpiry)) {
+      if (
+        !pendingToken ||
+        (pendingTokenExpiry && Date.now() > pendingTokenExpiry)
+      ) {
         setPendingToken(null);
         setLoading(false);
         setNeedsInstall(false);
@@ -241,7 +246,10 @@ export default function SignInScreen() {
     }
   }, [redirectUri, setUser, router, setToken]);
 
-  const s = useMemo(() => buildStyles(colors, isDark, shadows, insets.top, insets.bottom), [colors, isDark, shadows, insets.top, insets.bottom]);
+  const s = useMemo(
+    () => buildStyles(colors, isDark, shadows, insets.top, insets.bottom),
+    [colors, isDark, shadows, insets.top, insets.bottom],
+  );
 
   return (
     <View style={s.container}>
