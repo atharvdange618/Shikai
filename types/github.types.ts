@@ -217,7 +217,7 @@ interface WatchEventPayload {
   action: "started";
 }
 
-interface PublicEventPayload {}
+interface PublicEventPayload { }
 
 type KnownEventPayload =
   | { type: "PushEvent"; payload: PushEventPayload }
@@ -314,4 +314,22 @@ export interface GitHubPullRequest {
   merged: boolean;
   head: { ref: string; label: string };
   base: { ref: string; label: string };
+}
+
+export interface GitHubRelease {
+  id: number;
+  tag_name: string;
+  name: string | null;
+  body: string | null;
+  html_url: string;
+  draft: boolean;
+  prerelease: boolean;
+  created_at: string;
+  published_at: string;
+  assets: Array<{
+    name: string;
+    browser_download_url: string;
+    content_type: string;
+    size: number;
+  }>;
 }
