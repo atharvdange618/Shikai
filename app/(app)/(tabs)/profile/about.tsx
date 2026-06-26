@@ -71,7 +71,7 @@ const CREDITS = [
 export default function AboutScreen() {
   const isDark = useColorScheme() === "dark";
   const colors = isDark ? DarkColors : LightColors;
-  const shadows = isDark ? {} : Shadows.light.sm;
+  const shadows = useMemo(() => (isDark ? {} : Shadows.light.sm), [isDark]);
 
   const s = useMemo(() => buildStyles(colors, shadows), [colors, shadows]);
 

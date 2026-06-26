@@ -35,7 +35,7 @@ interface PinnedRepoCardProps {
 export function PinnedRepoCard({ repo }: PinnedRepoCardProps) {
   const isDark = useColorScheme() === "dark";
   const colors = isDark ? DarkColors : LightColors;
-  const shadows = isDark ? {} : Shadows.light.sm;
+  const shadows = useMemo(() => (isDark ? {} : Shadows.light.sm), [isDark]);
   const router = useRouter();
   const queryClient = useQueryClient();
 
