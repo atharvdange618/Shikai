@@ -100,7 +100,7 @@ export default function RepoDetailsScreen() {
   const queryClient = useQueryClient();
   const isDark = useColorScheme() === "dark";
   const colors = isDark ? DarkColors : LightColors;
-  const shadows = isDark ? {} : Shadows.light.sm;
+  const shadows = useMemo(() => (isDark ? {} : Shadows.light.sm), [isDark]);
 
   const [owner, repoName] = (repoId ?? "").split("__");
 
