@@ -1,6 +1,7 @@
+import { useDebounce } from "@/hooks/useDebounce";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
-import { memo, useCallback, useMemo, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
@@ -38,6 +39,8 @@ export default function StarsScreen() {
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState<SortOption>("pushed");
 
+  const debouncedSearch = useDebounce(search, 300);
+
   const prefetchMap = useRef(new Set<number>());
   const viewportTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -48,9 +51,15 @@ export default function StarsScreen() {
     isFetchingNextPage,
     isLoading,
     isError,
-  } = useStarred({ search, sort });
+  } = useStarred({ search: debouncedSearch, sort });
 
   const [refreshing, setRefreshing] = useState(false);
+
+  useEffect(() => {
+    if (debouncedSearch && hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
+    }
+  }, [debouncedSearch, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -122,20 +131,6 @@ export default function StarsScreen() {
 
   const Separator = useCallback(() => <View style={s.separator} />, [s]);
 
-  const ListHeader = useMemo(
-    () => (
-      <View style={s.listHeader}>
-        <SearchBar
-          value={search}
-          onChangeText={setSearch}
-          placeholder="Search starred repos…"
-        />
-        <RepoFilters sort={sort} onSortChange={setSort} />
-      </View>
-    ),
-    [s, search, sort],
-  );
-
   const ListEmpty = useMemo(() => {
     if (isLoading) {
       return (
@@ -152,10 +147,10 @@ export default function StarsScreen() {
             <Text style={s.emptyTitle}>Something went wrong</Text>
             <Text style={s.emptySubtitle}>Pull down to try again</Text>
           </>
-        ) : search ? (
+        ) : debouncedSearch ? (
           <>
             <Text style={s.emptyTitle}>
-              No results for &quot;{search}&quot;
+              No results for &quot;{debouncedSearch}&quot;
             </Text>
             <Text style={s.emptySubtitle}>Try a different search term</Text>
           </>
@@ -169,7 +164,7 @@ export default function StarsScreen() {
         )}
       </View>
     );
-  }, [isLoading, isError, search, s, colors.accent]);
+  }, [isLoading, isError, debouncedSearch, s, colors.accent]);
 
   const ListFooter = useMemo(
     () =>
@@ -183,13 +178,21 @@ export default function StarsScreen() {
 
   return (
     <View style={s.container}>
+      <View style={s.listHeader}>
+        <SearchBar
+          value={search}
+          onChangeText={setSearch}
+          placeholder="Search starred repos…"
+        />
+        <RepoFilters sort={sort} onSortChange={setSort} />
+      </View>
+
       <FlatList
         data={repos}
         renderItem={renderItem}
         keyExtractor={keyExtractor}
         contentContainerStyle={s.listContent}
         ItemSeparatorComponent={Separator}
-        ListHeaderComponent={ListHeader}
         ListEmptyComponent={ListEmpty}
         ListFooterComponent={ListFooter}
         onEndReached={onEndReached}
@@ -306,9 +309,10 @@ function buildStyles(colors: typeof LightColors | typeof DarkColors) {
     },
 
     listHeader: {
+      paddingHorizontal: Layout.screenPadding,
       paddingTop: Spacing.md,
+      paddingBottom: Spacing.md,
       gap: Spacing.md,
-      marginBottom: Spacing.md,
     },
 
     separator: {
