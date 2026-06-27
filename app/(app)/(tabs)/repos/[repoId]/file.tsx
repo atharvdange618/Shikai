@@ -121,7 +121,7 @@ function LoadingProgress({
         </View>
         <Text style={s.loadingText}>{displayProgress}%</Text>
       </View>
-      <Text style={s.loadingText}>{`Downloading ${fileName}...`}</Text>
+      <Text style={s.loadingText}>{`Loading ${fileName}...`}</Text>
     </View>
   );
 }
@@ -150,7 +150,11 @@ export default function FileViewerScreen() {
   const isMarkdown = useMemo(() => {
     if (!fileName) return false;
     const lower = fileName.toLowerCase();
-    return lower.endsWith(".md") || lower.endsWith(".mdx") || lower.endsWith(".markdown");
+    return (
+      lower.endsWith(".md") ||
+      lower.endsWith(".mdx") ||
+      lower.endsWith(".markdown")
+    );
   }, [fileName]);
 
   useEffect(() => {
