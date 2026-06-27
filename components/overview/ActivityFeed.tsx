@@ -42,8 +42,6 @@ import type { GitHubEvent } from "@/types/github.types";
 interface ActivityFeedProps {
   events: GitHubEvent[];
   isLoading?: boolean;
-  onLoadMore?: () => void;
-  hasNextPage?: boolean;
   isLoadingMore?: boolean;
 }
 
@@ -331,8 +329,6 @@ function groupEvents(
 export function ActivityFeed({
   events,
   isLoading = false,
-  onLoadMore,
-  hasNextPage = false,
   isLoadingMore = false,
 }: ActivityFeedProps) {
   const isDark = useColorScheme() === "dark";
@@ -499,21 +495,10 @@ export function ActivityFeed({
         );
       })}
 
-      {hasNextPage && (
-        <Pressable
-          style={({ pressed }) => [
-            s.loadMoreButton,
-            pressed && s.loadMoreButtonPressed,
-          ]}
-          onPress={onLoadMore}
-          disabled={isLoadingMore}
-        >
-          {isLoadingMore ? (
-            <ActivityIndicator size="small" color={colors.accent} />
-          ) : (
-            <Text style={s.loadMoreText}>Load more</Text>
-          )}
-        </Pressable>
+      {isLoadingMore && (
+        <View style={s.loadMoreContainer}>
+          <ActivityIndicator size="small" color={colors.accent} />
+        </View>
       )}
     </View>
   );
@@ -637,24 +622,10 @@ function buildStyles(colors: typeof LightColors | typeof DarkColors) {
       flexShrink: 0,
     },
 
-    loadMoreButton: {
+    loadMoreContainer: {
       alignItems: "center",
       justifyContent: "center",
       paddingVertical: Spacing.md,
-      paddingHorizontal: Spacing.lg,
-      borderRadius: Radius.md,
-      backgroundColor: colors.surfaceSecondary,
-      marginTop: Spacing.xs,
-    },
-
-    loadMoreButtonPressed: {
-      opacity: 0.7,
-    },
-
-    loadMoreText: {
-      fontFamily: FontFamily.medium,
-      fontSize: FontSize.label,
-      color: colors.accent,
     },
 
     emptyText: {
