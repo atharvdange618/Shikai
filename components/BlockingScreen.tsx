@@ -1,14 +1,30 @@
 import { useTheme } from "@/constants/theme";
 import { useFocusEffect } from "expo-router";
-import { useCallback } from "react";
-import { BackHandler, StyleSheet, Text, View } from "react-native";
+import { useCallback, useState } from "react";
+import {
+  ActivityIndicator,
+  Alert,
+  BackHandler,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
+import { setDevModeOverride } from "shikai-security";
 
 interface BlockingScreenProps {
   reasons: string[];
+  devModeBlocked: boolean;
+  onOverride?: () => void;
 }
 
-export function BlockingScreen({ reasons }: BlockingScreenProps) {
+export function BlockingScreen({
+  reasons,
+  devModeBlocked,
+  onOverride,
+}: BlockingScreenProps) {
   const { colors, typography, spacing } = useTheme();
+  const [loading, setLoading] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -16,6 +32,28 @@ export function BlockingScreen({ reasons }: BlockingScreenProps) {
       return () => sub.remove();
     }, []),
   );
+
+  const handleOverride = async () => {
+    Alert.alert(
+      "Developer Mode Override",
+      "Enabling this override allows developer tools (ADB, USB debugging) to access your app data. This includes your account credentials, messages, and any locally stored information.\n\nOnly enable this if you trust the devices connected to your phone.",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "I understand, enable override",
+          style: "destructive",
+          onPress: async () => {
+            setLoading(true);
+            const success = await setDevModeOverride(true);
+            setLoading(false);
+            if (success) {
+              onOverride?.();
+            }
+          },
+        },
+      ],
+    );
+  };
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
@@ -57,6 +95,29 @@ export function BlockingScreen({ reasons }: BlockingScreenProps) {
             ))}
           </View>
         )}
+
+        {devModeBlocked && (
+          <Pressable
+            style={[
+              styles.overrideButton,
+              {
+                backgroundColor: colors.surface,
+                borderColor: colors.border,
+                marginTop: spacing.xl,
+              },
+            ]}
+            onPress={handleOverride}
+            disabled={loading}
+          >
+            {loading ? (
+              <ActivityIndicator color={colors.textSecondary} />
+            ) : (
+              <Text style={[typography.label, { color: colors.textSecondary }]}>
+                I'm a developer - allow anyway
+              </Text>
+            )}
+          </Pressable>
+        )}
       </View>
     </View>
   );
@@ -74,5 +135,13 @@ const styles = StyleSheet.create({
   },
   reasons: {
     gap: 4,
+  },
+  overrideButton: {
+    paddingVertical: 14,
+    paddingHorizontal: 24,
+    borderRadius: 12,
+    borderWidth: 1,
+    width: "100%",
+    alignItems: "center",
   },
 });
