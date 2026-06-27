@@ -257,7 +257,7 @@ const PRItem = memo(function PRItem({
             contentContainerStyle={s.labelsContent}
           >
             {pr.labels.slice(0, 4).map((label) => (
-              <LabelPill key={label.id} label={label} colors={colors} />
+              <LabelPill key={label.id} label={label} />
             ))}
           </ScrollView>
         )}
@@ -289,10 +289,8 @@ const PRItem = memo(function PRItem({
 
 function LabelPill({
   label,
-  colors,
 }: {
   label: GitHubLabel;
-  colors: typeof LightColors | typeof DarkColors;
 }) {
   const bg = `#${label.color}28`;
   const text = `#${label.color}`;

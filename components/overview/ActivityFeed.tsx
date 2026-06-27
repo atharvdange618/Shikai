@@ -443,7 +443,7 @@ export function ActivityFeed({
 
             {isGroup && isExpanded && (
               <View style={s.expandedGroup}>
-                {group.events.map((event, index) => {
+                {group.events.map((event, _index) => {
                   const display = getEventDisplay(event, colors);
                   if (!display) return null;
 
