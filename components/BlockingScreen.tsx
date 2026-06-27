@@ -5,10 +5,9 @@ import { BackHandler, StyleSheet, Text, View } from "react-native";
 
 interface BlockingScreenProps {
   reasons: string[];
-  onRecheck?: () => void;
 }
 
-export function BlockingScreen({ reasons, onRecheck }: BlockingScreenProps) {
+export function BlockingScreen({ reasons }: BlockingScreenProps) {
   const { colors, typography, spacing } = useTheme();
 
   useFocusEffect(

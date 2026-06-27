@@ -150,7 +150,6 @@ export default function RootLayout() {
       {!showSplash && securityStatus === "blocked" && (
         <BlockingScreen
           reasons={securityReasons}
-          onRecheck={handleRecheck}
         />
       )}
       {!showSplash && securityStatus === "passed" && (

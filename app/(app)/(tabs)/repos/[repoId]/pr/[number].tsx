@@ -23,8 +23,8 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  useColorScheme,
   View,
+  useColorScheme,
 } from "react-native";
 
 export default function PullRequestDetailScreen() {
@@ -100,7 +100,6 @@ export default function PullRequestDetailScreen() {
       contentContainerStyle={s.content}
       showsVerticalScrollIndicator={false}
     >
-      {/* Title + state icon */}
       <View style={s.titleRow}>
         <Octicons name={stateIcon} size={22} color={stateColor} />
         <View style={{ flex: 1 }}>
@@ -120,16 +119,14 @@ export default function PullRequestDetailScreen() {
         </View>
       </View>
 
-      {/* Branch info */}
       <View style={s.branchRow}>
         <Octicons name="git-branch" size={12} color={colors.textMuted} />
         <Text style={[s.branchText, { color: colors.textSecondary }]}>
-          {pr.base.ref}{" "}
-          <Text style={{ color: colors.textMuted }}>←</Text> {pr.head.ref}
+          {pr.base.ref} <Text style={{ color: colors.textMuted }}>←</Text>{" "}
+          {pr.head.ref}
         </Text>
       </View>
 
-      {/* Labels */}
       {pr.labels.length > 0 && (
         <View style={s.labelsRow}>
           {pr.labels.map((label) => (
@@ -150,7 +147,6 @@ export default function PullRequestDetailScreen() {
         </View>
       )}
 
-      {/* Author bar */}
       <View style={s.authorBar}>
         <Image
           source={{ uri: pr.user.avatar_url }}
@@ -166,7 +162,6 @@ export default function PullRequestDetailScreen() {
         </Text>
       </View>
 
-      {/* Body */}
       {pr.body && (
         <View
           style={[
@@ -181,13 +176,11 @@ export default function PullRequestDetailScreen() {
         </View>
       )}
 
-      {/* Separator before comments */}
       {comments.length > 0 && (
         <View style={[s.separator, { backgroundColor: colors.border }]} />
       )}
 
-      {/* Comments */}
-      {comments.map((comment, index) => (
+      {comments.map((comment, _index) => (
         <View key={comment.id}>
           <View
             style={[
@@ -205,9 +198,7 @@ export default function PullRequestDetailScreen() {
                 contentFit="cover"
                 transition={100}
               />
-              <Text
-                style={[s.commentAuthor, { color: colors.textPrimary }]}
-              >
+              <Text style={[s.commentAuthor, { color: colors.textPrimary }]}>
                 {comment.user.login}
               </Text>
               <Text style={[s.commentTime, { color: colors.textMuted }]}>

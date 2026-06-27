@@ -20,8 +20,8 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  useColorScheme,
   View,
+  useColorScheme,
 } from "react-native";
 
 export default function IssueDetailScreen() {
@@ -78,19 +78,20 @@ export default function IssueDetailScreen() {
       contentContainerStyle={s.content}
       showsVerticalScrollIndicator={false}
     >
-      {/* Title + state icon */}
       <View style={s.titleRow}>
         <Octicons
           name={isOpen ? "issue-opened" : "issue-closed"}
           size={22}
           color={stateColor}
         />
-        <Text style={[s.title, { color: colors.textPrimary }]} numberOfLines={5}>
+        <Text
+          style={[s.title, { color: colors.textPrimary }]}
+          numberOfLines={5}
+        >
           {issue.title}
         </Text>
       </View>
 
-      {/* Labels */}
       {issue.labels.length > 0 && (
         <View style={s.labelsRow}>
           {issue.labels.map((label) => (
@@ -111,7 +112,6 @@ export default function IssueDetailScreen() {
         </View>
       )}
 
-      {/* Author bar */}
       <View style={s.authorBar}>
         <Image
           source={{ uri: issue.user.avatar_url }}
@@ -127,7 +127,6 @@ export default function IssueDetailScreen() {
         </Text>
       </View>
 
-      {/* Body */}
       {issue.body && (
         <View
           style={[
@@ -142,13 +141,11 @@ export default function IssueDetailScreen() {
         </View>
       )}
 
-      {/* Separator before comments */}
       {comments.length > 0 && (
         <View style={[s.separator, { backgroundColor: colors.border }]} />
       )}
 
-      {/* Comments */}
-      {comments.map((comment, index) => (
+      {comments.map((comment, _index) => (
         <View key={comment.id}>
           <View
             style={[
@@ -166,9 +163,7 @@ export default function IssueDetailScreen() {
                 contentFit="cover"
                 transition={100}
               />
-              <Text
-                style={[s.commentAuthor, { color: colors.textPrimary }]}
-              >
+              <Text style={[s.commentAuthor, { color: colors.textPrimary }]}>
                 {comment.user.login}
               </Text>
               <Text style={[s.commentTime, { color: colors.textMuted }]}>
