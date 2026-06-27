@@ -1,8 +1,6 @@
-import { Drawer } from "expo-router/drawer";
-import { useColorScheme, useWindowDimensions } from "react-native";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { Stack } from "expo-router";
+import { useColorScheme } from "react-native";
 
-import { ProfileDrawerContent } from "@/components/navigation/ProfileDrawerContent";
 import {
   DarkColors,
   FontFamily,
@@ -11,7 +9,6 @@ import {
 } from "@/constants/theme";
 
 export default function ProfileLayout() {
-  const { width } = useWindowDimensions();
   const isDark = useColorScheme() === "dark";
   const colors = isDark ? DarkColors : LightColors;
 
@@ -29,40 +26,23 @@ export default function ProfileLayout() {
   };
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <Drawer
-        drawerContent={(props) => <ProfileDrawerContent {...props} />}
-        screenOptions={{
+    <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Screen
+        name="index"
+        options={{
           ...sharedHeaderOptions,
-          drawerPosition: "right",
-          drawerType: "front",
-          drawerStyle: {
-            backgroundColor: colors.surface,
-            width: width * 0.72,
-          },
-          overlayColor: "rgba(0, 0, 0, 0.4)",
-          swipeEnabled: true,
-          swipeEdgeWidth: 60,
           headerShown: true,
+          title: "Profile",
         }}
-      >
-        <Drawer.Screen
-          name="index"
-          options={{
-            ...sharedHeaderOptions,
-            title: "Profile",
-            headerRight: undefined,
-          }}
-        />
-
-        <Drawer.Screen
-          name="about"
-          options={{
-            ...sharedHeaderOptions,
-            title: "About",
-          }}
-        />
-      </Drawer>
-    </GestureHandlerRootView>
+      />
+      <Stack.Screen
+        name="about"
+        options={{
+          ...sharedHeaderOptions,
+          headerShown: true,
+          title: "About",
+        }}
+      />
+    </Stack>
   );
 }

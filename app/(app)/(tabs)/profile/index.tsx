@@ -1,9 +1,8 @@
 import { FontAwesome6, Octicons } from "@expo/vector-icons";
-import { DrawerNavigationProp } from "@react-navigation/drawer";
 import { useQueryClient } from "@tanstack/react-query";
 import { Image } from "expo-image";
-import { useNavigation } from "expo-router";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { Href, useRouter } from "expo-router";
+import { useCallback, useMemo, useState } from "react";
 import {
   Linking,
   Pressable,
@@ -37,8 +36,7 @@ export default function ProfileScreen() {
   const isDark = useColorScheme() === "dark";
   const colors = isDark ? DarkColors : LightColors;
   const shadows = useMemo(() => (isDark ? {} : Shadows.light.sm), [isDark]);
-  const navigation =
-    useNavigation<DrawerNavigationProp<Record<string, undefined>>>();
+  const router = useRouter();
   const queryClient = useQueryClient();
 
   const { data: user, isLoading } = useUser();
@@ -59,26 +57,6 @@ export default function ProfileScreen() {
   )?.url;
 
   const [refreshing, setRefreshing] = useState(false);
-
-  useEffect(() => {
-    try {
-      navigation.setOptions({
-        headerRight: () => (
-          <Pressable
-            onPress={() => navigation.openDrawer()}
-            hitSlop={12}
-            style={{ marginRight: Spacing.sm, padding: Spacing.xs }}
-          >
-            <Octicons
-              name="three-bars"
-              size={IconSize.md}
-              color={colors.textSecondary}
-            />
-          </Pressable>
-        ),
-      });
-    } catch {}
-  }, [navigation, colors.textSecondary]);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -260,6 +238,18 @@ export default function ProfileScreen() {
           <Octicons name="link-external" size={13} color={colors.textMuted} />
         </Pressable>
       )}
+
+      <Pressable
+        style={({ pressed }) => [
+          s.aboutButton,
+          pressed && s.aboutButtonPressed,
+        ]}
+        onPress={() => router.push("/(app)/(tabs)/profile/about" as Href)}
+      >
+        <Octicons name="info" size={IconSize.md} color={colors.textSecondary} />
+        <Text style={s.aboutButtonText}>About Shikai</Text>
+        <Octicons name="chevron-right" size={13} color={colors.textMuted} />
+      </Pressable>
 
       {user?.created_at && (
         <Text style={s.memberSince}>
@@ -522,6 +512,29 @@ function buildStyles(
     },
 
     githubButtonText: {
+      flex: 1,
+      fontFamily: FontFamily.medium,
+      fontSize: FontSize.body,
+      color: colors.textSecondary,
+    },
+
+    aboutButton: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: Spacing.md,
+      backgroundColor: colors.surface,
+      borderRadius: Radius.lg,
+      borderWidth: 1,
+      borderColor: colors.border,
+      padding: Spacing.md,
+      ...shadows,
+    },
+
+    aboutButtonPressed: {
+      opacity: 0.7,
+    },
+
+    aboutButtonText: {
       flex: 1,
       fontFamily: FontFamily.medium,
       fontSize: FontSize.body,
