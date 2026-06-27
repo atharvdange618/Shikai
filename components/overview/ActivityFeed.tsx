@@ -17,7 +17,7 @@
 
 import { Octicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
-import * as WebBrowser from "expo-web-browser";
+import { Href, useRouter } from "expo-router";
 import { useMemo, useState } from "react";
 import {
   ActivityIndicator,
@@ -45,6 +45,16 @@ interface ActivityFeedProps {
   onLoadMore?: () => void;
   hasNextPage?: boolean;
   isLoadingMore?: boolean;
+}
+
+function parseGitHubUrl(url: string): Href | null {
+  const match = url.match(/github\.com\/([^/]+)\/([^/]+)(?:\/(issues|pull)\/(\d+))?/);
+  if (!match) return null;
+  const [, owner, repo, type, number] = match;
+  const repoId = `${owner}__${repo}`;
+  if (type === "issues" && number) return `/(app)/(tabs)/repos/${repoId}/issue/${number}` as Href;
+  if (type === "pull" && number) return `/(app)/(tabs)/repos/${repoId}/pr/${number}` as Href;
+  return `/(app)/(tabs)/repos/${repoId}` as Href;
 }
 
 interface EventDisplay {
@@ -328,13 +338,15 @@ export function ActivityFeed({
   const isDark = useColorScheme() === "dark";
   const colors = isDark ? DarkColors : LightColors;
   const s = useMemo(() => buildStyles(colors), [colors]);
+  const router = useRouter();
 
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
 
   const handleEventPress = async (url: string) => {
-    if (!url.startsWith("https://github.com/")) return;
+    const route = parseGitHubUrl(url);
+    if (!route) return;
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    await WebBrowser.openBrowserAsync(url);
+    router.push(route);
   };
 
   const toggleGroup = (groupId: string) => {
