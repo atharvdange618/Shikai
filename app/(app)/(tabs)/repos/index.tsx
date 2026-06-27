@@ -1,7 +1,8 @@
 import { ListItemSeparator } from "@/components/shared/ListItemSeparator";
+import { useDebounce } from "@/hooks/useDebounce";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   RefreshControl,
@@ -40,6 +41,8 @@ export default function ReposScreen() {
   const [sort, setSort] = useState<SortOption>("pushed");
   const [type, setType] = useState<TypeOption>("all");
 
+  const debouncedSearch = useDebounce(search, 300);
+
   const prefetchMap = useRef(new Set<number>());
   const viewportTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -50,9 +53,15 @@ export default function ReposScreen() {
     isFetchingNextPage,
     isLoading,
     isError,
-  } = useRepos({ search, sort, type });
+  } = useRepos({ search: debouncedSearch, sort, type });
 
   const [refreshing, setRefreshing] = useState(false);
+
+  useEffect(() => {
+    if (debouncedSearch && hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
+    }
+  }, [debouncedSearch, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -132,25 +141,6 @@ export default function ReposScreen() {
 
   const s = useMemo(() => buildStyles(colors), [colors]);
 
-  const ListHeader = useMemo(
-    () => (
-      <View style={s.listHeader}>
-        <SearchBar
-          value={search}
-          onChangeText={setSearch}
-          placeholder="Search repositories…"
-        />
-        <RepoFilters
-          sort={sort}
-          type={type}
-          onSortChange={setSort}
-          onTypeChange={setType}
-        />
-      </View>
-    ),
-    [search, sort, type, s.listHeader],
-  );
-
   const ListEmpty = isLoading ? (
     <View style={s.loadingContainer}>
       <ActivityIndicator size="large" color={colors.accent} />
@@ -163,9 +153,11 @@ export default function ReposScreen() {
           <Text style={s.emptyTitle}>Something went wrong</Text>
           <Text style={s.emptySubtitle}>Pull down to try again</Text>
         </>
-      ) : search ? (
+      ) : debouncedSearch ? (
         <>
-          <Text style={s.emptyTitle}>No results for &quot;{search}&quot;</Text>
+          <Text style={s.emptyTitle}>
+            No results for &quot;{debouncedSearch}&quot;
+          </Text>
           <Text style={s.emptySubtitle}>
             Try a different search term or filter
           </Text>
@@ -194,15 +186,34 @@ export default function ReposScreen() {
     </View>
   ) : null;
 
+  const listKey = debouncedSearch.length > 0 ? "search" : "default";
+
   return (
     <View style={s.container}>
+      {/* Fixed header — lives outside FlashList so it is never remounted
+          when the list key changes or FlashList re-renders. This keeps
+          the TextInput focus alive across every state transition. */}
+      <View style={s.listHeader}>
+        <SearchBar
+          value={search}
+          onChangeText={setSearch}
+          placeholder="Search repositories…"
+        />
+        <RepoFilters
+          sort={sort}
+          type={type}
+          onSortChange={setSort}
+          onTypeChange={setType}
+        />
+      </View>
+
       <FlashList
+        key={listKey}
         data={repos}
         renderItem={renderItem}
         keyExtractor={keyExtractor}
         contentContainerStyle={s.listContent}
         ItemSeparatorComponent={ListItemSeparator}
-        ListHeaderComponent={ListHeader}
         ListEmptyComponent={ListEmpty}
         ListFooterComponent={ListFooter}
         onEndReached={() => {
@@ -241,9 +252,10 @@ function buildStyles(colors: typeof LightColors | typeof DarkColors) {
     },
 
     listHeader: {
+      paddingHorizontal: Layout.screenPadding,
       paddingTop: Spacing.md,
+      paddingBottom: Spacing.md,
       gap: Spacing.md,
-      marginBottom: Spacing.md,
     },
 
     separator: {
