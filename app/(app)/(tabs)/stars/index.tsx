@@ -7,8 +7,8 @@ import {
   RefreshControl,
   StyleSheet,
   Text,
-  useColorScheme,
   View,
+  useColorScheme,
 } from "react-native";
 
 import { RepoCard } from "@/components/repo/RepoCard";
@@ -87,11 +87,12 @@ export default function StarsScreen() {
         stargazersCount={item.stargazers_count}
         topics={item.topics}
         isPrivate={item.private}
+        isDark={isDark}
         onPress={handleRepoPress}
         onPressIn={handleRepoPressIn}
       />
     ),
-    [handleRepoPress, handleRepoPressIn],
+    [handleRepoPress, handleRepoPressIn, isDark],
   );
 
   const keyExtractor = useCallback((item: GitHubRepo) => String(item.id), []);
@@ -168,7 +169,7 @@ export default function StarsScreen() {
         )}
       </View>
     );
-  },     [isLoading, isError, search, s, colors.accent]);
+  }, [isLoading, isError, search, s, colors.accent]);
 
   const ListFooter = useMemo(
     () =>
@@ -220,6 +221,7 @@ interface MemoizedRepoCardProps {
   stargazersCount: number;
   topics: string[];
   isPrivate: boolean;
+  isDark: boolean;
   onPress: (repoId: string) => void;
   onPressIn?: (owner: string, name: string) => void;
 }
@@ -235,6 +237,7 @@ const MemoizedRepoCard = memo(function MemoizedRepoCard({
   stargazersCount,
   topics,
   isPrivate,
+  isDark,
   onPress,
   onPressIn,
 }: MemoizedRepoCardProps) {
@@ -265,17 +268,28 @@ const MemoizedRepoCard = memo(function MemoizedRepoCard({
     ],
   ) as GitHubRepo;
 
-  const handlePress = useCallback(() => {
-    const repoId = `${ownerLogin}__${name}`;
-    onPress(repoId);
-  }, [ownerLogin, name, onPress]);
+  const handlePress = useCallback(
+    (_repo: GitHubRepo) => {
+      const repoId = `${ownerLogin}__${name}`;
+      onPress(repoId);
+    },
+    [ownerLogin, name, onPress],
+  );
 
-  const handlePressIn = useCallback(() => {
-    onPressIn?.(ownerLogin, name);
-  }, [ownerLogin, name, onPressIn]);
+  const handlePressIn = useCallback(
+    (_repo: GitHubRepo) => {
+      onPressIn?.(ownerLogin, name);
+    },
+    [ownerLogin, name, onPressIn],
+  );
 
   return (
-    <RepoCard repo={repo} onPress={handlePress} onPressIn={handlePressIn} />
+    <RepoCard
+      repo={repo}
+      isDark={isDark}
+      onPress={handlePress}
+      onPressIn={handlePressIn}
+    />
   );
 });
 

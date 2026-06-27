@@ -1,13 +1,6 @@
 import { Octicons } from "@expo/vector-icons";
 import { memo, useMemo } from "react";
-import {
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  useColorScheme,
-  View,
-} from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import languageColors from "@/constants/language-colors.json";
 import {
@@ -25,22 +18,20 @@ import type { GitHubRepo, RepoListParams } from "@/types/github.types";
 interface RepoCardProps {
   repo: GitHubRepo;
   sort?: RepoListParams["sort"];
-  onPress?: () => void;
-  onPressIn?: () => void;
+  isDark: boolean;
+  onPress?: (repo: GitHubRepo) => void;
+  onPressIn?: (repo: GitHubRepo) => void;
 }
 
 export const RepoCard = memo(function RepoCard({
   repo,
   sort = "pushed",
+  isDark,
   onPress,
   onPressIn,
 }: RepoCardProps) {
-  const isDark = useColorScheme() === "dark";
   const colors = isDark ? DarkColors : LightColors;
-  const s = useMemo(() => {
-    const shadows = isDark ? {} : Shadows.light.sm;
-    return buildStyles(colors, shadows);
-  }, [colors, isDark]);
+  const s = isDark ? darkStyles : lightStyles;
 
   const langColor = repo.language
     ? ((languageColors as Record<string, { color: string | null }>)[
@@ -57,11 +48,13 @@ export const RepoCard = memo(function RepoCard({
         ? repo.created_at
         : repo.updated_at;
 
+  const timeAgo = useMemo(() => relativeTime(timestampValue), [timestampValue]);
+
   return (
     <Pressable
       style={({ pressed }) => [s.card, pressed && s.cardPressed]}
-      onPress={onPress}
-      onPressIn={onPressIn}
+      onPress={onPress ? () => onPress(repo) : undefined}
+      onPressIn={onPressIn ? () => onPressIn(repo) : undefined}
     >
       <View style={s.titleRow}>
         <Octicons
@@ -128,24 +121,19 @@ export const RepoCard = memo(function RepoCard({
 
         <View style={[s.metaItem, s.metaRight]}>
           <Text style={s.metaText}>
-            {timestampLabel} {relativeTime(timestampValue)}
+            {timestampLabel} {timeAgo}
           </Text>
         </View>
       </View>
 
       {repo.topics.length > 0 && (
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          style={s.topicsScroll}
-          contentContainerStyle={s.topicsContent}
-        >
-          {repo.topics.map((topic) => (
+        <View style={s.topicsContainer}>
+          {repo.topics.slice(0, 4).map((topic) => (
             <View key={topic} style={s.topicPill}>
               <Text style={s.topicText}>{topic}</Text>
             </View>
           ))}
-        </ScrollView>
+        </View>
       )}
     </Pressable>
   );
@@ -290,12 +278,11 @@ function buildStyles(
       backgroundColor: colors.textMuted,
     },
 
-    topicsScroll: {
-      marginTop: Spacing.xs,
-    },
-
-    topicsContent: {
+    topicsContainer: {
+      flexDirection: "row",
+      flexWrap: "wrap",
       gap: Spacing.xs,
+      marginTop: Spacing.xs,
     },
 
     topicPill: {
@@ -314,3 +301,6 @@ function buildStyles(
     },
   });
 }
+
+const lightStyles = buildStyles(LightColors, Shadows.light.sm);
+const darkStyles = buildStyles(DarkColors, {});

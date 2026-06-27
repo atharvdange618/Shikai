@@ -160,12 +160,12 @@ interface PushEventPayload {
   ref: string;
   head: string;
   before: string;
-  commits: Array<{
+  commits: {
     sha: string;
     message: string;
     url: string;
     author: { name: string; email: string; username: string };
-  }>;
+  }[];
 }
 
 interface ForkEventPayload {
@@ -217,7 +217,7 @@ interface WatchEventPayload {
   action: "started";
 }
 
-interface PublicEventPayload { }
+interface PublicEventPayload {}
 
 type KnownEventPayload =
   | { type: "PushEvent"; payload: PushEventPayload }
@@ -326,12 +326,12 @@ export interface GitHubRelease {
   prerelease: boolean;
   created_at: string;
   published_at: string;
-  assets: Array<{
+  assets: {
     name: string;
     browser_download_url: string;
     content_type: string;
     size: number;
-  }>;
+  }[];
 }
 
 export interface GitHubComment {
