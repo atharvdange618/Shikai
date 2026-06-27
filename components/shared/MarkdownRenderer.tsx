@@ -21,14 +21,14 @@ function resolveImageUrls(html: string, context?: string): string {
   const base = `https://raw.githubusercontent.com/${owner}/${repo}/HEAD/`;
   return html.replace(
     /<img\s+([^>]*?)src=["']((?!https?:\/\/)[^"']+)["']/gi,
-    (match, attrs, src) => {
+    (_match, attrs, src) => {
       const resolved = src.startsWith("/") ? src.slice(1) : src;
       return `<img ${attrs}src="${base}${resolved}"`;
     },
   );
 }
 
-function buildHtml(html: string, isDark: boolean, context?: string): string {
+function buildHtml(html: string, isDark: boolean): string {
   const bg = isDark ? "#0D1117" : "#FAF9F6";
   const text = isDark ? "#E6EDF3" : "#1A2332";
   const textSecondary = isDark ? "#8B949E" : "#5A6B7B";
@@ -429,7 +429,7 @@ export function MarkdownRenderer({ markdown, style, context }: MarkdownRendererP
         );
 
         if (!cancelled) {
-          setHtml(buildHtml(resolveImageUrls(data, context), isDark, context));
+          setHtml(buildHtml(resolveImageUrls(data, context), isDark));
         }
       } catch {
         if (!cancelled) {
