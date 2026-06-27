@@ -680,16 +680,8 @@ export default function RepoDetailsScreen() {
       {readme && (
         <Animated.View
           entering={FadeInDown.duration(400).delay(ANIM_DELAYS.readme)}
-          style={[s.card, s.readmeCard]}
+          style={s.readmeSection}
         >
-          <View style={s.readmeHeader}>
-            <Octicons
-              name="file-directory"
-              size={IconSize.sm}
-              color={colors.textSecondary}
-            />
-            <Text style={s.readmeTitle}>README</Text>
-          </View>
           <MarkdownRenderer markdown={readme} />
         </Animated.View>
       )}
@@ -1053,26 +1045,8 @@ function buildStyles(
       color: colors.textSecondary,
     },
 
-    readmeCard: {
-      overflow: "hidden",
-    },
-
-    readmeHeader: {
-      flexDirection: "row",
-      alignItems: "center",
-      gap: Spacing.sm,
-      paddingHorizontal: Spacing.lg,
-      paddingVertical: Spacing.md,
-      borderBottomWidth: BorderWidth.normal,
-      borderBottomColor: colors.border,
-    },
-
-    readmeTitle: {
-      fontFamily: FontFamily.semiBold,
-      fontSize: FontSize.label,
-      color: colors.textSecondary,
-      textTransform: "uppercase",
-      letterSpacing: 0.5,
+    readmeSection: {
+      marginTop: Spacing.xs,
     },
 
     actionRow: {
