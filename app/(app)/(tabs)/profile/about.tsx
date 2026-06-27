@@ -35,6 +35,9 @@ const FEATURES = [
   { icon: "heart" as const, text: "Starred repos with search and filter" },
   { icon: "bell" as const, text: "Issues and pull requests" },
   { icon: "history" as const, text: "Commit history per branch" },
+  { icon: "markdown" as const, text: "In-app README and markdown preview" },
+  { icon: "issue-opened" as const, text: "Issue and PR detail screens" },
+  { icon: "arrow-up" as const, text: "In-app version update check" },
   {
     icon: "lock" as const,
     text: "Read-only \u00B7 No data leaves your device",
@@ -62,11 +65,6 @@ const CREDITS = [
     name: "Reanimated",
     url: "https://docs.swmansion.com/react-native-reanimated/",
     desc: "Fluid animations",
-  },
-  {
-    name: "Prism Highlighter",
-    url: "https://github.com/react-syntax-highlighter/react-syntax-highlighter",
-    desc: "Syntax highlighting",
   },
 ];
 
