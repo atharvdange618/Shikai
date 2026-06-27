@@ -51,7 +51,12 @@ function formatBytes(bytes: number): string {
   return `${(bytes / 1048576).toFixed(1)} MB`;
 }
 
-type HealthBadge = { label: string; icon: string; color: "warning" | "danger" };
+type HealthBadge = {
+  label: string;
+  icon: string;
+  color: "warning" | "danger";
+  description: string;
+};
 
 function getHealthBadges(
   repo:
@@ -68,16 +73,30 @@ function getHealthBadges(
   const badges: HealthBadge[] = [];
 
   if (!repo.license || repo.license.spdx_id === "NOASSERTION") {
-    badges.push({ label: "No license", icon: "law", color: "warning" });
+    badges.push({
+      label: "No license",
+      icon: "law",
+      color: "warning",
+      description:
+        "This repository has no open source license. Others may not be legally allowed to use, modify, or distribute the code.",
+    });
   }
   if (repo.topics.length === 0) {
-    badges.push({ label: "No topics", icon: "tag", color: "warning" });
+    badges.push({
+      label: "No topics",
+      icon: "tag",
+      color: "warning",
+      description:
+        "Topics help others discover this repository through search. Adding 3-5 relevant tags improves visibility.",
+    });
   }
   if (readme === undefined) {
     badges.push({
       label: "No README",
       icon: "file-directory",
       color: "warning",
+      description:
+        "No README file found. A README explains what the project does and how to use it - essential for new visitors and contributors.",
     });
   }
 
@@ -88,6 +107,10 @@ function getHealthBadges(
       label: "Stale",
       icon: "alert",
       color: daysSincePush > 180 ? "danger" : "warning",
+      description:
+        daysSincePush > 180
+          ? `No commits in over 6 months (${Math.floor(daysSincePush)} days). This project may be abandoned.`
+          : `No commits in ${Math.floor(daysSincePush)} days. The project may need attention.`,
     });
   }
 
@@ -105,6 +128,7 @@ export default function RepoDetailsScreen() {
   const [owner, repoName] = (repoId ?? "").split("__");
 
   const [copiedHash, setCopiedHash] = useState(false);
+  const [activeTooltip, setActiveTooltip] = useState<string | null>(null);
 
   const {
     repo,
@@ -327,28 +351,53 @@ export default function RepoDetailsScreen() {
                   const badgeBg = isD
                     ? colors.dangerSubtle
                     : colors.warningSubtle;
+                  const isTooltipOpen = activeTooltip === badge.label;
                   return (
-                    <View
-                      key={badge.label}
-                      style={[
-                        s.healthBadge,
-                        { backgroundColor: badgeBg, borderColor: badgeColor },
-                      ]}
-                    >
-                      <View
+                    <View key={badge.label}>
+                      <Pressable
                         style={[
-                          s.healthBadgeDot,
-                          { backgroundColor: badgeColor },
+                          s.healthBadge,
+                          { backgroundColor: badgeBg, borderColor: badgeColor },
                         ]}
-                      />
-                      <Octicons
-                        name={badge.icon as any}
-                        size={11}
-                        color={badgeColor}
-                      />
-                      <Text style={[s.healthBadgeText, { color: badgeColor }]}>
-                        {badge.label}
-                      </Text>
+                        onPress={() =>
+                          setActiveTooltip(isTooltipOpen ? null : badge.label)
+                        }
+                      >
+                        <View
+                          style={[
+                            s.healthBadgeDot,
+                            { backgroundColor: badgeColor },
+                          ]}
+                        />
+                        <Octicons
+                          name={badge.icon as any}
+                          size={11}
+                          color={badgeColor}
+                        />
+                        <Text
+                          style={[s.healthBadgeText, { color: badgeColor }]}
+                        >
+                          {badge.label}
+                        </Text>
+                        <Octicons
+                          name="info"
+                          size={10}
+                          color={badgeColor}
+                          style={{ opacity: 0.6 }}
+                        />
+                      </Pressable>
+                      {isTooltipOpen && (
+                        <View
+                          style={[
+                            s.tooltip,
+                            { backgroundColor: colors.surface, borderColor: colors.border },
+                          ]}
+                        >
+                          <Text style={[s.tooltipText, { color: colors.textSecondary }]}>
+                            {badge.description}
+                          </Text>
+                        </View>
+                      )}
                     </View>
                   );
                 })}
@@ -859,6 +908,20 @@ function buildStyles(
     healthBadgeText: {
       fontFamily: FontFamily.medium,
       fontSize: FontSize.caption,
+    },
+
+    tooltip: {
+      marginTop: 4,
+      padding: Spacing.sm,
+      borderRadius: Radius.sm,
+      borderWidth: 1,
+      maxWidth: 280,
+    },
+
+    tooltipText: {
+      fontFamily: FontFamily.regular,
+      fontSize: FontSize.caption,
+      lineHeight: FontSize.caption * 1.5,
     },
 
     description: {
