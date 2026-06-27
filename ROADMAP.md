@@ -23,6 +23,9 @@ This document tracks the feature backlog and development progress for Shikai.
 | In-App Version Check | Fetches latest GitHub release on mount, compares semver against installed version, shows dismissible update banner. Dismiss state persisted via expo-secure-store. | Done |
 | In-App README Preview | WebView-based markdown renderer (`MarkdownRenderer` component) using GitHub's `/markdown` API for 100% GFM fidelity. Renders inline on repo detail screen with themed CSS. Fixed UTF-8 decoding for Japanese/emoji support. | Done |
 | Native Issue/PR Detail Screens | In-app detail screens for issues and PRs with markdown body + comments rendering via MarkdownRenderer. Navigates from list screens instead of opening external browser. | Done |
+| Markdown Syntax Highlighting | GitHub-native `pl-*` CSS classes for syntax-colored code blocks in MarkdownRenderer. Per-block copy buttons, language labels, Mermaid diagram support. Zero JS dependency. | Done |
+| About Page Version Check | Interactive update status below version badge on about page. Shows loading spinner, "vX.Y.Z available" tappable pill, or green "up to date" checkmark. Shares React Query cache with home tab banner. | Done |
+| List Performance Optimization | Pre-built styles + hoisted `isDark` in RepoCard, `overrideItemLayout`/`getItemType` for FlashList virtualization, `drawDistance: 400`, nested ScrollView removal for topics. | Done |
 
 ---
 
