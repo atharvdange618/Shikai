@@ -41,6 +41,7 @@ export default function RootLayout() {
     "pending" | "passed" | "blocked"
   >("pending");
   const [securityReasons, setSecurityReasons] = useState<string[]>([]);
+  const [devModeBlocked, setDevModeBlocked] = useState(false);
 
   const [fontsLoaded, fontError] = useFonts({
     Inter_400Regular,
@@ -101,6 +102,7 @@ export default function RootLayout() {
         if (result.isBlocked) {
           setSecurityStatus("blocked");
           setSecurityReasons(result.reasons);
+          setDevModeBlocked(result.devModeBlocked);
         } else {
           setSecurityStatus("passed");
         }
@@ -113,6 +115,7 @@ export default function RootLayout() {
     if (result.isBlocked) {
       setSecurityReasons(result.reasons);
       setSecurityStatus("blocked");
+      setDevModeBlocked(result.devModeBlocked);
     } else {
       setSecurityStatus("passed");
     }
@@ -150,6 +153,8 @@ export default function RootLayout() {
       {!showSplash && securityStatus === "blocked" && (
         <BlockingScreen
           reasons={securityReasons}
+          devModeBlocked={devModeBlocked}
+          onOverride={handleRecheck}
         />
       )}
       {!showSplash && securityStatus === "passed" && (

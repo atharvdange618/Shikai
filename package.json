@@ -10,7 +10,8 @@
     "web": "expo start --web",
     "lint": "expo lint",
     "deploy": "npx expo export -p web && wrangler deploy",
-    "preview": "npx expo export -p web && wrangler dev"
+    "preview": "npx expo export -p web && wrangler dev",
+    "prebuild:clean": "npx expo prebuild --clean && node scripts/post-prebuild.js"
   },
   "dependencies": {
     "@clerk/expo": "^3.2.8",
