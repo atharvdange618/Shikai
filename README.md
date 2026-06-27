@@ -38,6 +38,8 @@ Your token is handled via a secure Cloudflare Worker proxy and never leaves your
 
 Shikai requests only read-only access to your GitHub data. It cannot modify, create, or delete anything.
 
+**Developer mode** is blocked by default on release builds. Developers who need to use Shikai with dev options enabled can override this restriction after accepting a warning about potential data access via ADB.
+
 ---
 
 ## Getting Started
