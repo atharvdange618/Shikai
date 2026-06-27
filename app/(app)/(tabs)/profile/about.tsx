@@ -1,9 +1,11 @@
+import { useLatestRelease } from "@/hooks/useLatestRelease";
 import { Octicons } from "@expo/vector-icons";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import Constants from "expo-constants";
 import { Image } from "expo-image";
 import { useMemo } from "react";
 import {
+  ActivityIndicator,
   Linking,
   Pressable,
   ScrollView,
@@ -72,6 +74,8 @@ export default function AboutScreen() {
   const isDark = useColorScheme() === "dark";
   const colors = isDark ? DarkColors : LightColors;
   const shadows = useMemo(() => (isDark ? {} : Shadows.light.sm), [isDark]);
+  const { updateAvailable, latestVersion, isLoading, releaseUrl } =
+    useLatestRelease();
 
   const s = useMemo(() => buildStyles(colors, shadows), [colors, shadows]);
 
@@ -93,6 +97,37 @@ export default function AboutScreen() {
         <View style={s.versionBadge}>
           <Text style={s.versionText}>v{APP_VERSION}</Text>
         </View>
+
+        {isLoading ? (
+          <View style={s.updateRow}>
+            <ActivityIndicator size="small" color={colors.textMuted} />
+            <Text style={s.updateText}>Checking for updates…</Text>
+          </View>
+        ) : updateAvailable ? (
+          <Pressable
+            style={({ pressed }) => [
+              s.updateRow,
+              s.updateRowAvailable,
+              pressed && { opacity: 0.7 },
+            ]}
+            onPress={() => Linking.openURL(releaseUrl)}
+          >
+            <Octicons name="arrow-up" size={14} color={colors.accent} />
+            <Text style={[s.updateText, { color: colors.accent }]}>
+              v{latestVersion} available
+            </Text>
+            <Octicons name="link-external" size={12} color={colors.accent} />
+          </Pressable>
+        ) : (
+          <View style={s.updateRow}>
+            <Octicons
+              name="check-circle-fill"
+              size={14}
+              color={colors.success}
+            />
+            <Text style={s.updateText}>You&apos;re on the latest version</Text>
+          </View>
+        )}
       </View>
 
       <View style={s.card}>
@@ -193,18 +228,13 @@ export default function AboutScreen() {
         </Pressable>
         <View style={s.divider} />
         <Text style={s.bodyText}>
-          Enjoying Shikai? A star on the repo helps others discover it and
-          keeps the project going.
+          Enjoying Shikai? A star on the repo helps others discover it and keeps
+          the project going.
         </Text>
         <Pressable
-          style={({ pressed }) => [
-            s.starButton,
-            pressed && { opacity: 0.7 },
-          ]}
+          style={({ pressed }) => [s.starButton, pressed && { opacity: 0.7 }]}
           onPress={() =>
-            Linking.openURL(
-              "https://github.com/atharvdange618/shikai#readme",
-            )
+            Linking.openURL("https://github.com/atharvdange618/shikai#readme")
           }
         >
           <Octicons name="star" size={IconSize.sm} color={colors.accent} />
@@ -289,6 +319,25 @@ function buildStyles(
     },
 
     versionText: {
+      fontFamily: FontFamily.medium,
+      fontSize: FontSize.caption,
+      color: colors.textMuted,
+    },
+
+    updateRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: Spacing.xs,
+    },
+
+    updateRowAvailable: {
+      backgroundColor: colors.surfaceSecondary,
+      borderRadius: Radius.full,
+      paddingHorizontal: Spacing.md,
+      paddingVertical: Spacing.xs,
+    },
+
+    updateText: {
       fontFamily: FontFamily.medium,
       fontSize: FontSize.caption,
       color: colors.textMuted,
