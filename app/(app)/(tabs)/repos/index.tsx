@@ -1,5 +1,5 @@
-import { useQueryClient } from "@tanstack/react-query";
 import { ListItemSeparator } from "@/components/shared/ListItemSeparator";
+import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { useCallback, useMemo, useRef, useState } from "react";
 import {
@@ -7,8 +7,8 @@ import {
   RefreshControl,
   StyleSheet,
   Text,
-  useColorScheme,
   View,
+  useColorScheme,
 } from "react-native";
 
 import { RepoCard } from "@/components/repo/RepoCard";
@@ -82,11 +82,12 @@ export default function ReposScreen() {
       <RepoCard
         repo={item}
         sort={sort}
-        onPress={() => handleRepoPress(item)}
-        onPressIn={() => handleRepoPressIn(item)}
+        isDark={isDark}
+        onPress={handleRepoPress}
+        onPressIn={handleRepoPressIn}
       />
     ),
-    [handleRepoPress, handleRepoPressIn, sort],
+    [handleRepoPress, handleRepoPressIn, sort, isDark],
   );
 
   const onViewableItemsChanged = useMemo(
@@ -109,22 +110,45 @@ export default function ReposScreen() {
 
   const keyExtractor = useCallback((item: GitHubRepo) => String(item.id), []);
 
+  const overrideItemLayout = useCallback(
+    (layout: { span?: number; size?: number }, item: GitHubRepo) => {
+      let size = 96;
+      if (item.description) {
+        size += 36;
+      }
+      if (item.topics && item.topics.length > 0) {
+        size += 34;
+      }
+      layout.size = size;
+    },
+    [],
+  );
+
+  const getItemType = useCallback(
+    (item: GitHubRepo) =>
+      item.topics.length > 0 ? 2 : item.description ? 1 : 0,
+    [],
+  );
+
   const s = useMemo(() => buildStyles(colors), [colors]);
 
-  const ListHeader = (
-    <View style={s.listHeader}>
-      <SearchBar
-        value={search}
-        onChangeText={setSearch}
-        placeholder="Search repositories…"
-      />
-      <RepoFilters
-        sort={sort}
-        type={type}
-        onSortChange={setSort}
-        onTypeChange={setType}
-      />
-    </View>
+  const ListHeader = useMemo(
+    () => (
+      <View style={s.listHeader}>
+        <SearchBar
+          value={search}
+          onChangeText={setSearch}
+          placeholder="Search repositories…"
+        />
+        <RepoFilters
+          sort={sort}
+          type={type}
+          onSortChange={setSort}
+          onTypeChange={setType}
+        />
+      </View>
+    ),
+    [search, sort, type, s.listHeader],
   );
 
   const ListEmpty = isLoading ? (
@@ -195,8 +219,10 @@ export default function ReposScreen() {
             colors={[colors.accent]}
           />
         }
+        overrideItemLayout={overrideItemLayout}
+        getItemType={getItemType}
         removeClippedSubviews
-        drawDistance={200}
+        drawDistance={400}
       />
     </View>
   );
