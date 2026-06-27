@@ -10,7 +10,6 @@ import {
   Layout,
   LightColors,
   Radius,
-  Shadows,
   Spacing,
 } from "@/constants/theme";
 import { useRepoDetailsScreen } from "@/hooks/useRepoDetails";
@@ -102,7 +101,6 @@ export default function RepoDetailsScreen() {
   const queryClient = useQueryClient();
   const isDark = useColorScheme() === "dark";
   const colors = isDark ? DarkColors : LightColors;
-  const shadows = useMemo(() => (isDark ? {} : Shadows.light.sm), [isDark]);
 
   const [owner, repoName] = (repoId ?? "").split("__");
 
@@ -241,8 +239,8 @@ export default function RepoDetailsScreen() {
 
   const insets = useSafeAreaInsets();
   const s = useMemo(
-    () => buildStyles(colors, shadows, insets.bottom),
-    [colors, shadows, insets.bottom],
+    () => buildStyles(colors, insets.bottom),
+    [colors, insets.bottom],
   );
 
   if (isError) {
@@ -266,7 +264,7 @@ export default function RepoDetailsScreen() {
     >
       <Animated.View
         entering={FadeInDown.duration(400).delay(ANIM_DELAYS.hero)}
-        style={[s.card, s.headerCard]}
+        style={s.headerCard}
       >
         {isLoading.core ? (
           <>
@@ -416,7 +414,7 @@ export default function RepoDetailsScreen() {
 
       <Animated.View
         entering={FadeInDown.duration(400).delay(ANIM_DELAYS.stats)}
-        style={[s.card, s.statsCard]}
+        style={s.statsCard}
       >
         <StatItem
           icon="star"
@@ -454,7 +452,7 @@ export default function RepoDetailsScreen() {
 
       <Animated.View
         entering={FadeInDown.duration(400).delay(ANIM_DELAYS.activity)}
-        style={[s.card, s.activityCard]}
+        style={s.activityCard}
       >
         {isLoading.core ? (
           <>
@@ -589,7 +587,7 @@ export default function RepoDetailsScreen() {
       {(lastCommit || isLoading.core) && (
         <Animated.View
           entering={FadeInDown.duration(400).delay(ANIM_DELAYS.commitSpotlight)}
-          style={[s.card, s.commitSpotlightCard]}
+          style={s.commitSpotlightCard}
         >
           {isLoading.core ? (
             <View style={s.commitSpotlightContent}>
@@ -628,7 +626,7 @@ export default function RepoDetailsScreen() {
       {!(languages.length === 0 && !isLoading.core) && (
         <Animated.View
           entering={FadeInDown.duration(400).delay(ANIM_DELAYS.languages)}
-          style={[s.card, s.languageCard]}
+          style={s.languageCard}
         >
           <View style={s.languageCardHeader}>
             <Text style={s.sectionLabel}>Languages</Text>
@@ -759,7 +757,6 @@ function StatItem({
 
 function buildStyles(
   colors: typeof LightColors | typeof DarkColors,
-  shadows: object,
   bottomInset: number,
 ) {
   return StyleSheet.create({
@@ -786,6 +783,9 @@ function buildStyles(
 
     section: {
       gap: Spacing.sm,
+      paddingVertical: Spacing.md,
+      borderBottomWidth: StyleSheet.hairlineWidth,
+      borderBottomColor: colors.border,
     },
 
     sectionLabel: {
@@ -799,6 +799,8 @@ function buildStyles(
     headerCard: {
       padding: Spacing.md,
       gap: Spacing.sm,
+      borderBottomWidth: StyleSheet.hairlineWidth,
+      borderBottomColor: colors.border,
     },
 
     ownerText: {
@@ -916,19 +918,13 @@ function buildStyles(
       color: colors.textMuted,
     },
 
-    card: {
-      backgroundColor: colors.surface,
-      borderRadius: Radius.lg,
-      borderWidth: BorderWidth.normal,
-      borderColor: colors.border,
-      ...shadows,
-    },
-
     statsCard: {
       flexDirection: "row",
       alignItems: "center",
       paddingVertical: Spacing.md,
       paddingHorizontal: Spacing.md,
+      borderBottomWidth: StyleSheet.hairlineWidth,
+      borderBottomColor: colors.border,
     },
 
     statDivider: {
@@ -938,7 +934,8 @@ function buildStyles(
     },
 
     activityCard: {
-      overflow: "hidden",
+      borderBottomWidth: StyleSheet.hairlineWidth,
+      borderBottomColor: colors.border,
     },
 
     activityRow: {
@@ -970,6 +967,10 @@ function buildStyles(
     commitSpotlightCard: {
       padding: Spacing.md,
       gap: Spacing.sm,
+      backgroundColor: colors.surface,
+      borderRadius: Radius.lg,
+      borderWidth: BorderWidth.normal,
+      borderColor: colors.border,
     },
 
     commitSpotlightContent: {
@@ -1014,6 +1015,8 @@ function buildStyles(
     languageCard: {
       padding: Spacing.md,
       gap: Spacing.sm,
+      borderBottomWidth: StyleSheet.hairlineWidth,
+      borderBottomColor: colors.border,
     },
 
     languageCardHeader: {
@@ -1045,9 +1048,7 @@ function buildStyles(
       color: colors.textSecondary,
     },
 
-    readmeSection: {
-      marginTop: Spacing.xs,
-    },
+    readmeSection: {},
 
     actionRow: {
       flexDirection: "row",
