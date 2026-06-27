@@ -11,9 +11,24 @@ const WebView = RNWebView as unknown as React.ComponentType<any>;
 interface MarkdownRendererProps {
   markdown: string;
   style?: StyleProp<ViewStyle>;
+  context?: string;
 }
 
-function buildHtml(html: string, isDark: boolean): string {
+function resolveImageUrls(html: string, context?: string): string {
+  if (!context) return html;
+  const [owner, repo] = context.split("/");
+  if (!owner || !repo) return html;
+  const base = `https://raw.githubusercontent.com/${owner}/${repo}/HEAD/`;
+  return html.replace(
+    /<img\s+([^>]*?)src=["']((?!https?:\/\/)[^"']+)["']/gi,
+    (match, attrs, src) => {
+      const resolved = src.startsWith("/") ? src.slice(1) : src;
+      return `<img ${attrs}src="${base}${resolved}"`;
+    },
+  );
+}
+
+function buildHtml(html: string, isDark: boolean, context?: string): string {
   const bg = isDark ? "#0D1117" : "#FAF9F6";
   const text = isDark ? "#E6EDF3" : "#1A2332";
   const textSecondary = isDark ? "#8B949E" : "#5A6B7B";
@@ -388,7 +403,7 @@ function buildHtml(html: string, isDark: boolean): string {
 </html>`;
 }
 
-export function MarkdownRenderer({ markdown, style }: MarkdownRendererProps) {
+export function MarkdownRenderer({ markdown, style, context }: MarkdownRendererProps) {
   const { colors, isDark } = useTheme();
   const [html, setHtml] = useState<string | null>(null);
   const [height, setHeight] = useState(300);
@@ -404,6 +419,7 @@ export function MarkdownRenderer({ markdown, style }: MarkdownRendererProps) {
           {
             text: markdown,
             mode: "gfm",
+            ...(context ? { context } : {}),
           },
           {
             headers: {
@@ -413,7 +429,7 @@ export function MarkdownRenderer({ markdown, style }: MarkdownRendererProps) {
         );
 
         if (!cancelled) {
-          setHtml(buildHtml(data, isDark));
+          setHtml(buildHtml(resolveImageUrls(data, context), isDark, context));
         }
       } catch {
         if (!cancelled) {
@@ -431,7 +447,7 @@ export function MarkdownRenderer({ markdown, style }: MarkdownRendererProps) {
     return () => {
       cancelled = true;
     };
-  }, [markdown, isDark]);
+  }, [markdown, isDark, context]);
 
   const onMessage = useCallback((event: WebViewMessageEvent) => {
     try {
