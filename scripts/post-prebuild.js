@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Post-prebuild script — re-applies custom Android build configurations
+ * Post-prebuild script - re-applies custom Android build configurations
  * that are wiped by `expo prebuild --clean`.
  *
  * Usage:
@@ -23,7 +23,7 @@ const warn = (msg) => console.warn(`[post-prebuild] WARNING: ${msg}`);
 
 // ─── gradle.properties patches ───
 const GRADLE_PROPERTIES_PATCHES = {
-  // Architecture filter — match ABI splits config
+  // Architecture filter - match ABI splits config
   "reactNativeArchitectures": {
     expected: "arm64-v8a,x86_64",
     fallback: "arm64-v8a,x86_64",
@@ -41,7 +41,7 @@ const GRADLE_PROPERTIES_PATCHES = {
     fallback: "true",
     description: "Resource shrinking for release builds",
   },
-  // Animated WebP — disabled to save ~3.4MB
+  // Animated WebP - disabled to save ~3.4MB
   "expo.webp.animated": {
     expected: "false",
     fallback: "false",
@@ -103,8 +103,6 @@ function patchBuildGradle() {
   if (content.includes("splits {")) {
     log("  splits block already exists");
   } else {
-    // Insert before the closing `}` of the android block
-    // Find the androidResources block and add splits after it
     const splitsInsert = `\n${SPLITS_BLOCK}\n`;
     if (content.includes("androidResources {")) {
       content = content.replace(
@@ -114,7 +112,7 @@ function patchBuildGradle() {
       log("  Added ABI splits block");
       changed = true;
     } else {
-      warn("  Could not find androidResources block — add splits manually");
+      warn("  Could not find androidResources block - add splits manually");
     }
   }
 
@@ -130,7 +128,7 @@ function patchBuildGradle() {
       log("  Added META-INF exclusion");
       changed = true;
     } else {
-      warn("  Could not find packagingOptions block — add exclusion manually");
+      warn("  Could not find packagingOptions block - add exclusion manually");
     }
   }
 
@@ -142,7 +140,6 @@ function patchBuildGradle() {
   }
 }
 
-// ─── main ───
 function main() {
   log("Re-applying post-prebuild configurations...\n");
 
