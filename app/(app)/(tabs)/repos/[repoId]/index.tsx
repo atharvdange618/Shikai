@@ -208,8 +208,7 @@ export default function RepoDetailsScreen() {
     if (!repo) return;
     try {
       await Share.share({
-        message: `Check out ${repo.full_name} on GitHub`,
-        url: repo.html_url,
+        message: `${repo.full_name} - ${repo.html_url}`,
       });
     } catch {
       /* share cancelled */
@@ -677,7 +676,7 @@ export default function RepoDetailsScreen() {
           entering={FadeInDown.duration(400).delay(ANIM_DELAYS.readme)}
           style={s.readmeSection}
         >
-          <MarkdownRenderer markdown={readme} />
+          <MarkdownRenderer markdown={readme} context={`${owner}/${repoName}`} />
         </Animated.View>
       )}
     </ScrollView>

@@ -300,7 +300,7 @@ export default function FileViewerScreen() {
                   />
                 </Pressable>
               </View>
-              <MarkdownRenderer markdown={data.content} />
+              <MarkdownRenderer markdown={data.content} context={`${owner}/${repoName}`} />
             </>
           )}
         </ScrollView>
