@@ -2,8 +2,10 @@ import { Octicons } from "@expo/vector-icons";
 import { useQueryClient } from "@tanstack/react-query";
 import { Image } from "expo-image";
 import { Href, useRouter } from "expo-router";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import {
+  NativeScrollEvent,
+  NativeSyntheticEvent,
   Pressable,
   RefreshControl,
   ScrollView,
@@ -82,6 +84,24 @@ export default function OverviewScreen() {
 
   const s = useMemo(() => buildStyles(colors), [colors]);
 
+  const loadingMoreRef = useRef(false);
+  const handleScroll = useCallback(
+    (e: NativeSyntheticEvent<NativeScrollEvent>) => {
+      if (loadingMoreRef.current || !hasNextPage || isFetchingNextPage) return;
+      const { layoutMeasurement, contentOffset, contentSize } = e.nativeEvent;
+      const distanceFromBottom =
+        contentSize.height - layoutMeasurement.height - contentOffset.y;
+      if (distanceFromBottom < 200) {
+        loadingMoreRef.current = true;
+        fetchNextPage();
+        setTimeout(() => {
+          loadingMoreRef.current = false;
+        }, 1000);
+      }
+    },
+    [hasNextPage, isFetchingNextPage, fetchNextPage],
+  );
+
   const getGreeting = () => {
     const hour = new Date().getHours();
     if (hour < 4) return "Good night";
@@ -122,6 +142,8 @@ export default function OverviewScreen() {
         style={s.scroll}
         contentContainerStyle={s.content}
         showsVerticalScrollIndicator={false}
+        onScroll={handleScroll}
+        scrollEventThrottle={100}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
@@ -180,8 +202,6 @@ export default function OverviewScreen() {
           <ActivityFeed
             events={events}
             isLoading={activityLoading}
-            onLoadMore={fetchNextPage}
-            hasNextPage={hasNextPage}
             isLoadingMore={isFetchingNextPage}
           />
         </View>
