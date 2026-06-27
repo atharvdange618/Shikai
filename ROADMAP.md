@@ -26,6 +26,8 @@ This document tracks the feature backlog and development progress for Shikai.
 | Markdown Syntax Highlighting | GitHub-native `pl-*` CSS classes for syntax-colored code blocks in MarkdownRenderer. Per-block copy buttons, language labels, Mermaid diagram support. Zero JS dependency. | Done |
 | About Page Version Check | Interactive update status below version badge on about page. Shows loading spinner, "vX.Y.Z available" tappable pill, or green "up to date" checkmark. Shares React Query cache with home tab banner. | Done |
 | List Performance Optimization | Pre-built styles + hoisted `isDark` in RepoCard, `overrideItemLayout`/`getItemType` for FlashList virtualization, `drawDistance: 400`, nested ScrollView removal for topics. | Done |
+| Developer Mode Override | Developers with Android dev options enabled can now bypass the security block by accepting a risk warning. Root and debugger detection remain hard-blocked. Override persisted via SharedPreferences. | Done |
+| Post-Build Automation | `npm run prebuild:clean` script auto-restores Android build customizations (ABI splits, R8 minification, resource shrinking) that are wiped by `expo prebuild --clean`. | Done |
 
 ---
 
@@ -71,4 +73,4 @@ This document tracks the feature backlog and development progress for Shikai.
 | 9 | Explore Tab / User Discovery | - |
 | 10 | Following Activity Feed | - |
 | 11 | Custom Theme Engine | Experimental - separate `feat/themes` branch |
-| 12 | 3D GitHub Profile Card | Social sharing feature — generate shareable profile cards |
+| 12 | 3D GitHub Profile Card | Social sharing feature - generate shareable profile cards |
