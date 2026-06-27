@@ -4,13 +4,14 @@ import { useRouter } from "expo-router";
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
-  FlatList,
   RefreshControl,
   StyleSheet,
   Text,
   View,
   useColorScheme,
 } from "react-native";
+
+import { FlashList } from "@shopify/flash-list";
 
 import { RepoCard } from "@/components/repo/RepoCard";
 import type { SortOption } from "@/components/repo/RepoFilters";
@@ -131,6 +132,21 @@ export default function StarsScreen() {
 
   const Separator = useCallback(() => <View style={s.separator} />, [s]);
 
+  const overrideItemLayout = useCallback(
+    (_layout: any, item: GitHubRepo) => {
+      if (!prefetchMap.current.has(item.id)) {
+        prefetchMap.current.add(item.id);
+        prefetchRepoDetails(queryClient, item.owner.login, item.name);
+      }
+    },
+    [queryClient],
+  );
+
+  const getItemType = useCallback(
+    (_item: GitHubRepo, index: number) => (index === 0 ? "header" : "default"),
+    [],
+  );
+
   const ListEmpty = useMemo(() => {
     if (isLoading) {
       return (
@@ -187,7 +203,7 @@ export default function StarsScreen() {
         <RepoFilters sort={sort} onSortChange={setSort} />
       </View>
 
-      <FlatList
+      <FlashList
         data={repos}
         renderItem={renderItem}
         keyExtractor={keyExtractor}
@@ -199,6 +215,8 @@ export default function StarsScreen() {
         onEndReachedThreshold={0.5}
         onViewableItemsChanged={onViewableItemsChanged}
         viewabilityConfig={{ itemVisiblePercentThreshold: 50 }}
+        overrideItemLayout={overrideItemLayout}
+        getItemType={getItemType}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
@@ -207,7 +225,6 @@ export default function StarsScreen() {
             colors={[colors.accent]}
           />
         }
-        removeClippedSubviews
       />
     </View>
   );
