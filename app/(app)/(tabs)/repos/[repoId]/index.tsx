@@ -133,9 +133,6 @@ export default function RepoDetailsScreen() {
     }
   }, [repo?.name, navigation]);
 
-  // When arriving from a different tab (e.g. Overview pinned repos), there is no
-  // screen beneath this one in the repos Stack, so the native back button never
-  // appears. Detect this on mount and inject a manual "Repos" back button.
   useEffect(() => {
     if (navigation.canGoBack()) return;
     try {
