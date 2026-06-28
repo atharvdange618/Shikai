@@ -40,6 +40,7 @@ export const queryClient = new QueryClient({
 
 export const queryKeys = {
   user: () => ["user"] as const,
+  userProfile: (username: string) => ["userProfile", username] as const,
   repos: () => ["repos"] as const,
   starred: () => ["starred"] as const,
   pinned: () => ["pinned"] as const,
