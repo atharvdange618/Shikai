@@ -1,4 +1,3 @@
-import { deleteToken } from "@/lib/secure-storage";
 import { useAuthStore } from "@/stores/auth.store";
 import axios, {
   type AxiosError,
@@ -85,7 +84,6 @@ githubAxios.interceptors.response.use(
 
     if (status === 401) {
       useAuthStore.getState().clearAuth();
-      deleteToken().catch(() => {});
     }
 
     if (status === 403) {
