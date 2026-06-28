@@ -1,7 +1,7 @@
 import { useDebounce } from "@/hooks/useDebounce";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { memo, useCallback, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   RefreshControl,
@@ -47,6 +47,7 @@ export default function StarsScreen() {
 
   const {
     repos,
+    loadedCount,
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
@@ -55,12 +56,6 @@ export default function StarsScreen() {
   } = useStarred({ search: debouncedSearch, sort });
 
   const [refreshing, setRefreshing] = useState(false);
-
-  useEffect(() => {
-    if (debouncedSearch && hasNextPage && !isFetchingNextPage) {
-      fetchNextPage();
-    }
-  }, [debouncedSearch, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -188,8 +183,14 @@ export default function StarsScreen() {
         <View style={s.footerLoader}>
           <Text style={s.footerText}>Loading more…</Text>
         </View>
+      ) : debouncedSearch && hasNextPage ? (
+        <View style={s.footerLoader}>
+          <Text style={s.footerText}>
+            Showing {repos.length} of {loadedCount}+ repos
+          </Text>
+        </View>
       ) : null,
-    [isFetchingNextPage, s],
+    [isFetchingNextPage, debouncedSearch, hasNextPage, repos.length, loadedCount, s],
   );
 
   return (
