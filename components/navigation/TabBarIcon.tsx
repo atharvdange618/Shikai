@@ -10,8 +10,11 @@ export type TabIconName =
   | "home"
   | "home-fill"
   | "repo"
+  | "search"
   | "star"
   | "star-fill"
+  | "bookmark"
+  | "bookmark-filled"
   | "person"
   | "person-fill";
 

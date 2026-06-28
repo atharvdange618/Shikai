@@ -41,7 +41,14 @@ export default function TabsLayout() {
   useKeyboardShortcuts({
     onTabSwitch: useCallback(
       (index: number) => {
-        const routes = ["/", "/repos", "/stars", "/profile"];
+        const routes = [
+          "/",
+          "/repos",
+          "/search",
+          "/stars",
+          "/watchlist",
+          "/profile",
+        ];
         const route = routes[index];
         if (route) router.push(`/(app)/(tabs)${route}` as any);
       },
@@ -104,6 +111,42 @@ export default function TabsLayout() {
       <TabBarIcon
         name="star"
         filledName="star-fill"
+        color={color}
+        size={size}
+        focused={focused}
+      />
+    ),
+    [],
+  );
+
+  const renderSearchIcon = useCallback(
+    ({
+      color,
+      size,
+      focused,
+    }: {
+      color: string;
+      size: number;
+      focused: boolean;
+    }) => (
+      <TabBarIcon name="search" color={color} size={size} focused={focused} />
+    ),
+    [],
+  );
+
+  const renderBookmarkIcon = useCallback(
+    ({
+      color,
+      size,
+      focused,
+    }: {
+      color: string;
+      size: number;
+      focused: boolean;
+    }) => (
+      <TabBarIcon
+        name="bookmark"
+        filledName="bookmark-filled"
         color={color}
         size={size}
         focused={focused}
@@ -189,10 +232,26 @@ export default function TabsLayout() {
         />
 
         <Tabs.Screen
+          name="search"
+          options={{
+            title: "Search",
+            tabBarIcon: renderSearchIcon,
+          }}
+        />
+
+        <Tabs.Screen
           name="stars"
           options={{
             title: "Stars",
             tabBarIcon: renderStarsIcon,
+          }}
+        />
+
+        <Tabs.Screen
+          name="watchlist"
+          options={{
+            title: "Watchlist",
+            tabBarIcon: renderBookmarkIcon,
           }}
         />
 
