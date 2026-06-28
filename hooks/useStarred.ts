@@ -10,6 +10,7 @@ import { fetchStarred } from "@/lib/github-rest";
 import { queryKeys } from "@/lib/query-client";
 import type { GitHubRepo } from "@/types/github.types";
 import { useInfiniteQuery } from "@tanstack/react-query";
+import { useSearchIndex } from "@/hooks/useSearchIndex";
 
 const PER_PAGE = 10;
 
@@ -39,26 +40,18 @@ export function useStarred(filters: StarredFilters = {}) {
     },
   });
 
-  const filteredRepos = useMemo(() => {
-    const allRepos = query.data ?? [];
+  const languageFilter = useMemo(() => {
+    if (!language) return undefined;
+    return (repo: GitHubRepo) =>
+      repo.language?.toLowerCase() === language.toLowerCase();
+  }, [language]);
 
-    return allRepos.filter((repo: GitHubRepo) => {
-      const matchesLanguage =
-        !language || repo.language?.toLowerCase() === language.toLowerCase();
-
-      const trimmedSearch = search?.trim();
-      const matchesSearch =
-        !trimmedSearch ||
-        repo.name.toLowerCase().includes(trimmedSearch.toLowerCase()) ||
-        repo.description?.toLowerCase().includes(trimmedSearch.toLowerCase()) ||
-        repo.owner.login.toLowerCase().includes(trimmedSearch.toLowerCase());
-
-      return matchesLanguage && matchesSearch;
-    });
-  }, [query.data, language, search]);
+  const allRepos = query.data ?? [];
+  const filteredRepos = useSearchIndex(allRepos, search ?? "", languageFilter);
 
   return {
     repos: filteredRepos,
+    loadedCount: allRepos.length,
     fetchNextPage: query.fetchNextPage,
     hasNextPage: query.hasNextPage,
     isFetchingNextPage: query.isFetchingNextPage,
