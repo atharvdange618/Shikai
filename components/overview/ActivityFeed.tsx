@@ -16,6 +16,7 @@
  */
 
 import { Octicons } from "@expo/vector-icons";
+import { FlashList } from "@shopify/flash-list";
 import * as Haptics from "expo-haptics";
 import { Href, useRouter } from "expo-router";
 import { useMemo, useState } from "react";
@@ -43,6 +44,7 @@ interface ActivityFeedProps {
   events: GitHubEvent[];
   isLoading?: boolean;
   isLoadingMore?: boolean;
+  onEndReached?: () => void;
 }
 
 function parseGitHubUrl(url: string): Href | null {
@@ -326,10 +328,13 @@ function groupEvents(
   return grouped;
 }
 
+const ACTIVITY_FEED_HEIGHT = 400;
+
 export function ActivityFeed({
   events,
   isLoading = false,
   isLoadingMore = false,
+  onEndReached,
 }: ActivityFeedProps) {
   const isDark = useColorScheme() === "dark";
   const colors = isDark ? DarkColors : LightColors;
@@ -357,6 +362,11 @@ export function ActivityFeed({
     });
   };
 
+  const groupedEvents = useMemo(
+    () => (events.length > 0 ? groupEvents(events, colors) : []),
+    [events, colors],
+  );
+
   if (isLoading) {
     return (
       <View style={s.container}>
@@ -383,123 +393,138 @@ export function ActivityFeed({
     );
   }
 
-  const groupedEvents = groupEvents(events, colors);
+  const renderItem = ({
+    item: group,
+  }: {
+    item: GroupedEvent;
+  }) => {
+    const isExpanded = expandedGroups.has(group.id);
+    const isGroup = group.type === "group";
+
+    return (
+      <View>
+        <Pressable
+          style={({ pressed }) => [s.item, pressed && s.itemPressed]}
+          onPress={() => {
+            if (isGroup) {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              toggleGroup(group.id);
+            } else {
+              handleEventPress(group.display.url);
+            }
+          }}
+        >
+          <View
+            style={[
+              s.iconWrap,
+              { backgroundColor: `${group.display.iconColor}18` },
+            ]}
+          >
+            <Octicons
+              name={group.display.icon}
+              size={14}
+              color={group.display.iconColor}
+            />
+          </View>
+
+          <View style={s.itemText}>
+            <Text style={s.itemLabel} numberOfLines={1}>
+              {group.display.primaryText}
+            </Text>
+            <View style={s.repoRow}>
+              <Text style={s.itemRepo} numberOfLines={1}>
+                {group.display.secondaryText}
+              </Text>
+              {group.events[0].public === false && (
+                <Octicons
+                  name="lock"
+                  size={10}
+                  color={colors.textMuted}
+                  style={s.lockIcon}
+                />
+              )}
+            </View>
+          </View>
+
+          <Text style={s.timestamp}>{group.timestamp}</Text>
+
+          {isGroup && (
+            <Octicons
+              name={isExpanded ? "chevron-up" : "chevron-down"}
+              size={14}
+              color={colors.textMuted}
+              style={s.chevron}
+            />
+          )}
+        </Pressable>
+
+        {isGroup && isExpanded && (
+          <View style={s.expandedGroup}>
+            {group.events.map((event) => {
+              const display = getEventDisplay(event, colors);
+              if (!display) return null;
+
+              const time = format24HourTime(event.created_at);
+
+              let itemText = display.primaryText;
+              if (event.type === "PushEvent") {
+                const payload = event.payload;
+                const commitSha =
+                  payload.head?.substring(0, 7) ??
+                  payload.commits?.[0]?.sha?.substring(0, 7);
+                const commitMessage =
+                  payload.commits?.[0]?.message?.split("\n")[0];
+                itemText = commitSha
+                  ? `${commitSha}${commitMessage ? `: ${commitMessage}` : ""}`
+                  : (commitMessage ?? display.primaryText);
+              }
+
+              return (
+                <Pressable
+                  key={event.id}
+                  style={({ pressed }) => [
+                    s.expandedItem,
+                    pressed && s.itemPressed,
+                  ]}
+                  onPress={() => handleEventPress(display.url)}
+                >
+                  <View style={s.expandedItemContent}>
+                    <View style={s.expandedItemDot} />
+                    <Text style={s.expandedItemText} numberOfLines={1}>
+                      {itemText}
+                    </Text>
+                  </View>
+                  <Text style={s.expandedItemTime}>{time}</Text>
+                </Pressable>
+              );
+            })}
+          </View>
+        )}
+      </View>
+    );
+  };
+
+  const ListFooter = isLoadingMore ? (
+    <View style={s.loadMoreContainer}>
+      <ActivityIndicator size="small" color={colors.accent} />
+    </View>
+  ) : null;
 
   return (
     <View style={s.container}>
       <Text style={s.sectionTitle}>Recent Activity</Text>
-      {groupedEvents.map((group) => {
-        const isExpanded = expandedGroups.has(group.id);
-        const isGroup = group.type === "group";
-
-        return (
-          <View key={group.id}>
-            <Pressable
-              style={({ pressed }) => [s.item, pressed && s.itemPressed]}
-              onPress={() => {
-                if (isGroup) {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  toggleGroup(group.id);
-                } else {
-                  handleEventPress(group.display.url);
-                }
-              }}
-            >
-              <View
-                style={[
-                  s.iconWrap,
-                  { backgroundColor: `${group.display.iconColor}18` },
-                ]}
-              >
-                <Octicons
-                  name={group.display.icon}
-                  size={14}
-                  color={group.display.iconColor}
-                />
-              </View>
-
-              <View style={s.itemText}>
-                <Text style={s.itemLabel} numberOfLines={1}>
-                  {group.display.primaryText}
-                </Text>
-                <View style={s.repoRow}>
-                  <Text style={s.itemRepo} numberOfLines={1}>
-                    {group.display.secondaryText}
-                  </Text>
-                  {group.events[0].public === false && (
-                    <Octicons
-                      name="lock"
-                      size={10}
-                      color={colors.textMuted}
-                      style={s.lockIcon}
-                    />
-                  )}
-                </View>
-              </View>
-
-              <Text style={s.timestamp}>{group.timestamp}</Text>
-
-              {isGroup && (
-                <Octicons
-                  name={isExpanded ? "chevron-up" : "chevron-down"}
-                  size={14}
-                  color={colors.textMuted}
-                  style={s.chevron}
-                />
-              )}
-            </Pressable>
-
-            {isGroup && isExpanded && (
-              <View style={s.expandedGroup}>
-                {group.events.map((event, _index) => {
-                  const display = getEventDisplay(event, colors);
-                  if (!display) return null;
-
-                  const time = format24HourTime(event.created_at);
-
-                  let itemText = display.primaryText;
-                  if (event.type === "PushEvent") {
-                    const payload = event.payload;
-                    const commitSha =
-                      payload.head?.substring(0, 7) ??
-                      payload.commits?.[0]?.sha?.substring(0, 7);
-                    const commitMessage =
-                      payload.commits?.[0]?.message?.split("\n")[0];
-                    itemText = commitSha
-                      ? `${commitSha}${commitMessage ? `: ${commitMessage}` : ""}`
-                      : (commitMessage ?? display.primaryText);
-                  }
-
-                  return (
-                    <Pressable
-                      key={event.id}
-                      style={({ pressed }) => [
-                        s.expandedItem,
-                        pressed && s.itemPressed,
-                      ]}
-                      onPress={() => handleEventPress(display.url)}
-                    >
-                      <View style={s.expandedItemContent}>
-                        <View style={s.expandedItemDot} />
-                        <Text style={s.expandedItemText} numberOfLines={1}>
-                          {itemText}
-                        </Text>
-                      </View>
-                      <Text style={s.expandedItemTime}>{time}</Text>
-                    </Pressable>
-                  );
-                })}
-              </View>
-            )}
-          </View>
-        );
-      })}
-
-      {isLoadingMore && (
-        <View style={s.loadMoreContainer}>
-          <ActivityIndicator size="small" color={colors.accent} />
-        </View>
-      )}
+      <FlashList
+        data={groupedEvents}
+        renderItem={renderItem}
+        keyExtractor={(item) => item.id}
+        style={{ height: ACTIVITY_FEED_HEIGHT }}
+        contentContainerStyle={s.listContent}
+        ListFooterComponent={ListFooter}
+        onEndReached={onEndReached}
+        onEndReachedThreshold={0.5}
+        removeClippedSubviews
+        drawDistance={100}
+      />
     </View>
   );
 }
@@ -620,6 +645,10 @@ function buildStyles(colors: typeof LightColors | typeof DarkColors) {
       fontSize: FontSize.caption,
       color: colors.textMuted,
       flexShrink: 0,
+    },
+
+    listContent: {
+      paddingBottom: Spacing.sm,
     },
 
     loadMoreContainer: {
