@@ -15,7 +15,7 @@ export default function UserProfileLayout() {
   return (
     <Stack>
       <Stack.Screen
-        name="index"
+        name="[username]"
         options={{
           title: "Profile",
           headerTitleStyle: {
