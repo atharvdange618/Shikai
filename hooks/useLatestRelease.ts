@@ -12,6 +12,7 @@ export const latestReleaseQueryOptions = queryOptions({
   queryFn: fetchLatestRelease,
   staleTime: 1000 * 60 * 60,
   gcTime: 1000 * 60 * 60 * 24,
+  meta: { persist: false },
 });
 
 function parseVersion(version: string): [number, number, number] {

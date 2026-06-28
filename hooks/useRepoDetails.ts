@@ -103,6 +103,7 @@ export function useCommits(owner: string, repo: string, branch?: string) {
 
     enabled: Boolean(owner && repo),
     staleTime: 1000 * 60 * 2,
+    meta: { persist: false },
   });
 
   return {
@@ -140,6 +141,7 @@ export function useFileTree(
       queryFn: () => fetchFileTree(owner, repo, branch),
       enabled: Boolean(owner && repo && branch && open),
       staleTime: 1000 * 60 * 15,
+      meta: { persist: false },
     }),
   );
 }
@@ -167,6 +169,7 @@ export function useFileContent(
       queryFn: () => fetchFileContent(owner, repo, path),
       enabled: Boolean(owner && repo && path && enabled),
       staleTime: 1000 * 60 * 15,
+      meta: { persist: false },
     }),
   );
 }
@@ -183,6 +186,7 @@ export function useReadme(owner: string, repo: string) {
           return false;
         return failureCount < 2;
       },
+      meta: { persist: false },
     }),
   );
 }
