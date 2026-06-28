@@ -95,7 +95,7 @@ export default function SearchScreen() {
       <Pressable
         style={({ pressed }) => [s.userCard, pressed && { opacity: 0.7 }]}
         onPress={() => {
-          // TODO: navigate to user profile when implemented
+          router.push(`/(app)/(tabs)/user/${item.login}` as any);
         }}
       >
         {item.avatar_url ? (
@@ -112,7 +112,7 @@ export default function SearchScreen() {
         <Octicons name="chevron-right" size={14} color={colors.textMuted} />
       </Pressable>
     ),
-    [s, colors],
+    [s, colors, router],
   );
 
   const renderIssueItem = useCallback(
