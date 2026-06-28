@@ -8,7 +8,8 @@ import {
   JetBrainsMono_400Regular,
   JetBrainsMono_500Medium,
 } from "@expo-google-fonts/jetbrains-mono";
-import { QueryClientProvider } from "@tanstack/react-query";
+import type { Query } from "@tanstack/react-query";
+import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
@@ -17,10 +18,13 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { StatusBar, useColorScheme } from "react-native";
 
 import { AnimatedSplashScreen, BlockingScreen } from "@/components";
+import { OfflineBanner } from "@/components/OfflineBanner";
 import { DarkColors, LightColors } from "@/constants/theme";
 import { fetchAuthenticatedUser } from "@/lib/github-rest";
+import { mmkvPersister, PERSISTENCE_MAX_AGE } from "@/lib/persister";
 import { queryClient, setupFocusManager } from "@/lib/query-client";
 import { getStoredToken } from "@/lib/secure-storage";
+import { useOnlineManager } from "@/lib/use-online-manager";
 import { useAuthStore } from "@/stores/auth.store";
 import { runSecurityChecks } from "shikai-security";
 
@@ -33,6 +37,7 @@ export default function RootLayout() {
   const setToken = useAuthStore((s) => s.setToken);
   const setUser = useAuthStore((s) => s.setUser);
   const scheme = useColorScheme();
+  useOnlineManager();
 
   const [bootComplete, setBootComplete] = useState(false);
   const [showSplash, setShowSplash] = useState(true);
@@ -138,7 +143,18 @@ export default function RootLayout() {
   const allReady = appReady && securityReady;
 
   return (
-    <QueryClientProvider client={queryClient}>
+    <PersistQueryClientProvider
+      client={queryClient}
+      persistOptions={{
+        persister: mmkvPersister,
+        maxAge: PERSISTENCE_MAX_AGE,
+        dehydrateOptions: {
+          shouldDehydrateQuery: (query: Query) =>
+            query.state.status === "success" && query.meta?.persist !== false,
+        },
+      }}
+    >
+      <OfflineBanner />
       <StatusBar
         barStyle={scheme === "dark" ? "light-content" : "dark-content"}
         backgroundColor="transparent"
@@ -166,6 +182,6 @@ export default function RootLayout() {
           )}
         </Stack>
       )}
-    </QueryClientProvider>
+    </PersistQueryClientProvider>
   );
 }
