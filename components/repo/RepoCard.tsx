@@ -1,5 +1,5 @@
 import { Octicons } from "@expo/vector-icons";
-import { memo, useMemo } from "react";
+import { memo, useCallback, useMemo } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import languageColors from "@/constants/language-colors.json";
@@ -13,6 +13,7 @@ import {
   Spacing,
 } from "@/constants/theme";
 import { formatCount, relativeTime } from "@/lib/utils";
+import { useWatchlistStore } from "@/stores/watchlist.store";
 import type { GitHubRepo, RepoListParams } from "@/types/github.types";
 
 interface RepoCardProps {
@@ -32,6 +33,20 @@ export const RepoCard = memo(function RepoCard({
 }: RepoCardProps) {
   const colors = isDark ? DarkColors : LightColors;
   const s = isDark ? darkStyles : lightStyles;
+
+  const repoId = `${repo.owner.login}__${repo.name}`;
+  const isWatchlisted = useWatchlistStore((state) =>
+    state.watchlistIds.includes(repoId),
+  );
+  const toggleWatchlist = useWatchlistStore((state) => state.toggleWatchlist);
+
+  const handleBookmarkPress = useCallback(
+    (e: any) => {
+      e.stopPropagation?.();
+      toggleWatchlist(repoId);
+    },
+    [repoId, toggleWatchlist],
+  );
 
   const langColor = repo.language
     ? ((languageColors as Record<string, { color: string | null }>)[
@@ -68,6 +83,21 @@ export const RepoCard = memo(function RepoCard({
         </Text>
         {repo.fork && <ForkBadge colors={colors} />}
         <VisibilityBadge isPrivate={repo.private} colors={colors} />
+        <Pressable
+          onPress={handleBookmarkPress}
+          hitSlop={8}
+          style={s.bookmarkButton}
+          accessibilityLabel={
+            isWatchlisted ? "Remove from watchlist" : "Add to watchlist"
+          }
+          accessibilityRole="button"
+        >
+          <Octicons
+            name={isWatchlisted ? "bookmark-filled" : "bookmark"}
+            size={14}
+            color={isWatchlisted ? colors.accent : colors.textMuted}
+          />
+        </Pressable>
       </View>
 
       {repo.description ? (
@@ -224,6 +254,10 @@ function buildStyles(
       flexDirection: "row",
       alignItems: "center",
       gap: Spacing.sm,
+    },
+
+    bookmarkButton: {
+      padding: 2,
     },
 
     repoIcon: {
