@@ -41,7 +41,8 @@
           }
         }
       ],
-      "expo-web-browser"
+      "expo-web-browser",
+      "./plugins/withAndroidPackaging"
     ],
     "experiments": {
       "typedRoutes": true,
