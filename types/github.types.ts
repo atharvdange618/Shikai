@@ -11,6 +11,7 @@ export interface GitHubUser {
   email: string | null;
   hireable: boolean | null;
   html_url: string;
+  type?: string;
 
   public_repos: number;
   total_private_repos: number;
@@ -217,7 +218,7 @@ interface WatchEventPayload {
   action: "started";
 }
 
-interface PublicEventPayload {}
+interface PublicEventPayload { }
 
 type KnownEventPayload =
   | { type: "PushEvent"; payload: PushEventPayload }

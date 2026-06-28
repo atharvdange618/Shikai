@@ -200,6 +200,66 @@ export async function fetchCommits(
   };
 }
 
+export interface GitHubSearchResult<T> {
+  total_count: number;
+  incomplete_results: boolean;
+  items: T[];
+}
+
+export async function searchRepos(
+  query: string,
+  page: number = 1,
+  per_page: number = 10,
+  sort?: "stars" | "forks" | "help-wanted-issues" | "updated",
+  order?: "desc" | "asc",
+): Promise<{ repos: GitHubRepo[]; totalCount: number; pagination: GitHubPagination }> {
+  const { data, headers } = await githubAxios.get<GitHubSearchResult<GitHubRepo>>(
+    "/search/repositories",
+    { params: { q: query, page, per_page, sort, order } },
+  );
+  return {
+    repos: data.items,
+    totalCount: data.total_count,
+    pagination: parseLinkHeader(headers["link"]),
+  };
+}
+
+export async function searchUsers(
+  query: string,
+  page: number = 1,
+  per_page: number = 10,
+  sort?: "followers" | "repositories" | "joined",
+  order?: "desc" | "asc",
+): Promise<{ users: GitHubUser[]; totalCount: number; pagination: GitHubPagination }> {
+  const { data, headers } = await githubAxios.get<GitHubSearchResult<GitHubUser>>(
+    "/search/users",
+    { params: { q: query, page, per_page, sort, order } },
+  );
+  return {
+    users: data.items,
+    totalCount: data.total_count,
+    pagination: parseLinkHeader(headers["link"]),
+  };
+}
+
+export async function searchIssues(
+  query: string,
+  page: number = 1,
+  per_page: number = 10,
+  sort?: "comments" | "reactions" | "interactions" | "created" | "updated",
+  order?: "desc" | "asc",
+): Promise<{ issues: GitHubIssue[]; totalCount: number; pagination: GitHubPagination }> {
+  const { data, headers } = await githubAxios.get<GitHubSearchResult<GitHubIssue>>(
+    "/search/issues",
+    { params: { q: query, page, per_page, sort, order } },
+  );
+  return {
+    issues: data.items,
+    totalCount: data.total_count,
+    pagination: parseLinkHeader(headers["link"]),
+  };
+}
+
 export async function fetchLastCommit(
   owner: string,
   repo: string,
