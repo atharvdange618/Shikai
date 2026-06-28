@@ -1,5 +1,6 @@
 import { ContributorRow } from "@/components/repo/ContributorRow";
 import { LanguageBar } from "@/components/repo/LanguageBar";
+import { InfoDot } from "@/components/shared/Tooltip";
 import { MarkdownRenderer } from "@/components/shared/MarkdownRenderer";
 import {
   BorderWidth,
@@ -128,7 +129,6 @@ export default function RepoDetailsScreen() {
   const [owner, repoName] = (repoId ?? "").split("__");
 
   const [copiedHash, setCopiedHash] = useState(false);
-  const [activeTooltip, setActiveTooltip] = useState<string | null>(null);
 
   const {
     repo,
@@ -345,62 +345,14 @@ export default function RepoDetailsScreen() {
             </View>
             {getHealthBadges(repo, readme, isLoading.core).length > 0 && (
               <View style={s.healthBadgeRow}>
-                {getHealthBadges(repo, readme, isLoading.core).map((badge) => {
-                  const isD = badge.color === "danger";
-                  const badgeColor = isD ? colors.danger : colors.warning;
-                  const badgeBg = isD
-                    ? colors.dangerSubtle
-                    : colors.warningSubtle;
-                  const isTooltipOpen = activeTooltip === badge.label;
-                  return (
-                    <View key={badge.label}>
-                      <Pressable
-                        style={[
-                          s.healthBadge,
-                          { backgroundColor: badgeBg, borderColor: badgeColor },
-                        ]}
-                        onPress={() =>
-                          setActiveTooltip(isTooltipOpen ? null : badge.label)
-                        }
-                      >
-                        <View
-                          style={[
-                            s.healthBadgeDot,
-                            { backgroundColor: badgeColor },
-                          ]}
-                        />
-                        <Octicons
-                          name={badge.icon as any}
-                          size={11}
-                          color={badgeColor}
-                        />
-                        <Text
-                          style={[s.healthBadgeText, { color: badgeColor }]}
-                        >
-                          {badge.label}
-                        </Text>
-                        <Octicons
-                          name="info"
-                          size={10}
-                          color={badgeColor}
-                          style={{ opacity: 0.6 }}
-                        />
-                      </Pressable>
-                      {isTooltipOpen && (
-                        <View
-                          style={[
-                            s.tooltip,
-                            { backgroundColor: colors.surface, borderColor: colors.border },
-                          ]}
-                        >
-                          <Text style={[s.tooltipText, { color: colors.textSecondary }]}>
-                            {badge.description}
-                          </Text>
-                        </View>
-                      )}
-                    </View>
-                  );
-                })}
+                {getHealthBadges(repo, readme, isLoading.core).map((badge) => (
+                  <InfoDot
+                    key={badge.label}
+                    label={badge.label}
+                    description={badge.description}
+                    color={badge.color}
+                  />
+                ))}
               </View>
             )}
 
@@ -887,41 +839,6 @@ function buildStyles(
       flexWrap: "wrap",
       gap: Spacing.xs,
       marginTop: 2,
-    },
-
-    healthBadge: {
-      flexDirection: "row",
-      alignItems: "center",
-      gap: 5,
-      borderRadius: Radius.md,
-      paddingHorizontal: Spacing.sm,
-      paddingVertical: 5,
-      borderWidth: BorderWidth.normal,
-    },
-
-    healthBadgeDot: {
-      width: 6,
-      height: 6,
-      borderRadius: 3,
-    },
-
-    healthBadgeText: {
-      fontFamily: FontFamily.medium,
-      fontSize: FontSize.caption,
-    },
-
-    tooltip: {
-      marginTop: 4,
-      padding: Spacing.sm,
-      borderRadius: Radius.sm,
-      borderWidth: 1,
-      maxWidth: 280,
-    },
-
-    tooltipText: {
-      fontFamily: FontFamily.regular,
-      fontSize: FontSize.caption,
-      lineHeight: FontSize.caption * 1.5,
     },
 
     description: {
