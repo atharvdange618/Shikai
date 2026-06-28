@@ -113,7 +113,7 @@ export function BlockingScreen({
               <ActivityIndicator color={colors.textSecondary} />
             ) : (
               <Text style={[typography.label, { color: colors.textSecondary }]}>
-                I'm a developer - allow anyway
+                {"I'm a developer - allow anyway"}
               </Text>
             )}
           </Pressable>
