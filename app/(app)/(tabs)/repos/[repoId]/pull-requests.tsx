@@ -3,7 +3,7 @@ import { Octicons } from "@expo/vector-icons";
 import { FlashList } from "@shopify/flash-list";
 import { useQueryClient } from "@tanstack/react-query";
 import { Image } from "expo-image";
-import { useLocalSearchParams, useNavigation } from "expo-router";
+import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import {
@@ -32,7 +32,6 @@ import {
   Spacing,
 } from "@/constants/theme";
 import { relativeTime } from "@/lib/utils";
-import { useRouter } from "expo-router";
 
 type PRState = "open" | "closed";
 
