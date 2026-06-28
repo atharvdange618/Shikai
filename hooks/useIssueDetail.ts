@@ -9,6 +9,7 @@ export function useIssueDetail(owner: string, repo: string, number: number) {
       queryFn: () => fetchIssue(owner, repo, number),
       enabled: Boolean(owner && repo && number),
       staleTime: 1000 * 60 * 2,
+      meta: { persist: false },
     }),
   );
 }
@@ -20,6 +21,7 @@ export function useIssueComments(owner: string, repo: string, number: number) {
       queryFn: () => fetchIssueComments(owner, repo, number),
       enabled: Boolean(owner && repo && number),
       staleTime: 1000 * 60 * 2,
+      meta: { persist: false },
     }),
   );
 }
