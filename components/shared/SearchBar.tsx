@@ -1,9 +1,10 @@
 import { Octicons } from "@expo/vector-icons";
-import { useMemo } from "react";
+import { forwardRef, useMemo } from "react";
 import {
   Pressable,
   StyleSheet,
   TextInput,
+  TextInputProps,
   useColorScheme,
   View,
 } from "react-native";
@@ -21,53 +22,54 @@ interface SearchBarProps {
   value: string;
   onChangeText: (text: string) => void;
   placeholder?: string;
+  textInputProps?: Partial<TextInputProps>;
 }
 
-export function SearchBar({
-  value,
-  onChangeText,
-  placeholder = "Search…",
-}: SearchBarProps) {
-  const isDark = useColorScheme() === "dark";
-  const colors = isDark ? DarkColors : LightColors;
-  const s = useMemo(() => buildStyles(colors), [colors]);
+export const SearchBar = forwardRef<TextInput, SearchBarProps>(
+  function SearchBar({ value, onChangeText, placeholder = "Search…", textInputProps }, ref) {
+    const isDark = useColorScheme() === "dark";
+    const colors = isDark ? DarkColors : LightColors;
+    const s = useMemo(() => buildStyles(colors), [colors]);
 
-  return (
-    <View style={s.container}>
-      <Octicons
-        name="search"
-        size={15}
-        color={colors.textMuted}
-        style={s.icon}
-      />
+    return (
+      <View style={s.container}>
+        <Octicons
+          name="search"
+          size={15}
+          color={colors.textMuted}
+          style={s.icon}
+        />
 
-      <TextInput
-        style={s.input}
-        value={value}
-        onChangeText={onChangeText}
-        placeholder={placeholder}
-        placeholderTextColor={colors.textMuted}
-        autoCapitalize="none"
-        autoCorrect={false}
-        returnKeyType="search"
-        clearButtonMode="never"
-        accessibilityLabel={placeholder}
-      />
+        <TextInput
+          ref={ref}
+          style={s.input}
+          value={value}
+          onChangeText={onChangeText}
+          placeholder={placeholder}
+          placeholderTextColor={colors.textMuted}
+          autoCapitalize="none"
+          autoCorrect={false}
+          returnKeyType="search"
+          clearButtonMode="never"
+          accessibilityLabel={placeholder}
+          {...textInputProps}
+        />
 
-      {value.length > 0 && (
-        <Pressable
-          onPress={() => onChangeText("")}
-          hitSlop={12}
-          style={s.clearButton}
-          accessibilityLabel="Clear search"
-          accessibilityRole="button"
-        >
-          <Octicons name="x-circle-fill" size={15} color={colors.textMuted} />
-        </Pressable>
-      )}
-    </View>
-  );
-}
+        {value.length > 0 && (
+          <Pressable
+            onPress={() => onChangeText("")}
+            hitSlop={12}
+            style={s.clearButton}
+            accessibilityLabel="Clear search"
+            accessibilityRole="button"
+          >
+            <Octicons name="x-circle-fill" size={15} color={colors.textMuted} />
+          </Pressable>
+        )}
+      </View>
+    );
+  },
+);
 
 function buildStyles(colors: typeof LightColors | typeof DarkColors) {
   return StyleSheet.create({
