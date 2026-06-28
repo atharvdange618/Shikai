@@ -16,6 +16,7 @@ export function usePullRequestDetail(
       queryFn: () => fetchPullRequestDetail(owner, repo, number),
       enabled: Boolean(owner && repo && number),
       staleTime: 1000 * 60 * 2,
+      meta: { persist: false },
     }),
   );
 }
@@ -31,6 +32,7 @@ export function usePullRequestComments(
       queryFn: () => fetchPullRequestComments(owner, repo, number),
       enabled: Boolean(owner && repo && number),
       staleTime: 1000 * 60 * 2,
+      meta: { persist: false },
     }),
   );
 }
