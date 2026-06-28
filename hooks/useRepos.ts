@@ -10,6 +10,7 @@ import { fetchRepos } from "@/lib/github-rest";
 import { queryKeys } from "@/lib/query-client";
 import type { GitHubRepo, RepoListParams } from "@/types/github.types";
 import { useInfiniteQuery } from "@tanstack/react-query";
+import { useSearchIndex } from "@/hooks/useSearchIndex";
 
 const PER_PAGE = 10;
 
@@ -47,27 +48,30 @@ export function useRepos(filters: RepoFilters = {}) {
     },
   });
 
-  const filteredRepos = useMemo(() => {
-    const allRepos = query.data ?? [];
+  const languageFilter = useMemo(() => {
+    if (!language) return undefined;
+    return (repo: GitHubRepo) =>
+      repo.language?.toLowerCase() === language.toLowerCase();
+  }, [language]);
 
-    return allRepos.filter((repo: GitHubRepo) => {
-      const matchesLanguage =
-        !language || repo.language?.toLowerCase() === language.toLowerCase();
+  const typeFilter = useMemo(() => {
+    if (type === "forks") return (repo: GitHubRepo) => repo.fork === true;
+    return undefined;
+  }, [type]);
 
-      const trimmedSearch = search?.trim();
-      const matchesSearch =
-        !trimmedSearch ||
-        repo.name.toLowerCase().includes(trimmedSearch.toLowerCase()) ||
-        repo.description?.toLowerCase().includes(trimmedSearch.toLowerCase());
+  const combinedFilter = useMemo(() => {
+    if (!languageFilter && !typeFilter) return undefined;
+    return (repo: GitHubRepo) =>
+      (!languageFilter || languageFilter(repo)) &&
+      (!typeFilter || typeFilter(repo));
+  }, [languageFilter, typeFilter]);
 
-      const matchesType = type === "forks" ? repo.fork === true : true;
-
-      return matchesLanguage && matchesSearch && matchesType;
-    });
-  }, [query.data, language, search, type]);
+  const allRepos = query.data ?? [];
+  const filteredRepos = useSearchIndex(allRepos, search ?? "", combinedFilter);
 
   return {
     repos: filteredRepos,
+    loadedCount: allRepos.length,
 
     fetchNextPage: query.fetchNextPage,
     hasNextPage: query.hasNextPage,
