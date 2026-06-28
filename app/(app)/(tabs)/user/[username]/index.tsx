@@ -1,11 +1,11 @@
 import { FontAwesome6, Octicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { useLocalSearchParams } from "expo-router";
-import { useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 import {
-  ActivityIndicator,
   Linking,
   Pressable,
+  RefreshControl,
   ScrollView,
   StyleSheet,
   Text,
@@ -34,22 +34,32 @@ export default function UserProfileScreen() {
   const colors = isDark ? DarkColors : LightColors;
   const shadows = useMemo(() => (isDark ? {} : Shadows.light.sm), [isDark]);
 
-  const { data: user, isLoading, isError } = useUserProfile(username ?? "");
+  const { data: user, isLoading, isError, refetch } = useUserProfile(username ?? "");
+
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await refetch();
+    setRefreshing(false);
+  }, [refetch]);
 
   const s = useMemo(() => buildStyles(colors, shadows), [colors, shadows]);
 
-  if (isLoading) {
+  if (isError && !user) {
     return (
       <View style={s.loadingContainer}>
-        <ActivityIndicator size="large" color={colors.accent} />
-      </View>
-    );
-  }
-
-  if (isError || !user) {
-    return (
-      <View style={s.loadingContainer}>
+        <Octicons name="alert" size={32} color={colors.textMuted} />
         <Text style={s.errorText}>User not found</Text>
+        <Pressable
+          style={({ pressed }) => [
+            s.retryButton,
+            pressed && s.retryButtonPressed,
+          ]}
+          onPress={() => refetch()}
+        >
+          <Text style={s.retryText}>Try again</Text>
+        </Pressable>
       </View>
     );
   }
@@ -59,9 +69,19 @@ export default function UserProfileScreen() {
       style={s.scroll}
       contentContainerStyle={s.content}
       showsVerticalScrollIndicator={false}
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+          tintColor={colors.accent}
+          colors={[colors.accent]}
+        />
+      }
     >
       <View style={s.heroSection}>
-        {user.avatar_url ? (
+        {isLoading ? (
+          <View style={[s.avatar, s.skeleton]} />
+        ) : user?.avatar_url ? (
           <Image
             source={{ uri: user.avatar_url }}
             style={s.avatar}
@@ -78,98 +98,109 @@ export default function UserProfileScreen() {
           </View>
         )}
 
-        <View style={s.nameBlock}>
-          {user.name && <Text style={s.displayName}>{user.name}</Text>}
-          <Text style={s.username}>@{user.login}</Text>
-          {user.type === "Organization" && (
-            <View style={s.orgBadge}>
-              <Octicons name="organization" size={12} color={colors.accent} />
-              <Text style={s.orgText}>Organization</Text>
-            </View>
-          )}
-          {user.hireable && (
-            <View style={s.hireableBadge}>
-              <View style={s.hireableDot} />
-              <Text style={s.hireableText}>Open to work</Text>
-            </View>
-          )}
-        </View>
+        {isLoading ? (
+          <View style={s.nameSkeleton}>
+            <View style={[s.skeleton, { width: 160, height: 26 }]} />
+            <View style={[s.skeleton, { width: 100, height: 16 }]} />
+          </View>
+        ) : (
+          <View style={s.nameBlock}>
+            {user?.name && <Text style={s.displayName}>{user.name}</Text>}
+            <Text style={s.username}>@{user?.login}</Text>
+            {user?.type === "Organization" && (
+              <View style={s.orgBadge}>
+                <Octicons name="organization" size={12} color={colors.accent} />
+                <Text style={s.orgText}>Organization</Text>
+              </View>
+            )}
+            {user?.hireable && (
+              <View style={s.hireableBadge}>
+                <View style={s.hireableDot} />
+                <Text style={s.hireableText}>Open to work</Text>
+              </View>
+            )}
+          </View>
+        )}
 
-        {user.bio && <Text style={s.bio}>{user.bio}</Text>}
+        {user?.bio && <Text style={s.bio}>{user.bio}</Text>}
       </View>
 
       <View style={[s.statsCard, shadows]}>
         <StatBlock
-          value={user.public_repos}
+          value={user?.public_repos ?? 0}
           label="Repositories"
           colors={colors}
+          isLoading={isLoading}
         />
         <View style={s.statDivider} />
         <StatBlock
-          value={user.followers}
+          value={user?.followers ?? 0}
           label="Followers"
           colors={colors}
+          isLoading={isLoading}
         />
         <View style={s.statDivider} />
         <StatBlock
-          value={user.following}
+          value={user?.following ?? 0}
           label="Following"
           colors={colors}
+          isLoading={isLoading}
         />
       </View>
 
-      {(user.location || user.company || user.blog || user.twitter_username) && (
-        <View style={s.metaCard}>
-          {user.location && (
-            <MetaRow icon="location" text={user.location} colors={colors} />
-          )}
-          {user.company && (
-            <MetaRow
-              icon="organization"
-              text={user.company.replace(/^@/, "")}
-              colors={colors}
-            />
-          )}
-          {user.twitter_username && (
-            <MetaRow
-              iconType="fontawesome6"
-              icon="x-twitter"
-              text={`@${user.twitter_username}`}
-              colors={colors}
-              isLink
-              onPress={() =>
-                Linking.openURL(`https://twitter.com/${user.twitter_username}`)
-              }
-            />
-          )}
-          {user.blog && (
-            <MetaRow
-              icon="globe"
-              text={user.blog.replace(/^https?:\/\//, "")}
-              colors={colors}
-              isLink
-              onPress={() => {
-                const url = user.blog!;
-                const finalUrl = url.startsWith("http")
-                  ? url
-                  : `https://${url}`;
-                Linking.openURL(finalUrl);
-              }}
-            />
-          )}
-          {user.email && (
-            <MetaRow
-              icon="mail"
-              text={user.email}
-              colors={colors}
-              isLink
-              onPress={() => Linking.openURL(`mailto:${user.email}`)}
-            />
-          )}
-        </View>
-      )}
+      {!isLoading &&
+        (user?.location || user?.company || user?.blog || user?.twitter_username) && (
+          <View style={s.metaCard}>
+            {user?.location && (
+              <MetaRow icon="location" text={user.location} colors={colors} />
+            )}
+            {user?.company && (
+              <MetaRow
+                icon="organization"
+                text={user.company.replace(/^@/, "")}
+                colors={colors}
+              />
+            )}
+            {user?.twitter_username && (
+              <MetaRow
+                iconType="fontawesome6"
+                icon="x-twitter"
+                text={`@${user.twitter_username}`}
+                colors={colors}
+                isLink
+                onPress={() =>
+                  Linking.openURL(`https://twitter.com/${user.twitter_username}`)
+                }
+              />
+            )}
+            {user?.blog && (
+              <MetaRow
+                icon="globe"
+                text={user.blog.replace(/^https?:\/\//, "")}
+                colors={colors}
+                isLink
+                onPress={() => {
+                  const url = user.blog!;
+                  const finalUrl = url.startsWith("http")
+                    ? url
+                    : `https://${url}`;
+                  Linking.openURL(finalUrl);
+                }}
+              />
+            )}
+            {user?.email && (
+              <MetaRow
+                icon="mail"
+                text={user.email}
+                colors={colors}
+                isLink
+                onPress={() => Linking.openURL(`mailto:${user.email}`)}
+              />
+            )}
+          </View>
+        )}
 
-      {user.html_url && (
+      {!isLoading && user?.html_url && (
         <Pressable
           style={({ pressed }) => [
             s.githubButton,
@@ -187,7 +218,7 @@ export default function UserProfileScreen() {
         </Pressable>
       )}
 
-      {user.created_at && (
+      {!isLoading && user?.created_at && (
         <Text style={s.memberSince}>
           Member since{" "}
           {new Date(user.created_at).toLocaleDateString("default", {
@@ -204,35 +235,54 @@ function StatBlock({
   value,
   label,
   colors,
+  isLoading,
 }: {
   value: number;
   label: string;
   colors: typeof LightColors | typeof DarkColors;
+  isLoading: boolean;
 }) {
   return (
-    <View style={{ flex: 1, alignItems: "center", gap: Spacing.xs }}>
-      <Text
-        style={{
-          fontFamily: FontFamily.bold,
-          fontSize: FontSize.title,
-          color: colors.textPrimary,
-          fontVariant: ["tabular-nums"],
-        }}
-      >
-        {value.toLocaleString()}
-      </Text>
-      <Text
-        style={{
-          fontFamily: FontFamily.regular,
-          fontSize: FontSize.caption,
-          color: colors.textMuted,
-        }}
-      >
-        {label}
-      </Text>
+    <View style={statStyles.container}>
+      {isLoading ? (
+        <>
+          <View style={[statStyles.skeleton, { width: 48, height: 22 }]} />
+          <View style={[statStyles.skeleton, { width: 64, height: 13 }]} />
+        </>
+      ) : (
+        <>
+          <Text style={[statStyles.value, { color: colors.textPrimary }]}>
+            {value.toLocaleString()}
+          </Text>
+          <Text style={[statStyles.label, { color: colors.textMuted }]}>
+            {label}
+          </Text>
+        </>
+      )}
     </View>
   );
 }
+
+const statStyles = StyleSheet.create({
+  container: {
+    flex: 1,
+    alignItems: "center",
+    gap: Spacing.xs,
+  },
+  value: {
+    fontFamily: FontFamily.bold,
+    fontSize: FontSize.title,
+    fontVariant: ["tabular-nums"],
+  },
+  label: {
+    fontFamily: FontFamily.regular,
+    fontSize: FontSize.caption,
+  },
+  skeleton: {
+    borderRadius: 4,
+    backgroundColor: "rgba(0,0,0,0.06)",
+  },
+});
 
 function MetaRow({
   icon,
@@ -252,17 +302,13 @@ function MetaRow({
   const IconComponent = iconType === "fontawesome6" ? FontAwesome6 : Octicons;
 
   const content = (
-    <View
-      style={{ flexDirection: "row", alignItems: "center", gap: Spacing.md }}
-    >
+    <View style={metaStyles.row}>
       <IconComponent name={icon as any} size={15} color={colors.textMuted} />
       <Text
-        style={{
-          flex: 1,
-          fontFamily: FontFamily.regular,
-          fontSize: FontSize.body,
-          color: isLink ? colors.accent : colors.textSecondary,
-        }}
+        style={[
+          metaStyles.text,
+          { color: isLink ? colors.accent : colors.textSecondary },
+        ]}
         numberOfLines={1}
       >
         {text}
@@ -287,6 +333,19 @@ function MetaRow({
   return content;
 }
 
+const metaStyles = StyleSheet.create({
+  row: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.md,
+  },
+  text: {
+    flex: 1,
+    fontFamily: FontFamily.regular,
+    fontSize: FontSize.body,
+  },
+});
+
 function buildStyles(
   colors: typeof LightColors | typeof DarkColors,
   shadows: object,
@@ -297,12 +356,30 @@ function buildStyles(
       alignItems: "center",
       justifyContent: "center",
       backgroundColor: colors.background,
+      gap: Spacing.md,
     },
 
     errorText: {
       fontFamily: FontFamily.medium,
       fontSize: FontSize.body,
       color: colors.textSecondary,
+    },
+
+    retryButton: {
+      paddingHorizontal: Spacing.lg,
+      paddingVertical: Spacing.sm,
+      borderRadius: Radius.md,
+      backgroundColor: colors.accentSubtle,
+    },
+
+    retryButtonPressed: {
+      opacity: 0.7,
+    },
+
+    retryText: {
+      fontFamily: FontFamily.medium,
+      fontSize: FontSize.label,
+      color: colors.accent,
     },
 
     scroll: {
@@ -334,6 +411,11 @@ function buildStyles(
       backgroundColor: colors.surfaceSecondary,
       alignItems: "center",
       justifyContent: "center",
+    },
+
+    nameSkeleton: {
+      alignItems: "center",
+      gap: Spacing.sm,
     },
 
     nameBlock: {
@@ -459,6 +541,11 @@ function buildStyles(
       fontSize: FontSize.caption,
       color: colors.textMuted,
       textAlign: "center",
+    },
+
+    skeleton: {
+      borderRadius: 4,
+      backgroundColor: colors.surfaceSecondary,
     },
   });
 }
