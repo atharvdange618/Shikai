@@ -1,6 +1,6 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { BlurView } from "expo-blur";
-import { Tabs } from "expo-router";
+import { Tabs, useRouter } from "expo-router";
 import { useCallback, useEffect } from "react";
 import { Platform, StyleSheet, useColorScheme } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -15,6 +15,7 @@ import {
   LightColors,
   Spacing,
 } from "@/constants/theme";
+import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { prefetchOverview, prefetchProfile } from "@/lib/prefetch";
 
 function IOSTabBarBackground() {
@@ -35,6 +36,18 @@ export default function TabsLayout() {
   const colors = isDark ? DarkColors : LightColors;
   const insets = useSafeAreaInsets();
   const queryClient = useQueryClient();
+  const router = useRouter();
+
+  useKeyboardShortcuts({
+    onTabSwitch: useCallback(
+      (index: number) => {
+        const routes = ["/", "/repos", "/stars", "/profile"];
+        const route = routes[index];
+        if (route) router.push(`/(app)/(tabs)${route}` as any);
+      },
+      [router],
+    ),
+  });
 
   useEffect(() => {
     prefetchProfile(queryClient);
