@@ -2,11 +2,13 @@ import { ListItemSeparator } from "@/components/shared/ListItemSeparator";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
+  Keyboard,
   RefreshControl,
   StyleSheet,
+  TextInput,
   Text,
   View,
   useColorScheme,
@@ -16,6 +18,7 @@ import { RepoCard } from "@/components/repo/RepoCard";
 import type { SortOption, TypeOption } from "@/components/repo/RepoFilters";
 import { RepoFilters } from "@/components/repo/RepoFilters";
 import { SearchBar } from "@/components/shared/SearchBar";
+import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { useRepos } from "@/hooks/useRepos";
 import { prefetchRepoDetails, prefetchRoute } from "@/lib/prefetch";
 import { queryKeys } from "@/lib/query-client";
@@ -36,6 +39,9 @@ export default function ReposScreen() {
   const colors = isDark ? DarkColors : LightColors;
   const router = useRouter();
   const queryClient = useQueryClient();
+  const searchInputRef = useRef<TextInput>(null);
+  const flashListRef = useRef<any>(null);
+  const [selectedIndex, setSelectedIndex] = useState(-1);
 
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState<SortOption>("pushed");
@@ -48,6 +54,7 @@ export default function ReposScreen() {
 
   const {
     repos,
+    loadedCount,
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
@@ -57,18 +64,6 @@ export default function ReposScreen() {
 
   const [refreshing, setRefreshing] = useState(false);
 
-  useEffect(() => {
-    if (debouncedSearch && hasNextPage && !isFetchingNextPage) {
-      fetchNextPage();
-    }
-  }, [debouncedSearch, hasNextPage, isFetchingNextPage, fetchNextPage]);
-
-  const onRefresh = useCallback(async () => {
-    setRefreshing(true);
-    await queryClient.invalidateQueries({ queryKey: queryKeys.repos() });
-    setRefreshing(false);
-  }, [queryClient]);
-
   const handleRepoPress = useCallback(
     (repo: GitHubRepo) => {
       const repoId = `${repo.owner.login}__${repo.name}`;
@@ -76,6 +71,37 @@ export default function ReposScreen() {
     },
     [router],
   );
+
+  useKeyboardShortcuts({
+    onSearchFocus: useCallback(() => {
+      searchInputRef.current?.focus();
+    }, []),
+    onEscape: useCallback(() => {
+      Keyboard.dismiss();
+      if (search) {
+        setSearch("");
+      } else if (selectedIndex >= 0) {
+        setSelectedIndex(-1);
+      }
+    }, [search, selectedIndex]),
+    onArrowUp: useCallback(() => {
+      setSelectedIndex((prev) => Math.max(0, prev - 1));
+    }, []),
+    onArrowDown: useCallback(() => {
+      setSelectedIndex((prev) => Math.min(repos.length - 1, prev + 1));
+    }, [repos.length]),
+    onEnter: useCallback(() => {
+      if (selectedIndex >= 0 && selectedIndex < repos.length) {
+        handleRepoPress(repos[selectedIndex]);
+      }
+    }, [selectedIndex, repos, handleRepoPress]),
+  });
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await queryClient.invalidateQueries({ queryKey: queryKeys.repos() });
+    setRefreshing(false);
+  }, [queryClient]);
 
   const handleRepoPressIn = useCallback(
     (repo: GitHubRepo) => {
@@ -184,6 +210,12 @@ export default function ReposScreen() {
     <View style={s.footerLoader}>
       <Text style={s.footerText}>Loading more…</Text>
     </View>
+  ) : debouncedSearch && hasNextPage ? (
+    <View style={s.footerLoader}>
+      <Text style={s.footerText}>
+        Showing {repos.length} of {loadedCount}+ repos
+      </Text>
+    </View>
   ) : null;
 
   const listKey = debouncedSearch.length > 0 ? "search" : "default";
@@ -192,6 +224,7 @@ export default function ReposScreen() {
     <View style={s.container}>
       <View style={s.listHeader}>
         <SearchBar
+          ref={searchInputRef}
           value={search}
           onChangeText={setSearch}
           placeholder="Search repositories…"
@@ -205,6 +238,7 @@ export default function ReposScreen() {
       </View>
 
       <FlashList
+        ref={flashListRef}
         key={listKey}
         data={repos}
         renderItem={renderItem}
@@ -219,6 +253,7 @@ export default function ReposScreen() {
         onEndReachedThreshold={0.5}
         onViewableItemsChanged={onViewableItemsChanged}
         viewabilityConfig={{ itemVisiblePercentThreshold: 50 }}
+        keyboardShouldPersistTaps="handled"
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
