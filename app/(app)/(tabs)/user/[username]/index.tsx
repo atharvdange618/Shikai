@@ -1,7 +1,8 @@
 import { FontAwesome6, Octicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
-import { useLocalSearchParams } from "expo-router";
-import { useCallback, useMemo, useState } from "react";
+import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
+import { useQueryClient } from "@tanstack/react-query";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Linking,
   Pressable,
@@ -14,6 +15,8 @@ import {
 } from "react-native";
 
 import { useUserProfile } from "@/hooks/useUserProfile";
+import { useUserProfileRepos } from "@/hooks/useUserProfileRepos";
+import { prefetchRepoDetails, prefetchRoute } from "@/lib/prefetch";
 
 import {
   AvatarSize,
@@ -27,22 +30,63 @@ import {
   Shadows,
   Spacing,
 } from "@/constants/theme";
+import { formatCount } from "@/lib/utils";
+import type { GitHubRepo } from "@/types/github.types";
 
 export default function UserProfileScreen() {
   const { username } = useLocalSearchParams<{ username: string }>();
   const isDark = useColorScheme() === "dark";
   const colors = isDark ? DarkColors : LightColors;
   const shadows = useMemo(() => (isDark ? {} : Shadows.light.sm), [isDark]);
+  const navigation = useNavigation();
+  const router = useRouter();
+  const queryClient = useQueryClient();
 
-  const { data: user, isLoading, isError, refetch } = useUserProfile(username ?? "");
+  const {
+    data: user,
+    isLoading,
+    isError,
+    refetch,
+  } = useUserProfile(username ?? "");
+
+  const { data: topRepos, isLoading: reposLoading } = useUserProfileRepos(
+    username ?? "",
+  );
 
   const [refreshing, setRefreshing] = useState(false);
 
+  useEffect(() => {
+    if (user?.name) {
+      navigation.setOptions({ title: user.name });
+    } else if (user?.login) {
+      navigation.setOptions({ title: user.login });
+    } else if (username) {
+      navigation.setOptions({ title: username });
+    }
+  }, [user?.name, user?.login, username, navigation]);
+
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    await refetch();
+    await Promise.all([refetch()]);
     setRefreshing(false);
   }, [refetch]);
+
+  const handleRepoPress = useCallback(
+    (repo: GitHubRepo) => {
+      const repoId = `${repo.owner.login}__${repo.name}`;
+      router.push(`/(app)/(tabs)/repos/${repoId}` as any);
+    },
+    [router],
+  );
+
+  const handleRepoPressIn = useCallback(
+    (repo: GitHubRepo) => {
+      const repoId = `${repo.owner.login}__${repo.name}`;
+      prefetchRoute(`/(app)/(tabs)/repos/${repoId}`);
+      prefetchRepoDetails(queryClient, repo.owner.login, repo.name);
+    },
+    [queryClient],
+  );
 
   const s = useMemo(() => buildStyles(colors, shadows), [colors, shadows]);
 
@@ -149,7 +193,10 @@ export default function UserProfileScreen() {
       </View>
 
       {!isLoading &&
-        (user?.location || user?.company || user?.blog || user?.twitter_username) && (
+        (user?.location ||
+          user?.company ||
+          user?.blog ||
+          user?.twitter_username) && (
           <View style={s.metaCard}>
             {user?.location && (
               <MetaRow icon="location" text={user.location} colors={colors} />
@@ -169,7 +216,9 @@ export default function UserProfileScreen() {
                 colors={colors}
                 isLink
                 onPress={() =>
-                  Linking.openURL(`https://twitter.com/${user.twitter_username}`)
+                  Linking.openURL(
+                    `https://twitter.com/${user.twitter_username}`,
+                  )
                 }
               />
             )}
@@ -200,6 +249,30 @@ export default function UserProfileScreen() {
           </View>
         )}
 
+      {reposLoading ? (
+        <View style={s.section}>
+          <Text style={s.sectionTitle}>Top Repositories</Text>
+          <View style={s.reposSkeleton}>
+            {[1, 2, 3].map((i) => (
+              <View key={i} style={[s.skeleton, s.repoSkeleton]} />
+            ))}
+          </View>
+        </View>
+      ) : topRepos?.repos && topRepos.repos.length > 0 ? (
+        <View style={s.section}>
+          <Text style={s.sectionTitle}>Top Repositories</Text>
+          {topRepos.repos.slice(0, 5).map((repo) => (
+            <RepoRow
+              key={repo.id}
+              repo={repo}
+              colors={colors}
+              onPress={handleRepoPress}
+              onPressIn={handleRepoPressIn}
+            />
+          ))}
+        </View>
+      ) : null}
+
       {!isLoading && user?.html_url && (
         <Pressable
           style={({ pressed }) => [
@@ -228,6 +301,65 @@ export default function UserProfileScreen() {
         </Text>
       )}
     </ScrollView>
+  );
+}
+
+function RepoRow({
+  repo,
+  colors,
+  onPress,
+  onPressIn,
+}: {
+  repo: GitHubRepo;
+  colors: typeof LightColors | typeof DarkColors;
+  onPress: (repo: GitHubRepo) => void;
+  onPressIn: (repo: GitHubRepo) => void;
+}) {
+  return (
+    <Pressable
+      style={({ pressed }) => [
+        styles.repoRow,
+        { borderColor: colors.border, backgroundColor: colors.surface },
+        pressed && { opacity: 0.7 },
+      ]}
+      onPress={() => onPress(repo)}
+      onPressIn={() => onPressIn(repo)}
+    >
+      <View style={styles.repoInfo}>
+        <Text
+          style={[styles.repoName, { color: colors.accent }]}
+          numberOfLines={1}
+        >
+          {repo.name}
+        </Text>
+        {repo.description && (
+          <Text
+            style={[styles.repoDesc, { color: colors.textSecondary }]}
+            numberOfLines={1}
+          >
+            {repo.description}
+          </Text>
+        )}
+      </View>
+      <View style={styles.repoStats}>
+        {repo.stargazers_count > 0 && (
+          <View style={styles.repoStat}>
+            <Octicons name="star" size={11} color={colors.star} />
+            <Text style={[styles.repoStatText, { color: colors.textMuted }]}>
+              {formatCount(repo.stargazers_count)}
+            </Text>
+          </View>
+        )}
+        {repo.forks_count > 0 && (
+          <View style={styles.repoStat}>
+            <Octicons name="repo-forked" size={11} color={colors.textMuted} />
+            <Text style={[styles.repoStatText, { color: colors.textMuted }]}>
+              {formatCount(repo.forks_count)}
+            </Text>
+          </View>
+        )}
+      </View>
+    </Pressable>
   );
 }
 
@@ -346,6 +478,68 @@ const metaStyles = StyleSheet.create({
   },
 });
 
+const styles = StyleSheet.create({
+  section: {
+    gap: Spacing.sm,
+  },
+
+  sectionTitle: {
+    fontFamily: FontFamily.semiBold,
+    fontSize: FontSize.title,
+    color: "inherit",
+    marginBottom: Spacing.xs,
+  },
+
+  reposSkeleton: {
+    gap: Spacing.sm,
+  },
+
+  repoSkeleton: {
+    height: 60,
+    borderRadius: Radius.lg,
+  },
+
+  repoRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderWidth: 1,
+    borderRadius: Radius.lg,
+    padding: Spacing.md,
+    gap: Spacing.md,
+  },
+
+  repoInfo: {
+    flex: 1,
+    gap: 2,
+  },
+
+  repoName: {
+    fontFamily: FontFamily.semiBold,
+    fontSize: FontSize.body,
+  },
+
+  repoDesc: {
+    fontFamily: FontFamily.regular,
+    fontSize: FontSize.caption,
+  },
+
+  repoStats: {
+    flexDirection: "row",
+    gap: Spacing.md,
+  },
+
+  repoStat: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
+
+  repoStatText: {
+    fontFamily: FontFamily.regular,
+    fontSize: FontSize.caption,
+  },
+});
+
 function buildStyles(
   colors: typeof LightColors | typeof DarkColors,
   shadows: object,
@@ -392,6 +586,26 @@ function buildStyles(
       paddingTop: Spacing.xl,
       paddingBottom: Spacing.xxl,
       gap: Spacing.lg,
+    },
+
+    section: {
+      gap: Spacing.sm,
+    },
+
+    sectionTitle: {
+      fontFamily: FontFamily.semiBold,
+      fontSize: FontSize.title,
+      color: colors.textPrimary,
+      marginBottom: Spacing.xs,
+    },
+
+    reposSkeleton: {
+      gap: Spacing.sm,
+    },
+
+    repoSkeleton: {
+      height: 60,
+      borderRadius: Radius.lg,
     },
 
     heroSection: {
