@@ -153,6 +153,22 @@ export async function fetchRepos(
   };
 }
 
+export async function fetchUserRepos(
+  username: string,
+  page: number = 1,
+  per_page: number = 6,
+  sort: "created" | "updated" | "pushed" | "full_name" = "updated",
+): Promise<{ repos: GitHubRepo[]; pagination: GitHubPagination }> {
+  const { data, headers } = await githubAxios.get<GitHubRepo[]>(
+    `/users/${encodeURIComponent(username)}/repos`,
+    { params: { page, per_page, sort } },
+  );
+  return {
+    repos: data,
+    pagination: parseLinkHeader(headers["link"]),
+  };
+}
+
 export async function fetchRepo(
   owner: string,
   repo: string,
