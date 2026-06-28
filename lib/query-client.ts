@@ -82,4 +82,10 @@ export const queryKeys = {
   socialAccounts: () => ["socialAccounts"] as const,
   repoCount: () => ["repoCount"] as const,
   latestRelease: () => ["latestRelease"] as const,
+  searchRepos: (query: string, sort?: string, order?: string) =>
+    ["search", "repos", query, sort, order] as const,
+  searchUsers: (query: string, sort?: string, order?: string) =>
+    ["search", "users", query, sort, order] as const,
+  searchIssues: (query: string, sort?: string, order?: string) =>
+    ["search", "issues", query, sort, order] as const,
 } as const;
