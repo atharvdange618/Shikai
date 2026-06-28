@@ -13,7 +13,8 @@
 const fs = require("fs");
 const path = require("path");
 
-const ROOT = path.resolve(__dirname, "..");
+const cwd = process.cwd();
+const ROOT = cwd.endsWith("scripts") ? path.resolve(cwd, "..") : cwd;
 const ANDROID_APP = path.join(ROOT, "android", "app");
 const GRADLE_PROPS = path.join(ROOT, "android", "gradle.properties");
 const BUILD_GRADLE = path.join(ANDROID_APP, "build.gradle");
@@ -24,7 +25,7 @@ const warn = (msg) => console.warn(`[post-prebuild] WARNING: ${msg}`);
 // ─── gradle.properties patches ───
 const GRADLE_PROPERTIES_PATCHES = {
   // Architecture filter - match ABI splits config
-  "reactNativeArchitectures": {
+  reactNativeArchitectures: {
     expected: "arm64-v8a,x86_64",
     fallback: "arm64-v8a,x86_64",
     description: "Architecture filter for ABI splits",
