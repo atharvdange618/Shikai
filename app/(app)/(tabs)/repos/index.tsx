@@ -190,9 +190,6 @@ export default function ReposScreen() {
 
   return (
     <View style={s.container}>
-      {/* Fixed header — lives outside FlashList so it is never remounted
-          when the list key changes or FlashList re-renders. This keeps
-          the TextInput focus alive across every state transition. */}
       <View style={s.listHeader}>
         <SearchBar
           value={search}
