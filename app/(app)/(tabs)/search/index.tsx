@@ -1,4 +1,5 @@
 import { Octicons } from "@expo/vector-icons";
+import { Image } from "expo-image";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { useCallback, useMemo, useRef, useState } from "react";
@@ -99,12 +100,19 @@ export default function SearchScreen() {
         }}
       >
         {item.avatar_url ? (
+          <Image
+            source={{ uri: item.avatar_url }}
+            style={s.userAvatar}
+            contentFit="cover"
+            transition={200}
+          />
+        ) : (
           <View style={s.userAvatar}>
             <Text style={s.userAvatarText}>
               {item.login.charAt(0).toUpperCase()}
             </Text>
           </View>
-        ) : null}
+        )}
         <View style={s.userInfo}>
           <Text style={s.userName}>{item.login}</Text>
           {item.type && <Text style={s.userType}>{item.type}</Text>}
@@ -378,6 +386,7 @@ function buildStyles(colors: typeof LightColors | typeof DarkColors) {
       backgroundColor: colors.accentSubtle,
       alignItems: "center",
       justifyContent: "center",
+      overflow: "hidden",
     },
 
     userAvatarText: {
