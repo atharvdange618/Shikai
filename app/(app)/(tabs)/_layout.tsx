@@ -6,6 +6,7 @@ import { Platform, StyleSheet, useColorScheme } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { TabBarIcon } from "@/components/navigation/TabBarIcon";
+import { TooltipProvider } from "@/components/shared/Tooltip";
 import {
   BorderWidth,
   DarkColors,
@@ -120,6 +121,7 @@ export default function TabsLayout() {
   );
 
   return (
+    <TooltipProvider>
     <Tabs
       screenOptions={{
         headerShown: false,
@@ -189,5 +191,6 @@ export default function TabsLayout() {
         }}
       />
     </Tabs>
+    </TooltipProvider>
   );
 }
