@@ -53,6 +53,13 @@ export async function fetchAuthenticatedUser(): Promise<GitHubUser> {
   return data;
 }
 
+export async function fetchUserProfile(username: string): Promise<GitHubUser> {
+  const { data } = await githubAxios.get<GitHubUser>(
+    `/users/${encodeURIComponent(username)}`,
+  );
+  return data;
+}
+
 export interface GitHubInstallation {
   id: number;
   account: {
