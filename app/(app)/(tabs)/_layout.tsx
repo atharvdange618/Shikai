@@ -135,75 +135,75 @@ export default function TabsLayout() {
 
   return (
     <TooltipProvider>
-    <Tabs
-      screenOptions={{
-        headerShown: false,
+      <Tabs
+        screenOptions={{
+          headerShown: false,
 
-        tabBarActiveTintColor: colors.tabBarActive,
-        tabBarInactiveTintColor: colors.tabBarInactive,
+          tabBarActiveTintColor: colors.tabBarActive,
+          tabBarInactiveTintColor: colors.tabBarInactive,
 
-        tabBarLabelStyle: {
-          fontFamily: FontFamily.medium,
-          fontSize: 10,
-          marginTop: -2,
-          marginBottom: Platform.OS === "android" ? 4 : 0,
-        },
+          tabBarLabelStyle: {
+            fontFamily: FontFamily.medium,
+            fontSize: 10,
+            marginTop: -2,
+            marginBottom: Platform.OS === "android" ? 4 : 0,
+          },
 
-        tabBarStyle: {
-          height: Layout.tabBarHeight + insets.bottom,
-          paddingBottom: insets.bottom,
-          backgroundColor: Platform.select({
-            ios: "transparent",
-            android: colors.tabBarBackground,
-          }),
-          borderTopWidth: Platform.select({
-            ios: 0,
-            android: BorderWidth.thin,
-          }),
-          borderTopColor: colors.border,
-          elevation: 0,
-        },
+          tabBarStyle: {
+            height: Layout.tabBarHeight + insets.bottom,
+            paddingBottom: insets.bottom,
+            backgroundColor: Platform.select({
+              ios: "transparent",
+              android: colors.tabBarBackground,
+            }),
+            borderTopWidth: Platform.select({
+              ios: 0,
+              android: BorderWidth.thin,
+            }),
+            borderTopColor: colors.border,
+            elevation: 0,
+          },
 
-        tabBarBackground:
-          Platform.OS === "ios" ? () => <IOSTabBarBackground /> : undefined,
+          tabBarBackground:
+            Platform.OS === "ios" ? () => <IOSTabBarBackground /> : undefined,
 
-        tabBarIconStyle: {
-          marginTop: Spacing.xs,
-        },
-      }}
-    >
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: "Overview",
-          tabBarIcon: renderHomeIcon,
+          tabBarIconStyle: {
+            marginTop: Spacing.xs,
+          },
         }}
-      />
+      >
+        <Tabs.Screen
+          name="index"
+          options={{
+            title: "Overview",
+            tabBarIcon: renderHomeIcon,
+          }}
+        />
 
-      <Tabs.Screen
-        name="repos"
-        options={{
-          title: "Repos",
-          tabBarIcon: renderReposIcon,
-        }}
-      />
+        <Tabs.Screen
+          name="repos"
+          options={{
+            title: "Repos",
+            tabBarIcon: renderReposIcon,
+          }}
+        />
 
-      <Tabs.Screen
-        name="stars"
-        options={{
-          title: "Stars",
-          tabBarIcon: renderStarsIcon,
-        }}
-      />
+        <Tabs.Screen
+          name="stars"
+          options={{
+            title: "Stars",
+            tabBarIcon: renderStarsIcon,
+          }}
+        />
 
-      <Tabs.Screen
-        name="profile"
-        options={{
-          title: "Profile",
-          tabBarIcon: renderProfileIcon,
-        }}
-      />
-    </Tabs>
+        <Tabs.Screen
+          name="profile"
+          options={{
+            title: "Profile",
+            tabBarIcon: renderProfileIcon,
+          }}
+        />
+      </Tabs>
     </TooltipProvider>
   );
 }
