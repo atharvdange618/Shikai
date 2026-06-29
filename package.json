@@ -30,8 +30,7 @@
     "lint": "expo lint",
     "deploy": "npx expo export -p web && wrangler deploy",
     "preview": "npx expo export -p web && wrangler dev",
-    "prebuild:clean": "npx expo prebuild --clean && node scripts/post-prebuild.js",
-    "doctor": "npx react-doctor@latest"
+    "prebuild:clean": "npx expo prebuild --clean && node scripts/post-prebuild.js"
   },
   "dependencies": {
     "@expo-google-fonts/inter": "^0.4.2",
