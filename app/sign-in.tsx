@@ -35,6 +35,8 @@ import {
   fetchAuthenticatedUser,
   fetchUserInstallations,
 } from "@/lib/github-rest";
+import { clearAllMMKV } from "@/lib/mmkv";
+import { queryClient } from "@/lib/query-client";
 import { saveToken } from "@/lib/secure-storage";
 import { useAuthStore } from "@/stores/auth.store";
 import { useSignInStore } from "@/stores/signin.store";
@@ -189,6 +191,8 @@ export default function SignInScreen() {
       ]);
       setUser(user);
 
+      clearAllMMKV();
+      queryClient.clear();
       setLoading(false);
       router.replace("/(app)/(tabs)/overview" as Href);
     } catch {
@@ -237,6 +241,8 @@ export default function SignInScreen() {
       ]);
       setUser(user);
 
+      clearAllMMKV();
+      queryClient.clear();
       setLoading(false);
       setNeedsInstall(false);
       router.replace("/(app)/(tabs)/overview" as Href);
