@@ -1,7 +1,26 @@
 {
   "name": "shikai",
-  "main": "expo-router/entry",
+  "description": "A read-only GitHub dashboard for Android. Browse repos, contribution graphs, stars, and activity.",
   "version": "1.1.0",
+  "author": "Atharv Dange (https://x.com/atharvdangedev)",
+  "license": "MIT",
+  "homepage": "https://github.com/atharvdange618/Shikai#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/atharvdange618/Shikai.git"
+  },
+  "bugs": {
+    "url": "https://github.com/atharvdange618/Shikai/issues"
+  },
+  "keywords": [
+    "github",
+    "dashboard",
+    "react-native",
+    "expo",
+    "android",
+    "open-source"
+  ],
+  "main": "expo-router/entry",
   "scripts": {
     "start": "expo start",
     "reset-project": "node ./scripts/reset-project.js",
@@ -11,16 +30,15 @@
     "lint": "expo lint",
     "deploy": "npx expo export -p web && wrangler deploy",
     "preview": "npx expo export -p web && wrangler dev",
-    "prebuild:clean": "npx expo prebuild --clean && node scripts/post-prebuild.js"
+    "prebuild:clean": "npx expo prebuild --clean && node scripts/post-prebuild.js",
+    "doctor": "npx react-doctor@latest"
   },
   "dependencies": {
-    "@clerk/expo": "^3.2.8",
     "@expo-google-fonts/inter": "^0.4.2",
     "@expo-google-fonts/jetbrains-mono": "^0.4.1",
     "@expo/vector-icons": "^15.0.3",
     "@react-native-community/netinfo": "11.4.1",
     "@react-navigation/bottom-tabs": "^7.4.0",
-    "@react-navigation/drawer": "^7.5.0",
     "@react-navigation/elements": "^2.6.3",
     "@react-navigation/native": "^7.1.8",
     "@shopify/flash-list": "2.0.2",
@@ -86,7 +104,6 @@
     "unrs-resolver@1.11.1": true,
     "workerd@1.20260504.1": true,
     "workerd@1.20260617.1": true,
-    "@clerk/shared@4.10.0": true,
     "bufferutil@4.1.0": true,
     "utf-8-validate@6.0.6": true
   }
