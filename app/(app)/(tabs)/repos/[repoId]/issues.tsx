@@ -31,9 +31,11 @@ import {
   Radius,
   Spacing,
 } from "@/constants/theme";
-import { relativeTime, decodeRepoId } from "@/lib/utils";
+import { decodeRepoId, relativeTime } from "@/lib/utils";
 
 type IssueState = "open" | "closed";
+
+const keyExtractor = (item: GitHubIssue) => String(item.id);
 
 export default function IssuesScreen() {
   const { repoId } = useLocalSearchParams<{ repoId: string }>();
@@ -97,8 +99,6 @@ export default function IssuesScreen() {
     ),
     [colors, repoId],
   );
-
-  const keyExtractor = useCallback((item: GitHubIssue) => String(item.id), []);
 
   const s = useMemo(() => buildStyles(colors), [colors]);
 

@@ -1,7 +1,7 @@
 import { FontAwesome6, Octicons } from "@expo/vector-icons";
+import { useQueryClient } from "@tanstack/react-query";
 import { Image } from "expo-image";
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
-import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Linking,
@@ -30,7 +30,7 @@ import {
   Shadows,
   Spacing,
 } from "@/constants/theme";
-import { formatCount, encodeRepoId } from "@/lib/utils";
+import { encodeRepoId, formatCount } from "@/lib/utils";
 import type { GitHubRepo } from "@/types/github.types";
 
 export default function UserProfileScreen() {

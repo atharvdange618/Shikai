@@ -24,7 +24,7 @@ import type { PinnedRepoNode } from "@/types/github-graphql.types";
 
 import languageColors from "@/constants/language-colors.json";
 import { prefetchRepoDetails, prefetchRoute } from "@/lib/prefetch";
-import { formatCount, encodeRepoId } from "@/lib/utils";
+import { encodeRepoId, formatCount } from "@/lib/utils";
 
 const CARD_WIDTH = 220;
 
