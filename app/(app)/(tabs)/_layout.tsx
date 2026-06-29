@@ -2,7 +2,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { BlurView } from "expo-blur";
 import { Tabs, useRouter } from "expo-router";
 import { useCallback, useEffect } from "react";
-import { Platform, StyleSheet, useColorScheme } from "react-native";
+import { Platform, StyleSheet, useColorScheme, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { TabBarIcon } from "@/components/navigation/TabBarIcon";
@@ -180,6 +180,7 @@ export default function TabsLayout() {
   return (
     <TooltipProvider>
       <ErrorBoundary>
+        <View style={{ flex: 1, backgroundColor: colors.background }}>
         <Tabs
         screenOptions={{
           headerShown: false,
@@ -272,6 +273,7 @@ export default function TabsLayout() {
           }}
         />
       </Tabs>
+      </View>
       </ErrorBoundary>
     </TooltipProvider>
   );
