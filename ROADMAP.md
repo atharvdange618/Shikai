@@ -1,6 +1,6 @@
 # Shikai Roadmap
 
-> **Version:** 1.1.0 · **Last Updated:** June 27, 2026 · **Status:** Active Development
+> **Version:** 1.1.0 · **Last Updated:** June 29, 2026 · **Status:** Active Development
 
 This document tracks the feature backlog and development progress for Shikai.
 
@@ -28,6 +28,17 @@ This document tracks the feature backlog and development progress for Shikai.
 | List Performance Optimization | Pre-built styles + hoisted `isDark` in RepoCard, `overrideItemLayout`/`getItemType` for FlashList virtualization, `drawDistance: 400`, nested ScrollView removal for topics. | Done |
 | Developer Mode Override | Developers with Android dev options enabled can now bypass the security block by accepting a risk warning. Root and debugger detection remain hard-blocked. Override persisted via SharedPreferences. | Done |
 | Post-Build Automation | `npm run prebuild:clean` script auto-restores Android build customizations (ABI splits, R8 minification, resource shrinking) that are wiped by `expo prebuild --clean`. | Done |
+| Global Search | New search tab with GitHub Search API integration. Tab switching between repos/users/issues. MiniSearch fuzzy index, debounced input, eager-load pagination. Result cards with user avatars, navigate in-app to repo or user profile. | Done |
+| Saved/Watchlist Repos | Bookmark toggle on every RepoCard. Local persistence via MMKV. Dedicated Watchlist tab with search/filter. Empty state with onboarding copy. | Done |
+| User Profile Screen | View any GitHub user's profile — avatar, bio, stats, social links, top repositories. Tappable from search results and contributor lists. Reuses profile layout patterns with skeleton states and pull-to-refresh. | Done |
+| Keyboard Shortcuts | `useKeyboardShortcuts` hook with Cmd+1-6 tab switching, Cmd+F search focus, arrow key list navigation, Escape to dismiss. Haptic feedback on all actions. | Done |
+| Offline Support | Network state manager via `@react-native-community/netinfo`. MMKV-backed React Query disk persistence with 24h max age. Offline banner with safe area support. Ephemeral queries excluded from disk cache. | Done |
+| Tooltip/InfoDot Components | Shared `Tooltip` and `InfoDot` components with mutual exclusivity. Used for repo health badges and info hints across the app. | Done |
+| Activity Feed Infinite Scroll | FlashList-based activity feed with `onEndReached` pagination, `isFetchingNextPage` loading indicator, and grouped consecutive events. | Done |
+| Navigation Overhaul | Fixed broken file navigation path, eliminated double auth guard race condition, replaced fragile `__` repoId encoding with safe `~~` separator (updated 19 files), added keyboard shortcuts for all 6 tabs, fixed `router.navigate` vs `push` inconsistency. | Done |
+| Error Boundaries | `ErrorBoundary` class component wrapping root and tabs layouts. Catches render errors and displays fallback UI with "Go to Home" recovery button. | Done |
+| 404 Screen | Custom `+not-found.tsx` with themed design matching the app. Shows "Go to Home" button instead of default Expo Router 404. | Done |
+| Flash-Free Navigation | Delayed native splash hide until app is fully ready (auth + security checks). Added `contentStyle` background to all Stack navigators. Wrapped Tabs in background View. Root Stack uses fade animation. | Done |
 
 ---
 
@@ -41,21 +52,12 @@ This document tracks the feature backlog and development progress for Shikai.
 
 ## Backlog
 
-### Tier 2 - Medium Features (1-3 hours each)
-
-| # | Feature | Description | Est. LOC |
-|---|---------|-------------|----------|
-| 3 | Saved/Watchlist Repos | Local save via AsyncStorage + save button on repo cards + dedicated list screen. | ~150 |
-| 4 | User Profile Screen | View any GitHub user's profile (repos, contributions, bio). Tappable from starred repo headers, contributor lists. Reuses existing profile layout patterns. | ~250 |
-
 ### Tier 3 - Large Features (3+ hours each)
 
 | # | Feature | Description | Est. LOC |
 |---|---------|-------------|----------|
-| 5 | Global Search | New search tab, GitHub search API integration, result cards for repos/users/issues/PRs. | ~400 |
 | 6 | Notifications-Lite / Attention Feed | GitHub notifications API, attention-worthy items logic, new screen. | ~300 |
 | 8 | Share as Image | `react-native-view-shot` card capture, image generation for repos/profiles. | ~150 |
-| 9 | Explore Tab / User Discovery | New tab for searching and discovering GitHub users. User cards with repo count, followers, bio. | ~350 |
 | 10 | Following Activity Feed | Dashboard-style feed showing recent activity from users you follow on GitHub. | ~300 |
 | 11 | Custom Theme Engine | User-selectable themes: Tokyo Night, Dracula, Atom One Dark. Theme picker in settings, persistent preference via AsyncStorage. Separate experimental branch (`feat/themes`). | ~400 |
 | 12 | 3D GitHub Profile Card | Shareable 3D-styled GitHub profile cards for social proof and FOMO. Generate a visual card with avatar, stats, top repos, contribution graph. Share as image to social media. Inspired by Threads' card sharing mechanic. | ~350 |
@@ -66,11 +68,7 @@ This document tracks the feature backlog and development progress for Shikai.
 
 | # | Feature | Notes |
 |---|---------|-------|
-| 3 | Saved / Watchlist Repositories | - |
-| 4 | User Profile Screen | - |
-| 5 | Global Search | - |
 | 6 | Notifications-Lite / Attention Feed | - |
-| 9 | Explore Tab / User Discovery | - |
 | 10 | Following Activity Feed | - |
 | 11 | Custom Theme Engine | Experimental - separate `feat/themes` branch |
 | 12 | 3D GitHub Profile Card | Social sharing feature - generate shareable profile cards |
