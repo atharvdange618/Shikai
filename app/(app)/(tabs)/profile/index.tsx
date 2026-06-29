@@ -4,7 +4,6 @@ import { Image } from "expo-image";
 import { Href, useRouter } from "expo-router";
 import { useCallback, useMemo, useState } from "react";
 import {
-  Alert,
   Linking,
   Pressable,
   RefreshControl,
@@ -14,6 +13,8 @@ import {
   useColorScheme,
   View,
 } from "react-native";
+
+import { useAlert } from "@/components";
 
 import { useRepoCount } from "@/hooks/useRepoCount";
 import { useUser } from "@/hooks/useUser";
@@ -41,26 +42,32 @@ export default function ProfileScreen() {
   const shadows = useMemo(() => (isDark ? {} : Shadows.light.sm), [isDark]);
   const router = useRouter();
   const queryClient = useQueryClient();
+  const alert = useAlert();
 
   const { data: user, isLoading } = useUser();
   const { data: socialAccounts } = useSocialAccounts();
   const { data: repoCount } = useRepoCount();
 
   const handleSignOut = useCallback(() => {
-    Alert.alert("Sign out", "Are you sure you want to sign out?", [
-      { text: "Cancel", style: "cancel" },
-      {
-        text: "Sign out",
-        style: "destructive",
-        onPress: async () => {
-          await deleteToken();
-          useAuthStore.getState().clearAuth();
-          queryClient.clear();
-          router.replace("/sign-in" as Href);
+    alert.show({
+      variant: "danger",
+      title: "Sign out",
+      message: "Are you sure you want to sign out?",
+      actions: [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Sign out",
+          style: "destructive",
+          onPress: async () => {
+            await deleteToken();
+            useAuthStore.getState().clearAuth();
+            queryClient.clear();
+            router.replace("/sign-in" as Href);
+          },
         },
-      },
-    ]);
-  }, [router]);
+      ],
+    });
+  }, [router, alert, queryClient]);
 
   const linkedInUrl = socialAccounts?.find((account) =>
     account.url.includes("linkedin.com"),
