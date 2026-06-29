@@ -13,7 +13,7 @@ export default function WatchlistLayout() {
   const colors = isDark ? DarkColors : LightColors;
 
   return (
-    <Stack>
+    <Stack screenOptions={{ contentStyle: { backgroundColor: colors.background } }}>
       <Stack.Screen
         name="index"
         options={{
