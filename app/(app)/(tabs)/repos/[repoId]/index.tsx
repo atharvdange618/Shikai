@@ -15,6 +15,8 @@ import {
 } from "@/constants/theme";
 import { useRepoDetailsScreen } from "@/hooks/useRepoDetails";
 import { prefetchFileTree, prefetchRepoCommits } from "@/lib/prefetch";
+import { fetchIssues, fetchPullRequests } from "@/lib/github-rest";
+import { queryKeys } from "@/lib/query-client";
 import { decodeRepoId, formatCount, relativeTime } from "@/lib/utils";
 import { Octicons } from "@expo/vector-icons";
 import { useQueryClient } from "@tanstack/react-query";
@@ -208,7 +210,17 @@ export default function RepoDetailsScreen() {
 
   const handleIssuesPressIn = useCallback(() => {
     if (!owner || !repoName) return;
-  }, [owner, repoName]);
+    queryClient.prefetchInfiniteQuery({
+      queryKey: queryKeys.repoIssues(owner, repoName, "open"),
+      queryFn: ({ pageParam }) =>
+        fetchIssues(owner, repoName, pageParam, 10, "open"),
+      initialPageParam: 1,
+      getNextPageParam: (lastPage) =>
+        lastPage.pagination.next ?? undefined,
+      pages: 1,
+      staleTime: 1000 * 60 * 2,
+    });
+  }, [owner, repoName, queryClient]);
 
   const handlePRsPress = useCallback(() => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -217,7 +229,17 @@ export default function RepoDetailsScreen() {
 
   const handlePRsPressIn = useCallback(() => {
     if (!owner || !repoName) return;
-  }, [owner, repoName]);
+    queryClient.prefetchInfiniteQuery({
+      queryKey: queryKeys.repoPullRequests(owner, repoName, "open"),
+      queryFn: ({ pageParam }) =>
+        fetchPullRequests(owner, repoName, pageParam, 10, "open"),
+      initialPageParam: 1,
+      getNextPageParam: (lastPage) =>
+        lastPage.pagination.next ?? undefined,
+      pages: 1,
+      staleTime: 1000 * 60 * 2,
+    });
+  }, [owner, repoName, queryClient]);
 
   const insets = useSafeAreaInsets();
   const s = useMemo(
