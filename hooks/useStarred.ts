@@ -6,11 +6,11 @@
 
 import { useMemo } from "react";
 
+import { useSearchIndex } from "@/hooks/useSearchIndex";
 import { fetchStarred } from "@/lib/github-rest";
 import { queryKeys } from "@/lib/query-client";
 import type { GitHubRepo } from "@/types/github.types";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { useSearchIndex } from "@/hooks/useSearchIndex";
 
 const PER_PAGE = 10;
 

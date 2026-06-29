@@ -35,6 +35,25 @@ import {
 } from "@/constants/theme";
 import { FlashList } from "@shopify/flash-list";
 
+const keyExtractor = (item: GitHubRepo) => String(item.id);
+
+const overrideItemLayout = (
+  layout: { span?: number; size?: number },
+  item: GitHubRepo,
+) => {
+  let size = 96;
+  if (item.description) {
+    size += 36;
+  }
+  if (item.topics && item.topics.length > 0) {
+    size += 34;
+  }
+  layout.size = size;
+};
+
+const getItemType = (item: GitHubRepo) =>
+  item.topics.length > 0 ? 2 : item.description ? 1 : 0;
+
 export default function ReposScreen() {
   const isDark = useColorScheme() === "dark";
   const colors = isDark ? DarkColors : LightColors;
@@ -67,8 +86,8 @@ export default function ReposScreen() {
 
   const handleRepoPress = useCallback(
     (repo: GitHubRepo) => {
-      const repoId = encodeRepoId(repo.owner.login, repo.name);
-      router.push(`/(app)/(tabs)/repos/${repoId}`);
+    const repoId = encodeRepoId(repo.owner.login, repo.name);
+    router.push(`/(app)/(tabs)/repos/${repoId}`);
     },
     [router],
   );
@@ -106,22 +125,22 @@ export default function ReposScreen() {
 
   const handleRepoPressIn = useCallback(
     (repo: GitHubRepo) => {
-      const repoId = encodeRepoId(repo.owner.login, repo.name);
-      prefetchRoute(`/(app)/(tabs)/repos/${repoId}`);
-      prefetchRepoDetails(queryClient, repo.owner.login, repo.name);
+    const repoId = encodeRepoId(repo.owner.login, repo.name);
+    prefetchRoute(`/(app)/(tabs)/repos/${repoId}`);
+    prefetchRepoDetails(queryClient, repo.owner.login, repo.name);
     },
     [queryClient],
   );
 
   const renderItem = useCallback(
     ({ item }: { item: GitHubRepo }) => (
-      <RepoCard
-        repo={item}
-        sort={sort}
-        isDark={isDark}
-        onPress={handleRepoPress}
-        onPressIn={handleRepoPressIn}
-      />
+    <RepoCard
+      repo={item}
+      sort={sort}
+      isDark={isDark}
+      onPress={handleRepoPress}
+      onPressIn={handleRepoPressIn}
+    />
     ),
     [handleRepoPress, handleRepoPressIn, sort, isDark],
   );
@@ -129,44 +148,22 @@ export default function ReposScreen() {
   const onViewableItemsChanged = useMemo(
     () =>
       ({ viewableItems }: { viewableItems: { item: GitHubRepo }[] }) => {
-        if (viewportTimer.current) {
-          clearTimeout(viewportTimer.current);
+    if (viewportTimer.current) {
+      clearTimeout(viewportTimer.current);
+    }
+    viewportTimer.current = setTimeout(() => {
+      for (const { item } of viewableItems) {
+        if (!prefetchMap.current.has(item.id)) {
+          prefetchMap.current.add(item.id);
+          prefetchRepoDetails(queryClient, item.owner.login, item.name);
         }
-        viewportTimer.current = setTimeout(() => {
-          for (const { item } of viewableItems) {
-            if (!prefetchMap.current.has(item.id)) {
-              prefetchMap.current.add(item.id);
-              prefetchRepoDetails(queryClient, item.owner.login, item.name);
-            }
-          }
-        }, 200);
+      }
+    }, 200);
       },
     [queryClient],
   );
 
-  const keyExtractor = useCallback((item: GitHubRepo) => String(item.id), []);
-
-  const overrideItemLayout = useCallback(
-    (layout: { span?: number; size?: number }, item: GitHubRepo) => {
-      let size = 96;
-      if (item.description) {
-        size += 36;
-      }
-      if (item.topics && item.topics.length > 0) {
-        size += 34;
-      }
-      layout.size = size;
-    },
-    [],
-  );
-
-  const getItemType = useCallback(
-    (item: GitHubRepo) =>
-      item.topics.length > 0 ? 2 : item.description ? 1 : 0,
-    [],
-  );
-
-  const s = useMemo(() => buildStyles(colors), [colors]);
+  const s = buildStyles(colors);
 
   const ListEmpty = isLoading ? (
     <View style={s.loadingContainer}>

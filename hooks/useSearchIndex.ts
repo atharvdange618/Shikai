@@ -1,6 +1,6 @@
+import type { GitHubRepo } from "@/types/github.types";
 import MiniSearch from "minisearch";
 import { useMemo } from "react";
-import type { GitHubRepo } from "@/types/github.types";
 
 function createIndex() {
   return new MiniSearch<GitHubRepo>({

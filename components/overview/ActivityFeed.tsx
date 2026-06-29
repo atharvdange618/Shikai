@@ -37,7 +37,7 @@ import {
   Radius,
   Spacing,
 } from "@/constants/theme";
-import { format24HourTime, encodeRepoId } from "@/lib/utils";
+import { encodeRepoId, format24HourTime } from "@/lib/utils";
 import type { GitHubEvent } from "@/types/github.types";
 
 interface ActivityFeedProps {
@@ -48,12 +48,16 @@ interface ActivityFeedProps {
 }
 
 function parseGitHubUrl(url: string): Href | null {
-  const match = url.match(/github\.com\/([^/]+)\/([^/]+)(?:\/(issues|pull)\/(\d+))?/);
+  const match = url.match(
+    /github\.com\/([^/]+)\/([^/]+)(?:\/(issues|pull)\/(\d+))?/,
+  );
   if (!match) return null;
   const [, owner, repo, type, number] = match;
   const repoId = encodeRepoId(owner, repo);
-  if (type === "issues" && number) return `/(app)/(tabs)/repos/${repoId}/issue/${number}` as Href;
-  if (type === "pull" && number) return `/(app)/(tabs)/repos/${repoId}/pr/${number}` as Href;
+  if (type === "issues" && number)
+    return `/(app)/(tabs)/repos/${repoId}/issue/${number}` as Href;
+  if (type === "pull" && number)
+    return `/(app)/(tabs)/repos/${repoId}/pr/${number}` as Href;
   return `/(app)/(tabs)/repos/${repoId}` as Href;
 }
 
@@ -84,8 +88,7 @@ function getEventDisplay(
     case "PushEvent": {
       const payload = event.payload;
       const commitCount = payload.size ?? 1;
-      const branch =
-        payload.ref?.replace("refs/heads/", "") ?? "main";
+      const branch = payload.ref?.replace("refs/heads/", "") ?? "main";
       return {
         icon: "repo-push",
         iconColor: colors.accent,
@@ -217,8 +220,7 @@ function getGroupKey(event: GitHubEvent): string {
   switch (event.type) {
     case "PushEvent": {
       const payload = event.payload;
-      const branch =
-        payload.ref?.replace("refs/heads/", "") ?? "main";
+      const branch = payload.ref?.replace("refs/heads/", "") ?? "main";
       return `${event.type}:${repoName}:${branch}`;
     }
     default:
@@ -393,11 +395,7 @@ export function ActivityFeed({
     );
   }
 
-  const renderItem = ({
-    item: group,
-  }: {
-    item: GroupedEvent;
-  }) => {
+  const renderItem = ({ item: group }: { item: GroupedEvent }) => {
     const isExpanded = expandedGroups.has(group.id);
     const isGroup = group.type === "group";
 

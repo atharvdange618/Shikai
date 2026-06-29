@@ -26,7 +26,10 @@ interface SearchBarProps {
 }
 
 export const SearchBar = forwardRef<TextInput, SearchBarProps>(
-  function SearchBar({ value, onChangeText, placeholder = "Search…", textInputProps }, ref) {
+  function SearchBar(
+    { value, onChangeText, placeholder = "Search…", textInputProps },
+    ref,
+  ) {
     const isDark = useColorScheme() === "dark";
     const colors = isDark ? DarkColors : LightColors;
     const s = useMemo(() => buildStyles(colors), [colors]);

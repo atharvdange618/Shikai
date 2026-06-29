@@ -1,4 +1,3 @@
-import React, { useMemo } from "react";
 import {
   Pressable,
   ScrollView,
@@ -17,6 +16,7 @@ import {
   Spacing,
 } from "@/constants/theme";
 import type { RepoListParams } from "@/types/github.types";
+import { useMemo } from "react";
 
 export type SortOption = NonNullable<RepoListParams["sort"]>;
 export type TypeOption = NonNullable<RepoListParams["type"]>;
@@ -49,7 +49,7 @@ export function RepoFilters({
 }: RepoFiltersProps) {
   const isDark = useColorScheme() === "dark";
   const colors = isDark ? DarkColors : LightColors;
-  const s = React.useMemo(() => buildStyles(colors), [colors]);
+  const s = useMemo(() => buildStyles(colors), [colors]);
 
   return (
     <ScrollView

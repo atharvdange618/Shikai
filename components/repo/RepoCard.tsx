@@ -12,7 +12,7 @@ import {
   Shadows,
   Spacing,
 } from "@/constants/theme";
-import { formatCount, relativeTime, encodeRepoId } from "@/lib/utils";
+import { encodeRepoId, formatCount, relativeTime } from "@/lib/utils";
 import { useWatchlistStore } from "@/stores/watchlist.store";
 import type { GitHubRepo, RepoListParams } from "@/types/github.types";
 
