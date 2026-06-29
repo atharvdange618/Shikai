@@ -7,3 +7,7 @@ export const mmkvStorage = {
   setItem: async (key: string, value: string) => mmkv.set(key, value),
   removeItem: async (key: string) => { mmkv.remove(key); },
 };
+
+export function clearAllMMKV() {
+  mmkv.clearAll();
+}
