@@ -4,6 +4,7 @@ import { Image } from "expo-image";
 import { Href, useRouter } from "expo-router";
 import { useCallback, useMemo, useState } from "react";
 import {
+  Alert,
   Linking,
   Pressable,
   RefreshControl,
@@ -16,6 +17,7 @@ import {
 
 import { useRepoCount } from "@/hooks/useRepoCount";
 import { useUser } from "@/hooks/useUser";
+import { deleteToken } from "@/lib/secure-storage";
 import { queryKeys } from "@/lib/query-client";
 
 import {
@@ -31,6 +33,7 @@ import {
   Spacing,
 } from "@/constants/theme";
 import { useSocialAccounts } from "@/hooks/useSocialAccounts";
+import { useAuthStore } from "@/stores/auth.store";
 
 export default function ProfileScreen() {
   const isDark = useColorScheme() === "dark";
@@ -42,6 +45,22 @@ export default function ProfileScreen() {
   const { data: user, isLoading } = useUser();
   const { data: socialAccounts } = useSocialAccounts();
   const { data: repoCount } = useRepoCount();
+
+  const handleSignOut = useCallback(() => {
+    Alert.alert("Sign out", "Are you sure you want to sign out?", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Sign out",
+        style: "destructive",
+        onPress: async () => {
+          await deleteToken();
+          useAuthStore.getState().clearAuth();
+          queryClient.clear();
+          router.replace("/sign-in" as Href);
+        },
+      },
+    ]);
+  }, [router]);
 
   const linkedInUrl = socialAccounts?.find((account) =>
     account.url.includes("linkedin.com"),
@@ -249,6 +268,17 @@ export default function ProfileScreen() {
         <Octicons name="info" size={IconSize.md} color={colors.textSecondary} />
         <Text style={s.aboutButtonText}>About Shikai</Text>
         <Octicons name="chevron-right" size={13} color={colors.textMuted} />
+      </Pressable>
+
+      <Pressable
+        style={({ pressed }) => [
+          s.signOutButton,
+          pressed && s.signOutButtonPressed,
+        ]}
+        onPress={handleSignOut}
+      >
+        <Octicons name="sign-out" size={IconSize.md} color={colors.danger} />
+        <Text style={s.signOutText}>Sign out</Text>
       </Pressable>
 
       {user?.created_at && (
@@ -539,6 +569,28 @@ function buildStyles(
       fontFamily: FontFamily.medium,
       fontSize: FontSize.body,
       color: colors.textSecondary,
+    },
+
+    signOutButton: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: Spacing.md,
+      backgroundColor: colors.surface,
+      borderRadius: Radius.lg,
+      borderWidth: 1,
+      borderColor: colors.dangerSubtle,
+      padding: Spacing.md,
+    },
+
+    signOutButtonPressed: {
+      opacity: 0.7,
+    },
+
+    signOutText: {
+      flex: 1,
+      fontFamily: FontFamily.medium,
+      fontSize: FontSize.body,
+      color: colors.danger,
     },
 
     memberSince: {
