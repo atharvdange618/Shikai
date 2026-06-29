@@ -8,7 +8,7 @@ import {
   LightColors,
 } from "@/constants/theme";
 
-export default function UserProfileLayout() {
+export default function UserLayout() {
   const isDark = useColorScheme() === "dark";
   const colors = isDark ? DarkColors : LightColors;
 
@@ -28,6 +28,8 @@ export default function UserProfileLayout() {
             backgroundColor: colors.background,
           },
           headerTintColor: colors.accent,
+          headerBackButtonDisplayMode: "minimal",
+          headerBackTitle: "",
         }}
       />
     </Stack>
