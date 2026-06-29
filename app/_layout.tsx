@@ -18,6 +18,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { StatusBar, useColorScheme } from "react-native";
 
 import {
+  AlertProvider,
   AnimatedSplashScreen,
   BlockingScreen,
   ErrorBoundary,
@@ -162,47 +163,49 @@ export default function RootLayout() {
         },
       }}
     >
-      <OfflineBanner />
-      <StatusBar
-        barStyle={scheme === "dark" ? "light-content" : "dark-content"}
-        backgroundColor="transparent"
-        translucent
-      />
-      {showSplash && (
-        <AnimatedSplashScreen
-          isReady={allReady}
-          onComplete={() => setShowSplash(false)}
+      <AlertProvider>
+        <OfflineBanner />
+        <StatusBar
+          barStyle={scheme === "dark" ? "light-content" : "dark-content"}
+          backgroundColor="transparent"
+          translucent
         />
-      )}
-      {!showSplash && securityStatus === "blocked" && (
-        <BlockingScreen
-          reasons={securityReasons}
-          devModeBlocked={devModeBlocked}
-          onOverride={handleRecheck}
-        />
-      )}
-      {!showSplash && securityStatus === "passed" && (
-        <ErrorBoundary>
-          <Stack
-            screenOptions={{
-              headerShown: false,
-              animation: "fade",
-              contentStyle: {
-                backgroundColor:
-                  scheme === "dark"
-                    ? DarkColors.background
-                    : LightColors.background,
-              },
-            }}
-          >
-            {token ? (
-              <Stack.Screen name="(app)" />
-            ) : (
-              <Stack.Screen name="sign-in" />
-            )}
-          </Stack>
-        </ErrorBoundary>
-      )}
+        {showSplash && (
+          <AnimatedSplashScreen
+            isReady={allReady}
+            onComplete={() => setShowSplash(false)}
+          />
+        )}
+        {!showSplash && securityStatus === "blocked" && (
+          <BlockingScreen
+            reasons={securityReasons}
+            devModeBlocked={devModeBlocked}
+            onOverride={handleRecheck}
+          />
+        )}
+        {!showSplash && securityStatus === "passed" && (
+          <ErrorBoundary>
+            <Stack
+              screenOptions={{
+                headerShown: false,
+                animation: "fade",
+                contentStyle: {
+                  backgroundColor:
+                    scheme === "dark"
+                      ? DarkColors.background
+                      : LightColors.background,
+                },
+              }}
+            >
+              {token ? (
+                <Stack.Screen name="(app)" />
+              ) : (
+                <Stack.Screen name="sign-in" />
+              )}
+            </Stack>
+          </ErrorBoundary>
+        )}
+      </AlertProvider>
     </PersistQueryClientProvider>
   );
 }

@@ -3,7 +3,6 @@ import { useFocusEffect } from "expo-router";
 import { useCallback, useState } from "react";
 import {
   ActivityIndicator,
-  Alert,
   BackHandler,
   Pressable,
   StyleSheet,
@@ -11,6 +10,7 @@ import {
   View,
 } from "react-native";
 import { setDevModeOverride } from "shikai-security";
+import { useAlert } from "@/components/shared/Alert";
 
 interface BlockingScreenProps {
   reasons: string[];
@@ -25,6 +25,7 @@ export function BlockingScreen({
 }: BlockingScreenProps) {
   const { colors, typography, spacing } = useTheme();
   const [loading, setLoading] = useState(false);
+  const alert = useAlert();
 
   useFocusEffect(
     useCallback(() => {
@@ -34,13 +35,15 @@ export function BlockingScreen({
   );
 
   const handleOverride = async () => {
-    Alert.alert(
-      "Developer Mode Override",
-      "Enabling this override allows developer tools (ADB, USB debugging) to access your app data. This includes your account credentials, messages, and any locally stored information.\n\nOnly enable this if you trust the devices connected to your phone.",
-      [
+    alert.show({
+      variant: "warning",
+      title: "Developer Mode Override",
+      message:
+        "Enabling this override allows developer tools (ADB, USB debugging) to access your app data. This includes your account credentials, messages, and any locally stored information.\n\nOnly enable this if you trust the devices connected to your phone.",
+      actions: [
         { text: "Cancel", style: "cancel" },
         {
-          text: "I understand, enable override",
+          text: "Enable override",
           style: "destructive",
           onPress: async () => {
             setLoading(true);
@@ -52,7 +55,7 @@ export function BlockingScreen({
           },
         },
       ],
-    );
+    });
   };
 
   return (

@@ -170,7 +170,7 @@ export default function SearchScreen() {
         })()}
       </Pressable>
     ),
-    [colors, s],
+    [colors, s, router],
   );
 
   const renderItem = useCallback(
