@@ -1,6 +1,6 @@
 # Shikai
 
-> A read-only GitHub companion for iOS and Android.
+> A read-only GitHub companion for Android.
 
 **Shikai** shows you your GitHub data the way it deserves to be seen. Your repos, your contributions, your activity - presented clearly, without the noise of the full GitHub mobile experience.
 
@@ -25,7 +25,7 @@ GitHub's mobile app is built for _work_ - reviewing PRs, responding to issues, m
 ## Design Principles
 
 - **Read-only by design.** No write operations means no accidental mistakes. This is your safe viewing space.
-- **Mobile-first, native feel.** Smooth animations, haptic feedback, frosted glass tab bar on iOS, and a UI that feels at home on your phone.
+- **Mobile-first, native feel.** Smooth animations, haptic feedback, and a UI that feels at home on your phone.
 - **Information at the right density.** Not too sparse, not overwhelming. Just enough detail to be useful, with deeper views when you need them.
 
 Light and dark themes are supported - a warm, paper-like aesthetic in light mode and a GitHub-inspired dark palette in dark mode. Typography uses Inter for body text and JetBrains Mono for code.
