@@ -158,12 +158,17 @@ export default function RepoDetailsScreen() {
   }, [repo?.name, navigation]);
 
   useEffect(() => {
-    if (navigation.canGoBack()) return;
     try {
       navigation.setOptions({
         headerLeft: () => (
           <Pressable
-            onPress={() => router.replace("/(app)/(tabs)/repos" as any)}
+            onPress={() => {
+              if (navigation.canGoBack()) {
+                navigation.goBack();
+              } else {
+                router.replace("/(app)/(tabs)/repos" as any);
+              }
+            }}
             hitSlop={8}
             style={{
               flexDirection: "row",
@@ -184,7 +189,7 @@ export default function RepoDetailsScreen() {
                 color: colors.accent,
               }}
             >
-              Repos
+              Back
             </Text>
           </Pressable>
         ),
