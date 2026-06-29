@@ -2,29 +2,28 @@ import { useQueryClient } from "@tanstack/react-query";
 import { BlurView } from "expo-blur";
 import { Tabs, useRouter } from "expo-router";
 import { useEffect } from "react";
-import { Platform, StyleSheet, useColorScheme, View } from "react-native";
+import { Platform, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { ErrorBoundary } from "@/components";
 import { TabBarIcon } from "@/components/navigation/TabBarIcon";
 import { TooltipProvider } from "@/components/shared/Tooltip";
-import { ErrorBoundary } from "@/components";
 import {
   BorderWidth,
-  DarkColors,
   FontFamily,
   Layout,
-  LightColors,
   Spacing,
+  useTheme,
 } from "@/constants/theme";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { prefetchOverview, prefetchProfile } from "@/lib/prefetch";
 
 function IOSTabBarBackground() {
-  const scheme = useColorScheme();
+  const { isDark } = useTheme();
 
   return (
     <BlurView
-      tint={scheme === "dark" ? "dark" : "light"}
+      tint={isDark ? "dark" : "light"}
       intensity={80}
       style={StyleSheet.absoluteFill}
     />
@@ -124,9 +123,7 @@ const renderProfileIcon = ({
 );
 
 export default function TabsLayout() {
-  const scheme = useColorScheme();
-  const isDark = scheme === "dark";
-  const colors = isDark ? DarkColors : LightColors;
+  const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const queryClient = useQueryClient();
   const router = useRouter();

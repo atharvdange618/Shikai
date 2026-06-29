@@ -1,11 +1,8 @@
+import { useTheme } from "@/constants/theme";
 import { Stack } from "expo-router";
-import { useColorScheme } from "react-native";
-
-import { DarkColors, LightColors } from "@/constants/theme";
 
 export default function AppLayout() {
-  const isDark = useColorScheme() === "dark";
-  const colors = isDark ? DarkColors : LightColors;
+  const { colors } = useTheme();
 
   return (
     <Stack

@@ -1,4 +1,5 @@
-import { useTheme } from "@/constants/theme";
+import { useAlert } from "@/components/shared/Alert";
+import { Spacing, TextStyles, useTheme } from "@/constants/theme";
 import { useFocusEffect } from "expo-router";
 import { useCallback, useState } from "react";
 import {
@@ -10,7 +11,6 @@ import {
   View,
 } from "react-native";
 import { setDevModeOverride } from "shikai-security";
-import { useAlert } from "@/components/shared/Alert";
 
 interface BlockingScreenProps {
   reasons: string[];
@@ -23,7 +23,7 @@ export function BlockingScreen({
   devModeBlocked,
   onOverride,
 }: BlockingScreenProps) {
-  const { colors, typography, spacing } = useTheme();
+  const { colors } = useTheme();
   const [loading, setLoading] = useState(false);
   const alert = useAlert();
 
@@ -63,7 +63,7 @@ export function BlockingScreen({
       <View style={styles.content}>
         <Text
           style={[
-            typography.display,
+            TextStyles.display,
             { color: colors.textPrimary, textAlign: "center" },
           ]}
         >
@@ -72,11 +72,11 @@ export function BlockingScreen({
 
         <Text
           style={[
-            typography.body,
+            TextStyles.body,
             {
               color: colors.textSecondary,
               textAlign: "center",
-              marginTop: spacing.md,
+              marginTop: Spacing.md,
             },
           ]}
         >
@@ -84,12 +84,12 @@ export function BlockingScreen({
         </Text>
 
         {reasons.length > 0 && (
-          <View style={[styles.reasons, { marginTop: spacing.xl }]}>
+          <View style={[styles.reasons, { marginTop: Spacing.xl }]}>
             {reasons.map((reason, i) => (
               <Text
                 key={i}
                 style={[
-                  typography.label,
+                  TextStyles.label,
                   { color: colors.textMuted, textAlign: "center" },
                 ]}
               >
@@ -106,7 +106,7 @@ export function BlockingScreen({
               {
                 backgroundColor: colors.surface,
                 borderColor: colors.border,
-                marginTop: spacing.xl,
+                marginTop: Spacing.xl,
               },
             ]}
             onPress={handleOverride}
@@ -115,7 +115,7 @@ export function BlockingScreen({
             {loading ? (
               <ActivityIndicator color={colors.textSecondary} />
             ) : (
-              <Text style={[typography.label, { color: colors.textSecondary }]}>
+              <Text style={[TextStyles.label, { color: colors.textSecondary }]}>
                 {"I'm a developer - allow anyway"}
               </Text>
             )}

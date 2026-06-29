@@ -11,19 +11,17 @@ import {
   Pressable,
   StyleSheet,
   Text,
-  View,
-  useColorScheme,
   useWindowDimensions,
+  View,
 } from "react-native";
 
 import {
-  DarkColors,
   FontFamily,
   FontSize,
-  LightColors,
   Radius,
   Shadows,
   Spacing,
+  useTheme,
   ZIndex,
 } from "@/constants/theme";
 
@@ -62,8 +60,7 @@ interface TooltipProps {
 }
 
 export function Tooltip({ content, children, align = "left" }: TooltipProps) {
-  const isDark = useColorScheme() === "dark";
-  const colors = isDark ? DarkColors : LightColors;
+  const { colors, isDark } = useTheme();
   const shadows = isDark ? Shadows.dark.md : Shadows.light.md;
   const idRef = useRef(`tooltip-${++nextId}`);
   const ctx = useContext(TooltipContext);
@@ -161,8 +158,7 @@ export function InfoDot({
   color = "accent",
   align = "left",
 }: InfoDotProps) {
-  const isDark = useColorScheme() === "dark";
-  const colors = isDark ? DarkColors : LightColors;
+  const { colors, isDark } = useTheme();
   const shadows = isDark ? Shadows.dark.md : Shadows.light.md;
   const idRef = useRef(`infodot-${++nextId}`);
   const ctx = useContext(TooltipContext);

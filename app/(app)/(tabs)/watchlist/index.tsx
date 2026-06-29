@@ -1,13 +1,7 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import {
-  RefreshControl,
-  StyleSheet,
-  Text,
-  View,
-  useColorScheme,
-} from "react-native";
+import { RefreshControl, StyleSheet, Text, View } from "react-native";
 
 import { FlashList } from "@shopify/flash-list";
 
@@ -24,19 +18,18 @@ import { useWatchlistStore } from "@/stores/watchlist.store";
 import type { GitHubRepo } from "@/types/github.types";
 
 import {
-  DarkColors,
+  type ColorTokens,
   FontFamily,
   FontSize,
   Layout,
-  LightColors,
   Spacing,
+  useTheme,
 } from "@/constants/theme";
 
 const keyExtractor = (item: GitHubRepo) => String(item.id);
 
 export default function WatchlistScreen() {
-  const isDark = useColorScheme() === "dark";
-  const colors = isDark ? DarkColors : LightColors;
+  const { colors, isDark } = useTheme();
   const router = useRouter();
   const queryClient = useQueryClient();
 
@@ -90,12 +83,13 @@ export default function WatchlistScreen() {
     ({ item }: { item: GitHubRepo }) => (
       <RepoCard
         repo={item}
+        colors={colors}
         isDark={isDark}
         onPress={handleRepoPress}
         onPressIn={handleRepoPressIn}
       />
     ),
-    [handleRepoPress, handleRepoPressIn, isDark],
+    [handleRepoPress, handleRepoPressIn, isDark, colors],
   );
 
   const s = useMemo(() => buildStyles(colors), [colors]);
@@ -164,7 +158,7 @@ export default function WatchlistScreen() {
   );
 }
 
-function buildStyles(colors: typeof LightColors | typeof DarkColors) {
+function buildStyles(colors: ColorTokens) {
   return StyleSheet.create({
     container: {
       flex: 1,

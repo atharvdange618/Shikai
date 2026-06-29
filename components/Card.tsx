@@ -1,4 +1,10 @@
-import { useTheme } from "@/constants/theme";
+import {
+  BorderWidth,
+  Radius,
+  Shadows,
+  Spacing,
+  useTheme,
+} from "@/constants/theme";
 import { ReactNode } from "react";
 import { StyleSheet, View, ViewStyle } from "react-native";
 
@@ -17,7 +23,7 @@ export function Card({
   padding = "lg",
   style,
 }: CardProps) {
-  const { colors, radius, spacing, shadows, border } = useTheme();
+  const { colors } = useTheme();
 
   const getBackgroundColor = () => {
     switch (variant) {
@@ -30,7 +36,7 @@ export function Card({
     }
   };
 
-  const shadowStyle = elevated ? shadows.sm : {};
+  const shadowStyle = elevated ? Shadows.light.sm : {};
 
   return (
     <View
@@ -38,10 +44,10 @@ export function Card({
         styles.card,
         {
           backgroundColor: getBackgroundColor(),
-          borderRadius: radius.lg,
-          borderWidth: border.normal,
+          borderRadius: Radius.lg,
+          borderWidth: BorderWidth.normal,
           borderColor: colors.border,
-          padding: spacing[padding],
+          padding: Spacing[padding],
         },
         shadowStyle,
         style,
