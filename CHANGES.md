@@ -4,6 +4,7 @@
 
 ### Features
 
+- **Custom Theme Engine** - User-selectable themes with 5 palettes: Light, Dark, Tokyo Night, Dracula, and Atom One Dark. Theme picker in profile settings, persistent selection via MMKV. Theme-specific contribution graph colors. Migrated all components from useColorScheme to context-based useTheme hook.
 - **Global Search** - New search tab with GitHub Search API integration. Tab switching between repos/users/issues. MiniSearch fuzzy index, debounced input, eager-load pagination. Result cards with user avatars, navigate in-app to repo or user profile.
 - **Saved/Watchlist Repos** - Bookmark toggle on every RepoCard. Local persistence via MMKV. Dedicated Watchlist tab with search/filter. Empty state with onboarding copy.
 - **User Profile Screen** - View any GitHub user's profile - avatar, bio, stats, social links, top repositories. Tappable from search results and contributor lists. Skeleton states and pull-to-refresh.
