@@ -15,7 +15,7 @@ import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import * as SystemUI from "expo-system-ui";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { StatusBar, useColorScheme } from "react-native";
+import { StatusBar } from "react-native";
 
 import {
   AlertProvider,
@@ -24,7 +24,7 @@ import {
   ErrorBoundary,
 } from "@/components";
 import { OfflineBanner } from "@/components/OfflineBanner";
-import { DarkColors, LightColors } from "@/constants/theme";
+import { ThemeProvider, useTheme } from "@/contexts/ThemeContext";
 import { fetchAuthenticatedUser } from "@/lib/github-rest";
 import { mmkvPersister, PERSISTENCE_MAX_AGE } from "@/lib/persister";
 import { queryClient, setupFocusManager } from "@/lib/query-client";
@@ -37,11 +37,26 @@ SplashScreen.preventAutoHideAsync();
 
 setupFocusManager();
 
+function ThemeEffects() {
+  const theme = useTheme();
+
+  useEffect(() => {
+    SystemUI.setBackgroundColorAsync(theme.colors.background);
+  }, [theme.colors.background]);
+
+  return (
+    <StatusBar
+      barStyle={theme.isDark ? "light-content" : "dark-content"}
+      backgroundColor="transparent"
+      translucent
+    />
+  );
+}
+
 export default function RootLayout() {
   const token = useAuthStore((s) => s.token);
   const setToken = useAuthStore((s) => s.setToken);
   const setUser = useAuthStore((s) => s.setUser);
-  const scheme = useColorScheme();
   useOnlineManager();
 
   const [bootComplete, setBootComplete] = useState(false);
@@ -61,12 +76,6 @@ export default function RootLayout() {
     JetBrainsMono_400Regular,
     JetBrainsMono_500Medium,
   });
-
-  useEffect(() => {
-    SystemUI.setBackgroundColorAsync(
-      scheme === "dark" ? DarkColors.background : LightColors.background,
-    );
-  }, [scheme]);
 
   useEffect(() => {
     if (!fontsLoaded && !fontError) return;
@@ -152,60 +161,59 @@ export default function RootLayout() {
   const allReady = appReady && securityReady;
 
   return (
-    <PersistQueryClientProvider
-      client={queryClient}
-      persistOptions={{
-        persister: mmkvPersister,
-        maxAge: PERSISTENCE_MAX_AGE,
-        dehydrateOptions: {
-          shouldDehydrateQuery: (query: Query) =>
-            query.state.status === "success" && query.meta?.persist !== false,
+    <ThemeProvider>
+      <PersistQueryClientProvider
+        client={queryClient}
+        persistOptions={{
+          persister: mmkvPersister,
+          maxAge: PERSISTENCE_MAX_AGE,
+          dehydrateOptions: {
+            shouldDehydrateQuery: (query: Query) =>
+              query.state.status === "success" && query.meta?.persist !== false,
+          },
+        }}
+      >
+        <AlertProvider>
+          <OfflineBanner />
+          <ThemeEffects />
+          {showSplash && (
+            <AnimatedSplashScreen
+              isReady={allReady}
+              onComplete={() => setShowSplash(false)}
+            />
+          )}
+          {!showSplash && securityStatus === "blocked" && (
+            <BlockingScreen
+              reasons={securityReasons}
+              devModeBlocked={devModeBlocked}
+              onOverride={handleRecheck}
+            />
+          )}
+          {!showSplash && securityStatus === "passed" && (
+            <ErrorBoundary>
+              <AppStack token={token} />
+            </ErrorBoundary>
+          )}
+        </AlertProvider>
+      </PersistQueryClientProvider>
+    </ThemeProvider>
+  );
+}
+
+function AppStack({ token }: { token: string | null }) {
+  const theme = useTheme();
+
+  return (
+    <Stack
+      screenOptions={{
+        headerShown: false,
+        animation: "fade",
+        contentStyle: {
+          backgroundColor: theme.colors.background,
         },
       }}
     >
-      <AlertProvider>
-        <OfflineBanner />
-        <StatusBar
-          barStyle={scheme === "dark" ? "light-content" : "dark-content"}
-          backgroundColor="transparent"
-          translucent
-        />
-        {showSplash && (
-          <AnimatedSplashScreen
-            isReady={allReady}
-            onComplete={() => setShowSplash(false)}
-          />
-        )}
-        {!showSplash && securityStatus === "blocked" && (
-          <BlockingScreen
-            reasons={securityReasons}
-            devModeBlocked={devModeBlocked}
-            onOverride={handleRecheck}
-          />
-        )}
-        {!showSplash && securityStatus === "passed" && (
-          <ErrorBoundary>
-            <Stack
-              screenOptions={{
-                headerShown: false,
-                animation: "fade",
-                contentStyle: {
-                  backgroundColor:
-                    scheme === "dark"
-                      ? DarkColors.background
-                      : LightColors.background,
-                },
-              }}
-            >
-              {token ? (
-                <Stack.Screen name="(app)" />
-              ) : (
-                <Stack.Screen name="sign-in" />
-              )}
-            </Stack>
-          </ErrorBoundary>
-        )}
-      </AlertProvider>
-    </PersistQueryClientProvider>
+      {token ? <Stack.Screen name="(app)" /> : <Stack.Screen name="sign-in" />}
+    </Stack>
   );
 }
