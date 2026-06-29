@@ -33,7 +33,7 @@ import {
   Shadows,
   Spacing,
 } from "@/constants/theme";
-import { relativeTime } from "@/lib/utils";
+import { relativeTime, decodeRepoId } from "@/lib/utils";
 
 export default function CommitsScreen() {
   const { repoId } = useLocalSearchParams<{ repoId: string }>();
@@ -42,7 +42,7 @@ export default function CommitsScreen() {
   const colors = isDark ? DarkColors : LightColors;
   const shadows = useMemo(() => (isDark ? {} : Shadows.light.sm), [isDark]);
 
-  const [owner, repoName] = (repoId ?? "").split("__");
+  const [owner, repoName] = decodeRepoId(repoId ?? "");
   const [selectedBranch, setSelectedBranch] = useState("");
 
   const { data: repo } = useRepo(owner, repoName);
