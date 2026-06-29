@@ -31,11 +31,13 @@ import {
   Radius,
   Spacing,
 } from "@/constants/theme";
-import { relativeTime, decodeRepoId } from "@/lib/utils";
+import { decodeRepoId, relativeTime } from "@/lib/utils";
 
 type PRState = "open" | "closed";
 
 type PRFilter = "open" | "closed" | "merged";
+
+const keyExtractor = (item: GitHubPullRequest) => String(item.id);
 
 export default function PullRequestsScreen() {
   const { repoId } = useLocalSearchParams<{ repoId: string }>();
@@ -103,11 +105,6 @@ export default function PullRequestsScreen() {
       <PRItem pr={item} colors={colors} repoId={repoId ?? ""} />
     ),
     [colors, repoId],
-  );
-
-  const keyExtractor = useCallback(
-    (item: GitHubPullRequest) => String(item.id),
-    [],
   );
 
   const s = useMemo(() => buildStyles(colors), [colors]);
@@ -286,11 +283,7 @@ const PRItem = memo(function PRItem({
   );
 });
 
-function LabelPill({
-  label,
-}: {
-  label: GitHubLabel;
-}) {
+function LabelPill({ label }: { label: GitHubLabel }) {
   const bg = `#${label.color}28`;
   const text = `#${label.color}`;
 

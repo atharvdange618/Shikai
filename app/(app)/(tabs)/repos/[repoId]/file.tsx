@@ -31,7 +31,7 @@ import {
   Spacing,
 } from "@/constants/theme";
 import { useFileContent } from "@/hooks/useRepoDetails";
-import { getLanguage, isImageFile, decodeRepoId } from "@/lib/utils";
+import { decodeRepoId, getLanguage, isImageFile } from "@/lib/utils";
 
 interface LoadingProgressProps {
   isLoading: boolean;
@@ -300,7 +300,10 @@ export default function FileViewerScreen() {
                   />
                 </Pressable>
               </View>
-              <MarkdownRenderer markdown={data.content} context={`${owner}/${repoName}`} />
+              <MarkdownRenderer
+                markdown={data.content}
+                context={`${owner}/${repoName}`}
+              />
             </>
           )}
         </ScrollView>

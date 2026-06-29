@@ -403,7 +403,11 @@ function buildHtml(html: string, isDark: boolean): string {
 </html>`;
 }
 
-export function MarkdownRenderer({ markdown, style, context }: MarkdownRendererProps) {
+export function MarkdownRenderer({
+  markdown,
+  style,
+  context,
+}: MarkdownRendererProps) {
   const { colors, isDark } = useTheme();
   const [html, setHtml] = useState<string | null>(null);
   const [height, setHeight] = useState(300);

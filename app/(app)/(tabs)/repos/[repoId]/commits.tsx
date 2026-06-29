@@ -1,6 +1,6 @@
+import { ListItemSeparator } from "@/components/shared/ListItemSeparator";
 import { Octicons } from "@expo/vector-icons";
 import { FlashList } from "@shopify/flash-list";
-import { ListItemSeparator } from "@/components/shared/ListItemSeparator";
 import { useQueryClient } from "@tanstack/react-query";
 import * as Clipboard from "expo-clipboard";
 import { Image } from "expo-image";
@@ -33,7 +33,9 @@ import {
   Shadows,
   Spacing,
 } from "@/constants/theme";
-import { relativeTime, decodeRepoId } from "@/lib/utils";
+import { decodeRepoId, relativeTime } from "@/lib/utils";
+
+const keyExtractor = (item: GitHubCommit) => item.sha;
 
 export default function CommitsScreen() {
   const { repoId } = useLocalSearchParams<{ repoId: string }>();
@@ -83,8 +85,6 @@ export default function CommitsScreen() {
     ),
     [colors, shadows],
   );
-
-  const keyExtractor = useCallback((item: GitHubCommit) => item.sha, []);
 
   const s = useMemo(() => buildStyles(colors), [colors]);
 
