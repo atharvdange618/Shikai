@@ -24,7 +24,7 @@ import type { PinnedRepoNode } from "@/types/github-graphql.types";
 
 import languageColors from "@/constants/language-colors.json";
 import { prefetchRepoDetails, prefetchRoute } from "@/lib/prefetch";
-import { formatCount } from "@/lib/utils";
+import { formatCount, encodeRepoId } from "@/lib/utils";
 
 const CARD_WIDTH = 220;
 
@@ -41,7 +41,7 @@ export function PinnedRepoCard({ repo }: PinnedRepoCardProps) {
 
   const urlParts = repo.url.split("/");
   const owner = urlParts[urlParts.length - 2] ?? "";
-  const repoId = `${owner}__${repo.name}`;
+  const repoId = encodeRepoId(owner, repo.name);
   const route = `/(app)/(tabs)/repos/${repoId}`;
 
   const handlePress = useCallback(() => {

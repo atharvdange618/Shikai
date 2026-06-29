@@ -12,7 +12,7 @@ import {
   Shadows,
   Spacing,
 } from "@/constants/theme";
-import { formatCount, relativeTime } from "@/lib/utils";
+import { formatCount, relativeTime, encodeRepoId } from "@/lib/utils";
 import { useWatchlistStore } from "@/stores/watchlist.store";
 import type { GitHubRepo, RepoListParams } from "@/types/github.types";
 
@@ -34,7 +34,7 @@ export const RepoCard = memo(function RepoCard({
   const colors = isDark ? DarkColors : LightColors;
   const s = isDark ? darkStyles : lightStyles;
 
-  const repoId = `${repo.owner.login}__${repo.name}`;
+  const repoId = encodeRepoId(repo.owner.login, repo.name);
   const isWatchlisted = useWatchlistStore((state) =>
     state.watchlistIds.includes(repoId),
   );

@@ -31,7 +31,7 @@ import {
   Spacing,
 } from "@/constants/theme";
 import { useFileContent } from "@/hooks/useRepoDetails";
-import { getLanguage, isImageFile } from "@/lib/utils";
+import { getLanguage, isImageFile, decodeRepoId } from "@/lib/utils";
 
 interface LoadingProgressProps {
   isLoading: boolean;
@@ -137,7 +137,7 @@ export default function FileViewerScreen() {
   const colors = isDark ? DarkColors : LightColors;
   const { width: screenWidth } = useWindowDimensions();
 
-  const [owner, repoName] = (repoId ?? "").split("__");
+  const [owner, repoName] = decodeRepoId(repoId ?? "");
   const [imageLoading, setImageLoading] = useState(true);
   const [imageError, setImageError] = useState(false);
   const [copied, setCopied] = useState(false);

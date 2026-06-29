@@ -18,6 +18,7 @@ import { useDebounce } from "@/hooks/useDebounce";
 import { useRepos } from "@/hooks/useRepos";
 import { useSearchIndex } from "@/hooks/useSearchIndex";
 import { prefetchRepoDetails, prefetchRoute } from "@/lib/prefetch";
+import { encodeRepoId } from "@/lib/utils";
 import { useWatchlistStore } from "@/stores/watchlist.store";
 import type { GitHubRepo } from "@/types/github.types";
 
@@ -50,7 +51,7 @@ export default function WatchlistScreen() {
 
   const watchlistedRepos = useMemo(() => {
     return allRepos.filter((repo) => {
-      const repoId = `${repo.owner.login}__${repo.name}`;
+      const repoId = encodeRepoId(repo.owner.login, repo.name);
       return watchlistIds.includes(repoId);
     });
   }, [allRepos, watchlistIds]);
@@ -67,7 +68,7 @@ export default function WatchlistScreen() {
 
   const handleRepoPress = useCallback(
     (repo: GitHubRepo) => {
-      const repoId = `${repo.owner.login}__${repo.name}`;
+      const repoId = encodeRepoId(repo.owner.login, repo.name);
       router.push(`/(app)/(tabs)/repos/${repoId}`);
     },
     [router],
@@ -75,7 +76,7 @@ export default function WatchlistScreen() {
 
   const handleRepoPressIn = useCallback(
     (repo: GitHubRepo) => {
-      const repoId = `${repo.owner.login}__${repo.name}`;
+      const repoId = encodeRepoId(repo.owner.login, repo.name);
       prefetchRoute(`/(app)/(tabs)/repos/${repoId}`);
       prefetchRepoDetails(queryClient, repo.owner.login, repo.name);
     },

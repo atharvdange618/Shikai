@@ -13,7 +13,7 @@ import {
   usePullRequestComments,
   usePullRequestDetail,
 } from "@/hooks/usePullRequestDetail";
-import { relativeTime } from "@/lib/utils";
+import { relativeTime, decodeRepoId } from "@/lib/utils";
 import { Octicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { useLocalSearchParams, useNavigation } from "expo-router";
@@ -36,7 +36,7 @@ export default function PullRequestDetailScreen() {
   const isDark = useColorScheme() === "dark";
   const colors = isDark ? DarkColors : LightColors;
 
-  const [owner, repoName] = (repoId ?? "").split("__");
+  const [owner, repoName] = decodeRepoId(repoId ?? "");
   const prNumber = Number(number);
 
   const {

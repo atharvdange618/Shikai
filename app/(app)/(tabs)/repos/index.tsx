@@ -21,6 +21,7 @@ import { SearchBar } from "@/components/shared/SearchBar";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { useRepos } from "@/hooks/useRepos";
 import { prefetchRepoDetails, prefetchRoute } from "@/lib/prefetch";
+import { encodeRepoId } from "@/lib/utils";
 import { queryKeys } from "@/lib/query-client";
 import type { GitHubRepo } from "@/types/github.types";
 
@@ -66,7 +67,7 @@ export default function ReposScreen() {
 
   const handleRepoPress = useCallback(
     (repo: GitHubRepo) => {
-      const repoId = `${repo.owner.login}__${repo.name}`;
+      const repoId = encodeRepoId(repo.owner.login, repo.name);
       router.push(`/(app)/(tabs)/repos/${repoId}`);
     },
     [router],
@@ -105,7 +106,7 @@ export default function ReposScreen() {
 
   const handleRepoPressIn = useCallback(
     (repo: GitHubRepo) => {
-      const repoId = `${repo.owner.login}__${repo.name}`;
+      const repoId = encodeRepoId(repo.owner.login, repo.name);
       prefetchRoute(`/(app)/(tabs)/repos/${repoId}`);
       prefetchRepoDetails(queryClient, repo.owner.login, repo.name);
     },

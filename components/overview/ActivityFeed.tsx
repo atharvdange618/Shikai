@@ -37,7 +37,7 @@ import {
   Radius,
   Spacing,
 } from "@/constants/theme";
-import { format24HourTime } from "@/lib/utils";
+import { format24HourTime, encodeRepoId } from "@/lib/utils";
 import type { GitHubEvent } from "@/types/github.types";
 
 interface ActivityFeedProps {
@@ -51,7 +51,7 @@ function parseGitHubUrl(url: string): Href | null {
   const match = url.match(/github\.com\/([^/]+)\/([^/]+)(?:\/(issues|pull)\/(\d+))?/);
   if (!match) return null;
   const [, owner, repo, type, number] = match;
-  const repoId = `${owner}__${repo}`;
+  const repoId = encodeRepoId(owner, repo);
   if (type === "issues" && number) return `/(app)/(tabs)/repos/${repoId}/issue/${number}` as Href;
   if (type === "pull" && number) return `/(app)/(tabs)/repos/${repoId}/pr/${number}` as Href;
   return `/(app)/(tabs)/repos/${repoId}` as Href;

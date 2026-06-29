@@ -19,6 +19,7 @@ import { RepoFilters } from "@/components/repo/RepoFilters";
 import { SearchBar } from "@/components/shared/SearchBar";
 import { useStarred } from "@/hooks/useStarred";
 import { prefetchRepoDetails, prefetchRoute } from "@/lib/prefetch";
+import { encodeRepoId } from "@/lib/utils";
 import { queryKeys } from "@/lib/query-client";
 import type { GitHubRepo } from "@/types/github.types";
 
@@ -72,7 +73,7 @@ export default function StarsScreen() {
 
   const handleRepoPressIn = useCallback(
     (owner: string, name: string) => {
-      const repoId = `${owner}__${name}`;
+      const repoId = encodeRepoId(owner, name);
       prefetchRoute(`/(app)/(tabs)/repos/${repoId}`);
       prefetchRepoDetails(queryClient, owner, name);
     },
@@ -291,7 +292,7 @@ const MemoizedRepoCard = memo(function MemoizedRepoCard({
 
   const handlePress = useCallback(
     (_repo: GitHubRepo) => {
-      const repoId = `${ownerLogin}__${name}`;
+      const repoId = encodeRepoId(ownerLogin, name);
       onPress(repoId);
     },
     [ownerLogin, name, onPress],

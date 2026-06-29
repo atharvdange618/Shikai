@@ -31,7 +31,7 @@ import {
   Radius,
   Spacing,
 } from "@/constants/theme";
-import { relativeTime } from "@/lib/utils";
+import { relativeTime, decodeRepoId } from "@/lib/utils";
 
 type PRState = "open" | "closed";
 
@@ -44,7 +44,7 @@ export default function PullRequestsScreen() {
   const isDark = useColorScheme() === "dark";
   const colors = isDark ? DarkColors : LightColors;
 
-  const [owner, repoName] = (repoId ?? "").split("__");
+  const [owner, repoName] = decodeRepoId(repoId ?? "");
   const [filter, setFilter] = useState<PRFilter>("open");
   const [refreshing, setRefreshing] = useState(false);
 
