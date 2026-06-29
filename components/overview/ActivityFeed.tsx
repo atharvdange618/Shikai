@@ -25,17 +25,16 @@ import {
   Pressable,
   StyleSheet,
   Text,
-  useColorScheme,
   View,
 } from "react-native";
 
 import {
-  DarkColors,
+  type ColorTokens,
   FontFamily,
   FontSize,
-  LightColors,
   Radius,
   Spacing,
+  useTheme,
 } from "@/constants/theme";
 import { encodeRepoId, format24HourTime } from "@/lib/utils";
 import type { GitHubEvent } from "@/types/github.types";
@@ -79,7 +78,7 @@ interface GroupedEvent {
 
 function getEventDisplay(
   event: GitHubEvent,
-  colors: typeof LightColors | typeof DarkColors,
+  colors: ColorTokens,
 ): EventDisplay | null {
   const repoName = event.repo.name.split("/")[1] || event.repo.name;
   const repoUrl = `https://github.com/${event.repo.name}`;
@@ -230,7 +229,7 @@ function getGroupKey(event: GitHubEvent): string {
 
 function groupEvents(
   events: GitHubEvent[],
-  colors: typeof LightColors | typeof DarkColors,
+  colors: ColorTokens,
 ): GroupedEvent[] {
   const grouped: GroupedEvent[] = [];
   let currentGroup: GitHubEvent[] = [];
@@ -338,8 +337,7 @@ export function ActivityFeed({
   isLoadingMore = false,
   onEndReached,
 }: ActivityFeedProps) {
-  const isDark = useColorScheme() === "dark";
-  const colors = isDark ? DarkColors : LightColors;
+  const { colors } = useTheme();
   const s = useMemo(() => buildStyles(colors), [colors]);
   const router = useRouter();
 
@@ -527,7 +525,7 @@ export function ActivityFeed({
   );
 }
 
-function buildStyles(colors: typeof LightColors | typeof DarkColors) {
+function buildStyles(colors: ColorTokens) {
   return StyleSheet.create({
     container: {
       gap: Spacing.sm,

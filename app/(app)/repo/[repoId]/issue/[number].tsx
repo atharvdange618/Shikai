@@ -1,16 +1,15 @@
 import { MarkdownRenderer } from "@/components/shared/MarkdownRenderer";
 import {
-  DarkColors,
   FontFamily,
   FontSize,
   IconSize,
   Layout,
-  LightColors,
   Radius,
   Spacing,
+  useTheme,
 } from "@/constants/theme";
 import { useIssueComments, useIssueDetail } from "@/hooks/useIssueDetail";
-import { relativeTime, decodeRepoId } from "@/lib/utils";
+import { decodeRepoId, relativeTime } from "@/lib/utils";
 import { Octicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { useLocalSearchParams, useNavigation } from "expo-router";
@@ -21,7 +20,6 @@ import {
   StyleSheet,
   Text,
   View,
-  useColorScheme,
 } from "react-native";
 
 export default function IssueDetailScreen() {
@@ -30,8 +28,7 @@ export default function IssueDetailScreen() {
     number: string;
   }>();
   const navigation = useNavigation();
-  const isDark = useColorScheme() === "dark";
-  const colors = isDark ? DarkColors : LightColors;
+  const { colors } = useTheme();
 
   const [owner, repoName] = decodeRepoId(repoId ?? "");
   const issueNumber = Number(number);

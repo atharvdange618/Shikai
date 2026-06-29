@@ -8,7 +8,6 @@ import {
   StyleSheet,
   Text,
   View,
-  useColorScheme,
 } from "react-native";
 
 import { FlashList } from "@shopify/flash-list";
@@ -24,12 +23,12 @@ import { encodeRepoId } from "@/lib/utils";
 import type { GitHubRepo } from "@/types/github.types";
 
 import {
-  DarkColors,
+  type ColorTokens,
   FontFamily,
   FontSize,
   Layout,
-  LightColors,
   Spacing,
+  useTheme,
 } from "@/constants/theme";
 
 const keyExtractor = (item: GitHubRepo) => String(item.id);
@@ -38,8 +37,7 @@ const getItemType = (_item: GitHubRepo, index: number) =>
   index === 0 ? "header" : "default";
 
 export default function StarsScreen() {
-  const isDark = useColorScheme() === "dark";
-  const colors = isDark ? DarkColors : LightColors;
+  const { colors, isDark } = useTheme();
   const router = useRouter();
   const queryClient = useQueryClient();
 
@@ -100,12 +98,13 @@ export default function StarsScreen() {
         stargazersCount={item.stargazers_count}
         topics={item.topics}
         isPrivate={item.private}
+        colors={colors}
         isDark={isDark}
         onPress={handleRepoPress}
         onPressIn={handleRepoPressIn}
       />
     ),
-    [handleRepoPress, handleRepoPressIn, isDark],
+    [handleRepoPress, handleRepoPressIn, colors, isDark],
   );
 
   const onEndReached = useCallback(() => {
@@ -244,6 +243,7 @@ interface MemoizedRepoCardProps {
   stargazersCount: number;
   topics: string[];
   isPrivate: boolean;
+  colors: ColorTokens;
   isDark: boolean;
   onPress: (repoId: string) => void;
   onPressIn?: (owner: string, name: string) => void;
@@ -260,6 +260,7 @@ const MemoizedRepoCard = memo(function MemoizedRepoCard({
   stargazersCount,
   topics,
   isPrivate,
+  colors,
   isDark,
   onPress,
   onPressIn,
@@ -309,6 +310,7 @@ const MemoizedRepoCard = memo(function MemoizedRepoCard({
   return (
     <RepoCard
       repo={repo}
+      colors={colors}
       isDark={isDark}
       onPress={handlePress}
       onPressIn={handlePressIn}
@@ -316,7 +318,7 @@ const MemoizedRepoCard = memo(function MemoizedRepoCard({
   );
 });
 
-function buildStyles(colors: typeof LightColors | typeof DarkColors) {
+function buildStyles(colors: ColorTokens) {
   return StyleSheet.create({
     container: {
       flex: 1,

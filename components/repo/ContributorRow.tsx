@@ -1,12 +1,12 @@
 import { Image } from "expo-image";
 import { useMemo } from "react";
-import { StyleSheet, Text, useColorScheme, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 
 import {
   AvatarSize,
-  DarkColors,
+  type ColorTokens,
   FontFamily,
-  LightColors,
+  useTheme,
 } from "@/constants/theme";
 import type { GitHubContributor } from "@/types/github.types";
 
@@ -23,8 +23,7 @@ export function ContributorRow({
   contributors,
   isLoading = false,
 }: ContributorRowProps) {
-  const isDark = useColorScheme() === "dark";
-  const colors = isDark ? DarkColors : LightColors;
+  const { colors } = useTheme();
   const s = useMemo(() => buildStyles(colors), [colors]);
 
   if (isLoading) {
@@ -81,7 +80,7 @@ export function ContributorRow({
   );
 }
 
-function buildStyles(colors: typeof LightColors | typeof DarkColors) {
+function buildStyles(colors: ColorTokens) {
   return StyleSheet.create({
     row: {
       flexDirection: "row",
