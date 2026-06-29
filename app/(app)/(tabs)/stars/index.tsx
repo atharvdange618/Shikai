@@ -19,8 +19,8 @@ import { RepoFilters } from "@/components/repo/RepoFilters";
 import { SearchBar } from "@/components/shared/SearchBar";
 import { useStarred } from "@/hooks/useStarred";
 import { prefetchRepoDetails, prefetchRoute } from "@/lib/prefetch";
-import { encodeRepoId } from "@/lib/utils";
 import { queryKeys } from "@/lib/query-client";
+import { encodeRepoId } from "@/lib/utils";
 import type { GitHubRepo } from "@/types/github.types";
 
 import {
@@ -31,6 +31,11 @@ import {
   LightColors,
   Spacing,
 } from "@/constants/theme";
+
+const keyExtractor = (item: GitHubRepo) => String(item.id);
+
+const getItemType = (_item: GitHubRepo, index: number) =>
+  index === 0 ? "header" : "default";
 
 export default function StarsScreen() {
   const isDark = useColorScheme() === "dark";
@@ -45,6 +50,8 @@ export default function StarsScreen() {
 
   const prefetchMap = useRef(new Set<number>());
   const viewportTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const prefetchCount = useRef(0);
+  const MAX_PREFETCH = 3;
 
   const {
     repos,
@@ -101,8 +108,6 @@ export default function StarsScreen() {
     [handleRepoPress, handleRepoPressIn, isDark],
   );
 
-  const keyExtractor = useCallback((item: GitHubRepo) => String(item.id), []);
-
   const onEndReached = useCallback(() => {
     if (hasNextPage) fetchNextPage();
   }, [hasNextPage, fetchNextPage]);
@@ -114,10 +119,15 @@ export default function StarsScreen() {
       }
       viewportTimer.current = setTimeout(() => {
         for (const { item } of viewableItems) {
-          if (!prefetchMap.current.has(item.id)) {
-            prefetchMap.current.add(item.id);
-            prefetchRepoDetails(queryClient, item.owner.login, item.name);
+          if (
+            prefetchCount.current >= MAX_PREFETCH ||
+            prefetchMap.current.has(item.id)
+          ) {
+            continue;
           }
+          prefetchMap.current.add(item.id);
+          prefetchCount.current++;
+          prefetchRepoDetails(queryClient, item.owner.login, item.name);
         }
       }, 200);
     },
@@ -127,21 +137,6 @@ export default function StarsScreen() {
   const s = useMemo(() => buildStyles(colors), [colors]);
 
   const Separator = useCallback(() => <View style={s.separator} />, [s]);
-
-  const overrideItemLayout = useCallback(
-    (_layout: any, item: GitHubRepo) => {
-      if (!prefetchMap.current.has(item.id)) {
-        prefetchMap.current.add(item.id);
-        prefetchRepoDetails(queryClient, item.owner.login, item.name);
-      }
-    },
-    [queryClient],
-  );
-
-  const getItemType = useCallback(
-    (_item: GitHubRepo, index: number) => (index === 0 ? "header" : "default"),
-    [],
-  );
 
   const ListEmpty = useMemo(() => {
     if (isLoading) {
@@ -191,7 +186,14 @@ export default function StarsScreen() {
           </Text>
         </View>
       ) : null,
-    [isFetchingNextPage, debouncedSearch, hasNextPage, repos.length, loadedCount, s],
+    [
+      isFetchingNextPage,
+      debouncedSearch,
+      hasNextPage,
+      repos.length,
+      loadedCount,
+      s,
+    ],
   );
 
   return (
@@ -217,7 +219,6 @@ export default function StarsScreen() {
         onEndReachedThreshold={0.5}
         onViewableItemsChanged={onViewableItemsChanged}
         viewabilityConfig={{ itemVisiblePercentThreshold: 50 }}
-        overrideItemLayout={overrideItemLayout}
         getItemType={getItemType}
         refreshControl={
           <RefreshControl
