@@ -17,7 +17,11 @@ import * as SystemUI from "expo-system-ui";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { StatusBar, useColorScheme } from "react-native";
 
-import { AnimatedSplashScreen, BlockingScreen, ErrorBoundary } from "@/components";
+import {
+  AnimatedSplashScreen,
+  BlockingScreen,
+  ErrorBoundary,
+} from "@/components";
 import { OfflineBanner } from "@/components/OfflineBanner";
 import { DarkColors, LightColors } from "@/constants/theme";
 import { fetchAuthenticatedUser } from "@/lib/github-rest";
@@ -94,7 +98,11 @@ export default function RootLayout() {
   }, [fontsLoaded, fontError, setToken, setUser]);
 
   useEffect(() => {
-    if ((fontsLoaded || fontError) && bootComplete && securityStatus !== "pending") {
+    if (
+      (fontsLoaded || fontError) &&
+      bootComplete &&
+      securityStatus !== "pending"
+    ) {
       SplashScreen.hideAsync();
     }
   }, [fontsLoaded, fontError, bootComplete, securityStatus]);
@@ -175,7 +183,18 @@ export default function RootLayout() {
       )}
       {!showSplash && securityStatus === "passed" && (
         <ErrorBoundary>
-          <Stack screenOptions={{ headerShown: false, animation: "fade", contentStyle: { backgroundColor: scheme === "dark" ? DarkColors.background : LightColors.background } }}>
+          <Stack
+            screenOptions={{
+              headerShown: false,
+              animation: "fade",
+              contentStyle: {
+                backgroundColor:
+                  scheme === "dark"
+                    ? DarkColors.background
+                    : LightColors.background,
+              },
+            }}
+          >
             {token ? (
               <Stack.Screen name="(app)" />
             ) : (
