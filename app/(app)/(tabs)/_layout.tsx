@@ -7,6 +7,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { TabBarIcon } from "@/components/navigation/TabBarIcon";
 import { TooltipProvider } from "@/components/shared/Tooltip";
+import { ErrorBoundary } from "@/components";
 import {
   BorderWidth,
   DarkColors,
@@ -178,7 +179,8 @@ export default function TabsLayout() {
 
   return (
     <TooltipProvider>
-      <Tabs
+      <ErrorBoundary>
+        <Tabs
         screenOptions={{
           headerShown: false,
 
@@ -262,7 +264,15 @@ export default function TabsLayout() {
             tabBarIcon: renderProfileIcon,
           }}
         />
+
+        <Tabs.Screen
+          name="user"
+          options={{
+            href: null,
+          }}
+        />
       </Tabs>
+      </ErrorBoundary>
     </TooltipProvider>
   );
 }
