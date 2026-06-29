@@ -3,6 +3,7 @@ import React, {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useRef,
   useState,
 } from "react";
@@ -75,23 +76,15 @@ export function Tooltip({ content, children, align = "left" }: TooltipProps) {
     width: number;
   } | null>(null);
 
-  const measureContainer = useCallback(() => {
-    containerRef.current?.measureInWindow((x, _y, width) => {
-      if (typeof x === "number" && !isNaN(x)) {
-        setLayoutInfo({ pageX: x, width });
-      }
-    });
-  }, []);
-
-  const onLayout = useCallback(() => {
-    measureContainer();
-  }, [measureContainer]);
-
-  React.useEffect(() => {
+  useEffect(() => {
     if (visible) {
-      measureContainer();
+      containerRef.current?.measureInWindow((x, _y, width) => {
+        if (typeof x === "number" && !isNaN(x)) {
+          setLayoutInfo({ pageX: x, width });
+        }
+      });
     }
-  }, [visible, measureContainer]);
+  }, [visible]);
 
   const toggle = useCallback(() => {
     if (!ctx) return;
@@ -133,7 +126,7 @@ export function Tooltip({ content, children, align = "left" }: TooltipProps) {
   }
 
   return (
-    <View ref={containerRef} onLayout={onLayout} style={s.container}>
+    <View ref={containerRef} style={s.container}>
       {React.cloneElement(children, {
         onPress: toggle,
       })}
@@ -182,23 +175,23 @@ export function InfoDot({
     width: number;
   } | null>(null);
 
-  const measureContainer = useCallback(() => {
+  const onLayout = () => {
     containerRef.current?.measureInWindow((x, _y, width) => {
       if (typeof x === "number" && !isNaN(x)) {
         setLayoutInfo({ pageX: x, width });
       }
     });
-  }, []);
+  };
 
-  const onLayout = useCallback(() => {
-    measureContainer();
-  }, [measureContainer]);
-
-  React.useEffect(() => {
+  useEffect(() => {
     if (visible) {
-      measureContainer();
+      containerRef.current?.measureInWindow((x, _y, width) => {
+        if (typeof x === "number" && !isNaN(x)) {
+          setLayoutInfo({ pageX: x, width });
+        }
+      });
     }
-  }, [visible, measureContainer]);
+  }, [visible]);
 
   const dotColor =
     color === "danger"
