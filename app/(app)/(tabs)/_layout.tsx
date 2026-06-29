@@ -134,7 +134,7 @@ export default function TabsLayout() {
   useKeyboardShortcuts({
     onTabSwitch: (index: number) => {
       const routes = [
-        "/",
+        "/overview",
         "/repos",
         "/search",
         "/stars",
@@ -195,7 +195,7 @@ export default function TabsLayout() {
             }}
           >
             <Tabs.Screen
-              name="index"
+              name="overview"
               options={{
                 title: "Overview",
                 tabBarIcon: renderHomeIcon,
@@ -239,13 +239,6 @@ export default function TabsLayout() {
               options={{
                 title: "Profile",
                 tabBarIcon: renderProfileIcon,
-              }}
-            />
-
-            <Tabs.Screen
-              name="user"
-              options={{
-                href: null,
               }}
             />
           </Tabs>

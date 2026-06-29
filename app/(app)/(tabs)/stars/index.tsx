@@ -73,7 +73,7 @@ export default function StarsScreen() {
 
   const handleRepoPress = useCallback(
     (repoId: string) => {
-      router.push(`/(app)/(tabs)/repos/${repoId}`);
+      router.push(`/(app)/repo/${repoId}`);
     },
     [router],
   );
@@ -81,7 +81,7 @@ export default function StarsScreen() {
   const handleRepoPressIn = useCallback(
     (owner: string, name: string) => {
       const repoId = encodeRepoId(owner, name);
-      prefetchRoute(`/(app)/(tabs)/repos/${repoId}`);
+      prefetchRoute(`/(app)/repo/${repoId}`);
       prefetchRepoDetails(queryClient, owner, name);
     },
     [queryClient],

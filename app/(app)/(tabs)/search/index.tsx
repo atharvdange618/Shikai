@@ -68,7 +68,7 @@ export default function SearchScreen() {
   const handleRepoPress = useCallback(
     (repo: GitHubRepo) => {
       const repoId = encodeRepoId(repo.owner.login, repo.name);
-      router.push(`/(app)/(tabs)/repos/${repoId}`);
+      router.push(`/(app)/repo/${repoId}`);
     },
     [router],
   );
@@ -76,7 +76,7 @@ export default function SearchScreen() {
   const handleRepoPressIn = useCallback(
     (repo: GitHubRepo) => {
       const repoId = encodeRepoId(repo.owner.login, repo.name);
-      prefetchRoute(`/(app)/(tabs)/repos/${repoId}`);
+      prefetchRoute(`/(app)/repo/${repoId}`);
       prefetchRepoDetails(queryClient, repo.owner.login, repo.name);
     },
     [queryClient],
@@ -99,7 +99,7 @@ export default function SearchScreen() {
       <Pressable
         style={({ pressed }) => [s.userCard, pressed && { opacity: 0.7 }]}
         onPress={() => {
-          router.push(`/(app)/(tabs)/user/${item.login}` as any);
+          router.push(`/(app)/user/${item.login}` as any);
         }}
       >
         {item.avatar_url ? (
@@ -138,7 +138,7 @@ export default function SearchScreen() {
             const [, owner, repo] = repoMatch;
             const repoId = encodeRepoId(owner, repo);
             router.push(
-              `/(app)/(tabs)/repos/${repoId}/issue/${item.number}` as any,
+              `/(app)/repo/${repoId}/issue/${item.number}` as any,
             );
           }
         }}

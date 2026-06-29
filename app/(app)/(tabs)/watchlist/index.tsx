@@ -72,7 +72,7 @@ export default function WatchlistScreen() {
   const handleRepoPress = useCallback(
     (repo: GitHubRepo) => {
       const repoId = encodeRepoId(repo.owner.login, repo.name);
-      router.push(`/(app)/(tabs)/repos/${repoId}`);
+      router.push(`/(app)/repo/${repoId}`);
     },
     [router],
   );
@@ -80,7 +80,7 @@ export default function WatchlistScreen() {
   const handleRepoPressIn = useCallback(
     (repo: GitHubRepo) => {
       const repoId = encodeRepoId(repo.owner.login, repo.name);
-      prefetchRoute(`/(app)/(tabs)/repos/${repoId}`);
+      prefetchRoute(`/(app)/repo/${repoId}`);
       prefetchRepoDetails(queryClient, repo.owner.login, repo.name);
     },
     [queryClient],

@@ -55,10 +55,10 @@ function parseGitHubUrl(url: string): Href | null {
   const [, owner, repo, type, number] = match;
   const repoId = encodeRepoId(owner, repo);
   if (type === "issues" && number)
-    return `/(app)/(tabs)/repos/${repoId}/issue/${number}` as Href;
+    return `/(app)/repo/${repoId}/issue/${number}` as Href;
   if (type === "pull" && number)
-    return `/(app)/(tabs)/repos/${repoId}/pr/${number}` as Href;
-  return `/(app)/(tabs)/repos/${repoId}` as Href;
+    return `/(app)/repo/${repoId}/pr/${number}` as Href;
+  return `/(app)/repo/${repoId}` as Href;
 }
 
 interface EventDisplay {

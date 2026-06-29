@@ -39,7 +39,7 @@ export default function NotFoundScreen() {
             { backgroundColor: colors.accent },
             pressed && { opacity: 0.8 },
           ]}
-          onPress={() => router.replace("/(app)/(tabs)" as any)}
+          onPress={() => router.replace("/(app)/(tabs)/overview" as any)}
         >
           <Text style={s.buttonText}>Go to Home</Text>
         </Pressable>

@@ -42,7 +42,7 @@ export function PinnedRepoCard({ repo }: PinnedRepoCardProps) {
   const urlParts = repo.url.split("/");
   const owner = urlParts[urlParts.length - 2] ?? "";
   const repoId = encodeRepoId(owner, repo.name);
-  const route = `/(app)/(tabs)/repos/${repoId}`;
+  const route = `/(app)/repo/${repoId}`;
 
   const handlePress = useCallback(() => {
     router.push(route as any);

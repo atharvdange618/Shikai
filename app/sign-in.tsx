@@ -190,7 +190,7 @@ export default function SignInScreen() {
       setUser(user);
 
       setLoading(false);
-      router.replace("/(app)/(tabs)" as Href);
+      router.replace("/(app)/(tabs)/overview" as Href);
     } catch {
       setError("Something went wrong. Check your connection and try again.");
       setLoading(false);
@@ -239,7 +239,7 @@ export default function SignInScreen() {
 
       setLoading(false);
       setNeedsInstall(false);
-      router.replace("/(app)/(tabs)" as Href);
+      router.replace("/(app)/(tabs)/overview" as Href);
     } catch {
       setError("Installation failed. You can set it up later from settings.");
       setLoading(false);
