@@ -16,7 +16,7 @@ import {
 
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { useUserProfileRepos } from "@/hooks/useUserProfileRepos";
-import { prefetchRepoDetails, prefetchRoute } from "@/lib/prefetch";
+import { prefetchRepoDetails } from "@/lib/prefetch";
 
 import {
   AvatarSize,
@@ -74,15 +74,13 @@ export default function UserProfileScreen() {
   const handleRepoPress = useCallback(
     (repo: GitHubRepo) => {
       const repoId = `${repo.owner.login}__${repo.name}`;
-      router.push(`/(app)/(tabs)/repos/${repoId}` as any);
+      router.navigate(`/(app)/(tabs)/repos/${repoId}` as any);
     },
     [router],
   );
 
   const handleRepoPressIn = useCallback(
     (repo: GitHubRepo) => {
-      const repoId = `${repo.owner.login}__${repo.name}`;
-      prefetchRoute(`/(app)/(tabs)/repos/${repoId}`);
       prefetchRepoDetails(queryClient, repo.owner.login, repo.name);
     },
     [queryClient],
