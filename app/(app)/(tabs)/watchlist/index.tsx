@@ -18,6 +18,7 @@ import { useDebounce } from "@/hooks/useDebounce";
 import { useRepos } from "@/hooks/useRepos";
 import { useSearchIndex } from "@/hooks/useSearchIndex";
 import { prefetchRepoDetails, prefetchRoute } from "@/lib/prefetch";
+import { queryKeys } from "@/lib/query-client";
 import { encodeRepoId } from "@/lib/utils";
 import { useWatchlistStore } from "@/stores/watchlist.store";
 import type { GitHubRepo } from "@/types/github.types";
@@ -30,6 +31,8 @@ import {
   LightColors,
   Spacing,
 } from "@/constants/theme";
+
+const keyExtractor = (item: GitHubRepo) => String(item.id);
 
 export default function WatchlistScreen() {
   const isDark = useColorScheme() === "dark";
@@ -62,9 +65,9 @@ export default function WatchlistScreen() {
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    // Watchlist is local, nothing to refetch from API
+    await queryClient.invalidateQueries({ queryKey: queryKeys.repos() });
     setRefreshing(false);
-  }, []);
+  }, [queryClient]);
 
   const handleRepoPress = useCallback(
     (repo: GitHubRepo) => {
@@ -94,8 +97,6 @@ export default function WatchlistScreen() {
     ),
     [handleRepoPress, handleRepoPressIn, isDark],
   );
-
-  const keyExtractor = useCallback((item: GitHubRepo) => String(item.id), []);
 
   const s = useMemo(() => buildStyles(colors), [colors]);
 
