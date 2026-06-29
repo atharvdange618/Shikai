@@ -17,7 +17,7 @@ import * as SystemUI from "expo-system-ui";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { StatusBar, useColorScheme } from "react-native";
 
-import { AnimatedSplashScreen, BlockingScreen } from "@/components";
+import { AnimatedSplashScreen, BlockingScreen, ErrorBoundary } from "@/components";
 import { OfflineBanner } from "@/components/OfflineBanner";
 import { DarkColors, LightColors } from "@/constants/theme";
 import { fetchAuthenticatedUser } from "@/lib/github-rest";
@@ -174,13 +174,15 @@ export default function RootLayout() {
         />
       )}
       {!showSplash && securityStatus === "passed" && (
-        <Stack screenOptions={{ headerShown: false }}>
-          {token ? (
-            <Stack.Screen name="(app)" />
-          ) : (
-            <Stack.Screen name="sign-in" />
-          )}
-        </Stack>
+        <ErrorBoundary>
+          <Stack screenOptions={{ headerShown: false }}>
+            {token ? (
+              <Stack.Screen name="(app)" />
+            ) : (
+              <Stack.Screen name="sign-in" />
+            )}
+          </Stack>
+        </ErrorBoundary>
       )}
     </PersistQueryClientProvider>
   );
