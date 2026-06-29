@@ -1,4 +1,4 @@
-import { useTheme } from "@/constants/theme";
+import { TextStyles, useTheme } from "@/constants/theme";
 import NetInfo from "@react-native-community/netinfo";
 import { useEffect, useState } from "react";
 import { StyleSheet, Text } from "react-native";
@@ -10,7 +10,7 @@ import Animated, {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export function OfflineBanner() {
-  const { colors, typography } = useTheme();
+  const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const [isOffline, setIsOffline] = useState(false);
 
@@ -34,7 +34,7 @@ export function OfflineBanner() {
         { backgroundColor: colors.warningSubtle, paddingTop: insets.top },
       ]}
     >
-      <Text style={[typography.caption, { color: colors.textSecondary }]}>
+      <Text style={[TextStyles.caption, { color: colors.textSecondary }]}>
         You{"'"}re offline - showing cached data
       </Text>
     </Animated.View>

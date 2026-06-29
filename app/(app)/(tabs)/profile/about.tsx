@@ -11,20 +11,19 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  useColorScheme,
   View,
 } from "react-native";
 
 import {
-  DarkColors,
+  type ColorTokens,
   FontFamily,
   FontSize,
   IconSize,
   Layout,
-  LightColors,
   Radius,
   Shadows,
   Spacing,
+  useTheme,
 } from "@/constants/theme";
 
 const APP_VERSION = Constants.expoConfig?.version ?? "1.0.0";
@@ -69,8 +68,7 @@ const CREDITS = [
 ];
 
 export default function AboutScreen() {
-  const isDark = useColorScheme() === "dark";
-  const colors = isDark ? DarkColors : LightColors;
+  const { colors, isDark } = useTheme();
   const shadows = useMemo(() => (isDark ? {} : Shadows.light.sm), [isDark]);
   const { updateAvailable, latestVersion, isLoading, releaseUrl } =
     useLatestRelease();
@@ -267,10 +265,7 @@ export default function AboutScreen() {
   );
 }
 
-function buildStyles(
-  colors: typeof LightColors | typeof DarkColors,
-  shadows: object,
-) {
+function buildStyles(colors: ColorTokens, shadows: object) {
   return StyleSheet.create({
     scroll: {
       flex: 1,

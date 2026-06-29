@@ -1,6 +1,6 @@
 import { createMMKV } from "react-native-mmkv";
 
-const mmkv = createMMKV({ id: "shikai-cache" });
+export const mmkv = createMMKV({ id: "shikai-cache" });
 
 export const mmkvStorage = {
   getItem: async (key: string) => mmkv.getString(key) ?? null,

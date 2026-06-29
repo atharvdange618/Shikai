@@ -9,7 +9,6 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  useColorScheme,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -28,12 +27,12 @@ import { PinnedRepoCard } from "@/components/overview/PinnedRepoCard";
 import { VersionCheckBanner } from "@/components/VersionCheckBanner";
 
 import {
-  DarkColors,
+  type ColorTokens,
   FontFamily,
   FontSize,
-  LightColors,
   Radius,
   Spacing,
+  useTheme,
 } from "@/constants/theme";
 
 function getGreeting() {
@@ -46,8 +45,7 @@ function getGreeting() {
 
 export default function OverviewScreen() {
   const router = useRouter();
-  const isDark = useColorScheme() === "dark";
-  const colors = isDark ? DarkColors : LightColors;
+  const { colors } = useTheme();
 
   const queryClient = useQueryClient();
   const [refreshing, setRefreshing] = useState(false);
@@ -201,7 +199,7 @@ export default function OverviewScreen() {
   );
 }
 
-function buildStyles(colors: typeof LightColors | typeof DarkColors) {
+function buildStyles(colors: ColorTokens) {
   return StyleSheet.create({
     safeArea: {
       flex: 1,

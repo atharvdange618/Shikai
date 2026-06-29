@@ -4,18 +4,18 @@ import { MarkdownRenderer } from "@/components/shared/MarkdownRenderer";
 import { InfoDot } from "@/components/shared/Tooltip";
 import {
   BorderWidth,
-  DarkColors,
+  type ColorTokens,
   FontFamily,
   FontSize,
   IconSize,
   Layout,
-  LightColors,
   Radius,
   Spacing,
+  useTheme,
 } from "@/constants/theme";
 import { useRepoDetailsScreen } from "@/hooks/useRepoDetails";
-import { prefetchFileTree, prefetchRepoCommits } from "@/lib/prefetch";
 import { fetchIssues, fetchPullRequests } from "@/lib/github-rest";
+import { prefetchFileTree, prefetchRepoCommits } from "@/lib/prefetch";
 import { queryKeys } from "@/lib/query-client";
 import { decodeRepoId, formatCount, relativeTime } from "@/lib/utils";
 import { Octicons } from "@expo/vector-icons";
@@ -32,7 +32,6 @@ import {
   StyleSheet,
   Text,
   View,
-  useColorScheme,
 } from "react-native";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -125,8 +124,7 @@ export default function RepoDetailsScreen() {
   const navigation = useNavigation();
   const router = useRouter();
   const queryClient = useQueryClient();
-  const isDark = useColorScheme() === "dark";
-  const colors = isDark ? DarkColors : LightColors;
+  const { colors } = useTheme();
 
   const [owner, repoName] = decodeRepoId(repoId ?? "");
 
@@ -215,8 +213,7 @@ export default function RepoDetailsScreen() {
       queryFn: ({ pageParam }) =>
         fetchIssues(owner, repoName, pageParam, 10, "open"),
       initialPageParam: 1,
-      getNextPageParam: (lastPage) =>
-        lastPage.pagination.next ?? undefined,
+      getNextPageParam: (lastPage) => lastPage.pagination.next ?? undefined,
       pages: 1,
       staleTime: 1000 * 60 * 2,
     });
@@ -234,8 +231,7 @@ export default function RepoDetailsScreen() {
       queryFn: ({ pageParam }) =>
         fetchPullRequests(owner, repoName, pageParam, 10, "open"),
       initialPageParam: 1,
-      getNextPageParam: (lastPage) =>
-        lastPage.pagination.next ?? undefined,
+      getNextPageParam: (lastPage) => lastPage.pagination.next ?? undefined,
       pages: 1,
       staleTime: 1000 * 60 * 2,
     });
@@ -279,7 +275,12 @@ export default function RepoDetailsScreen() {
         ) : (
           <>
             <Pressable
-              onPress={() => router.push({ pathname: "/(app)/user/[username]", params: { username: owner } } as any)}
+              onPress={() =>
+                router.push({
+                  pathname: "/(app)/user/[username]",
+                  params: { username: owner },
+                } as any)
+              }
               hitSlop={4}
             >
               {({ pressed }) => (
@@ -701,7 +702,7 @@ function StatItem({
   icon: React.ComponentProps<typeof Octicons>["name"];
   value: number;
   label: string;
-  colors: typeof LightColors | typeof DarkColors;
+  colors: ColorTokens;
   isLoading: boolean;
   iconColor?: string;
 }) {
@@ -758,10 +759,7 @@ function StatItem({
   );
 }
 
-function buildStyles(
-  colors: typeof LightColors | typeof DarkColors,
-  bottomInset: number,
-) {
+function buildStyles(colors: ColorTokens, bottomInset: number) {
   return StyleSheet.create({
     scroll: {
       flex: 1,

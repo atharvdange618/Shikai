@@ -4,10 +4,9 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import languageColors from "@/constants/language-colors.json";
 import {
-  DarkColors,
+  type ColorTokens,
   FontFamily,
   FontSize,
-  LightColors,
   Radius,
   Shadows,
   Spacing,
@@ -19,6 +18,7 @@ import type { GitHubRepo, RepoListParams } from "@/types/github.types";
 interface RepoCardProps {
   repo: GitHubRepo;
   sort?: RepoListParams["sort"];
+  colors: ColorTokens;
   isDark: boolean;
   onPress?: (repo: GitHubRepo) => void;
   onPressIn?: (repo: GitHubRepo) => void;
@@ -27,12 +27,15 @@ interface RepoCardProps {
 export const RepoCard = memo(function RepoCard({
   repo,
   sort = "pushed",
+  colors,
   isDark,
   onPress,
   onPressIn,
 }: RepoCardProps) {
-  const colors = isDark ? DarkColors : LightColors;
-  const s = isDark ? darkStyles : lightStyles;
+  const s = useMemo(
+    () => buildStyles(colors, isDark ? {} : Shadows.light.sm),
+    [colors, isDark],
+  );
 
   const repoId = encodeRepoId(repo.owner.login, repo.name);
   const isWatchlisted = useWatchlistStore((state) =>
@@ -169,11 +172,7 @@ export const RepoCard = memo(function RepoCard({
   );
 });
 
-function ForkBadge({
-  colors,
-}: {
-  colors: typeof LightColors | typeof DarkColors;
-}) {
+function ForkBadge({ colors }: { colors: ColorTokens }) {
   return (
     <View
       style={{
@@ -203,7 +202,7 @@ function VisibilityBadge({
   colors,
 }: {
   isPrivate: boolean;
-  colors: typeof LightColors | typeof DarkColors;
+  colors: ColorTokens;
 }) {
   return (
     <View
@@ -231,10 +230,7 @@ function VisibilityBadge({
   );
 }
 
-function buildStyles(
-  colors: typeof LightColors | typeof DarkColors,
-  shadows: object,
-) {
+function buildStyles(colors: ColorTokens, shadows: object) {
   return StyleSheet.create({
     card: {
       backgroundColor: colors.surface,
@@ -335,6 +331,3 @@ function buildStyles(
     },
   });
 }
-
-const lightStyles = buildStyles(LightColors, Shadows.light.sm);
-const darkStyles = buildStyles(DarkColors, {});
