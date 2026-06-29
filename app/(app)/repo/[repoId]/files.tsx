@@ -218,7 +218,7 @@ export default function FileExplorerScreen() {
     (path: string) => {
       const fileName = path.split("/").pop() ?? path;
       router.push({
-        pathname: "/(app)/(tabs)/repos/[repoId]/file",
+        pathname: "/(app)/repo/[repoId]/file",
         params: { repoId, path, fileName },
       });
     },

@@ -190,7 +190,7 @@ const PRItem = memo(function PRItem({
   const router = useRouter();
 
   const handlePress = useCallback(() => {
-    router.push(`/(app)/(tabs)/repos/${repoId}/pr/${pr.number}` as any);
+    router.push(`/(app)/repo/${repoId}/pr/${pr.number}` as any);
   }, [router, repoId, pr.number]);
 
   const s = useMemo(() => buildStyles(colors), [colors]);
