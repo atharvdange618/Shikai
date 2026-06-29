@@ -18,6 +18,7 @@ import { useAlert } from "@/components";
 
 import { useRepoCount } from "@/hooks/useRepoCount";
 import { useUser } from "@/hooks/useUser";
+import { clearAllMMKV } from "@/lib/mmkv";
 import { deleteToken } from "@/lib/secure-storage";
 import { queryKeys } from "@/lib/query-client";
 
@@ -62,6 +63,7 @@ export default function ProfileScreen() {
             await deleteToken();
             useAuthStore.getState().clearAuth();
             queryClient.clear();
+            clearAllMMKV();
             router.replace("/sign-in" as Href);
           },
         },
