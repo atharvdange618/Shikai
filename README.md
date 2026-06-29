@@ -10,15 +10,25 @@ GitHub's mobile app is built for _work_ - reviewing PRs, responding to issues, m
 
 ## Features
 
-**Dashboard** - Pinned repos, contribution graph, and a live activity feed. Pushes, stars, forks, releases, PRs, and issues - all in one place. Tap any item to jump to the repo.
+**Overview** - Pinned repos, contribution graph with streaks, and a live activity feed. Pushes, stars, forks, releases, PRs, and issues - all in one place. Tap any item to jump to the repo.
 
-**Repositories** - Browse all your repos with smart filters by language, type, or sort order. Explore file trees, view files with syntax highlighting, browse commit history per branch, and track issues and pull requests. Health badges flag missing licenses, no topics, and stale repos.
+**Repositories** - Browse all your repos with smart filters by language, type, or sort order. Explore file trees, view files with syntax highlighting, browse commit history per branch, and track issues and pull requests. Health badges flag missing licenses, no topics, and stale repos. Branch selector lets you switch branches across file tree and commits views.
+
+**Search** - Global search across repos, users, and issues with fuzzy matching via MiniSearch. Tab switching between result types, debounced input, eager-load pagination. Navigate in-app to any repo, user profile, or issue detail.
 
 **Stars** - Search and sort your starred repos by recent activity or name. Quick access to the projects that inspire you.
 
-**Profile** - Your GitHub card, always ready to share. Stats, social links, location, and hireable status - perfect for meetups, interviews, or just admiring your streak.
+**Watchlist** - Bookmark any repo from anywhere in the app. Local persistence via MMKV with search and filter. Dedicated tab with empty state onboarding.
+
+**Profile** - Your GitHub card, always ready to share. Stats, social links, location, and hireable status - perfect for meetups, interviews, or just admiring your streak. Sign out with confirmation dialog.
+
+**User Profiles** - View any GitHub user's profile - avatar, bio, stats, social links, top repositories. Tappable from search results and contributor lists. Skeleton states and pull-to-refresh.
+
+**Offline Support** - Network state detection via `@react-native-community/netinfo`. MMKV-backed React Query disk persistence with 24h max age. Offline banner with safe area support. Ephemeral queries excluded from disk cache.
 
 **Version Check** - Shikai checks for updates on launch and shows a dismissible banner when a new version is available.
+
+**Error Recovery** - Crash recovery with ErrorBoundary wrapping root and tabs layouts. Custom 404 screen for invalid routes.
 
 ---
 
@@ -34,7 +44,7 @@ Light and dark themes are supported - a warm, paper-like aesthetic in light mode
 
 ## Security
 
-Your token is handled via a secure Cloudflare Worker proxy and never leaves your device after the initial exchange. All subsequent API requests go directly from your phone to GitHub. The app detects rooted devices and debuggers to prevent usage on compromised environments. Tokens are encrypted on-device using `expo-secure-store`.
+Your token is handled via a secure Cloudflare Worker proxy and never leaves your device after the initial exchange. All subsequent API requests go directly from your phone to GitHub. The app detects rooted devices and debuggers to prevent usage on compromised environments. Tokens are encrypted on-device using `expo-secure-store`. MMKV cache is cleared on sign-in and sign-out.
 
 Shikai requests only read-only access to your GitHub data. It cannot modify, create, or delete anything.
 
@@ -50,9 +60,20 @@ Shikai requests only read-only access to your GitHub data. It cannot modify, cre
 
 ---
 
+## Keyboard Shortcuts
+
+| Shortcut | Action |
+|----------|--------|
+| Cmd/Ctrl + 1-6 | Switch between tabs |
+| Cmd/Ctrl + F | Focus search bar |
+| Arrow Up/Down | Navigate lists |
+| Escape | Dismiss search |
+
+---
+
 ## Built With
 
-React Native · Expo · TypeScript · React Query · Zustand · Reanimated · FlashList · GitHub REST & GraphQL APIs · GitHub OAuth (PKCE) · Cloudflare Workers
+React Native · Expo · TypeScript · React Query · Zustand · Reanimated · FlashList · MMKV · GitHub REST & GraphQL APIs · GitHub OAuth (PKCE) · Cloudflare Workers
 
 ---
 
