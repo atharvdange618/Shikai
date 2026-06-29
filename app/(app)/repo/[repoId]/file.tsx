@@ -12,7 +12,6 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  useColorScheme,
   useWindowDimensions,
   View,
 } from "react-native";
@@ -21,14 +20,14 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { VirtualizedCodeViewer } from "@/components/repo/VirtualizedCodeViewer";
 import { MarkdownRenderer } from "@/components/shared/MarkdownRenderer";
 import {
-  DarkColors,
+  type ColorTokens,
   FontFamily,
   FontSize,
   IconSize,
   Layout,
-  LightColors,
   Radius,
   Spacing,
+  useTheme,
 } from "@/constants/theme";
 import { useFileContent } from "@/hooks/useRepoDetails";
 import { decodeRepoId, getLanguage, isImageFile } from "@/lib/utils";
@@ -36,7 +35,7 @@ import { decodeRepoId, getLanguage, isImageFile } from "@/lib/utils";
 interface LoadingProgressProps {
   isLoading: boolean;
   fileName: string;
-  colors: typeof LightColors | typeof DarkColors;
+  colors: ColorTokens;
 }
 
 function LoadingProgress({
@@ -133,8 +132,7 @@ export default function FileViewerScreen() {
     fileName: string;
   }>();
   const navigation = useNavigation();
-  const isDark = useColorScheme() === "dark";
-  const colors = isDark ? DarkColors : LightColors;
+  const { colors } = useTheme();
   const { width: screenWidth } = useWindowDimensions();
 
   const [owner, repoName] = decodeRepoId(repoId ?? "");
@@ -361,7 +359,7 @@ export default function FileViewerScreen() {
   );
 }
 
-function buildStyles(colors: typeof LightColors | typeof DarkColors) {
+function buildStyles(colors: ColorTokens) {
   return StyleSheet.create({
     container: {
       flex: 1,

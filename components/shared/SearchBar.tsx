@@ -5,17 +5,16 @@ import {
   StyleSheet,
   TextInput,
   TextInputProps,
-  useColorScheme,
   View,
 } from "react-native";
 
 import {
-  DarkColors,
+  type ColorTokens,
   FontFamily,
   FontSize,
-  LightColors,
   Radius,
   Spacing,
+  useTheme,
 } from "@/constants/theme";
 
 interface SearchBarProps {
@@ -30,8 +29,7 @@ export const SearchBar = forwardRef<TextInput, SearchBarProps>(
     { value, onChangeText, placeholder = "Search…", textInputProps },
     ref,
   ) {
-    const isDark = useColorScheme() === "dark";
-    const colors = isDark ? DarkColors : LightColors;
+    const { colors } = useTheme();
     const s = useMemo(() => buildStyles(colors), [colors]);
 
     return (
@@ -74,7 +72,7 @@ export const SearchBar = forwardRef<TextInput, SearchBarProps>(
   },
 );
 
-function buildStyles(colors: typeof LightColors | typeof DarkColors) {
+function buildStyles(colors: ColorTokens) {
   return StyleSheet.create({
     container: {
       flexDirection: "row",

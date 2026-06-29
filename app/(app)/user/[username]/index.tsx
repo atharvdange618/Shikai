@@ -10,7 +10,6 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  useColorScheme,
   View,
 } from "react-native";
 
@@ -20,23 +19,22 @@ import { prefetchRepoDetails } from "@/lib/prefetch";
 
 import {
   AvatarSize,
-  DarkColors,
+  type ColorTokens,
   FontFamily,
   FontSize,
   IconSize,
   Layout,
-  LightColors,
   Radius,
   Shadows,
   Spacing,
+  useTheme,
 } from "@/constants/theme";
 import { encodeRepoId, formatCount } from "@/lib/utils";
 import type { GitHubRepo } from "@/types/github.types";
 
 export default function UserProfileScreen() {
   const { username } = useLocalSearchParams<{ username: string }>();
-  const isDark = useColorScheme() === "dark";
-  const colors = isDark ? DarkColors : LightColors;
+  const { colors, isDark } = useTheme();
   const shadows = useMemo(() => (isDark ? {} : Shadows.light.sm), [isDark]);
   const navigation = useNavigation();
   const router = useRouter();
@@ -309,7 +307,7 @@ function RepoRow({
   onPressIn,
 }: {
   repo: GitHubRepo;
-  colors: typeof LightColors | typeof DarkColors;
+  colors: ColorTokens;
   onPress: (repo: GitHubRepo) => void;
   onPressIn: (repo: GitHubRepo) => void;
 }) {
@@ -369,7 +367,7 @@ function StatBlock({
 }: {
   value: number;
   label: string;
-  colors: typeof LightColors | typeof DarkColors;
+  colors: ColorTokens;
   isLoading: boolean;
 }) {
   return (
@@ -424,7 +422,7 @@ function MetaRow({
 }: {
   icon: React.ComponentProps<typeof Octicons>["name"] | string;
   text: string;
-  colors: typeof LightColors | typeof DarkColors;
+  colors: ColorTokens;
   isLink?: boolean;
   onPress?: () => void;
   iconType?: "octicons" | "fontawesome6";
@@ -538,10 +536,7 @@ const styles = StyleSheet.create({
   },
 });
 
-function buildStyles(
-  colors: typeof LightColors | typeof DarkColors,
-  shadows: object,
-) {
+function buildStyles(colors: ColorTokens, shadows: object) {
   return StyleSheet.create({
     loadingContainer: {
       flex: 1,

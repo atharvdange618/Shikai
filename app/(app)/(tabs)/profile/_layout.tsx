@@ -1,16 +1,11 @@
 import { Stack } from "expo-router";
-import { useColorScheme } from "react-native";
 
-import {
-  DarkColors,
-  FontFamily,
-  FontSize,
-  LightColors,
-} from "@/constants/theme";
+import { FontFamily, FontSize } from "@/constants/theme";
+import { useTheme } from "@/contexts/ThemeContext";
 
 export default function ProfileLayout() {
-  const isDark = useColorScheme() === "dark";
-  const colors = isDark ? DarkColors : LightColors;
+  const theme = useTheme();
+  const colors = theme.colors;
 
   const sharedHeaderOptions = {
     headerStyle: {
@@ -26,13 +21,26 @@ export default function ProfileLayout() {
   };
 
   return (
-    <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.background } }}>
+    <Stack
+      screenOptions={{
+        headerShown: false,
+        contentStyle: { backgroundColor: colors.background },
+      }}
+    >
       <Stack.Screen
         name="index"
         options={{
           ...sharedHeaderOptions,
           headerShown: true,
           title: "Profile",
+        }}
+      />
+      <Stack.Screen
+        name="settings"
+        options={{
+          ...sharedHeaderOptions,
+          headerShown: true,
+          title: "Theme",
         }}
       />
       <Stack.Screen

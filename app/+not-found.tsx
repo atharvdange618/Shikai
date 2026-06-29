@@ -1,27 +1,20 @@
 import { Octicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useMemo } from "react";
-import {
-  Pressable,
-  StyleSheet,
-  Text,
-  useColorScheme,
-  View,
-} from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import {
-  DarkColors,
+  type ColorTokens,
   FontFamily,
   FontSize,
-  LightColors,
   Radius,
   Spacing,
+  useTheme,
 } from "@/constants/theme";
 
 export default function NotFoundScreen() {
-  const isDark = useColorScheme() === "dark";
-  const colors = isDark ? DarkColors : LightColors;
+  const { colors } = useTheme();
   const router = useRouter();
   const s = useMemo(() => buildStyles(colors), [colors]);
 
@@ -48,7 +41,7 @@ export default function NotFoundScreen() {
   );
 }
 
-function buildStyles(colors: typeof LightColors | typeof DarkColors) {
+function buildStyles(colors: ColorTokens) {
   return StyleSheet.create({
     container: {
       flex: 1,

@@ -10,7 +10,6 @@ import {
   Text,
   TextInput,
   View,
-  useColorScheme,
 } from "react-native";
 
 import { FlashList } from "@shopify/flash-list";
@@ -24,13 +23,13 @@ import { encodeRepoId } from "@/lib/utils";
 import type { GitHubIssue, GitHubRepo, GitHubUser } from "@/types/github.types";
 
 import {
-  DarkColors,
+  type ColorTokens,
   FontFamily,
   FontSize,
   Layout,
-  LightColors,
   Radius,
   Spacing,
+  useTheme,
 } from "@/constants/theme";
 
 const TABS: { key: SearchTab; label: string }[] = [
@@ -42,8 +41,7 @@ const TABS: { key: SearchTab; label: string }[] = [
 const keyExtractor = (item: any) => String(item.id);
 
 export default function SearchScreen() {
-  const isDark = useColorScheme() === "dark";
-  const colors = isDark ? DarkColors : LightColors;
+  const { colors, isDark } = useTheme();
   const router = useRouter();
   const queryClient = useQueryClient();
   const searchInputRef = useRef<TextInput>(null);
@@ -86,12 +84,13 @@ export default function SearchScreen() {
     ({ item }: { item: GitHubRepo }) => (
       <RepoCard
         repo={item}
+        colors={colors}
         isDark={isDark}
         onPress={handleRepoPress}
         onPressIn={handleRepoPressIn}
       />
     ),
-    [handleRepoPress, handleRepoPressIn, isDark],
+    [handleRepoPress, handleRepoPressIn, isDark, colors],
   );
 
   const renderUserItem = useCallback(
@@ -137,9 +136,7 @@ export default function SearchScreen() {
           if (repoMatch) {
             const [, owner, repo] = repoMatch;
             const repoId = encodeRepoId(owner, repo);
-            router.push(
-              `/(app)/repo/${repoId}/issue/${item.number}` as any,
-            );
+            router.push(`/(app)/repo/${repoId}/issue/${item.number}` as any);
           }
         }}
       >
@@ -158,16 +155,17 @@ export default function SearchScreen() {
           {item.user && ` by ${item.user.login}`}
           {item.state && ` \u00b7 ${item.state}`}
         </Text>
-        {item.repository_url && (() => {
-          const repoMatch = item.repository_url.match(
-            /\/repos\/([^/]+\/[^/]+)$/,
-          );
-          return repoMatch ? (
-            <Text style={s.issueRepo} numberOfLines={1}>
-              {repoMatch[1]}
-            </Text>
-          ) : null;
-        })()}
+        {item.repository_url &&
+          (() => {
+            const repoMatch = item.repository_url.match(
+              /\/repos\/([^/]+\/[^/]+)$/,
+            );
+            return repoMatch ? (
+              <Text style={s.issueRepo} numberOfLines={1}>
+                {repoMatch[1]}
+              </Text>
+            ) : null;
+          })()}
       </Pressable>
     ),
     [colors, s, router],
@@ -285,7 +283,7 @@ export default function SearchScreen() {
   );
 }
 
-function buildStyles(colors: typeof LightColors | typeof DarkColors) {
+function buildStyles(colors: ColorTokens) {
   return StyleSheet.create({
     container: {
       flex: 1,
