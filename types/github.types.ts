@@ -284,6 +284,7 @@ export interface GitHubIssue {
   title: string;
   state: "open" | "closed";
   html_url: string;
+  repository_url: string;
   body: string | null;
   user: GitHubUserSummary;
   labels: GitHubLabel[];
