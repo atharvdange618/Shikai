@@ -174,7 +174,7 @@ export default function RepoDetailsScreen() {
 
   const handleCommitsPress = useCallback(() => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    router.push(`/(app)/(tabs)/repos/${repoId}/commits`);
+    router.push(`/(app)/repo/${repoId}/commits`);
   }, [router, repoId]);
 
   const handleCommitsPressIn = useCallback(() => {
@@ -184,7 +184,7 @@ export default function RepoDetailsScreen() {
 
   const handleCodePress = useCallback(() => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    router.push(`/(app)/(tabs)/repos/${repoId}/files`);
+    router.push(`/(app)/repo/${repoId}/files`);
   }, [router, repoId]);
 
   const handleCodePressIn = useCallback(() => {
@@ -205,7 +205,7 @@ export default function RepoDetailsScreen() {
 
   const handleIssuesPress = useCallback(() => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    router.push(`/(app)/(tabs)/repos/${repoId}/issues`);
+    router.push(`/(app)/repo/${repoId}/issues`);
   }, [router, repoId]);
 
   const handleIssuesPressIn = useCallback(() => {
@@ -224,7 +224,7 @@ export default function RepoDetailsScreen() {
 
   const handlePRsPress = useCallback(() => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    router.push(`/(app)/(tabs)/repos/${repoId}/pull-requests`);
+    router.push(`/(app)/repo/${repoId}/pull-requests`);
   }, [router, repoId]);
 
   const handlePRsPressIn = useCallback(() => {
@@ -278,7 +278,21 @@ export default function RepoDetailsScreen() {
           </>
         ) : (
           <>
-            <Text style={s.ownerText}>{owner}</Text>
+            <Pressable
+              onPress={() => router.push({ pathname: "/(app)/user/[username]", params: { username: owner } } as any)}
+              hitSlop={4}
+            >
+              {({ pressed }) => (
+                <Text
+                  style={[
+                    s.ownerText,
+                    pressed && { color: colors.accent, opacity: 0.7 },
+                  ]}
+                >
+                  {owner}
+                </Text>
+              )}
+            </Pressable>
             <View style={s.titleRow}>
               <Text style={s.repoName} numberOfLines={1}>
                 {repo?.name}
@@ -796,6 +810,8 @@ function buildStyles(
       fontFamily: FontFamily.regular,
       fontSize: FontSize.caption,
       color: colors.textMuted,
+      textDecorationLine: "underline",
+      textDecorationColor: colors.textMuted,
     },
 
     titleRow: {
