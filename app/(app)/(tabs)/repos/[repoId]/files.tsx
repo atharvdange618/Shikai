@@ -24,6 +24,7 @@ import {
 } from "@/constants/theme";
 import { useBranches, useFileTree, useRepo } from "@/hooks/useRepoDetails";
 import { prefetchCommonFiles, prefetchFileContent } from "@/lib/prefetch";
+import { decodeRepoId } from "@/lib/utils";
 import type { GitHubTreeItem } from "@/types/github.types";
 
 interface TreeNode {
@@ -154,7 +155,7 @@ export default function FileExplorerScreen() {
   const isDark = useColorScheme() === "dark";
   const colors = isDark ? DarkColors : LightColors;
 
-  const [owner, repoName] = (repoId ?? "").split("__");
+  const [owner, repoName] = decodeRepoId(repoId ?? "");
   const [expandedPaths, setExpandedPaths] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedBranch, setSelectedBranch] = useState("");
@@ -217,7 +218,7 @@ export default function FileExplorerScreen() {
     (path: string) => {
       const fileName = path.split("/").pop() ?? path;
       router.push({
-        pathname: "/repos/[repoId]/file",
+        pathname: "/(app)/(tabs)/repos/[repoId]/file",
         params: { repoId, path, fileName },
       });
     },
