@@ -69,6 +69,18 @@ export function isImageFile(filename: string): boolean {
   return IMAGE_EXTENSIONS.some((ext) => filename.toLowerCase().endsWith(ext));
 }
 
+const REPO_ID_SEPARATOR = "~~";
+
+export function encodeRepoId(owner: string, name: string): string {
+  return `${owner}${REPO_ID_SEPARATOR}${name}`;
+}
+
+export function decodeRepoId(repoId: string): [string, string] {
+  const idx = repoId.indexOf(REPO_ID_SEPARATOR);
+  if (idx === -1) return [repoId, ""];
+  return [repoId.slice(0, idx), repoId.slice(idx + REPO_ID_SEPARATOR.length)];
+}
+
 export function getLanguage(filename: string): string {
   const ext = filename.split(".").pop()?.toLowerCase();
   switch (ext) {
