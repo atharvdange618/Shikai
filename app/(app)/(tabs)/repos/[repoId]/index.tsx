@@ -1,7 +1,7 @@
 import { ContributorRow } from "@/components/repo/ContributorRow";
 import { LanguageBar } from "@/components/repo/LanguageBar";
-import { InfoDot } from "@/components/shared/Tooltip";
 import { MarkdownRenderer } from "@/components/shared/MarkdownRenderer";
+import { InfoDot } from "@/components/shared/Tooltip";
 import {
   BorderWidth,
   DarkColors,
@@ -15,7 +15,7 @@ import {
 } from "@/constants/theme";
 import { useRepoDetailsScreen } from "@/hooks/useRepoDetails";
 import { prefetchFileTree, prefetchRepoCommits } from "@/lib/prefetch";
-import { formatCount, relativeTime } from "@/lib/utils";
+import { decodeRepoId, formatCount, relativeTime } from "@/lib/utils";
 import { Octicons } from "@expo/vector-icons";
 import { useQueryClient } from "@tanstack/react-query";
 import * as Clipboard from "expo-clipboard";
@@ -126,7 +126,7 @@ export default function RepoDetailsScreen() {
   const isDark = useColorScheme() === "dark";
   const colors = isDark ? DarkColors : LightColors;
 
-  const [owner, repoName] = (repoId ?? "").split("__");
+  const [owner, repoName] = decodeRepoId(repoId ?? "");
 
   const [copiedHash, setCopiedHash] = useState(false);
 
@@ -156,49 +156,6 @@ export default function RepoDetailsScreen() {
       }
     }
   }, [repo?.name, navigation]);
-
-  useEffect(() => {
-    try {
-      navigation.setOptions({
-        headerLeft: () => (
-          <Pressable
-            onPress={() => {
-              if (navigation.canGoBack()) {
-                navigation.goBack();
-              } else {
-                router.replace("/(app)/(tabs)/repos" as any);
-              }
-            }}
-            hitSlop={8}
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              gap: 4,
-              paddingRight: 8,
-            }}
-          >
-            <Octicons
-              name="chevron-left"
-              size={IconSize.md}
-              color={colors.accent}
-            />
-            <Text
-              style={{
-                fontFamily: FontFamily.regular,
-                fontSize: FontSize.body,
-                color: colors.accent,
-              }}
-            >
-              Back
-            </Text>
-          </Pressable>
-        ),
-      });
-    } catch {
-      /* navigator not ready yet */
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   useEffect(() => {
     if (!isLoading.core) return;
@@ -391,7 +348,7 @@ export default function RepoDetailsScreen() {
 
             {repo?.topics && repo.topics.length > 0 && (
               <View style={s.topicsRow}>
-                {repo.topics.map((topic) => (
+                {repo.topics.map((topic: string) => (
                   <View key={topic} style={s.topicPill}>
                     <Text style={s.topicText}>{topic}</Text>
                   </View>
@@ -634,7 +591,12 @@ export default function RepoDetailsScreen() {
             <Text style={s.sectionLabel}>Languages</Text>
             {!isLoading.core && languages.length > 0 && (
               <Text style={s.languageTotalBytes}>
-                {formatBytes(languages.reduce((sum, l) => sum + l.bytes, 0))}
+                {formatBytes(
+                  languages.reduce(
+                    (sum: number, l: { bytes: number }) => sum + l.bytes,
+                    0,
+                  ),
+                )}
               </Text>
             )}
           </View>
@@ -682,7 +644,10 @@ export default function RepoDetailsScreen() {
           entering={FadeInDown.duration(400).delay(ANIM_DELAYS.readme)}
           style={s.readmeSection}
         >
-          <MarkdownRenderer markdown={readme} context={`${owner}/${repoName}`} />
+          <MarkdownRenderer
+            markdown={readme}
+            context={`${owner}/${repoName}`}
+          />
         </Animated.View>
       )}
     </ScrollView>

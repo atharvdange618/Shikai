@@ -20,6 +20,7 @@ import { ListItemSeparator } from "@/components/shared/ListItemSeparator";
 import { useDebounce } from "@/hooks/useDebounce";
 import { SearchTab, useGlobalSearch } from "@/hooks/useGlobalSearch";
 import { prefetchRepoDetails, prefetchRoute } from "@/lib/prefetch";
+import { encodeRepoId } from "@/lib/utils";
 import type { GitHubIssue, GitHubRepo, GitHubUser } from "@/types/github.types";
 
 import {
@@ -64,7 +65,7 @@ export default function SearchScreen() {
 
   const handleRepoPress = useCallback(
     (repo: GitHubRepo) => {
-      const repoId = `${repo.owner.login}__${repo.name}`;
+      const repoId = encodeRepoId(repo.owner.login, repo.name);
       router.push(`/(app)/(tabs)/repos/${repoId}`);
     },
     [router],
@@ -72,7 +73,7 @@ export default function SearchScreen() {
 
   const handleRepoPressIn = useCallback(
     (repo: GitHubRepo) => {
-      const repoId = `${repo.owner.login}__${repo.name}`;
+      const repoId = encodeRepoId(repo.owner.login, repo.name);
       prefetchRoute(`/(app)/(tabs)/repos/${repoId}`);
       prefetchRepoDetails(queryClient, repo.owner.login, repo.name);
     },

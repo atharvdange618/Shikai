@@ -31,7 +31,7 @@ import {
   Radius,
   Spacing,
 } from "@/constants/theme";
-import { relativeTime } from "@/lib/utils";
+import { relativeTime, decodeRepoId } from "@/lib/utils";
 
 type IssueState = "open" | "closed";
 
@@ -42,7 +42,7 @@ export default function IssuesScreen() {
   const isDark = useColorScheme() === "dark";
   const colors = isDark ? DarkColors : LightColors;
 
-  const [owner, repoName] = (repoId ?? "").split("__");
+  const [owner, repoName] = decodeRepoId(repoId ?? "");
   const [state, setState] = useState<IssueState>("open");
   const [refreshing, setRefreshing] = useState(false);
 

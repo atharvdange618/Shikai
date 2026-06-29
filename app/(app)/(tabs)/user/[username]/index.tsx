@@ -30,7 +30,7 @@ import {
   Shadows,
   Spacing,
 } from "@/constants/theme";
-import { formatCount } from "@/lib/utils";
+import { formatCount, encodeRepoId } from "@/lib/utils";
 import type { GitHubRepo } from "@/types/github.types";
 
 export default function UserProfileScreen() {
@@ -73,8 +73,8 @@ export default function UserProfileScreen() {
 
   const handleRepoPress = useCallback(
     (repo: GitHubRepo) => {
-      const repoId = `${repo.owner.login}__${repo.name}`;
-      router.navigate(`/(app)/(tabs)/repos/${repoId}` as any);
+      const repoId = encodeRepoId(repo.owner.login, repo.name);
+      router.push(`/(app)/(tabs)/repos/${repoId}` as any);
     },
     [router],
   );
