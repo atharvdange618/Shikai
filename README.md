@@ -22,6 +22,8 @@ GitHub's mobile app is built for _work_ - reviewing PRs, responding to issues, m
 
 **Profile** - Your GitHub card, always ready to share. Stats, social links, location, and hireable status - perfect for meetups, interviews, or just admiring your streak. Sign out with confirmation dialog.
 
+**Themes** - Choose from 5 carefully crafted palettes: Light, Dark, Tokyo Night, Dracula, and Atom One Dark. Theme selection persists across app restarts. Each theme includes unique contribution graph colors.
+
 **User Profiles** - View any GitHub user's profile - avatar, bio, stats, social links, top repositories. Tappable from search results and contributor lists. Skeleton states and pull-to-refresh.
 
 **Offline Support** - Network state detection via `@react-native-community/netinfo`. MMKV-backed React Query disk persistence with 24h max age. Offline banner with safe area support. Ephemeral queries excluded from disk cache.
@@ -38,7 +40,7 @@ GitHub's mobile app is built for _work_ - reviewing PRs, responding to issues, m
 - **Mobile-first, native feel.** Smooth animations, haptic feedback, and a UI that feels at home on your phone.
 - **Information at the right density.** Not too sparse, not overwhelming. Just enough detail to be useful, with deeper views when you need them.
 
-Light and dark themes are supported - a warm, paper-like aesthetic in light mode and a GitHub-inspired dark palette in dark mode. Typography uses Inter for body text and JetBrains Mono for code.
+Light and dark themes are supported with 5 palettes to choose from: Light, Dark, Tokyo Night, Dracula, and Atom One Dark. Pick your favorite from Profile > Theme. Typography uses Inter for body text and JetBrains Mono for code.
 
 ---
 
