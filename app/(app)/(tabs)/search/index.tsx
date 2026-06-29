@@ -1,6 +1,6 @@
 import { Octicons } from "@expo/vector-icons";
-import { Image } from "expo-image";
 import { useQueryClient } from "@tanstack/react-query";
+import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import { useCallback, useMemo, useRef, useState } from "react";
 import {
@@ -38,6 +38,8 @@ const TABS: { key: SearchTab; label: string }[] = [
   { key: "users", label: "Users" },
   { key: "issues", label: "Issues" },
 ];
+
+const keyExtractor = (item: any) => String(item.id);
 
 export default function SearchScreen() {
   const isDark = useColorScheme() === "dark";
@@ -129,8 +131,16 @@ export default function SearchScreen() {
       <Pressable
         style={({ pressed }) => [s.issueCard, pressed && { opacity: 0.7 }]}
         onPress={() => {
-          // Issues search results include repository info
-          // Navigate to the issue detail if we can extract the repo
+          const repoMatch = item.repository_url?.match(
+            /\/repos\/([^/]+)\/([^/]+)$/,
+          );
+          if (repoMatch) {
+            const [, owner, repo] = repoMatch;
+            const repoId = encodeRepoId(owner, repo);
+            router.push(
+              `/(app)/(tabs)/repos/${repoId}/issue/${item.number}` as any,
+            );
+          }
         }}
       >
         <View style={s.issueHeader}>
@@ -148,6 +158,16 @@ export default function SearchScreen() {
           {item.user && ` by ${item.user.login}`}
           {item.state && ` \u00b7 ${item.state}`}
         </Text>
+        {item.repository_url && (() => {
+          const repoMatch = item.repository_url.match(
+            /\/repos\/([^/]+\/[^/]+)$/,
+          );
+          return repoMatch ? (
+            <Text style={s.issueRepo} numberOfLines={1}>
+              {repoMatch[1]}
+            </Text>
+          ) : null;
+        })()}
       </Pressable>
     ),
     [colors, s],
@@ -163,8 +183,6 @@ export default function SearchScreen() {
   );
 
   const data = tab === "repos" ? repos : tab === "users" ? users : issues;
-
-  const keyExtractor = useCallback((item: any) => String(item.id), []);
 
   const ListEmpty = useMemo(() => {
     if (isLoading) {
@@ -439,6 +457,13 @@ function buildStyles(colors: typeof LightColors | typeof DarkColors) {
       fontFamily: FontFamily.regular,
       fontSize: FontSize.caption,
       color: colors.textMuted,
+      marginLeft: 22,
+    },
+
+    issueRepo: {
+      fontFamily: FontFamily.medium,
+      fontSize: FontSize.caption,
+      color: colors.textSecondary,
       marginLeft: 22,
     },
   });
