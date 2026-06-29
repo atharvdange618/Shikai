@@ -13,7 +13,6 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  useColorScheme,
   View,
 } from "react-native";
 
@@ -23,13 +22,13 @@ import type { GitHubLabel, GitHubPullRequest } from "@/types/github.types";
 
 import {
   AvatarSize,
-  DarkColors,
+  type ColorTokens,
   FontFamily,
   FontSize,
   Layout,
-  LightColors,
   Radius,
   Spacing,
+  useTheme,
 } from "@/constants/theme";
 import { decodeRepoId, relativeTime } from "@/lib/utils";
 
@@ -43,8 +42,7 @@ export default function PullRequestsScreen() {
   const { repoId } = useLocalSearchParams<{ repoId: string }>();
   const navigation = useNavigation();
   const queryClient = useQueryClient();
-  const isDark = useColorScheme() === "dark";
-  const colors = isDark ? DarkColors : LightColors;
+  const { colors } = useTheme();
 
   const [owner, repoName] = decodeRepoId(repoId ?? "");
   const [filter, setFilter] = useState<PRFilter>("open");
@@ -184,7 +182,7 @@ const PRItem = memo(function PRItem({
   repoId,
 }: {
   pr: GitHubPullRequest;
-  colors: typeof LightColors | typeof DarkColors;
+  colors: ColorTokens;
   repoId: string;
 }) {
   const router = useRouter();
@@ -316,7 +314,7 @@ function FilterTab({
   label: string;
   active: boolean;
   onPress: () => void;
-  colors: typeof LightColors | typeof DarkColors;
+  colors: ColorTokens;
 }) {
   return (
     <Pressable
@@ -343,7 +341,7 @@ function FilterTab({
   );
 }
 
-function buildStyles(colors: typeof LightColors | typeof DarkColors) {
+function buildStyles(colors: ColorTokens) {
   return StyleSheet.create({
     container: {
       flex: 1,

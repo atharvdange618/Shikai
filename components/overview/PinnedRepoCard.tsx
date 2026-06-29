@@ -2,23 +2,17 @@ import { Octicons } from "@expo/vector-icons";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { useCallback, useMemo } from "react";
-import {
-  Pressable,
-  StyleSheet,
-  Text,
-  useColorScheme,
-  View,
-} from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import {
-  DarkColors,
+  type ColorTokens,
   FontFamily,
   FontSize,
   IconSize,
-  LightColors,
   Radius,
   Shadows,
   Spacing,
+  useTheme,
 } from "@/constants/theme";
 import type { PinnedRepoNode } from "@/types/github-graphql.types";
 
@@ -33,8 +27,7 @@ interface PinnedRepoCardProps {
 }
 
 export function PinnedRepoCard({ repo }: PinnedRepoCardProps) {
-  const isDark = useColorScheme() === "dark";
-  const colors = isDark ? DarkColors : LightColors;
+  const { colors, isDark } = useTheme();
   const shadows = useMemo(() => (isDark ? {} : Shadows.light.sm), [isDark]);
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -121,10 +114,7 @@ export function PinnedRepoCard({ repo }: PinnedRepoCardProps) {
   );
 }
 
-function buildStyles(
-  colors: typeof LightColors | typeof DarkColors,
-  shadows: object,
-) {
+function buildStyles(colors: ColorTokens, shadows: object) {
   return StyleSheet.create({
     card: {
       width: CARD_WIDTH,

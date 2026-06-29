@@ -1,13 +1,13 @@
 import { useMemo } from "react";
-import { StyleSheet, Text, useColorScheme, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 
 import {
-  DarkColors,
+  type ColorTokens,
   FontFamily,
   FontSize,
-  LightColors,
   Radius,
   Spacing,
+  useTheme,
 } from "@/constants/theme";
 import type { LanguageShare } from "@/types/github.types";
 
@@ -23,8 +23,7 @@ export function LanguageBar({
   languages,
   isLoading = false,
 }: LanguageBarProps) {
-  const isDark = useColorScheme() === "dark";
-  const colors = isDark ? DarkColors : LightColors;
+  const { colors } = useTheme();
   const s = useMemo(() => buildStyles(colors), [colors]);
 
   if (isLoading) {
@@ -83,7 +82,7 @@ export function LanguageBar({
   );
 }
 
-function buildStyles(colors: typeof LightColors | typeof DarkColors) {
+function buildStyles(colors: ColorTokens) {
   return StyleSheet.create({
     container: {
       gap: Spacing.sm,

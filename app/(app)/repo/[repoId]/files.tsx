@@ -9,18 +9,17 @@ import {
   StyleSheet,
   Text,
   View,
-  useColorScheme,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { BranchSelector } from "@/components/repo/BranchSelector";
 import { SearchBar } from "@/components/shared/SearchBar";
 import {
-  DarkColors,
+  type ColorTokens,
   FontFamily,
   FontSize,
-  LightColors,
   Spacing,
+  useTheme,
 } from "@/constants/theme";
 import { useBranches, useFileTree, useRepo } from "@/hooks/useRepoDetails";
 import { prefetchCommonFiles, prefetchFileContent } from "@/lib/prefetch";
@@ -86,7 +85,7 @@ const TreeItem = memo(function TreeItem({
   onToggle: (path: string) => void;
   onFileSelect: (path: string) => void;
   onFilePressIn?: (path: string) => void;
-  colors: typeof LightColors | typeof DarkColors;
+  colors: ColorTokens;
   searchMode?: boolean;
 }) {
   const { node, depth, isExpanded } = item;
@@ -152,8 +151,7 @@ export default function FileExplorerScreen() {
   const router = useRouter();
   const navigation = useNavigation();
   const queryClient = useQueryClient();
-  const isDark = useColorScheme() === "dark";
-  const colors = isDark ? DarkColors : LightColors;
+  const { colors } = useTheme();
 
   const [owner, repoName] = decodeRepoId(repoId ?? "");
   const [expandedPaths, setExpandedPaths] = useState<Set<string>>(new Set());
@@ -358,7 +356,7 @@ export default function FileExplorerScreen() {
   );
 }
 
-function buildStyles(colors: typeof LightColors | typeof DarkColors) {
+function buildStyles(colors: ColorTokens) {
   return StyleSheet.create({
     container: {
       flex: 1,

@@ -1,7 +1,7 @@
-import { useTheme } from "@/constants/theme";
+import { Radius, Spacing, TextStyles, useTheme } from "@/constants/theme";
+import * as SecureStore from "expo-secure-store";
 import { useEffect, useState } from "react";
 import { Linking, Pressable, StyleSheet, Text, View } from "react-native";
-import * as SecureStore from "expo-secure-store";
 
 const DISMISS_KEY = "shikai_version_dismissed";
 
@@ -14,7 +14,7 @@ export function VersionCheckBanner({
   latestVersion,
   releaseUrl,
 }: VersionCheckBannerProps) {
-  const { colors, typography, spacing, radius } = useTheme();
+  const { colors } = useTheme();
   const [dismissed, setDismissed] = useState(true);
 
   useEffect(() => {
@@ -40,18 +40,18 @@ export function VersionCheckBanner({
         {
           backgroundColor: colors.accentSubtle,
           borderColor: colors.accentMuted,
-          borderRadius: radius.md,
-          padding: spacing.md,
+          borderRadius: Radius.md,
+          padding: Spacing.md,
         },
       ]}
     >
       <View style={styles.content}>
-        <Text style={[typography.label, { color: colors.textPrimary }]}>
+        <Text style={[TextStyles.label, { color: colors.textPrimary }]}>
           Update available
         </Text>
         <Text
           style={[
-            typography.caption,
+            TextStyles.caption,
             { color: colors.textSecondary, marginTop: 2 },
           ]}
         >
@@ -70,7 +70,7 @@ export function VersionCheckBanner({
         >
           <Text
             style={[
-              typography.label,
+              TextStyles.label,
               { color: colors.textOnAccent, fontFamily: undefined },
             ]}
           >
@@ -82,7 +82,7 @@ export function VersionCheckBanner({
           onPress={handleDismiss}
           style={[styles.button, styles.dismissButton]}
         >
-          <Text style={[typography.caption, { color: colors.textMuted }]}>
+          <Text style={[TextStyles.caption, { color: colors.textMuted }]}>
             Dismiss
           </Text>
         </Pressable>

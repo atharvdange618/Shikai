@@ -13,7 +13,6 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  useColorScheme,
   View,
 } from "react-native";
 
@@ -23,13 +22,13 @@ import type { GitHubIssue, GitHubLabel } from "@/types/github.types";
 
 import {
   AvatarSize,
-  DarkColors,
+  type ColorTokens,
   FontFamily,
   FontSize,
   Layout,
-  LightColors,
   Radius,
   Spacing,
+  useTheme,
 } from "@/constants/theme";
 import { decodeRepoId, relativeTime } from "@/lib/utils";
 
@@ -41,8 +40,7 @@ export default function IssuesScreen() {
   const { repoId } = useLocalSearchParams<{ repoId: string }>();
   const navigation = useNavigation();
   const queryClient = useQueryClient();
-  const isDark = useColorScheme() === "dark";
-  const colors = isDark ? DarkColors : LightColors;
+  const { colors } = useTheme();
 
   const [owner, repoName] = decodeRepoId(repoId ?? "");
   const [state, setState] = useState<IssueState>("open");
@@ -184,7 +182,7 @@ const IssueItem = memo(function IssueItem({
   repoId,
 }: {
   issue: GitHubIssue;
-  colors: typeof LightColors | typeof DarkColors;
+  colors: ColorTokens;
   repoId: string;
 }) {
   const router = useRouter();
@@ -292,7 +290,7 @@ function StateTab({
   label: string;
   active: boolean;
   onPress: () => void;
-  colors: typeof LightColors | typeof DarkColors;
+  colors: ColorTokens;
 }) {
   return (
     <Pressable
@@ -319,7 +317,7 @@ function StateTab({
   );
 }
 
-function buildStyles(colors: typeof LightColors | typeof DarkColors) {
+function buildStyles(colors: ColorTokens) {
   return StyleSheet.create({
     container: {
       flex: 1,

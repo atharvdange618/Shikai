@@ -12,7 +12,6 @@ import {
   StyleSheet,
   Text,
   View,
-  useColorScheme,
 } from "react-native";
 import Animated, {
   FadeInDown,
@@ -23,13 +22,13 @@ import Animated, {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import {
-  DarkColors,
+  type ColorTokens,
   FontFamily,
   FontSize,
-  LightColors,
   Radius,
   Shadows,
   Spacing,
+  useTheme,
 } from "@/constants/theme";
 import {
   fetchAuthenticatedUser,
@@ -52,9 +51,7 @@ const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 export default function SignInScreen() {
   const router = useRouter();
-  const scheme = useColorScheme();
-  const isDark = scheme === "dark";
-  const colors = isDark ? DarkColors : LightColors;
+  const { colors, isDark } = useTheme();
   const shadows = useMemo(() => (isDark ? {} : Shadows.light.md), [isDark]);
   const insets = useSafeAreaInsets();
 
@@ -350,7 +347,7 @@ export default function SignInScreen() {
 }
 
 function buildStyles(
-  colors: typeof LightColors | typeof DarkColors,
+  colors: ColorTokens,
   isDark: boolean,
   shadows: object,
   topInset: number,

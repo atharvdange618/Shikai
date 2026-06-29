@@ -1,21 +1,14 @@
 import { Octicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { Component, type ReactNode } from "react";
-import {
-  Pressable,
-  StyleSheet,
-  Text,
-  useColorScheme,
-  View,
-} from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import {
-  DarkColors,
   FontFamily,
   FontSize,
-  LightColors,
   Radius,
   Spacing,
+  useTheme,
 } from "@/constants/theme";
 
 interface Props {
@@ -36,15 +29,25 @@ export class ErrorBoundary extends Component<Props, State> {
 
   render() {
     if (this.state.hasError) {
-      return <ErrorFallback error={this.state.error} onRetry={() => this.setState({ hasError: false, error: null })} />;
+      return (
+        <ErrorFallback
+          error={this.state.error}
+          onRetry={() => this.setState({ hasError: false, error: null })}
+        />
+      );
     }
     return this.props.children;
   }
 }
 
-function ErrorFallback({ error, onRetry }: { error: Error | null; onRetry: () => void }) {
-  const isDark = useColorScheme() === "dark";
-  const colors = isDark ? DarkColors : LightColors;
+function ErrorFallback({
+  error,
+  onRetry,
+}: {
+  error: Error | null;
+  onRetry: () => void;
+}) {
+  const { colors } = useTheme();
   const router = useRouter();
 
   return (
