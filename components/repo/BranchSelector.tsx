@@ -7,19 +7,18 @@ import {
   StyleSheet,
   Text,
   View,
-  useColorScheme,
 } from "react-native";
 
 import {
   BorderWidth,
-  DarkColors,
+  type ColorTokens,
   FontFamily,
   FontSize,
   IconSize,
-  LightColors,
   Radius,
   Shadows,
   Spacing,
+  useTheme,
 } from "@/constants/theme";
 import type { GitHubBranch } from "@/types/github.types";
 
@@ -36,8 +35,7 @@ export function BranchSelector({
   onBranchChange,
   isLoading,
 }: BranchSelectorProps) {
-  const isDark = useColorScheme() === "dark";
-  const colors = isDark ? DarkColors : LightColors;
+  const { colors, isDark } = useTheme();
   const s = useMemo(
     () => buildStyles(colors, isDark ? {} : Shadows.light.sm),
     [colors, isDark],
@@ -129,10 +127,7 @@ export function BranchSelector({
   );
 }
 
-function buildStyles(
-  colors: typeof LightColors | typeof DarkColors,
-  shadows: Record<string, any>,
-) {
+function buildStyles(colors: ColorTokens, shadows: Record<string, any>) {
   return StyleSheet.create({
     wrapper: {
       paddingHorizontal: Spacing.md,

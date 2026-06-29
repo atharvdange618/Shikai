@@ -1,21 +1,15 @@
 import { Tooltip } from "@/components/shared/Tooltip";
 import { Octicons } from "@expo/vector-icons";
 import { useMemo } from "react";
-import {
-  Pressable,
-  StyleSheet,
-  Text,
-  useColorScheme,
-  View,
-} from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import {
-  DarkColors,
+  type ColorTokens,
   FontFamily,
   FontSize,
-  LightColors,
   Radius,
   Spacing,
+  useTheme,
 } from "@/constants/theme";
 import type { ContributionStats } from "@/types/github-graphql.types";
 
@@ -32,8 +26,7 @@ const STAT_INFO: Record<string, string> = {
 };
 
 export function ContributionStatsRow({ stats }: Props) {
-  const isDark = useColorScheme() === "dark";
-  const colors = isDark ? DarkColors : LightColors;
+  const { colors } = useTheme();
   const s = useMemo(() => buildStyles(colors), [colors]);
 
   return (
@@ -93,7 +86,7 @@ export function ContributionStatsRow({ stats }: Props) {
   );
 }
 
-function buildStyles(colors: typeof LightColors | typeof DarkColors) {
+function buildStyles(colors: ColorTokens) {
   return StyleSheet.create({
     row: {
       flexDirection: "row",

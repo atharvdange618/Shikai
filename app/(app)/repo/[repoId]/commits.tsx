@@ -13,7 +13,6 @@ import {
   RefreshControl,
   StyleSheet,
   Text,
-  useColorScheme,
   View,
 } from "react-native";
 
@@ -24,14 +23,14 @@ import type { GitHubCommit } from "@/types/github.types";
 import { BranchSelector } from "@/components/repo/BranchSelector";
 import {
   AvatarSize,
-  DarkColors,
+  type ColorTokens,
   FontFamily,
   FontSize,
   Layout,
-  LightColors,
   Radius,
   Shadows,
   Spacing,
+  useTheme,
 } from "@/constants/theme";
 import { decodeRepoId, relativeTime } from "@/lib/utils";
 
@@ -40,8 +39,7 @@ const keyExtractor = (item: GitHubCommit) => item.sha;
 export default function CommitsScreen() {
   const { repoId } = useLocalSearchParams<{ repoId: string }>();
   const queryClient = useQueryClient();
-  const isDark = useColorScheme() === "dark";
-  const colors = isDark ? DarkColors : LightColors;
+  const { colors, isDark } = useTheme();
   const shadows = useMemo(() => (isDark ? {} : Shadows.light.sm), [isDark]);
 
   const [owner, repoName] = decodeRepoId(repoId ?? "");
@@ -153,7 +151,7 @@ const CommitItem = memo(function CommitItem({
   shadows,
 }: {
   commit: GitHubCommit;
-  colors: typeof LightColors | typeof DarkColors;
+  colors: ColorTokens;
   shadows: object;
 }) {
   const [copied, setCopied] = useState(false);
@@ -217,7 +215,7 @@ const CommitItem = memo(function CommitItem({
   );
 });
 
-function buildStyles(colors: typeof LightColors | typeof DarkColors) {
+function buildStyles(colors: ColorTokens) {
   return StyleSheet.create({
     container: {
       flex: 1,

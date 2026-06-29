@@ -10,7 +10,6 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  useColorScheme,
   View,
 } from "react-native";
 
@@ -19,27 +18,28 @@ import { useAlert } from "@/components";
 import { useRepoCount } from "@/hooks/useRepoCount";
 import { useUser } from "@/hooks/useUser";
 import { clearAllMMKV } from "@/lib/mmkv";
-import { deleteToken } from "@/lib/secure-storage";
 import { queryKeys } from "@/lib/query-client";
+import { deleteToken } from "@/lib/secure-storage";
 
 import {
   AvatarSize,
-  DarkColors,
   FontFamily,
   FontSize,
   IconSize,
   Layout,
-  LightColors,
   Radius,
   Shadows,
   Spacing,
+  useTheme,
 } from "@/constants/theme";
+import { themes } from "@/constants/themes";
+import { useThemeContext } from "@/contexts/ThemeContext";
 import { useSocialAccounts } from "@/hooks/useSocialAccounts";
 import { useAuthStore } from "@/stores/auth.store";
 
 export default function ProfileScreen() {
-  const isDark = useColorScheme() === "dark";
-  const colors = isDark ? DarkColors : LightColors;
+  const { theme } = useThemeContext();
+  const { colors, isDark } = theme;
   const shadows = useMemo(() => (isDark ? {} : Shadows.light.sm), [isDark]);
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -281,6 +281,23 @@ export default function ProfileScreen() {
 
       <Pressable
         style={({ pressed }) => [
+          s.themeButton,
+          pressed && s.themeButtonPressed,
+        ]}
+        onPress={() => router.push("/(app)/(tabs)/profile/settings" as Href)}
+      >
+        <Octicons
+          name="paintbrush"
+          size={IconSize.md}
+          color={colors.textSecondary}
+        />
+        <Text style={s.themeButtonText}>Theme</Text>
+        <Text style={s.themeCurrentValue}>{themes[theme.name].label}</Text>
+        <Octicons name="chevron-right" size={13} color={colors.textMuted} />
+      </Pressable>
+
+      <Pressable
+        style={({ pressed }) => [
           s.signOutButton,
           pressed && s.signOutButtonPressed,
         ]}
@@ -311,7 +328,7 @@ function StatBlock({
 }: {
   value: number;
   label: string;
-  colors: typeof LightColors | typeof DarkColors;
+  colors: ReturnType<typeof useTheme>["colors"];
   isLoading: boolean;
 }) {
   return (
@@ -372,7 +389,7 @@ function MetaRow({
 }: {
   icon: React.ComponentProps<typeof Octicons>["name"] | string;
   text: string;
-  colors: typeof LightColors | typeof DarkColors;
+  colors: ReturnType<typeof useTheme>["colors"];
   isLink?: boolean;
   onPress?: () => void;
   iconType?: "octicons" | "fontawesome6";
@@ -416,7 +433,7 @@ function MetaRow({
 }
 
 function buildStyles(
-  colors: typeof LightColors | typeof DarkColors,
+  colors: ReturnType<typeof useTheme>["colors"],
   shadows: object,
 ) {
   return StyleSheet.create({
@@ -578,6 +595,35 @@ function buildStyles(
       fontFamily: FontFamily.medium,
       fontSize: FontSize.body,
       color: colors.textSecondary,
+    },
+
+    themeButton: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: Spacing.md,
+      backgroundColor: colors.surface,
+      borderRadius: Radius.lg,
+      borderWidth: 1,
+      borderColor: colors.border,
+      padding: Spacing.md,
+      ...shadows,
+    },
+
+    themeButtonPressed: {
+      opacity: 0.7,
+    },
+
+    themeButtonText: {
+      flex: 1,
+      fontFamily: FontFamily.medium,
+      fontSize: FontSize.body,
+      color: colors.textSecondary,
+    },
+
+    themeCurrentValue: {
+      fontFamily: FontFamily.regular,
+      fontSize: FontSize.body,
+      color: colors.textMuted,
     },
 
     signOutButton: {

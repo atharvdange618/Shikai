@@ -1,18 +1,6 @@
 import { Octicons } from "@expo/vector-icons";
-import React, {
-  createContext,
-  useCallback,
-  useContext,
-  useState,
-} from "react";
-import {
-  Modal,
-  Pressable,
-  StyleSheet,
-  Text,
-  useColorScheme,
-  View,
-} from "react-native";
+import React, { createContext, useCallback, useContext, useState } from "react";
+import { Modal, Pressable, StyleSheet, Text, View } from "react-native";
 import Animated, {
   FadeIn,
   FadeOut,
@@ -21,12 +9,11 @@ import Animated, {
 } from "react-native-reanimated";
 
 import {
-  DarkColors,
   FontFamily,
   FontSize,
-  LightColors,
   Radius,
   Spacing,
+  useTheme,
   ZIndex,
 } from "@/constants/theme";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -87,8 +74,7 @@ function AlertDialog({
   config: AlertConfig;
   onClose: () => void;
 }) {
-  const isDark = useColorScheme() === "dark";
-  const colors = isDark ? DarkColors : LightColors;
+  const { colors } = useTheme();
   const insets = useSafeAreaInsets();
 
   const variant = config.variant ?? "info";

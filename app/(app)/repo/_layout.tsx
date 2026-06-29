@@ -1,16 +1,10 @@
 import { Stack } from "expo-router";
-import { Platform, useColorScheme } from "react-native";
+import { Platform } from "react-native";
 
-import {
-  DarkColors,
-  FontFamily,
-  FontSize,
-  LightColors,
-} from "@/constants/theme";
+import { FontFamily, FontSize, useTheme } from "@/constants/theme";
 
 export default function RepoLayout() {
-  const isDark = useColorScheme() === "dark";
-  const colors = isDark ? DarkColors : LightColors;
+  const { colors, isDark } = useTheme();
 
   const sharedHeaderOptions = {
     headerStyle: {
@@ -29,7 +23,9 @@ export default function RepoLayout() {
   };
 
   return (
-    <Stack screenOptions={{ contentStyle: { backgroundColor: colors.background } }}>
+    <Stack
+      screenOptions={{ contentStyle: { backgroundColor: colors.background } }}
+    >
       <Stack.Screen
         name="[repoId]/index"
         options={{

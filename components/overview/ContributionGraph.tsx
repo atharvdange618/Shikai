@@ -1,20 +1,14 @@
 import { useCallback, useMemo, useRef } from "react";
-import {
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-  useColorScheme,
-} from "react-native";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
 import Svg, { Rect, Text as SvgText } from "react-native-svg";
 
 import {
-  DarkColors,
+  type ColorTokens,
   FontFamily,
   FontSize,
   Layout,
-  LightColors,
   Spacing,
+  useTheme,
 } from "@/constants/theme";
 import type {
   ContributionStats,
@@ -38,10 +32,7 @@ const DAY_LABELS: { label: string; row: number }[] = [
 ];
 const DAY_LABEL_WIDTH = 28;
 
-function getContributionColor(
-  count: number,
-  colors: typeof LightColors | typeof DarkColors,
-): string {
+function getContributionColor(count: number, colors: ColorTokens): string {
   if (count === 0) return colors.contributeEmpty;
   if (count <= 3) return colors.contributeL1;
   if (count <= 6) return colors.contributeL2;
@@ -62,8 +53,7 @@ export function ContributionGraph({
   isLoading = false,
   stats,
 }: ContributionGraphProps) {
-  const isDark = useColorScheme() === "dark";
-  const colors = isDark ? DarkColors : LightColors;
+  const { colors } = useTheme();
   const scrollRef = useRef<ScrollView>(null);
 
   const handleContentSizeChange = useCallback(() => {
@@ -193,11 +183,7 @@ export function ContributionGraph({
   );
 }
 
-function ContributionGraphSkeleton({
-  colors,
-}: {
-  colors: typeof LightColors | typeof DarkColors;
-}) {
+function ContributionGraphSkeleton({ colors }: { colors: ColorTokens }) {
   return (
     <View style={{ gap: Spacing.sm }}>
       <View
@@ -219,7 +205,7 @@ function ContributionGraphSkeleton({
   );
 }
 
-function buildStyles(colors: typeof LightColors | typeof DarkColors) {
+function buildStyles(colors: ColorTokens) {
   return StyleSheet.create({
     container: {
       gap: Spacing.sm,
