@@ -2,7 +2,7 @@ import { Octicons } from "@expo/vector-icons";
 import { useQueryClient } from "@tanstack/react-query";
 import { Image } from "expo-image";
 import { Href, useRouter } from "expo-router";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import {
   Pressable,
   RefreshControl,
@@ -35,6 +35,14 @@ import {
   Radius,
   Spacing,
 } from "@/constants/theme";
+
+function getGreeting() {
+  const hour = new Date().getHours();
+  if (hour < 4) return "Good night";
+  if (hour < 12) return "Good morning";
+  if (hour < 18) return "Good afternoon";
+  return "Good evening";
+}
 
 export default function OverviewScreen() {
   const router = useRouter();
@@ -82,19 +90,17 @@ export default function OverviewScreen() {
 
   const s = useMemo(() => buildStyles(colors), [colors]);
 
+  const hasInitialLoad = useRef(false);
+
   const handleActivityEndReached = useCallback(() => {
+    if (!hasInitialLoad.current) {
+      hasInitialLoad.current = true;
+      return;
+    }
     if (hasNextPage && !isFetchingNextPage) {
       fetchNextPage();
     }
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
-
-  const getGreeting = () => {
-    const hour = new Date().getHours();
-    if (hour < 4) return "Good night";
-    if (hour < 12) return "Good morning";
-    if (hour < 18) return "Good afternoon";
-    return "Good evening";
-  };
 
   return (
     <SafeAreaView style={s.safeArea} edges={["top"]}>
