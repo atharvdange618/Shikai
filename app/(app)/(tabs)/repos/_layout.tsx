@@ -29,7 +29,7 @@ export default function ReposLayout() {
   };
 
   return (
-    <Stack>
+    <Stack screenOptions={{ contentStyle: { backgroundColor: colors.background } }}>
       <Stack.Screen
         name="index"
         options={{
