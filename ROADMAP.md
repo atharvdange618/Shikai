@@ -1,6 +1,6 @@
 # Shikai Roadmap
 
-> **Version:** 1.1.0 · **Last Updated:** June 29, 2026 · **Status:** Active Development
+> **Version:** 1.2.0 · **Last Updated:** June 30, 2026 · **Status:** Active Development
 
 This document tracks the feature backlog and development progress for Shikai.
 
@@ -39,6 +39,9 @@ This document tracks the feature backlog and development progress for Shikai.
 | Error Boundaries | `ErrorBoundary` class component wrapping root and tabs layouts. Catches render errors and displays fallback UI with "Go to Home" recovery button. | Done |
 | 404 Screen | Custom `+not-found.tsx` with themed design matching the app. Shows "Go to Home" button instead of default Expo Router 404. | Done |
 | Flash-Free Navigation | Delayed native splash hide until app is fully ready (auth + security checks). Added `contentStyle` background to all Stack navigators. Wrapped Tabs in background View. Root Stack uses fade animation. | Done |
+| Custom Alert System | Themed `Alert` component replacing native `Alert.alert()`. Consistent styling with the app's design system. | Done |
+| Safe Repo ID Encoding | `encodeRepoId`/`decodeRepoId` utility functions with `~~` separator. Replaces fragile `__` encoding across 19 files. | Done |
+| MMKV Cache Clearing | Clear MMKV cache on sign-in and sign-out to prevent stale data. | Done |
 
 ---
 
@@ -61,14 +64,3 @@ This document tracks the feature backlog and development progress for Shikai.
 | 10 | Following Activity Feed | Dashboard-style feed showing recent activity from users you follow on GitHub. | ~300 |
 | 11 | Custom Theme Engine | User-selectable themes: Tokyo Night, Dracula, Atom One Dark. Theme picker in settings, persistent preference via AsyncStorage. Separate experimental branch (`feat/themes`). | ~400 |
 | 12 | 3D GitHub Profile Card | Shareable 3D-styled GitHub profile cards for social proof and FOMO. Generate a visual card with avatar, stats, top repos, contribution graph. Share as image to social media. Inspired by Threads' card sharing mechanic. | ~350 |
-
----
-
-## Not Started
-
-| # | Feature | Notes |
-|---|---------|-------|
-| 6 | Notifications-Lite / Attention Feed | - |
-| 10 | Following Activity Feed | - |
-| 11 | Custom Theme Engine | Experimental - separate `feat/themes` branch |
-| 12 | 3D GitHub Profile Card | Social sharing feature - generate shareable profile cards |
