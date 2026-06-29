@@ -94,10 +94,10 @@ export default function RootLayout() {
   }, [fontsLoaded, fontError, setToken, setUser]);
 
   useEffect(() => {
-    if (fontsLoaded || fontError) {
+    if ((fontsLoaded || fontError) && bootComplete && securityStatus !== "pending") {
       SplashScreen.hideAsync();
     }
-  }, [fontsLoaded, fontError]);
+  }, [fontsLoaded, fontError, bootComplete, securityStatus]);
 
   const appReady = bootComplete && Boolean(fontsLoaded || fontError);
 
@@ -175,7 +175,7 @@ export default function RootLayout() {
       )}
       {!showSplash && securityStatus === "passed" && (
         <ErrorBoundary>
-          <Stack screenOptions={{ headerShown: false }}>
+          <Stack screenOptions={{ headerShown: false, animation: "fade", contentStyle: { backgroundColor: scheme === "dark" ? DarkColors.background : LightColors.background } }}>
             {token ? (
               <Stack.Screen name="(app)" />
             ) : (
