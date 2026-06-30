@@ -15,6 +15,8 @@ export type TabIconName =
   | "star-fill"
   | "bookmark"
   | "bookmark-filled"
+  | "bell"
+  | "bell-fill"
   | "person"
   | "person-fill";
 
