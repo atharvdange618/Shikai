@@ -36,7 +36,7 @@ import {
 } from "@/lib/github-rest";
 import { clearAllMMKV } from "@/lib/mmkv";
 import { queryClient } from "@/lib/query-client";
-import { saveToken } from "@/lib/secure-storage";
+import { getStoredPAT, saveToken } from "@/lib/secure-storage";
 import { useAuthStore } from "@/stores/auth.store";
 import { useSignInStore } from "@/stores/signin.store";
 
@@ -57,6 +57,7 @@ export default function SignInScreen() {
 
   const setToken = useAuthStore((s) => s.setToken);
   const setUser = useAuthStore((s) => s.setUser);
+  const setPat = useAuthStore((s) => s.setPat);
 
   const isLoading = useSignInStore((s) => s.isLoading);
   const error = useSignInStore((s) => s.error);
@@ -188,6 +189,9 @@ export default function SignInScreen() {
       ]);
       setUser(user);
 
+      const storedPAT = await getStoredPAT();
+      if (storedPAT) setPat(storedPAT);
+
       clearAllMMKV();
       queryClient.clear();
       setLoading(false);
@@ -237,6 +241,9 @@ export default function SignInScreen() {
         fetchAuthenticatedUser(),
       ]);
       setUser(user);
+
+      const storedPAT = await getStoredPAT();
+      if (storedPAT) setPat(storedPAT);
 
       clearAllMMKV();
       queryClient.clear();
