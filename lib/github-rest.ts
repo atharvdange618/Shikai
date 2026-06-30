@@ -397,6 +397,21 @@ export async function fetchUserEvents(
   };
 }
 
+export async function fetchReceivedEvents(
+  page: number,
+  per_page: number = 30,
+): Promise<FetchEventsResult> {
+  const { data, headers } = await githubAxios.get<GitHubEvent[]>(
+    "/user/received_events",
+    { params: { page, per_page } },
+  );
+
+  return {
+    events: data,
+    pagination: parseLinkHeader(headers["link"]),
+  };
+}
+
 export interface FetchIssuesResult {
   issues: GitHubIssue[];
   pagination: GitHubPagination;

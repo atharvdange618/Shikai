@@ -92,4 +92,5 @@ export const queryKeys = {
   searchIssues: (query: string, sort?: string, order?: string) =>
     ["search", "issues", query, sort, order] as const,
   notifications: () => ["notifications"] as const,
+  receivedEvents: () => ["receivedEvents"] as const,
 } as const;
