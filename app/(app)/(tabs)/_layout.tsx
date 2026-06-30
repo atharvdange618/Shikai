@@ -58,24 +58,6 @@ const renderReposIcon = ({
   focused: boolean;
 }) => <TabBarIcon name="repo" color={color} size={size} focused={focused} />;
 
-const renderStarsIcon = ({
-  color,
-  size,
-  focused,
-}: {
-  color: string;
-  size: number;
-  focused: boolean;
-}) => (
-  <TabBarIcon
-    name="star"
-    filledName="star-fill"
-    color={color}
-    size={size}
-    focused={focused}
-  />
-);
-
 const renderSearchIcon = ({
   color,
   size,
@@ -85,42 +67,6 @@ const renderSearchIcon = ({
   size: number;
   focused: boolean;
 }) => <TabBarIcon name="search" color={color} size={size} focused={focused} />;
-
-const renderBookmarkIcon = ({
-  color,
-  size,
-  focused,
-}: {
-  color: string;
-  size: number;
-  focused: boolean;
-}) => (
-  <TabBarIcon
-    name="bookmark"
-    filledName="bookmark-filled"
-    color={color}
-    size={size}
-    focused={focused}
-  />
-);
-
-const renderBellIcon = ({
-  color,
-  size,
-  focused,
-}: {
-  color: string;
-  size: number;
-  focused: boolean;
-}) => (
-  <TabBarIcon
-    name="bell"
-    filledName="bell-fill"
-    color={color}
-    size={size}
-    focused={focused}
-  />
-);
 
 const renderProfileIcon = ({
   color,
@@ -148,15 +94,7 @@ export default function TabsLayout() {
 
   useKeyboardShortcuts({
     onTabSwitch: (index: number) => {
-      const routes = [
-        "/overview",
-        "/repos",
-        "/search",
-        "/stars",
-        "/watchlist",
-        "/notifications",
-        "/profile",
-      ];
+      const routes = ["/overview", "/repos", "/search", "/profile"];
       const route = routes[index];
       if (route) router.push(`/(app)/(tabs)${route}` as any);
     },
@@ -231,30 +169,6 @@ export default function TabsLayout() {
               options={{
                 title: "Search",
                 tabBarIcon: renderSearchIcon,
-              }}
-            />
-
-            <Tabs.Screen
-              name="stars"
-              options={{
-                title: "Stars",
-                tabBarIcon: renderStarsIcon,
-              }}
-            />
-
-            <Tabs.Screen
-              name="watchlist"
-              options={{
-                title: "Watchlist",
-                tabBarIcon: renderBookmarkIcon,
-              }}
-            />
-
-            <Tabs.Screen
-              name="notifications"
-              options={{
-                title: "Notifications",
-                tabBarIcon: renderBellIcon,
               }}
             />
 
