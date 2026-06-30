@@ -31,8 +31,8 @@ export default function ProfileLayout() {
         name="index"
         options={{
           ...sharedHeaderOptions,
-          headerShown: true,
-          title: "Profile",
+          headerShown: false,
+          title: "",
         }}
       />
       <Stack.Screen
@@ -40,7 +40,7 @@ export default function ProfileLayout() {
         options={{
           ...sharedHeaderOptions,
           headerShown: true,
-          title: "Theme",
+          title: "Settings",
         }}
       />
       <Stack.Screen
@@ -49,6 +49,22 @@ export default function ProfileLayout() {
           ...sharedHeaderOptions,
           headerShown: true,
           title: "About",
+        }}
+      />
+      <Stack.Screen
+        name="saved"
+        options={{
+          ...sharedHeaderOptions,
+          headerShown: true,
+          title: "Saved Repos",
+        }}
+      />
+      <Stack.Screen
+        name="notifications"
+        options={{
+          ...sharedHeaderOptions,
+          headerShown: true,
+          title: "Notifications",
         }}
       />
     </Stack>
