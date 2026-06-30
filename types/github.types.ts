@@ -343,3 +343,32 @@ export interface GitHubComment {
   created_at: string;
   updated_at: string;
 }
+
+export interface GitHubNotification {
+  id: string;
+  unread: boolean;
+  reason: string;
+  updated_at: string;
+  last_read_at: string | null;
+  subject: {
+    title: string;
+    url: string | null;
+    latest_comment_url: string | null;
+    type:
+    | "Issue"
+    | "PullRequest"
+    | "Discussion"
+    | "DiscussionComment"
+    | "CheckRun"
+    | "Commit"
+    | "Release";
+  };
+  repository: {
+    id: number;
+    full_name: string;
+    html_url: string;
+    owner: GitHubUserSummary;
+  };
+  url: string;
+  subscription_url: string;
+}

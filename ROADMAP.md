@@ -43,14 +43,7 @@ This document tracks the feature backlog and development progress for Shikai.
 | Safe Repo ID Encoding | `encodeRepoId`/`decodeRepoId` utility functions with `~~` separator. Replaces fragile `__` encoding across 19 files. | Done |
 | MMKV Cache Clearing | Clear MMKV cache on sign-in and sign-out to prevent stale data. | Done |
 | Custom Theme Engine | User-selectable themes with 5 palettes (Light, Dark, Tokyo Night, Dracula, Atom One Dark). Theme picker in profile settings, MMKV persistence, theme-specific contribution graph colors. | Done |
-
----
-
-## In Progress
-
-| Feature | Description | Blocker |
-|---------|-------------|---------|
-| Share as Image/Link | Share as text+link works on repo detail. No image generation, no profile sharing. | Image generation pending |
+| Notifications-Lite / Attention Feed | GitHub notifications API (`/notifications`) with attention-worthy filtering (review requests, mentions, assignments). New Notifications tab with All/Unread/Attention filters, mark-all-read, FlashList virtualization, tap-to-navigate to issues/PRs. | Done |
 
 ---
 
@@ -60,7 +53,5 @@ This document tracks the feature backlog and development progress for Shikai.
 
 | # | Feature | Description | Est. LOC |
 |---|---------|-------------|----------|
-| 6 | Notifications-Lite / Attention Feed | GitHub notifications API, attention-worthy items logic, new screen. | ~300 |
-| 8 | Share as Image | `react-native-view-shot` card capture, image generation for repos/profiles. | ~150 |
 | 10 | Following Activity Feed | Dashboard-style feed showing recent activity from users you follow on GitHub. | ~300 |
 | 12 | 3D GitHub Profile Card | Shareable 3D-styled GitHub profile cards for social proof and FOMO. Generate a visual card with avatar, stats, top repos, contribution graph. Share as image to social media. Inspired by Threads' card sharing mechanic. | ~350 |

@@ -9,6 +9,7 @@ import type {
   GitHubEvent,
   GitHubIssue,
   GitHubLanguages,
+  GitHubNotification,
   GitHubPagination,
   GitHubPullRequest,
   GitHubReadme,
@@ -495,6 +496,35 @@ export async function fetchPullRequestDetail(
     `/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/pulls/${prNumber}`,
   );
   return data;
+}
+
+export interface FetchNotificationsResult {
+  notifications: GitHubNotification[];
+  pagination: GitHubPagination;
+}
+
+export async function fetchNotifications(
+  page: number = 1,
+  per_page: number = 50,
+  all: boolean = false,
+): Promise<FetchNotificationsResult> {
+  const { data, headers } = await githubAxios.get<GitHubNotification[]>(
+    "/notifications",
+    { params: { page, per_page, all } },
+  );
+
+  return {
+    notifications: data,
+    pagination: parseLinkHeader(headers["link"]),
+  };
+}
+
+export async function markNotificationAsRead(threadId: string): Promise<void> {
+  await githubAxios.patch(`/notifications/threads/${threadId}`);
+}
+
+export async function markAllNotificationsAsRead(): Promise<void> {
+  await githubAxios.put("/notifications");
 }
 
 export async function fetchPullRequestComments(
