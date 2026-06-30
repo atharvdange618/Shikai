@@ -1,17 +1,21 @@
 import { Octicons } from "@expo/vector-icons";
+import * as Linking from "expo-linking";
 import { Href, useRouter } from "expo-router";
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 import {
+  ActivityIndicator,
   Pressable,
   ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   View,
 } from "react-native";
 
 import { useAlert } from "@/components";
 import { clearAllMMKV } from "@/lib/mmkv";
-import { deleteToken } from "@/lib/secure-storage";
+import { deletePAT, deleteToken, savePAT } from "@/lib/secure-storage";
+import { validatePAT } from "@/lib/github-rest";
 
 import {
   FontFamily,
@@ -36,6 +40,65 @@ export default function SettingsScreen() {
   const queryClient = useQueryClient();
   const alert = useAlert();
   const s = useMemo(() => buildStyles(colors), [colors]);
+
+  const pat = useAuthStore((s) => s.pat);
+  const setPat = useAuthStore((s) => s.setPat);
+  const [patInput, setPatInput] = useState("");
+  const [validating, setValidating] = useState(false);
+  const [patError, setPatError] = useState<string | null>(null);
+
+  const handleSavePAT = useCallback(async () => {
+    const trimmed = patInput.trim();
+    if (!trimmed) return;
+
+    if (!trimmed.startsWith("ghp_") && !trimmed.startsWith("github_pat_")) {
+      setPatError("Token must start with ghp_ or github_pat_");
+      return;
+    }
+
+    setValidating(true);
+    setPatError(null);
+
+    try {
+      const valid = await validatePAT(trimmed);
+      setValidating(false);
+
+      if (!valid) {
+        setPatError("Invalid token. Make sure it has the 'notifications' scope.");
+        return;
+      }
+
+      await savePAT(trimmed);
+      setPat(trimmed);
+      setPatInput("");
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
+    } catch {
+      setValidating(false);
+      setPatError("Something went wrong. Please try again.");
+    }
+  }, [patInput, setPat, queryClient]);
+
+  const handleRemovePAT = useCallback(() => {
+    alert.show({
+      variant: "danger",
+      title: "Remove token",
+      message: "Notifications will stop working without a Personal Access Token.",
+      actions: [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Remove",
+          style: "destructive",
+          onPress: async () => {
+            await deletePAT();
+            setPat(null);
+            setPatInput("");
+            setPatError(null);
+            queryClient.invalidateQueries({ queryKey: ["notifications"] });
+          },
+        },
+      ],
+    });
+  }, [alert, setPat, queryClient]);
 
   const handleSignOut = useCallback(() => {
     alert.show({
@@ -108,6 +171,81 @@ export default function SettingsScreen() {
               </Pressable>
             );
           })}
+        </View>
+      </View>
+
+      <View style={s.section}>
+        <Text style={s.sectionTitle}>Notifications & Following</Text>
+        <View style={s.card}>
+          <View style={s.patInfo}>
+            <Text style={s.patDescription}>
+              A Personal Access Token enables the Notifications tab and the Following activity feed. Without one, these features are hidden.
+            </Text>
+            <Pressable
+              onPress={() =>
+                Linking.openURL("https://github.com/settings/tokens/new?scopes=notifications,repo&description=Shikai%20Notifications")
+              }
+            >
+              <Text style={s.patLink}>Create a token here</Text>
+            </Pressable>
+            <Text style={s.patDescription}>
+              with the <Text style={s.patBold}>notifications</Text> and <Text style={s.patBold}>repo</Text> scopes, then paste it below.
+            </Text>
+          </View>
+
+          {pat ? (
+            <View style={s.patActiveRow}>
+              <View style={s.patActiveInfo}>
+                <View style={[s.patDot, { backgroundColor: colors.success }]} />
+                <Text style={s.patActiveText}>Token configured</Text>
+              </View>
+              <Pressable
+                style={({ pressed }) => [
+                  s.patRemoveBtn,
+                  pressed && s.menuRowPressed,
+                ]}
+                onPress={handleRemovePAT}
+              >
+                <Text style={s.patRemoveText}>Remove</Text>
+              </Pressable>
+            </View>
+          ) : (
+            <View style={s.patInputContainer}>
+              <TextInput
+                style={s.patInput}
+                value={patInput}
+                onChangeText={(text) => {
+                  setPatInput(text);
+                  setPatError(null);
+                }}
+                placeholder="ghp_xxxx or github_pat_xxxx"
+                placeholderTextColor={colors.textMuted}
+                autoCapitalize="none"
+                autoCorrect={false}
+                secureTextEntry
+              />
+              {patError && (
+                <Text style={[s.patError, { color: colors.danger }]}>
+                  {patError}
+                </Text>
+              )}
+              <Pressable
+                style={({ pressed }) => [
+                  s.patSaveBtn,
+                  { backgroundColor: colors.accent },
+                  (pressed || validating) && s.menuRowPressed,
+                ]}
+                onPress={handleSavePAT}
+                disabled={validating || !patInput.trim()}
+              >
+                {validating ? (
+                  <ActivityIndicator size="small" color="#fff" />
+                ) : (
+                  <Text style={s.patSaveBtnText}>Save</Text>
+                )}
+              </Pressable>
+            </View>
+          )}
         </View>
       </View>
 
@@ -263,6 +401,109 @@ function buildStyles(colors: ColorTokens) {
       fontFamily: FontFamily.medium,
       fontSize: FontSize.body,
       color: colors.danger,
+    },
+
+    patInfo: {
+      paddingHorizontal: Spacing.lg,
+      paddingTop: Spacing.md,
+      paddingBottom: Spacing.sm,
+      gap: 2,
+    },
+
+    patDescription: {
+      fontFamily: FontFamily.regular,
+      fontSize: FontSize.caption,
+      color: colors.textMuted,
+      lineHeight: FontSize.caption * 1.5,
+    },
+
+    patLink: {
+      fontFamily: FontFamily.medium,
+      fontSize: FontSize.caption,
+      color: colors.accent,
+      textDecorationLine: "underline",
+    },
+
+    patBold: {
+      fontFamily: FontFamily.semiBold,
+    },
+
+    patActiveRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      paddingVertical: Spacing.md,
+      paddingHorizontal: Spacing.lg,
+      borderTopWidth: 1,
+      borderTopColor: colors.border,
+    },
+
+    patActiveInfo: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: Spacing.sm,
+    },
+
+    patDot: {
+      width: 8,
+      height: 8,
+      borderRadius: 4,
+    },
+
+    patActiveText: {
+      fontFamily: FontFamily.medium,
+      fontSize: FontSize.body,
+      color: colors.textSecondary,
+    },
+
+    patRemoveBtn: {
+      paddingHorizontal: Spacing.md,
+      paddingVertical: Spacing.xs,
+      borderRadius: Radius.sm,
+    },
+
+    patRemoveText: {
+      fontFamily: FontFamily.medium,
+      fontSize: FontSize.caption,
+      color: colors.danger,
+    },
+
+    patInputContainer: {
+      paddingHorizontal: Spacing.lg,
+      paddingVertical: Spacing.md,
+      gap: Spacing.sm,
+      borderTopWidth: 1,
+      borderTopColor: colors.border,
+    },
+
+    patInput: {
+      fontFamily: FontFamily.mono,
+      fontSize: FontSize.label,
+      color: colors.textPrimary,
+      backgroundColor: colors.surfaceInset,
+      borderRadius: Radius.sm,
+      borderWidth: 1,
+      borderColor: colors.border,
+      paddingHorizontal: Spacing.md,
+      paddingVertical: Spacing.sm,
+    },
+
+    patError: {
+      fontFamily: FontFamily.regular,
+      fontSize: FontSize.caption,
+    },
+
+    patSaveBtn: {
+      alignItems: "center",
+      justifyContent: "center",
+      borderRadius: Radius.sm,
+      paddingVertical: Spacing.sm,
+    },
+
+    patSaveBtnText: {
+      fontFamily: FontFamily.semiBold,
+      fontSize: FontSize.label,
+      color: "#fff",
     },
   });
 }
