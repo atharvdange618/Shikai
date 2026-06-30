@@ -1,9 +1,11 @@
 import { Stack } from "expo-router";
 
-import { useTheme } from "@/constants/theme";
+import { FontFamily, FontSize } from "@/constants/theme";
+import { useThemeContext } from "@/contexts/ThemeContext";
 
 export default function OverviewLayout() {
-  const { colors } = useTheme();
+  const { theme } = useThemeContext();
+  const { colors } = theme;
 
   return (
     <Stack
@@ -13,6 +15,21 @@ export default function OverviewLayout() {
         name="index"
         options={{
           headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="feed"
+        options={{
+          headerShown: true,
+          title: "Following",
+          headerStyle: { backgroundColor: colors.background },
+          headerTitleStyle: {
+            fontFamily: FontFamily.semiBold,
+            fontSize: FontSize.title,
+            color: colors.textPrimary,
+          },
+          headerTintColor: colors.accent,
+          headerShadowVisible: false,
         }}
       />
     </Stack>

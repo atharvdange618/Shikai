@@ -187,6 +187,15 @@ export default function OverviewScreen() {
         </View>
 
         <View style={s.section}>
+          <View style={s.sectionHeader}>
+            <Text style={s.sectionTitle}>Activity</Text>
+            <Pressable
+              onPress={() => router.push("/(app)/(tabs)/overview/feed" as Href)}
+            >
+              <Text style={s.seeAllText}>Following</Text>
+            </Pressable>
+          </View>
+
           <ActivityFeed
             events={events}
             isLoading={activityLoading}
@@ -259,11 +268,23 @@ function buildStyles(colors: ColorTokens) {
       gap: Spacing.sm,
     },
 
+    sectionHeader: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: Spacing.xs,
+    },
+
     sectionTitle: {
       fontFamily: FontFamily.semiBold,
       fontSize: FontSize.title,
       color: colors.textPrimary,
-      marginBottom: Spacing.xs,
+    },
+
+    seeAllText: {
+      fontFamily: FontFamily.medium,
+      fontSize: FontSize.label,
+      color: colors.accent,
     },
 
     pinnedScroll: {
