@@ -29,13 +29,14 @@ This document tracks the feature backlog and development progress for Shikai.
 | Developer Mode Override | Developers with Android dev options enabled can now bypass the security block by accepting a risk warning. Root and debugger detection remain hard-blocked. Override persisted via SharedPreferences. | Done |
 | Post-Build Automation | `npm run prebuild:clean` script auto-restores Android build customizations (ABI splits, R8 minification, resource shrinking) that are wiped by `expo prebuild --clean`. | Done |
 | Global Search | New search tab with GitHub Search API integration. Tab switching between repos/users/issues. MiniSearch fuzzy index, debounced input, eager-load pagination. Result cards with user avatars, navigate in-app to repo or user profile. | Done |
-| Saved/Watchlist Repos | Bookmark toggle on every RepoCard. Local persistence via MMKV. Dedicated Watchlist tab with search/filter. Empty state with onboarding copy. | Done |
+| Saved/Watchlist Repos | Bookmark toggle on every RepoCard. Local persistence via MMKV. Saved Repos sub-screen under Profile with Stars/Watchlist tabs. | Done |
 | User Profile Screen | View any GitHub user's profile - avatar, bio, stats, social links, top repositories. Tappable from search results and contributor lists. Reuses profile layout patterns with skeleton states and pull-to-refresh. | Done |
-| Keyboard Shortcuts | `useKeyboardShortcuts` hook with Cmd+1-6 tab switching, Cmd+F search focus, arrow key list navigation, Escape to dismiss. Haptic feedback on all actions. | Done |
+| Profile Declutter | Moved Theme, About, and Sign out to Settings screen (gear icon). Profile now shows: user info, stats, social links, GitHub link, Saved Repos, notifications bell + settings gear in header. | Done |
+| Keyboard Shortcuts | `useKeyboardShortcuts` hook with Cmd+1-4 tab switching, Cmd+F search focus, arrow key list navigation, Escape to dismiss. Haptic feedback on all actions. | Done |
 | Offline Support | Network state manager via `@react-native-community/netinfo`. MMKV-backed React Query disk persistence with 24h max age. Offline banner with safe area support. Ephemeral queries excluded from disk cache. | Done |
 | Tooltip/InfoDot Components | Shared `Tooltip` and `InfoDot` components with mutual exclusivity. Used for repo health badges and info hints across the app. | Done |
 | Activity Feed Infinite Scroll | FlashList-based activity feed with `onEndReached` pagination, `isFetchingNextPage` loading indicator, and grouped consecutive events. | Done |
-| Navigation Overhaul | Fixed broken file navigation path, eliminated double auth guard race condition, replaced fragile `__` repoId encoding with safe `~~` separator (updated 19 files), added keyboard shortcuts for all 6 tabs, fixed `router.navigate` vs `push` inconsistency. | Done |
+| Navigation Overhaul | Fixed broken file navigation path, eliminated double auth guard race condition, replaced fragile `__` repoId encoding with safe `~~` separator (updated 19 files), added keyboard shortcuts for all 4 tabs, fixed `router.navigate` vs `push` inconsistency. | Done |
 | Error Boundaries | `ErrorBoundary` class component wrapping root and tabs layouts. Catches render errors and displays fallback UI with "Go to Home" recovery button. | Done |
 | 404 Screen | Custom `+not-found.tsx` with themed design matching the app. Shows "Go to Home" button instead of default Expo Router 404. | Done |
 | Flash-Free Navigation | Delayed native splash hide until app is fully ready (auth + security checks). Added `contentStyle` background to all Stack navigators. Wrapped Tabs in background View. Root Stack uses fade animation. | Done |
@@ -43,7 +44,8 @@ This document tracks the feature backlog and development progress for Shikai.
 | Safe Repo ID Encoding | `encodeRepoId`/`decodeRepoId` utility functions with `~~` separator. Replaces fragile `__` encoding across 19 files. | Done |
 | MMKV Cache Clearing | Clear MMKV cache on sign-in and sign-out to prevent stale data. | Done |
 | Custom Theme Engine | User-selectable themes with 5 palettes (Light, Dark, Tokyo Night, Dracula, Atom One Dark). Theme picker in profile settings, MMKV persistence, theme-specific contribution graph colors. | Done |
-| Notifications-Lite / Attention Feed | GitHub notifications API (`/notifications`) with attention-worthy filtering (review requests, mentions, assignments). New Notifications tab with All/Unread/Attention filters, mark-all-read, FlashList virtualization, tap-to-navigate to issues/PRs. | Done |
+| Notifications-Lite / Attention Feed | GitHub notifications API (`/notifications`) with attention-worthy filtering (review requests, mentions, assignments). Accessible via bell icon in Profile header. All/Unread/Attention filters, mark-all-read, FlashList virtualization, tap-to-navigate to issues/PRs. | Done |
+| Tab Reorganization | Consolidated 7 tabs to 4 (Overview, Repos, Search, Profile). Stars + Watchlist merged into "Saved Repos" sub-screen under Profile. Notifications moved to Profile header bell icon. Keyboard shortcuts updated for 4 tabs. | Done |
 
 ---
 
