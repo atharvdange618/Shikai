@@ -28,7 +28,7 @@ import { ThemeProvider, useTheme } from "@/contexts/ThemeContext";
 import { fetchAuthenticatedUser } from "@/lib/github-rest";
 import { mmkvPersister, PERSISTENCE_MAX_AGE } from "@/lib/persister";
 import { queryClient, setupFocusManager } from "@/lib/query-client";
-import { getStoredToken } from "@/lib/secure-storage";
+import { getStoredPAT, getStoredToken } from "@/lib/secure-storage";
 import { useOnlineManager } from "@/lib/use-online-manager";
 import { useAuthStore } from "@/stores/auth.store";
 import { runSecurityChecks } from "shikai-security";
@@ -57,6 +57,7 @@ export default function RootLayout() {
   const token = useAuthStore((s) => s.token);
   const setToken = useAuthStore((s) => s.setToken);
   const setUser = useAuthStore((s) => s.setUser);
+  const setPat = useAuthStore((s) => s.setPat);
   useOnlineManager();
 
   const [bootComplete, setBootComplete] = useState(false);
@@ -82,8 +83,10 @@ export default function RootLayout() {
 
     async function boot() {
       try {
-        const storedToken = await getStoredToken();
+        const storedPAT = await getStoredPAT();
+        if (storedPAT) setPat(storedPAT);
 
+        const storedToken = await getStoredToken();
         if (storedToken) {
           try {
             useAuthStore.getState().setToken(storedToken);
@@ -91,6 +94,7 @@ export default function RootLayout() {
             setUser(user);
           } catch {
             useAuthStore.getState().clearAuth();
+            if (storedPAT) setPat(storedPAT);
           }
         }
       } catch {
