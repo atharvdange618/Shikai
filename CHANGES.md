@@ -11,6 +11,7 @@
 - **Saved Repos Screen** - Stars and Watchlist merged into a single screen under Profile with tab switcher. Search and filter for both sources.
 - **Settings Screen** - Theme, About, and Sign out consolidated into dedicated Settings screen accessed via gear icon in Profile header.
 - **Profile Declutter** - Profile now shows: user info, stats, social links, GitHub link, Saved Repos. Notifications bell and Settings gear in header. Compact horizontal hero layout.
+- **Following Activity Feed** - Dashboard-style feed showing recent activity from users you follow on GitHub. Uses `/user/received_events` API. Accessible via "Following" button in Overview. Avatar, actor name, event details with tap-to-navigate.
 - **User Profile Screen** - View any GitHub user's profile - avatar, bio, stats, social links, top repositories. Tappable from search results and contributor lists. Skeleton states and pull-to-refresh.
 - **Overview Tab** - Dedicated overview screen with pinned repos, contribution graph with streaks, and activity feed. Separate from the old index route.
 - **Keyboard Shortcuts** - `useKeyboardShortcuts` hook with Cmd+1-4 tab switching, Cmd+F search focus, arrow key list navigation, Escape to dismiss. Haptic feedback on all actions.
