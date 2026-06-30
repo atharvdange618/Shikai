@@ -1,4 +1,4 @@
-import { githubAxios } from "@/lib/axios";
+import { githubAxios, GitHubApiError } from "@/lib/axios";
 import { useAuthStore } from "@/stores/auth.store";
 import type {
   GitHubBranch,
@@ -398,11 +398,23 @@ export async function fetchUserEvents(
 }
 
 export async function fetchReceivedEvents(
+  username: string,
   page: number,
   per_page: number = 30,
+  pat?: string | null,
 ): Promise<FetchEventsResult> {
+  const path = `/users/${encodeURIComponent(username)}/received_events`;
+  if (pat) {
+    const { data, headers } = await fetchWithPAT(path, pat, {
+      params: { page, per_page },
+    });
+    return {
+      events: data as GitHubEvent[],
+      pagination: parseLinkHeader(headers.get("link") ?? undefined),
+    };
+  }
   const { data, headers } = await githubAxios.get<GitHubEvent[]>(
-    "/user/received_events",
+    path,
     { params: { page, per_page } },
   );
 
@@ -518,28 +530,88 @@ export interface FetchNotificationsResult {
   pagination: GitHubPagination;
 }
 
+async function fetchWithPAT(
+  path: string,
+  pat: string,
+  options?: { method?: string; params?: Record<string, string | number | boolean> },
+): Promise<{ data: unknown; headers: Headers }> {
+  const url = new URL(path, "https://api.github.com");
+  if (options?.params) {
+    for (const [key, value] of Object.entries(options.params)) {
+      url.searchParams.set(key, String(value));
+    }
+  }
+  const response = await fetch(url.toString(), {
+    method: options?.method ?? "GET",
+    headers: {
+      Authorization: `Bearer ${pat}`,
+      Accept: "application/vnd.github+json",
+      "X-GitHub-Api-Version": "2022-11-28",
+    },
+  });
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    const message = (body as Record<string, unknown>).message ?? response.statusText;
+    throw new GitHubApiError(response.status, String(message));
+  }
+  const data = await response.json();
+  return { data, headers: response.headers };
+}
+
 export async function fetchNotifications(
   page: number = 1,
   per_page: number = 50,
   all: boolean = false,
+  pat?: string | null,
 ): Promise<FetchNotificationsResult> {
+  if (pat) {
+    const { data, headers } = await fetchWithPAT("/notifications", pat, {
+      params: { page, per_page, all },
+    });
+    return {
+      notifications: data as GitHubNotification[],
+      pagination: parseLinkHeader(headers.get("link") ?? undefined),
+    };
+  }
   const { data, headers } = await githubAxios.get<GitHubNotification[]>(
     "/notifications",
     { params: { page, per_page, all } },
   );
-
   return {
     notifications: data,
     pagination: parseLinkHeader(headers["link"]),
   };
 }
 
-export async function markNotificationAsRead(threadId: string): Promise<void> {
+export async function markNotificationAsRead(threadId: string, pat?: string | null): Promise<void> {
+  if (pat) {
+    await fetchWithPAT(`/notifications/threads/${threadId}`, pat, { method: "PATCH" });
+    return;
+  }
   await githubAxios.patch(`/notifications/threads/${threadId}`);
 }
 
-export async function markAllNotificationsAsRead(): Promise<void> {
+export async function markAllNotificationsAsRead(pat?: string | null): Promise<void> {
+  if (pat) {
+    await fetchWithPAT("/notifications", pat, { method: "PUT" });
+    return;
+  }
   await githubAxios.put("/notifications");
+}
+
+export async function validatePAT(pat: string): Promise<boolean> {
+  try {
+    const response = await fetch("https://api.github.com/user", {
+      headers: {
+        Authorization: `Bearer ${pat}`,
+        Accept: "application/vnd.github+json",
+        "X-GitHub-Api-Version": "2022-11-28",
+      },
+    });
+    return response.ok;
+  } catch {
+    return false;
+  }
 }
 
 export async function fetchPullRequestComments(
