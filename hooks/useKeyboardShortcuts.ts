@@ -46,6 +46,10 @@ export function useKeyboardShortcuts(handlers: KeyboardShortcutHandlers) {
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
             handlers.onTabSwitch?.(5);
             break;
+          case "tab7":
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            handlers.onTabSwitch?.(6);
+            break;
           case "search":
             handlers.onSearchFocus?.();
             break;

@@ -104,6 +104,24 @@ const renderBookmarkIcon = ({
   />
 );
 
+const renderBellIcon = ({
+  color,
+  size,
+  focused,
+}: {
+  color: string;
+  size: number;
+  focused: boolean;
+}) => (
+  <TabBarIcon
+    name="bell"
+    filledName="bell-fill"
+    color={color}
+    size={size}
+    focused={focused}
+  />
+);
+
 const renderProfileIcon = ({
   color,
   size,
@@ -136,6 +154,7 @@ export default function TabsLayout() {
         "/search",
         "/stars",
         "/watchlist",
+        "/notifications",
         "/profile",
       ];
       const route = routes[index];
@@ -228,6 +247,14 @@ export default function TabsLayout() {
               options={{
                 title: "Watchlist",
                 tabBarIcon: renderBookmarkIcon,
+              }}
+            />
+
+            <Tabs.Screen
+              name="notifications"
+              options={{
+                title: "Notifications",
+                tabBarIcon: renderBellIcon,
               }}
             />
 
