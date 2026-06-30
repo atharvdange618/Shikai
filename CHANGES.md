@@ -1,5 +1,21 @@
 # Changelog
 
+## v1.3.0
+
+### Features
+
+- **Personal Access Token Support** - Optional PAT fallback for GitHub App token limitations. Settings screen with token input, validation against GitHub API, and secure storage via `expo-secure-store`. PAT is restored automatically on app restart.
+- **Notifications via PAT** - Notifications tab now works with a Personal Access Token that has the `notifications` scope. Notifications bell icon and tab are hidden when no PAT is configured. Mark-as-read operations also use the PAT.
+- **Following Activity Feed** - Dedicated feed showing recent activity from users you follow on GitHub. Uses `/users/{username}/received_events` endpoint via PAT. Compact inline preview on Overview dashboard with "See all" navigation. Your own events are filtered out. Requires PAT with `notifications` and `repo` scopes.
+- **Following Preview on Overview** - Compact banner above the Activity section showing 1-2 recent events from followed users with actor avatars. Tappable to navigate to the full Following feed. Hidden when no PAT is configured.
+- **PAT-gated Features** - Notifications tab, Following feed link, and Following preview are conditionally rendered based on PAT availability. Clean error states on notifications and following feed screens.
+
+### Bug Fixes
+
+- **Notification navigation routes** - Fixed incorrect `(repo)` route group in notification press handlers. Routes now correctly use `/(app)/repo/` matching the actual file structure.
+- **Following feed endpoint** - Fixed 404 error by correcting the API endpoint from non-existent `/user/received_events` to `/users/{username}/received_events`.
+- **PAT persistence on boot** - PAT is now loaded from SecureStore independently from the main OAuth token, preventing loss during auth reset cycles.
+
 ## v1.2.0
 
 ### Features
