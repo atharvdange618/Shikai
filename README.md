@@ -16,9 +16,13 @@ GitHub's mobile app is built for _work_ - reviewing PRs, responding to issues, m
 
 **Search** - Global search across repos, users, and issues with fuzzy matching via MiniSearch. Tab switching between result types, debounced input, eager-load pagination. Navigate in-app to any repo, user profile, or issue detail.
 
-**Profile** - Your GitHub card with stats, social links, location, and hireable status. Access notifications via bell icon, saved repos, and settings via gear icon.
+**Profile** - Your GitHub card with stats, social links, location, and hireable status. Access notifications via bell icon (requires PAT), saved repos, and settings via gear icon.
 
-**Notifications** - GitHub notifications with attention-worthy filtering. Review requests, mentions, and assignments are highlighted. All/Unread/Attention filters with mark-all-read. Tap to navigate to issues and PRs.
+**Personal Access Token** - Optional PAT support for features not accessible via the GitHub App token. Settings screen lets you paste a token with `notifications` and `repo` scopes. Token is validated, stored securely, and used for notifications and following feed.
+
+**Notifications** - GitHub notifications with attention-worthy filtering. Review requests, mentions, and assignments are highlighted. All/Unread/Attention filters with mark-all-read. Tap to navigate to issues and PRs. Requires a Personal Access Token with the `notifications` scope.
+
+**Following Feed** - See recent activity from people you follow on GitHub. Compact preview on the Overview dashboard with a full feed view. Requires a Personal Access Token with the `notifications` and `repo` scopes. Your own events are filtered out.
 
 **Saved Repos** - Bookmark any repo from anywhere in the app. Stars (from GitHub) and Watchlist (local bookmarks) combined in one screen with search and filter.
 
@@ -50,6 +54,8 @@ Light and dark themes are supported with 5 palettes to choose from: Light, Dark,
 
 Your token is handled via a secure Cloudflare Worker proxy and never leaves your device after the initial exchange. All subsequent API requests go directly from your phone to GitHub. The app detects rooted devices and debuggers to prevent usage on compromised environments. Tokens are encrypted on-device using `expo-secure-store`. MMKV cache is cleared on sign-in and sign-out.
 
+If you choose to use a Personal Access Token for notifications and following, it is stored alongside your OAuth token in `expo-secure-store` and never transmitted anywhere except directly to GitHub's API.
+
 Shikai requests only read-only access to your GitHub data. It cannot modify, create, or delete anything.
 
 **Developer mode** is blocked by default on release builds. Developers who need to use Shikai with dev options enabled can override this restriction after accepting a warning about potential data access via ADB.
@@ -61,6 +67,7 @@ Shikai requests only read-only access to your GitHub data. It cannot modify, cre
 1. Open Shikai and tap **Sign in with GitHub**
 2. Authorize the app - it only requests read permissions
 3. You're in. Your dashboard loads instantly.
+4. (Optional) Go to Profile > Settings > Notifications & Following to add a Personal Access Token for notifications and activity feed.
 
 ---
 
