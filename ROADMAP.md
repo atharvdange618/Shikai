@@ -46,6 +46,7 @@ This document tracks the feature backlog and development progress for Shikai.
 | Custom Theme Engine | User-selectable themes with 5 palettes (Light, Dark, Tokyo Night, Dracula, Atom One Dark). Theme picker in profile settings, MMKV persistence, theme-specific contribution graph colors. | Done |
 | Notifications-Lite / Attention Feed | GitHub notifications API (`/notifications`) with attention-worthy filtering (review requests, mentions, assignments). Accessible via bell icon in Profile header. All/Unread/Attention filters, mark-all-read, FlashList virtualization, tap-to-navigate to issues/PRs. | Done |
 | Tab Reorganization | Consolidated 7 tabs to 4 (Overview, Repos, Search, Profile). Stars + Watchlist merged into "Saved Repos" sub-screen under Profile. Notifications moved to Profile header bell icon. Keyboard shortcuts updated for 4 tabs. | Done |
+| Following Activity Feed | Dashboard-style feed showing recent activity from users you follow on GitHub. Uses `/user/received_events` API. Accessible via "Following" button in Overview. Avatar, actor name, event details with tap-to-navigate. | Done |
 
 ---
 
@@ -55,5 +56,4 @@ This document tracks the feature backlog and development progress for Shikai.
 
 | # | Feature | Description | Est. LOC |
 |---|---------|-------------|----------|
-| 10 | Following Activity Feed | Dashboard-style feed showing recent activity from users you follow on GitHub. | ~300 |
 | 12 | 3D GitHub Profile Card | Shareable 3D-styled GitHub profile cards for social proof and FOMO. Generate a visual card with avatar, stats, top repos, contribution graph. Share as image to social media. Inspired by Threads' card sharing mechanic. | ~350 |
