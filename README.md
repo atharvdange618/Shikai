@@ -4,7 +4,7 @@
 
 **Shikai** shows you your GitHub data the way it deserves to be seen. Your repos, your contributions, your activity - presented clearly, without the noise of the full GitHub mobile experience.
 
-GitHub's mobile app is built for _work_ - reviewing PRs, responding to issues, managing projects. Shikai is built for _you_. No notifications. No write operations. No anxiety about accidentally merging something on a tiny screen. Just your work, at a glance.
+GitHub's mobile app is built for _work_ - reviewing PRs, responding to issues, managing projects. Shikai is built for _you_. No write operations. No anxiety about accidentally merging something on a tiny screen. Just your work, at a glance.
 
 ---
 
@@ -16,17 +16,19 @@ GitHub's mobile app is built for _work_ - reviewing PRs, responding to issues, m
 
 **Search** - Global search across repos, users, and issues with fuzzy matching via MiniSearch. Tab switching between result types, debounced input, eager-load pagination. Navigate in-app to any repo, user profile, or issue detail.
 
-**Stars** - Search and sort your starred repos by recent activity or name. Quick access to the projects that inspire you.
+**Profile** - Your GitHub card with stats, social links, location, and hireable status. Access notifications via bell icon, saved repos, and settings via gear icon.
 
-**Watchlist** - Bookmark any repo from anywhere in the app. Local persistence via MMKV with search and filter. Dedicated tab with empty state onboarding.
+**Notifications** - GitHub notifications with attention-worthy filtering. Review requests, mentions, and assignments are highlighted. All/Unread/Attention filters with mark-all-read. Tap to navigate to issues and PRs.
 
-**Profile** - Your GitHub card, always ready to share. Stats, social links, location, and hireable status - perfect for meetups, interviews, or just admiring your streak. Sign out with confirmation dialog.
+**Saved Repos** - Bookmark any repo from anywhere in the app. Stars (from GitHub) and Watchlist (local bookmarks) combined in one screen with search and filter.
 
 **Themes** - Choose from 5 carefully crafted palettes: Light, Dark, Tokyo Night, Dracula, and Atom One Dark. Theme selection persists across app restarts. Each theme includes unique contribution graph colors.
 
 **User Profiles** - View any GitHub user's profile - avatar, bio, stats, social links, top repositories. Tappable from search results and contributor lists. Skeleton states and pull-to-refresh.
 
-**Offline Support** - Network state detection via `@react-native-community/netinfo`. MMKV-backed React Query disk persistence with 24h max age. Offline banner with safe area support. Ephemeral queries excluded from disk cache.
+**Keyboard Shortcuts** - Cmd/Ctrl + 1-4 for tab switching, Cmd/Ctrl + F for search, arrow keys for list navigation, Escape to dismiss.
+
+**Offline Support** - Network state detection with MMKV-backed disk persistence. Offline banner with safe area support. Ephemeral queries excluded from cache.
 
 **Version Check** - Shikai checks for updates on launch and shows a dismissible banner when a new version is available.
 
@@ -40,7 +42,7 @@ GitHub's mobile app is built for _work_ - reviewing PRs, responding to issues, m
 - **Mobile-first, native feel.** Smooth animations, haptic feedback, and a UI that feels at home on your phone.
 - **Information at the right density.** Not too sparse, not overwhelming. Just enough detail to be useful, with deeper views when you need them.
 
-Light and dark themes are supported with 5 palettes to choose from: Light, Dark, Tokyo Night, Dracula, and Atom One Dark. Pick your favorite from Profile > Theme. Typography uses Inter for body text and JetBrains Mono for code.
+Light and dark themes are supported with 5 palettes to choose from: Light, Dark, Tokyo Night, Dracula, and Atom One Dark. Pick your favorite from Profile > Settings > Theme. Typography uses Inter for body text and JetBrains Mono for code.
 
 ---
 
@@ -66,7 +68,7 @@ Shikai requests only read-only access to your GitHub data. It cannot modify, cre
 
 | Shortcut | Action |
 |----------|--------|
-| Cmd/Ctrl + 1-6 | Switch between tabs |
+| Cmd/Ctrl + 1-4 | Switch between tabs |
 | Cmd/Ctrl + F | Focus search bar |
 | Arrow Up/Down | Navigate lists |
 | Escape | Dismiss search |
