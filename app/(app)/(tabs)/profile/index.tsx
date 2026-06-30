@@ -30,6 +30,7 @@ import {
   useTheme,
 } from "@/constants/theme";
 import { useSocialAccounts } from "@/hooks/useSocialAccounts";
+import { useAuthStore } from "@/stores/auth.store";
 
 export default function ProfileScreen() {
   const { colors, isDark } = useTheme();
@@ -40,6 +41,7 @@ export default function ProfileScreen() {
   const { data: user, isLoading } = useUser();
   const { data: socialAccounts } = useSocialAccounts();
   const { data: repoCount } = useRepoCount();
+  const pat = useAuthStore((s) => s.pat);
   const { notifications } = useNotifications();
 
   const unreadCount = useMemo(
@@ -92,24 +94,26 @@ export default function ProfileScreen() {
       <View style={s.headerRow}>
         <View style={s.headerSpacer} />
         <View style={s.headerIcons}>
-          <Pressable
-            style={({ pressed }) => [
-              s.headerIconButton,
-              pressed && s.headerIconButtonPressed,
-            ]}
-            onPress={() =>
-              router.push("/(app)/(tabs)/profile/notifications" as Href)
-            }
-          >
-            <Octicons name="bell" size={20} color={colors.textSecondary} />
-            {unreadCount > 0 && (
-              <View style={[s.badge, { backgroundColor: colors.accent }]}>
-                <Text style={s.badgeText}>
-                  {unreadCount > 99 ? "99+" : unreadCount}
-                </Text>
-              </View>
-            )}
-          </Pressable>
+          {pat && (
+            <Pressable
+              style={({ pressed }) => [
+                s.headerIconButton,
+                pressed && s.headerIconButtonPressed,
+              ]}
+              onPress={() =>
+                router.push("/(app)/(tabs)/profile/notifications" as Href)
+              }
+            >
+              <Octicons name="bell" size={20} color={colors.textSecondary} />
+              {unreadCount > 0 && (
+                <View style={[s.badge, { backgroundColor: colors.accent }]}>
+                  <Text style={s.badgeText}>
+                    {unreadCount > 99 ? "99+" : unreadCount}
+                  </Text>
+                </View>
+              )}
+            </Pressable>
+          )}
           <Pressable
             style={({ pressed }) => [
               s.headerIconButton,
