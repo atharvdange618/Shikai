@@ -13,13 +13,10 @@ import {
   View,
 } from "react-native";
 
-import { useAlert } from "@/components";
-
+import { useNotifications } from "@/hooks/useNotifications";
 import { useRepoCount } from "@/hooks/useRepoCount";
 import { useUser } from "@/hooks/useUser";
-import { clearAllMMKV } from "@/lib/mmkv";
 import { queryKeys } from "@/lib/query-client";
-import { deleteToken } from "@/lib/secure-storage";
 
 import {
   AvatarSize,
@@ -32,44 +29,23 @@ import {
   Spacing,
   useTheme,
 } from "@/constants/theme";
-import { themes } from "@/constants/themes";
-import { useThemeContext } from "@/contexts/ThemeContext";
 import { useSocialAccounts } from "@/hooks/useSocialAccounts";
-import { useAuthStore } from "@/stores/auth.store";
 
 export default function ProfileScreen() {
-  const { theme } = useThemeContext();
-  const { colors, isDark } = theme;
+  const { colors, isDark } = useTheme();
   const shadows = useMemo(() => (isDark ? {} : Shadows.light.sm), [isDark]);
   const router = useRouter();
   const queryClient = useQueryClient();
-  const alert = useAlert();
 
   const { data: user, isLoading } = useUser();
   const { data: socialAccounts } = useSocialAccounts();
   const { data: repoCount } = useRepoCount();
+  const { notifications } = useNotifications();
 
-  const handleSignOut = useCallback(() => {
-    alert.show({
-      variant: "danger",
-      title: "Sign out",
-      message: "Are you sure you want to sign out?",
-      actions: [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Sign out",
-          style: "destructive",
-          onPress: async () => {
-            await deleteToken();
-            useAuthStore.getState().clearAuth();
-            queryClient.clear();
-            clearAllMMKV();
-            router.replace("/sign-in" as Href);
-          },
-        },
-      ],
-    });
-  }, [router, alert, queryClient]);
+  const unreadCount = useMemo(
+    () => notifications.filter((n) => n.unread).length,
+    [notifications],
+  );
 
   const linkedInUrl = socialAccounts?.find((account) =>
     account.url.includes("linkedin.com"),
@@ -92,6 +68,7 @@ export default function ProfileScreen() {
       queryClient.invalidateQueries({ queryKey: queryKeys.user() }),
       queryClient.invalidateQueries({ queryKey: queryKeys.socialAccounts() }),
       queryClient.invalidateQueries({ queryKey: queryKeys.repoCount() }),
+      queryClient.invalidateQueries({ queryKey: queryKeys.notifications() }),
     ]);
     setRefreshing(false);
   }, [queryClient]);
@@ -112,6 +89,41 @@ export default function ProfileScreen() {
         />
       }
     >
+      <View style={s.headerRow}>
+        <View style={s.headerSpacer} />
+        <View style={s.headerIcons}>
+          <Pressable
+            style={({ pressed }) => [
+              s.headerIconButton,
+              pressed && s.headerIconButtonPressed,
+            ]}
+            onPress={() =>
+              router.push("/(app)/(tabs)/profile/notifications" as Href)
+            }
+          >
+            <Octicons name="bell" size={20} color={colors.textSecondary} />
+            {unreadCount > 0 && (
+              <View style={[s.badge, { backgroundColor: colors.accent }]}>
+                <Text style={s.badgeText}>
+                  {unreadCount > 99 ? "99+" : unreadCount}
+                </Text>
+              </View>
+            )}
+          </Pressable>
+          <Pressable
+            style={({ pressed }) => [
+              s.headerIconButton,
+              pressed && s.headerIconButtonPressed,
+            ]}
+            onPress={() =>
+              router.push("/(app)/(tabs)/profile/settings" as Href)
+            }
+          >
+            <Octicons name="gear" size={20} color={colors.textSecondary} />
+          </Pressable>
+        </View>
+      </View>
+
       <View style={s.heroSection}>
         {user?.avatar_url ? (
           <Image
@@ -269,42 +281,18 @@ export default function ProfileScreen() {
 
       <Pressable
         style={({ pressed }) => [
-          s.aboutButton,
-          pressed && s.aboutButtonPressed,
+          s.savedButton,
+          pressed && s.savedButtonPressed,
         ]}
-        onPress={() => router.push("/(app)/(tabs)/profile/about" as Href)}
-      >
-        <Octicons name="info" size={IconSize.md} color={colors.textSecondary} />
-        <Text style={s.aboutButtonText}>About Shikai</Text>
-        <Octicons name="chevron-right" size={13} color={colors.textMuted} />
-      </Pressable>
-
-      <Pressable
-        style={({ pressed }) => [
-          s.themeButton,
-          pressed && s.themeButtonPressed,
-        ]}
-        onPress={() => router.push("/(app)/(tabs)/profile/settings" as Href)}
+        onPress={() => router.push("/(app)/(tabs)/profile/saved" as Href)}
       >
         <Octicons
-          name="paintbrush"
+          name="bookmark"
           size={IconSize.md}
           color={colors.textSecondary}
         />
-        <Text style={s.themeButtonText}>Theme</Text>
-        <Text style={s.themeCurrentValue}>{themes[theme.name].label}</Text>
+        <Text style={s.savedButtonText}>Saved Repos</Text>
         <Octicons name="chevron-right" size={13} color={colors.textMuted} />
-      </Pressable>
-
-      <Pressable
-        style={({ pressed }) => [
-          s.signOutButton,
-          pressed && s.signOutButtonPressed,
-        ]}
-        onPress={handleSignOut}
-      >
-        <Octicons name="sign-out" size={IconSize.md} color={colors.danger} />
-        <Text style={s.signOutText}>Sign out</Text>
       </Pressable>
 
       {user?.created_at && (
@@ -449,6 +437,53 @@ function buildStyles(
       gap: Spacing.lg,
     },
 
+    headerRow: {
+      flexDirection: "row",
+      justifyContent: "flex-end",
+      marginBottom: -Spacing.sm,
+      marginTop: Spacing["3xl"],
+    },
+
+    headerSpacer: {
+      flex: 1,
+    },
+
+    headerIcons: {
+      flexDirection: "row",
+      gap: Spacing.sm,
+    },
+
+    headerIconButton: {
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: colors.surfaceSecondary,
+    },
+
+    headerIconButtonPressed: {
+      opacity: 0.7,
+    },
+
+    badge: {
+      position: "absolute",
+      top: 4,
+      right: 4,
+      minWidth: 16,
+      height: 16,
+      borderRadius: 8,
+      alignItems: "center",
+      justifyContent: "center",
+      paddingHorizontal: 4,
+    },
+
+    badgeText: {
+      fontFamily: FontFamily.bold,
+      fontSize: 9,
+      color: "#fff",
+    },
+
     heroSection: {
       alignItems: "center",
       gap: Spacing.md,
@@ -574,7 +609,7 @@ function buildStyles(
       color: colors.textSecondary,
     },
 
-    aboutButton: {
+    savedButton: {
       flexDirection: "row",
       alignItems: "center",
       gap: Spacing.md,
@@ -586,66 +621,15 @@ function buildStyles(
       ...shadows,
     },
 
-    aboutButtonPressed: {
+    savedButtonPressed: {
       opacity: 0.7,
     },
 
-    aboutButtonText: {
+    savedButtonText: {
       flex: 1,
       fontFamily: FontFamily.medium,
       fontSize: FontSize.body,
       color: colors.textSecondary,
-    },
-
-    themeButton: {
-      flexDirection: "row",
-      alignItems: "center",
-      gap: Spacing.md,
-      backgroundColor: colors.surface,
-      borderRadius: Radius.lg,
-      borderWidth: 1,
-      borderColor: colors.border,
-      padding: Spacing.md,
-      ...shadows,
-    },
-
-    themeButtonPressed: {
-      opacity: 0.7,
-    },
-
-    themeButtonText: {
-      flex: 1,
-      fontFamily: FontFamily.medium,
-      fontSize: FontSize.body,
-      color: colors.textSecondary,
-    },
-
-    themeCurrentValue: {
-      fontFamily: FontFamily.regular,
-      fontSize: FontSize.body,
-      color: colors.textMuted,
-    },
-
-    signOutButton: {
-      flexDirection: "row",
-      alignItems: "center",
-      gap: Spacing.md,
-      backgroundColor: colors.surface,
-      borderRadius: Radius.lg,
-      borderWidth: 1,
-      borderColor: colors.dangerSubtle,
-      padding: Spacing.md,
-    },
-
-    signOutButtonPressed: {
-      opacity: 0.7,
-    },
-
-    signOutText: {
-      flex: 1,
-      fontFamily: FontFamily.medium,
-      fontSize: FontSize.body,
-      color: colors.danger,
     },
 
     memberSince: {
