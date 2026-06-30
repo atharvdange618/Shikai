@@ -273,6 +273,8 @@ export default function FollowingFeedScreen() {
     hasNextPage,
     isFetchingNextPage,
     isLoading,
+    isError,
+    error,
   } = useReceivedEvents();
 
   const onRefresh = useCallback(async () => {
@@ -325,7 +327,15 @@ export default function FollowingFeedScreen() {
 
   return (
     <View style={s.container}>
-      {isLoading ? (
+      {isError ? (
+        <View style={s.emptyContainer}>
+          <Octicons name="alert" size={48} color={colors.danger} />
+          <Text style={s.emptyTitle}>Couldn't load activity</Text>
+          <Text style={s.emptySubtitle}>
+            {error?.message || "Something went wrong. Please try again later."}
+          </Text>
+        </View>
+      ) : isLoading ? (
         <View style={s.skeletonContainer}>
           {Array.from({ length: 6 }).map((_, i) => (
             <View key={i} style={s.skeletonRow}>

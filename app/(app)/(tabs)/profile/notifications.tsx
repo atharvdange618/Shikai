@@ -19,6 +19,7 @@ import {
   markNotificationAsRead,
 } from "@/lib/github-rest";
 import { queryKeys } from "@/lib/query-client";
+import { useAuthStore } from "@/stores/auth.store";
 
 import {
   type ColorTokens,
@@ -257,6 +258,7 @@ export default function NotificationsScreen() {
   const queryClient = useQueryClient();
   const [refreshing, setRefreshing] = useState(false);
   const [filter, setFilter] = useState<Filter>("all");
+  const pat = useAuthStore((s) => s.pat);
 
   const {
     notifications,
@@ -264,6 +266,8 @@ export default function NotificationsScreen() {
     hasNextPage,
     isFetchingNextPage,
     isLoading,
+    isError,
+    error,
   } = useNotifications();
 
   const filtered = useMemo(
@@ -287,9 +291,9 @@ export default function NotificationsScreen() {
   const handleNotificationPress = useCallback(
     async (notification: GitHubNotification) => {
       if (notification.unread) {
-        await markNotificationAsRead(notification.id);
+        await markNotificationAsRead(notification.id, pat);
         queryClient.invalidateQueries({
-          queryKey: queryKeys.notifications(),
+          queryKey: [...queryKeys.notifications(), pat ? "pat" : "oauth"],
         });
       }
 
@@ -302,8 +306,8 @@ export default function NotificationsScreen() {
           const [, owner, repo, type, number] = match;
           const route =
             type === "pulls"
-              ? `/(app)/(repo)/${owner}~~${repo}/pr/${number}`
-              : `/(app)/(repo)/${owner}~~${repo}/issue/${number}`;
+              ? `/(app)/repo/${owner}~~${repo}/pr/${number}`
+              : `/(app)/repo/${owner}~~${repo}/issue/${number}`;
           router.push(route as Href);
           return;
         }
@@ -313,14 +317,14 @@ export default function NotificationsScreen() {
         );
         if (commitMatch) {
           router.push(
-            `/(app)/(repo)/${commitMatch[1]}~~${commitMatch[2]}` as Href,
+            `/(app)/repo/${commitMatch[1]}~~${commitMatch[2]}` as Href,
           );
           return;
         }
 
         const repoMatch = url.match(/\/repos\/([^/]+)\/([^/]+)$/);
         if (repoMatch) {
-          router.push(`/(app)/(repo)/${repoMatch[1]}~~${repoMatch[2]}` as Href);
+          router.push(`/(app)/repo/${repoMatch[1]}~~${repoMatch[2]}` as Href);
           return;
         }
       }
@@ -329,19 +333,19 @@ export default function NotificationsScreen() {
   );
 
   const handleMarkAllRead = useCallback(async () => {
-    await markAllNotificationsAsRead();
+    await markAllNotificationsAsRead(pat);
     queryClient.invalidateQueries({
-      queryKey: queryKeys.notifications(),
+      queryKey: [...queryKeys.notifications(), pat ? "pat" : "oauth"],
     });
-  }, [queryClient]);
+  }, [queryClient, pat]);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     await queryClient.invalidateQueries({
-      queryKey: queryKeys.notifications(),
+      queryKey: [...queryKeys.notifications(), pat ? "pat" : "oauth"],
     });
     setRefreshing(false);
-  }, [queryClient]);
+  }, [queryClient, pat]);
 
   const keyExtractor = useCallback(
     (item: GitHubNotification) => item.id,
@@ -422,7 +426,15 @@ export default function NotificationsScreen() {
         </View>
       </View>
 
-      {isLoading ? (
+      {isError ? (
+        <View style={s.emptyContainer}>
+          <Octicons name="alert" size={48} color={colors.danger} />
+          <Text style={s.emptyTitle}>Couldn't load notifications</Text>
+          <Text style={s.emptySubtitle}>
+            {error?.message || "Something went wrong. Please try again later."}
+          </Text>
+        </View>
+      ) : isLoading ? (
         <View style={s.skeletonContainer}>
           {Array.from({ length: 8 }).map((_, i) => (
             <View key={i} style={s.skeletonRow}>
