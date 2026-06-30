@@ -31,16 +31,17 @@ const APP_VERSION = Constants.expoConfig?.version ?? "1.0.0";
 const FEATURES = [
   { icon: "repo" as const, text: "Browse repos, files, and branches" },
   { icon: "graph" as const, text: "Contribution graphs and streaks" },
-  { icon: "heart" as const, text: "Starred repos with search and filter" },
-  { icon: "bell" as const, text: "Issues and pull requests" },
+  { icon: "bell" as const, text: "Notifications with attention filtering" },
+  { icon: "issue-opened" as const, text: "Issue and PR detail screens" },
   { icon: "history" as const, text: "Commit history per branch" },
   { icon: "markdown" as const, text: "In-app README and markdown preview" },
-  { icon: "issue-opened" as const, text: "Issue and PR detail screens" },
+  { icon: "search" as const, text: "Global search across repos, users, issues" },
+  { icon: "bookmark" as const, text: "Saved repos with Stars and Watchlist" },
+  { icon: "paintbrush" as const, text: "5 themes: Light, Dark, Tokyo Night, Dracula, Atom One" },
+  { icon: "keyboard" as const, text: "Keyboard shortcuts for iPad/macOS" },
+  { icon: "signal" as const, text: "Offline support with disk caching" },
   { icon: "arrow-up" as const, text: "In-app version update check" },
-  {
-    icon: "lock" as const,
-    text: "Read-only \u00B7 No data leaves your device",
-  },
+  { icon: "lock" as const, text: "Read-only \u00B7 No data leaves your device" },
 ];
 
 const CREDITS = [
