@@ -6,10 +6,14 @@
 
 - **Custom Theme Engine** - User-selectable themes with 5 palettes: Light, Dark, Tokyo Night, Dracula, and Atom One Dark. Theme picker in profile settings, persistent selection via MMKV. Theme-specific contribution graph colors. Migrated all components from useColorScheme to context-based useTheme hook.
 - **Global Search** - New search tab with GitHub Search API integration. Tab switching between repos/users/issues. MiniSearch fuzzy index, debounced input, eager-load pagination. Result cards with user avatars, navigate in-app to repo or user profile.
-- **Saved/Watchlist Repos** - Bookmark toggle on every RepoCard. Local persistence via MMKV. Dedicated Watchlist tab with search/filter. Empty state with onboarding copy.
+- **Notifications-Lite** - GitHub notifications API integration with attention-worthy filtering. Review requests, mentions, and assignments highlighted. All/Unread/Attention filters with mark-all-read. FlashList virtualization with pull-to-refresh. Tap to navigate to issues and PRs.
+- **Tab Reorganization** - Consolidated 7 tabs to 4 (Overview, Repos, Search, Profile). Cleaner navigation with focused tab bar.
+- **Saved Repos Screen** - Stars and Watchlist merged into a single screen under Profile with tab switcher. Search and filter for both sources.
+- **Settings Screen** - Theme, About, and Sign out consolidated into dedicated Settings screen accessed via gear icon in Profile header.
+- **Profile Declutter** - Profile now shows: user info, stats, social links, GitHub link, Saved Repos. Notifications bell and Settings gear in header. Compact horizontal hero layout.
 - **User Profile Screen** - View any GitHub user's profile - avatar, bio, stats, social links, top repositories. Tappable from search results and contributor lists. Skeleton states and pull-to-refresh.
 - **Overview Tab** - Dedicated overview screen with pinned repos, contribution graph with streaks, and activity feed. Separate from the old index route.
-- **Keyboard Shortcuts** - `useKeyboardShortcuts` hook with Cmd+1-6 tab switching, Cmd+F search focus, arrow key list navigation, Escape to dismiss. Haptic feedback on all actions.
+- **Keyboard Shortcuts** - `useKeyboardShortcuts` hook with Cmd+1-4 tab switching, Cmd+F search focus, arrow key list navigation, Escape to dismiss. Haptic feedback on all actions.
 - **Offline Support** - Network state manager via `@react-native-community/netinfo`. MMKV-backed React Query disk persistence with 24h max age. Offline banner with safe area support. Ephemeral queries excluded from disk cache.
 - **Custom Alert System** - Themed `Alert` component replacing native `Alert.alert()`. Consistent styling with the app's design system.
 - **Error Boundaries** - `ErrorBoundary` class component wrapping root and tabs layouts. Catches render errors and displays fallback UI with "Go to Home" recovery button.
@@ -29,6 +33,7 @@
 ### Bug Fixes
 
 - **Navigation Overhaul** - Fixed broken file navigation path, eliminated double auth guard race condition, fixed `router.navigate` vs `push` inconsistency for cross-tab navigation.
+- **FlashList rendering** - Fixed blank screen when switching between Stars/Watchlist tabs and when clearing search by adding key prop for remount.
 - **Splash Screen** - Delayed native splash hide until app is fully ready to prevent flash of white.
 - **File Explorer** - Use absolute route path for file viewer navigation instead of relative paths.
 - **Repo Detail Back Button** - Always show fallback back button when `canGoBack` is false.
