@@ -1,6 +1,6 @@
 import { Radius, Spacing, TextStyles, useTheme } from "@/constants/theme";
-import * as SecureStore from "expo-secure-store";
-import { useEffect, useState } from "react";
+import { mmkv } from "@/lib/mmkv";
+import { useState } from "react";
 import { Linking, Pressable, StyleSheet, Text, View } from "react-native";
 
 const DISMISS_KEY = "shikai_version_dismissed";
@@ -15,16 +15,13 @@ export function VersionCheckBanner({
   releaseUrl,
 }: VersionCheckBannerProps) {
   const { colors } = useTheme();
-  const [dismissed, setDismissed] = useState(true);
-
-  useEffect(() => {
-    const val = SecureStore.getItem(DISMISS_KEY);
-    setDismissed(val === latestVersion);
-  }, [latestVersion]);
+  const [dismissed, setDismissed] = useState(
+    () => mmkv.getString(DISMISS_KEY) === latestVersion,
+  );
 
   const handleDismiss = () => {
     setDismissed(true);
-    SecureStore.setItem(DISMISS_KEY, latestVersion);
+    mmkv.set(DISMISS_KEY, latestVersion);
   };
 
   const handleUpdate = () => {
