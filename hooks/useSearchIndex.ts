@@ -1,21 +1,18 @@
 import type { GitHubRepo } from "@/types/github.types";
-import MiniSearch from "minisearch";
 import { useMemo } from "react";
 
-function createIndex() {
-  return new MiniSearch<GitHubRepo>({
-    fields: ["name", "description", "language", "owner.login"],
-    storeFields: ["id"],
-    extractField: (doc, fieldName) => {
-      if (fieldName === "owner.login") return doc.owner?.login ?? "";
-      return (doc as unknown as Record<string, unknown>)[fieldName] ?? "";
-    },
-    searchOptions: {
-      fuzzy: 0.2,
-      prefix: true,
-      combineWith: "AND",
-    },
-  });
+function matchesQuery(repo: GitHubRepo, query: string): boolean {
+  const q = query.toLowerCase();
+  const name = repo.name?.toLowerCase() ?? "";
+  const desc = repo.description?.toLowerCase() ?? "";
+  const lang = repo.language?.toLowerCase() ?? "";
+  const owner = repo.owner?.login?.toLowerCase() ?? "";
+  return (
+    name.includes(q) ||
+    desc.includes(q) ||
+    lang.includes(q) ||
+    owner.includes(q)
+  );
 }
 
 export function useSearchIndex(
@@ -23,28 +20,16 @@ export function useSearchIndex(
   search: string,
   extraFilter?: (repo: GitHubRepo) => boolean,
 ): GitHubRepo[] {
-  const index = useMemo(() => {
-    if (repos.length === 0) return null;
-
-    const idx = createIndex();
-    idx.addAll(repos);
-    return idx;
-  }, [repos]);
-
   return useMemo(() => {
     const trimmed = search?.trim();
 
-    if (!trimmed) {
-      return extraFilter ? repos.filter(extraFilter) : repos;
+    let filtered = repos;
+    if (trimmed) {
+      filtered = repos.filter((repo) => matchesQuery(repo, trimmed));
     }
-
-    if (!index) return [];
-
-    const results = index.search(trimmed);
-    const matchedIds = new Set(results.map((r) => r.id));
-
-    let filtered = repos.filter((repo) => matchedIds.has(repo.id));
-    if (extraFilter) filtered = filtered.filter(extraFilter);
+    if (extraFilter) {
+      filtered = filtered.filter(extraFilter);
+    }
     return filtered;
-  }, [index, repos, search, extraFilter]);
+  }, [repos, search, extraFilter]);
 }
