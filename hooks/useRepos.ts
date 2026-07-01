@@ -1,14 +1,15 @@
 /**
- * Client-side filtering:
- * GitHub's REST API doesn't support filtering by language.
- * Type and sort filters ARE passed as query params to the API.
+ * When there's a search query, use GitHub's search API (searches ALL repos,
+ * case-insensitive). Otherwise, use the paginated /user/repos endpoint
+ * with client-side language/type filtering.
  */
 
 import { useMemo } from "react";
 
 import { useSearchIndex } from "@/hooks/useSearchIndex";
-import { fetchRepos } from "@/lib/github-rest";
+import { fetchRepos, searchRepos } from "@/lib/github-rest";
 import { queryKeys } from "@/lib/query-client";
+import { useAuthStore } from "@/stores/auth.store";
 import type { GitHubRepo, RepoListParams } from "@/types/github.types";
 import { useInfiniteQuery } from "@tanstack/react-query";
 
@@ -23,10 +24,12 @@ export interface RepoFilters {
 
 export function useRepos(filters: RepoFilters = {}) {
   const { sort = "pushed", type, language, search } = filters;
+  const trimmedSearch = search?.trim() ?? "";
+  const username = useAuthStore((s) => s.user?.login ?? "");
 
   const apiType = type === "forks" ? "all" : type;
 
-  const query = useInfiniteQuery({
+  const listQuery = useInfiniteQuery({
     queryKey: [...queryKeys.repos(), { sort, type: apiType }] as const,
 
     queryFn: ({ pageParam }) =>
@@ -46,6 +49,18 @@ export function useRepos(filters: RepoFilters = {}) {
     select: (data) => {
       return data.pages.flatMap((page) => page.repos);
     },
+
+    enabled: !trimmedSearch,
+  });
+
+  const searchQuery = useInfiniteQuery({
+    queryKey: queryKeys.searchRepos(`${trimmedSearch} user:${username}`),
+    queryFn: ({ pageParam }) =>
+      searchRepos(`${trimmedSearch} user:${username}`, pageParam, PER_PAGE),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) => lastPage.pagination.next ?? undefined,
+    staleTime: 1000 * 60 * 5,
+    enabled: !!trimmedSearch && !!username,
   });
 
   const languageFilter = useMemo(() => {
@@ -66,22 +81,35 @@ export function useRepos(filters: RepoFilters = {}) {
       (!typeFilter || typeFilter(repo));
   }, [languageFilter, typeFilter]);
 
-  const allRepos = query.data ?? [];
-  const filteredRepos = useSearchIndex(allRepos, search ?? "", combinedFilter);
+  const isSearching = !!trimmedSearch;
+  const activeQuery = isSearching ? searchQuery : listQuery;
+
+  const listRepos = listQuery.data ?? [];
+  const searchReposData = searchQuery.data?.pages.flatMap((p) => p.repos) ?? [];
+  const allRepos = isSearching ? searchReposData : listRepos;
+
+  // When not searching, apply client-side language/type filter via useSearchIndex.
+  // When searching, the API already handled the query; just apply extra filters.
+  const clientFiltered = useSearchIndex(listRepos, "", combinedFilter);
+  const filteredRepos = isSearching
+    ? combinedFilter
+      ? allRepos.filter(combinedFilter)
+      : allRepos
+    : clientFiltered;
 
   return {
     repos: filteredRepos,
     loadedCount: allRepos.length,
 
-    fetchNextPage: query.fetchNextPage,
-    hasNextPage: query.hasNextPage,
-    isFetchingNextPage: query.isFetchingNextPage,
+    fetchNextPage: activeQuery.fetchNextPage,
+    hasNextPage: activeQuery.hasNextPage,
+    isFetchingNextPage: activeQuery.isFetchingNextPage,
 
-    isLoading: query.isLoading,
-    isError: query.isError,
-    error: query.error,
-    isFetching: query.isFetching,
-    refetch: query.refetch,
+    isLoading: activeQuery.isLoading,
+    isError: activeQuery.isError,
+    error: activeQuery.error,
+    isFetching: activeQuery.isFetching,
+    refetch: activeQuery.refetch,
   };
 }
 
