@@ -1,6 +1,6 @@
 # Changelog
 
-## v1.3.0
+## v1.2.0
 
 ### Features
 
@@ -9,25 +9,13 @@
 - **Following Activity Feed** - Dedicated feed showing recent activity from users you follow on GitHub. Uses `/users/{username}/received_events` endpoint via PAT. Compact inline preview on Overview dashboard with "See all" navigation. Your own events are filtered out. Requires PAT with `notifications` and `repo` scopes.
 - **Following Preview on Overview** - Compact banner above the Activity section showing 1-2 recent events from followed users with actor avatars. Tappable to navigate to the full Following feed. Hidden when no PAT is configured.
 - **PAT-gated Features** - Notifications tab, Following feed link, and Following preview are conditionally rendered based on PAT availability. Clean error states on notifications and following feed screens.
-
-### Bug Fixes
-
-- **Notification navigation routes** - Fixed incorrect `(repo)` route group in notification press handlers. Routes now correctly use `/(app)/repo/` matching the actual file structure.
-- **Following feed endpoint** - Fixed 404 error by correcting the API endpoint from non-existent `/user/received_events` to `/users/{username}/received_events`.
-- **PAT persistence on boot** - PAT is now loaded from SecureStore independently from the main OAuth token, preventing loss during auth reset cycles.
-
-## v1.2.0
-
-### Features
-
 - **Custom Theme Engine** - User-selectable themes with 5 palettes: Light, Dark, Tokyo Night, Dracula, and Atom One Dark. Theme picker in profile settings, persistent selection via MMKV. Theme-specific contribution graph colors. Migrated all components from useColorScheme to context-based useTheme hook.
-- **Global Search** - New search tab with GitHub Search API integration. Tab switching between repos/users/issues. MiniSearch fuzzy index, debounced input, eager-load pagination. Result cards with user avatars, navigate in-app to repo or user profile.
+- **Global Search** - New search tab with GitHub Search API integration. Tab switching between repos/users/issues. Fuzzy search, debounced input, eager-load pagination. Result cards with user avatars, navigate in-app to repo or user profile.
 - **Notifications-Lite** - GitHub notifications API integration with attention-worthy filtering. Review requests, mentions, and assignments highlighted. All/Unread/Attention filters with mark-all-read. FlashList virtualization with pull-to-refresh. Tap to navigate to issues and PRs.
 - **Tab Reorganization** - Consolidated 7 tabs to 4 (Overview, Repos, Search, Profile). Cleaner navigation with focused tab bar.
 - **Saved Repos Screen** - Stars and Watchlist merged into a single screen under Profile with tab switcher. Search and filter for both sources.
 - **Settings Screen** - Theme, About, and Sign out consolidated into dedicated Settings screen accessed via gear icon in Profile header.
 - **Profile Declutter** - Profile now shows: user info, stats, social links, GitHub link, Saved Repos. Notifications bell and Settings gear in header. Compact horizontal hero layout.
-- **Following Activity Feed** - Dashboard-style feed showing recent activity from users you follow on GitHub. Uses `/user/received_events` API. Accessible via "Following" button in Overview. Avatar, actor name, event details with tap-to-navigate.
 - **User Profile Screen** - View any GitHub user's profile - avatar, bio, stats, social links, top repositories. Tappable from search results and contributor lists. Skeleton states and pull-to-refresh.
 - **Overview Tab** - Dedicated overview screen with pinned repos, contribution graph with streaks, and activity feed. Separate from the old index route.
 - **Keyboard Shortcuts** - `useKeyboardShortcuts` hook with Cmd+1-4 tab switching, Cmd+F search focus, arrow key list navigation, Escape to dismiss. Haptic feedback on all actions.
@@ -38,7 +26,7 @@
 - **Flash-Free Navigation** - Delayed native splash hide until app is fully ready (auth + security checks). Added `contentStyle` background to all Stack navigators. Root Stack uses fade animation.
 - **Safe Repo ID Encoding** - Replaced fragile `__` repoId encoding with safe `~~` separator across 19 files. Added `encodeRepoId`/`decodeRepoId` utility functions.
 - **Sign-Out with Cache Clear** - Sign-out button with confirmation dialog. MMKV cache cleared on both sign-in and sign-out.
-- **In-app version check banner** - Dashboard shows a dismissible update banner when a new GitHub release is available. Dismiss state persisted via SecureStore.
+- **In-app version check banner** - Dashboard shows a dismissible update banner when a new GitHub release is available. Dismiss state persisted via MMKV.
 - **In-app README preview** - MarkdownRenderer component renders README files inline on repo detail screen using GitHub's `/markdown` API with themed CSS. Fixed UTF-8 decoding for Japanese/emoji support.
 - **Markdown file viewer** - MarkdownRenderer now renders `.md` files in the file viewer with syntax-highlighted code blocks and copy buttons.
 - **Issue and PR detail screens** - In-app detail screens for issues and pull requests with markdown body and comments rendering. Navigates from list screens instead of opening external browser.
@@ -49,6 +37,9 @@
 
 ### Bug Fixes
 
+- **Notification navigation routes** - Fixed incorrect `(repo)` route group in notification press handlers. Routes now correctly use `/(app)/repo/` matching the actual file structure.
+- **Following feed endpoint** - Fixed 404 error by correcting the API endpoint from non-existent `/user/received_events` to `/users/{username}/received_events`.
+- **PAT persistence on boot** - PAT is now loaded from SecureStore independently from the main OAuth token, preventing loss during auth reset cycles.
 - **Navigation Overhaul** - Fixed broken file navigation path, eliminated double auth guard race condition, fixed `router.navigate` vs `push` inconsistency for cross-tab navigation.
 - **FlashList rendering** - Fixed blank screen when switching between Stars/Watchlist tabs and when clearing search by adding key prop for remount.
 - **Splash Screen** - Delayed native splash hide until app is fully ready to prevent flash of white.
@@ -69,6 +60,7 @@
 - **Import Ordering** - Fixed import ordering and formatting across all components for consistency.
 - **GitHub-native syntax highlighting** - Replaced highlight.js with GitHub's `pl-*` CSS classes for syntax-colored code blocks. Zero JS dependency.
 - **TypeScript strictness** - Enabled `noUnusedLocals` and `noUnusedParameters` in tsconfig.
+- **Native search filtering** - Replaced minisearch library with native substring matching in `useSearchIndex` hook.
 
 ### UI/UX
 
@@ -84,3 +76,8 @@
 - **ABI splits** - Release builds produce 3 APKs: arm64-v8a (~42MB), x86_64 (~43MB), universal (~84MB).
 - **R8 minification and resource shrinking** - Enabled for release builds.
 - **Animated WebP disabled** - Saves ~3.4MB per APK.
+
+### Removed
+
+- **Dead code cleanup** - Removed unused `usePrefetchOnPress` and `useRecentActivity` hooks.
+- **Dependency cleanup** - Removed `minisearch` package, replaced with native filtering.
