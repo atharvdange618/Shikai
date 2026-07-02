@@ -282,9 +282,8 @@ export default function NotificationsScreen() {
 
   const attentionCount = useMemo(
     () =>
-      notifications.filter(
-        (n) => n.unread && ATTENTION_REASONS.has(n.reason),
-      ).length,
+      notifications.filter((n) => n.unread && ATTENTION_REASONS.has(n.reason))
+        .length,
     [notifications],
   );
 
@@ -329,7 +328,7 @@ export default function NotificationsScreen() {
         }
       }
     },
-    [queryClient, router],
+    [queryClient, router, pat],
   );
 
   const handleMarkAllRead = useCallback(async () => {
@@ -347,10 +346,7 @@ export default function NotificationsScreen() {
     setRefreshing(false);
   }, [queryClient, pat]);
 
-  const keyExtractor = useCallback(
-    (item: GitHubNotification) => item.id,
-    [],
-  );
+  const keyExtractor = useCallback((item: GitHubNotification) => item.id, []);
 
   const s = useMemo(() => buildStyles(colors, isDark), [colors, isDark]);
 
@@ -429,7 +425,7 @@ export default function NotificationsScreen() {
       {isError ? (
         <View style={s.emptyContainer}>
           <Octicons name="alert" size={48} color={colors.danger} />
-          <Text style={s.emptyTitle}>Couldn't load notifications</Text>
+          <Text style={s.emptyTitle}>Couldn{"'"}t load notifications</Text>
           <Text style={s.emptySubtitle}>
             {error?.message || "Something went wrong. Please try again later."}
           </Text>
@@ -560,9 +556,7 @@ function buildStyles(colors: ColorTokens, isDark: boolean) {
       backgroundColor: colors.border,
     },
     filterBadgeActive: {
-      backgroundColor: isDark
-        ? "rgba(255,255,255,0.25)"
-        : "rgba(0,0,0,0.15)",
+      backgroundColor: isDark ? "rgba(255,255,255,0.25)" : "rgba(0,0,0,0.15)",
     },
     filterBadgeText: {
       fontFamily: FontFamily.semiBold,

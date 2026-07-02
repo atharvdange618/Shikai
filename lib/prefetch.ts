@@ -17,6 +17,7 @@ import {
   fetchLastCommit,
   fetchRepo,
   fetchSocialAccounts,
+  fetchUserEvents,
 } from "@/lib/github-rest";
 import { queryKeys } from "@/lib/query-client";
 import type { GitHubRepo, GitHubTreeItem } from "@/types/github.types";
@@ -104,10 +105,10 @@ export function prefetchFileTree(
             queryFn: () =>
               fetchFileTree(owner, repo, updatedRepo.default_branch),
             staleTime: 1000 * 60 * 15,
-          }).catch(() => {});
+          }).catch(() => { });
         }
       })
-      .catch(() => {});
+      .catch(() => { });
   }
 }
 
@@ -184,7 +185,7 @@ export function prefetchProfile(queryClient: QueryClient) {
   });
 }
 
-export function prefetchOverview(queryClient: QueryClient) {
+export function prefetchOverview(queryClient: QueryClient, username?: string) {
   queryClient.prefetchQuery({
     queryKey: queryKeys.pinned(),
     queryFn: fetchPinnedRepos,
@@ -195,4 +196,14 @@ export function prefetchOverview(queryClient: QueryClient) {
     queryFn: fetchContributionGraph,
     staleTime: 1000 * 60 * 15,
   });
+  if (username) {
+    queryClient.prefetchInfiniteQuery({
+      queryKey: queryKeys.events(username),
+      queryFn: ({ pageParam }) => fetchUserEvents(username, pageParam, 20),
+      initialPageParam: 1,
+      getNextPageParam: (lastPage) => lastPage.pagination.next ?? undefined,
+      pages: 1,
+      staleTime: 1000 * 60 * 2,
+    });
+  }
 }
