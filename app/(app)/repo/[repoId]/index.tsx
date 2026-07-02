@@ -4,7 +4,6 @@ import { MarkdownRenderer } from "@/components/shared/MarkdownRenderer";
 import { InfoDot } from "@/components/shared/Tooltip";
 import {
   BorderWidth,
-  type ColorTokens,
   FontFamily,
   FontSize,
   IconSize,
@@ -12,12 +11,19 @@ import {
   Radius,
   Spacing,
   useTheme,
+  type ColorTokens,
 } from "@/constants/theme";
 import { useRepoDetailsScreen } from "@/hooks/useRepoDetails";
 import { fetchIssues, fetchPullRequests } from "@/lib/github-rest";
 import { prefetchFileTree, prefetchRepoCommits } from "@/lib/prefetch";
 import { queryKeys } from "@/lib/query-client";
-import { decodeRepoId, formatCount, relativeTime } from "@/lib/utils";
+import {
+  decodeRepoId,
+  encodeRepoId,
+  formatCount,
+  relativeTime,
+} from "@/lib/utils";
+import { useWatchlistStore } from "@/stores/watchlist.store";
 import { Octicons } from "@expo/vector-icons";
 import { useQueryClient } from "@tanstack/react-query";
 import * as Clipboard from "expo-clipboard";
@@ -130,6 +136,22 @@ export default function RepoDetailsScreen() {
 
   const [copiedHash, setCopiedHash] = useState(false);
 
+  const repoIdEncoded = encodeRepoId(owner, repoName);
+  const isWatchlisted = useWatchlistStore((s) =>
+    s.isWatchlisted(repoIdEncoded),
+  );
+  const toggleWatchlist = useWatchlistStore((s) => s.toggleWatchlist);
+  const initWatchlist = useWatchlistStore((s) => s.init);
+
+  useEffect(() => {
+    initWatchlist();
+  }, [initWatchlist]);
+
+  const handleBookmarkToggle = useCallback(() => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    toggleWatchlist(repoIdEncoded);
+  }, [toggleWatchlist, repoIdEncoded]);
+
   const {
     repo,
     languages,
@@ -190,16 +212,33 @@ export default function RepoDetailsScreen() {
     prefetchFileTree(queryClient, owner, repoName);
   }, [queryClient, owner, repoName]);
 
+  const [copiedUrl, setCopiedUrl] = useState(false);
+
   const handleShare = useCallback(async () => {
     if (!repo) return;
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     try {
-      await Share.share({
-        message: `${repo.full_name} - ${repo.html_url}`,
-      });
+      const parts: string[] = [`📦 ${repo.full_name}`];
+      if (repo.description) parts.push(repo.description);
+      const meta: string[] = [];
+      if (repo.stargazers_count > 0)
+        meta.push(`⭐ ${formatCount(repo.stargazers_count)} stars`);
+      if (repo.language) meta.push(`🔧 ${repo.language}`);
+      if (meta.length > 0) parts.push(meta.join("  ·  "));
+      parts.push(repo.html_url);
+      await Share.share({ message: parts.join("\n") });
     } catch {
       /* share cancelled */
     }
   }, [repo]);
+
+  const handleShareLongPress = useCallback(async () => {
+    if (!repo?.html_url) return;
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    await Clipboard.setStringAsync(repo.html_url);
+    setCopiedUrl(true);
+    setTimeout(() => setCopiedUrl(false), 2000);
+  }, [repo?.html_url]);
 
   const handleIssuesPress = useCallback(() => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -570,13 +609,43 @@ export default function RepoDetailsScreen() {
             pressed && s.actionButtonPressed,
           ]}
           onPress={handleShare}
+          onLongPress={handleShareLongPress}
+          delayLongPress={400}
         >
           <Octicons
-            name="share"
+            name={copiedUrl ? "check" : "share"}
             size={IconSize.sm}
-            color={colors.textPrimary}
+            color={copiedUrl ? colors.success : colors.textPrimary}
           />
-          <Text style={s.actionButtonOutlineText}>Share</Text>
+          <Text
+            style={[
+              s.actionButtonOutlineText,
+              copiedUrl && { color: colors.success },
+            ]}
+          >
+            {copiedUrl ? "Copied!" : "Share"}
+          </Text>
+        </Pressable>
+
+        <Pressable
+          style={({ pressed }) => [
+            s.actionButtonIcon,
+            isWatchlisted
+              ? { backgroundColor: colors.accent, borderColor: colors.accent }
+              : s.actionButtonOutline,
+            pressed && s.actionButtonPressed,
+          ]}
+          onPress={handleBookmarkToggle}
+          accessibilityLabel={
+            isWatchlisted ? "Remove from watchlist" : "Add to watchlist"
+          }
+          accessibilityRole="button"
+        >
+          <Octicons
+            name={isWatchlisted ? "bookmark-slash" : "bookmark"}
+            size={IconSize.sm}
+            color={isWatchlisted ? colors.textOnAccent : colors.textPrimary}
+          />
         </Pressable>
       </Animated.View>
 
@@ -1045,6 +1114,16 @@ function buildStyles(colors: ColorTokens, bottomInset: number) {
       gap: Spacing.sm,
       height: 44,
       borderRadius: Radius.md,
+    },
+
+    actionButtonIcon: {
+      width: 44,
+      height: 44,
+      alignItems: "center",
+      justifyContent: "center",
+      borderRadius: Radius.md,
+      borderWidth: BorderWidth.normal,
+      borderColor: colors.border,
     },
 
     actionButtonPressed: {
