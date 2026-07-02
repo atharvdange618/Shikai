@@ -86,7 +86,8 @@ function patchGradleProperties() {
 // ─── build.gradle patches ───
 const SPLITS_BLOCK = `    splits {
         abi {
-            enable true
+            // Disabled automatically for bundleRelease (AAB builds)
+            enable !project.gradle.startParameter.taskNames.any { it.toLowerCase().contains('bundle') }
             reset()
             include "arm64-v8a", "x86_64"
             universalApk true
