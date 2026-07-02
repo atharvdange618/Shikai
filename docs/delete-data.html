@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delete Your Data - Shikai</title>
+    <meta name="description" content="How to delete your data from Shikai, a read-only GitHub companion app for Android.">
+    <meta name="robots" content="noindex">
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/icon.png">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.7;
+            color: #e2e8f0;
+            background: #0f172a;
+            padding: 2rem 1rem;
+        }
+        .container {
+            max-width: 720px;
+            margin: 0 auto;
+            background: #1e293b;
+            border-radius: 12px;
+            padding: 3rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        }
+        .header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 0.5rem;
+        }
+        .header img {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+        }
+        .header h1 { margin-bottom: 0; font-size: 1.75rem; color: #f1f5f9; }
+        .updated { color: #94a3b8; font-size: 0.9rem; margin-bottom: 2rem; }
+        h2 { font-size: 1.25rem; margin: 2rem 0 0.75rem; color: #f1f5f9; border-bottom: 1px solid #334155; padding-bottom: 0.5rem; }
+        p { margin-bottom: 0.75rem; }
+        ul { margin: 0.5rem 0 1rem 1.5rem; }
+        li { margin-bottom: 0.4rem; }
+        a { color: #58a6ff; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .highlight {
+            background: #334155;
+            border-left: 4px solid #58a6ff;
+            padding: 1rem 1.25rem;
+            border-radius: 0 8px 8px 0;
+            margin: 1rem 0;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #334155;
+            color: #64748b;
+            font-size: 0.85rem;
+        }
+        .footer a { color: #94a3b8; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <img src="assets/icon.png" alt="Shikai" width="40" height="40">
+            <h1>Delete Your Data</h1>
+        </div>
+        <p class="updated">Last updated: July 1, 2026</p>
+
+        <div class="highlight">
+            <strong>Important:</strong> Shikai stores all your data locally on your device. No data is stored on external servers.
+        </div>
+
+        <h2>How to Delete Your Data</h2>
+        <p>You have two options to completely remove all your data from Shikai:</p>
+
+        <h3>Option 1: Sign Out</h3>
+        <p>Signing out of Shikai immediately deletes:</p>
+        <ul>
+            <li>Your GitHub OAuth token</li>
+            <li>Your Personal Access Token (if configured)</li>
+            <li>All cached repositories, contributions, and activity</li>
+            <li>Your user profile data</li>
+            <li>Your theme preferences</li>
+            <li>All other locally stored data</li>
+        </ul>
+        <p>To sign out: Open the app > Profile tab > Settings (gear icon) > Sign out</p>
+
+        <h3>Option 2: Uninstall the App</h3>
+        <p>Uninstalling Shikai from your device removes all local data permanently.</p>
+
+        <h2>Data That Is Not Stored</h2>
+        <p>Shikai does not store any of the following on external servers:</p>
+        <ul>
+            <li>Your GitHub credentials</li>
+            <li>Your repositories or code</li>
+            <li>Your contribution history</li>
+            <li>Your personal information</li>
+            <li>Any analytics or usage data</li>
+        </ul>
+
+        <h2>Data Retention</h2>
+        <p>All data is stored locally on your device only. There is no server-side data retention. When you sign out or uninstall, all data is immediately and permanently deleted.</p>
+
+        <h2>Need Help?</h2>
+        <p>If you have questions about data deletion, contact us:</p>
+        <ul>
+            <li>Twitter: <a href="https://x.com/atharvdangedev">@atharvdangedev</a></li>
+            <li>GitHub: <a href="https://github.com/atharvdange618/Shikai/issues">Open an issue</a></li>
+        </ul>
+
+        <div class="footer">
+            <p>Built by <a href="https://x.com/atharvdangedev">Atharv Dange</a></p>
+            <p><a href="https://atharvdange618.github.io/Shikai/">Shikai</a> &mdash; A read-only GitHub companion for Android</p>
+        </div>
+    </div>
+</body>
+</html>
