@@ -29,7 +29,9 @@
     "lint": "expo lint",
     "deploy": "npx expo export -p web && wrangler deploy",
     "preview": "npx expo export -p web && wrangler dev",
-    "prebuild:clean": "npx expo prebuild --clean && node scripts/post-prebuild.js"
+    "prebuild:clean": "npx expo prebuild --clean && node scripts/post-prebuild.js",
+    "android:assemble": "cd android && gradlew.bat assembleRelease",
+    "android:bundle": "cd android && gradlew.bat bundleRelease"
   },
   "dependencies": {
     "@expo-google-fonts/inter": "^0.4.2",
