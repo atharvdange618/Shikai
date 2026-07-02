@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Policy - Shikai</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.7;
+            color: #e2e8f0;
+            background: #0f172a;
+            padding: 2rem 1rem;
+        }
+        .container {
+            max-width: 720px;
+            margin: 0 auto;
+            background: #1e293b;
+            border-radius: 12px;
+            padding: 3rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        }
+        h1 { font-size: 1.75rem; margin-bottom: 0.5rem; color: #f1f5f9; }
+        .updated { color: #94a3b8; font-size: 0.9rem; margin-bottom: 2rem; }
+        h2 { font-size: 1.25rem; margin: 2rem 0 0.75rem; color: #f1f5f9; border-bottom: 1px solid #334155; padding-bottom: 0.5rem; }
+        h3 { font-size: 1.05rem; margin: 1.25rem 0 0.5rem; color: #cbd5e1; }
+        p { margin-bottom: 0.75rem; }
+        ul { margin: 0.5rem 0 1rem 1.5rem; }
+        li { margin-bottom: 0.4rem; }
+        a { color: #58a6ff; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Privacy Policy</h1>
+        <p class="updated">Last updated: July 1, 2026</p>
+
+        <h2>Overview</h2>
+        <p>Shikai is a read-only GitHub companion app. This privacy policy explains how we handle your data.</p>
+
+        <h2>Data Collection</h2>
+        <p>Shikai collects minimal data necessary to provide its services:</p>
+
+        <h3>Authentication Data</h3>
+        <ul>
+            <li><strong>OAuth Token:</strong> Stored locally on your device using secure encrypted storage (expo-secure-store). This token is used to authenticate with GitHub's API.</li>
+            <li><strong>Personal Access Token (Optional):</strong> If you choose to enable notifications, you may provide a GitHub Personal Access Token. This is stored locally on your device only.</li>
+        </ul>
+
+        <h3>Cached Data</h3>
+        <ul>
+            <li><strong>Repository Data:</strong> Repos, contributions, and activity are cached locally using MMKV for offline access.</li>
+            <li><strong>User Profiles:</strong> Basic profile information (avatar, bio, stats) may be cached.</li>
+        </ul>
+
+        <h2>Data Usage</h2>
+        <ul>
+            <li><strong>API Communication:</strong> Your OAuth token is sent directly from your device to GitHub's API. It passes through a secure Cloudflare Worker proxy only during the initial authentication exchange.</li>
+            <li><strong>No Server Storage:</strong> Shikai does not store your tokens or personal data on any external servers.</li>
+            <li><strong>No Analytics:</strong> Shikai does not collect analytics, crash reports, or usage data.</li>
+        </ul>
+
+        <h2>Data Sharing</h2>
+        <ul>
+            <li><strong>GitHub API:</strong> Your data is shared with GitHub only as part of normal API requests you initiate.</li>
+            <li><strong>No Third Parties:</strong> We do not share your data with any third parties.</li>
+        </ul>
+
+        <h2>Data Security</h2>
+        <ul>
+            <li><strong>Encryption:</strong> Tokens are encrypted on-device using expo-secure-store's encryption.</li>
+            <li><strong>Secure Transmission:</strong> All API requests use HTTPS.</li>
+            <li><strong>Root Detection:</strong> The app detects rooted devices and blocks usage on compromised environments to protect your data.</li>
+        </ul>
+
+        <h2>Data Deletion</h2>
+        <ul>
+            <li><strong>Sign Out:</strong> Signing out clears all locally cached data and tokens.</li>
+            <li><strong>Uninstall:</strong> Uninstalling the app removes all local data.</li>
+            <li><strong>PAT Removal:</strong> You can remove your Personal Access Token from Settings at any time.</li>
+        </ul>
+
+        <h2>Children's Privacy</h2>
+        <p>Shikai is not directed at children under 13. We do not knowingly collect data from children.</p>
+
+        <h2>Changes to This Policy</h2>
+        <p>We may update this privacy policy. Changes will be reflected in the app's About page.</p>
+
+        <h2>Contact</h2>
+        <p>For questions about this privacy policy, contact:</p>
+        <ul>
+            <li>Twitter: <a href="https://x.com/atharvdangedev">@atharvdangedev</a></li>
+            <li>GitHub: <a href="https://github.com/atharvdange618">atharvdange618</a></li>
+        </ul>
+    </div>
+</body>
+</html>
