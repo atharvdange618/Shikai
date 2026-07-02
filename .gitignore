@@ -54,3 +54,7 @@ modules/*/android/build/
 .dev.vars*
 !.dev.vars.example
 !.env.example
+/screenshots
+app-marketing-context.md
+play-store-checklist.md
+GITHUB-RELEASE.md
