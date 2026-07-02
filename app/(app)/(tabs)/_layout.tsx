@@ -16,6 +16,7 @@ import {
   useTheme,
 } from "@/constants/theme";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
+import { useUser } from "@/hooks/useUser";
 import { prefetchOverview, prefetchProfile } from "@/lib/prefetch";
 
 function IOSTabBarBackground() {
@@ -100,10 +101,12 @@ export default function TabsLayout() {
     },
   });
 
+  const { data: user } = useUser();
+
   useEffect(() => {
     prefetchProfile(queryClient);
-    prefetchOverview(queryClient);
-  }, [queryClient]);
+    prefetchOverview(queryClient, user?.login);
+  }, [queryClient, user?.login]);
 
   return (
     <TooltipProvider>

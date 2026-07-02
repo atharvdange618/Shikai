@@ -260,6 +260,7 @@ export default function OverviewScreen() {
   }, [queryClient]);
 
   const { data: user } = useUser();
+  const storeUser = useAuthStore((s) => s.user);
   const pat = useAuthStore((s) => s.pat);
   const { data: pinnedRepos, isLoading: pinnedLoading } = usePinnedRepos();
   const {
@@ -268,13 +269,14 @@ export default function OverviewScreen() {
     stats,
     isLoading: contribLoading,
   } = useContributions();
+  const eventsUsername = user?.login ?? storeUser?.login ?? "";
   const {
     events,
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
     isLoading: activityLoading,
-  } = useEvents(user?.login ?? "");
+  } = useEvents(eventsUsername);
   const { events: followingEvents, isLoading: followingLoading } =
     useReceivedEvents();
   const { updateAvailable, latestVersion, releaseUrl } = useLatestRelease();
@@ -285,13 +287,14 @@ export default function OverviewScreen() {
     await queryClient.invalidateQueries({
       queryKey: queryKeys.contributions(),
     });
-    if (user?.login) {
+    const username = user?.login || storeUser?.login;
+    if (username) {
       await queryClient.invalidateQueries({
-        queryKey: queryKeys.events(user.login),
+        queryKey: queryKeys.events(username),
       });
     }
     setRefreshing(false);
-  }, [queryClient, user?.login]);
+  }, [queryClient, user?.login, storeUser?.login]);
 
   const s = useMemo(() => buildStyles(colors), [colors]);
 
@@ -313,15 +316,21 @@ export default function OverviewScreen() {
         <View style={s.headerContent}>
           <View>
             <Text style={s.greeting}>{getGreeting()}</Text>
-            <Text style={s.userName}>{user?.name || user?.login || "..."}</Text>
+            <Text style={s.userName}>
+              {user?.name ||
+                storeUser?.name ||
+                user?.login ||
+                storeUser?.login ||
+                "..."}
+            </Text>
           </View>
           <Pressable
             onPress={() => router.push("/(app)/(tabs)/profile" as Href)}
             onPressIn={handleAvatarPressIn}
           >
-            {user?.avatar_url ? (
+            {user?.avatar_url || storeUser?.avatar_url ? (
               <Image
-                source={{ uri: user.avatar_url }}
+                source={{ uri: user?.avatar_url || storeUser?.avatar_url }}
                 style={s.avatar}
                 contentFit="cover"
                 transition={200}

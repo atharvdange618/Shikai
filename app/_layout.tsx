@@ -109,7 +109,7 @@ export default function RootLayout() {
     } else {
       setBootComplete(true);
     }
-  }, [fontsLoaded, fontError, setToken, setUser]);
+  }, [fontsLoaded, fontError, setToken, setUser, setPat]);
 
   useEffect(() => {
     if (
