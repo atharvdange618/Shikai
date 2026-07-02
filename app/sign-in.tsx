@@ -22,20 +22,22 @@ import Animated, {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import {
-  type ColorTokens,
   FontFamily,
   FontSize,
   Radius,
   Shadows,
   Spacing,
   useTheme,
+  type ColorTokens,
 } from "@/constants/theme";
+import { githubAxios } from "@/lib/axios";
 import {
   fetchAuthenticatedUser,
   fetchUserInstallations,
 } from "@/lib/github-rest";
 import { clearAllMMKV } from "@/lib/mmkv";
-import { queryClient } from "@/lib/query-client";
+import { prefetchOverview } from "@/lib/prefetch";
+import { queryClient, queryKeys } from "@/lib/query-client";
 import { getStoredPAT, saveToken } from "@/lib/secure-storage";
 import { useAuthStore } from "@/stores/auth.store";
 import { useSignInStore } from "@/stores/signin.store";
@@ -173,7 +175,9 @@ export default function SignInScreen() {
         clearTimeout(timeoutId);
       }
 
-      setToken(accessToken);
+      githubAxios.defaults.headers.common["Authorization"] =
+        `Bearer ${accessToken}`;
+
       const installations = await fetchUserInstallations();
 
       if (installations.length === 0) {
@@ -187,20 +191,27 @@ export default function SignInScreen() {
         saveToken(accessToken),
         fetchAuthenticatedUser(),
       ]);
-      setUser(user);
 
       const storedPAT = await getStoredPAT();
       if (storedPAT) setPat(storedPAT);
 
+      // Set auth store FIRST so hooks have data on mount
+      setToken(accessToken);
+      setUser(user);
+
+      // Then clear and repopulate query cache
       clearAllMMKV();
       queryClient.clear();
+      queryClient.setQueryData(queryKeys.user(), user);
+      prefetchOverview(queryClient, user.login);
+
       setLoading(false);
       router.replace("/(app)/(tabs)/overview" as Href);
     } catch {
       setError("Something went wrong. Check your connection and try again.");
       setLoading(false);
     }
-  }, [redirectUri, setToken, setUser, router]);
+  }, [redirectUri, setToken, setUser, router, setPat]);
 
   const handleInstall = useCallback(async () => {
     const { setLoading, setError, setNeedsInstall, setPendingToken } =
@@ -234,19 +245,27 @@ export default function SignInScreen() {
       }
       setPendingToken(null);
 
-      setToken(pendingToken);
+      githubAxios.defaults.headers.common["Authorization"] =
+        `Bearer ${pendingToken}`;
 
       const [, user] = await Promise.all([
         saveToken(pendingToken),
         fetchAuthenticatedUser(),
       ]);
-      setUser(user);
 
       const storedPAT = await getStoredPAT();
       if (storedPAT) setPat(storedPAT);
 
+      // Set auth store FIRST so hooks have data on mount
+      setToken(pendingToken);
+      setUser(user);
+
+      // Then clear and repopulate query cache
       clearAllMMKV();
       queryClient.clear();
+      queryClient.setQueryData(queryKeys.user(), user);
+      prefetchOverview(queryClient, user.login);
+
       setLoading(false);
       setNeedsInstall(false);
       router.replace("/(app)/(tabs)/overview" as Href);
@@ -254,7 +273,7 @@ export default function SignInScreen() {
       setError("Installation failed. You can set it up later from settings.");
       setLoading(false);
     }
-  }, [redirectUri, setUser, router, setToken]);
+  }, [redirectUri, setUser, router, setToken, setPat]);
 
   const s = useMemo(
     () => buildStyles(colors, isDark, shadows, insets.top, insets.bottom),
