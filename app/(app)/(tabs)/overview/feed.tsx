@@ -45,7 +45,12 @@ function parseGitHubUrl(url: string): Href | null {
 function getEventDisplay(
   event: GitHubEvent,
   colors: ColorTokens,
-): { icon: keyof typeof Octicons.glyphMap; iconColor: string; text: string; url: string } | null {
+): {
+  icon: keyof typeof Octicons.glyphMap;
+  iconColor: string;
+  text: string;
+  url: string;
+} | null {
   const repoName = event.repo.name.split("/")[1] || event.repo.name;
 
   switch (event.type) {
@@ -60,7 +65,8 @@ function getEventDisplay(
         url:
           payload.commits?.[0]?.url
             ?.replace("api.github.com/repos", "github.com")
-            .replace("/commits/", "/commit/") ?? `https://github.com/${event.repo.name}`,
+            .replace("/commits/", "/commit/") ??
+          `https://github.com/${event.repo.name}`,
       };
     }
     case "WatchEvent":
@@ -77,7 +83,8 @@ function getEventDisplay(
         icon: "repo-forked",
         iconColor: "#58a6ff",
         text: `Forked ${repoName}${forkName ? ` → ${forkName.split("/")[1]}` : ""}`,
-        url: payload.forkee?.html_url ?? `https://github.com/${event.repo.name}`,
+        url:
+          payload.forkee?.html_url ?? `https://github.com/${event.repo.name}`,
       };
     }
     case "CreateEvent": {
@@ -100,7 +107,9 @@ function getEventDisplay(
         icon: "git-pull-request",
         iconColor: merged ? "#a371f7" : colors.accent,
         text: `${action.charAt(0).toUpperCase() + action.slice(1)} PR${prNumber ? ` #${prNumber}` : ""} in ${repoName}`,
-        url: payload.pull_request?.html_url ?? `https://github.com/${event.repo.name}`,
+        url:
+          payload.pull_request?.html_url ??
+          `https://github.com/${event.repo.name}`,
       };
     }
     case "IssuesEvent": {
@@ -121,7 +130,8 @@ function getEventDisplay(
         icon: "tag",
         iconColor: "#f97316",
         text: `Released ${tagName ?? "new version"} in ${repoName}`,
-        url: payload.release?.html_url ?? `https://github.com/${event.repo.name}`,
+        url:
+          payload.release?.html_url ?? `https://github.com/${event.repo.name}`,
       };
     }
     case "PublicEvent":
@@ -191,7 +201,9 @@ function EventItem({
           <Text style={s.time}>{getTimeAgo(event.created_at)}</Text>
         </View>
         <View style={s.eventRow}>
-          <View style={[s.iconBadge, { backgroundColor: display.iconColor + "20" }]}>
+          <View
+            style={[s.iconBadge, { backgroundColor: display.iconColor + "20" }]}
+          >
             <Octicons name={display.icon} size={12} color={display.iconColor} />
           </View>
           <Text style={s.eventText} numberOfLines={2}>
@@ -295,18 +307,11 @@ export default function FollowingFeedScreen() {
     [router],
   );
 
-  const keyExtractor = useCallback(
-    (item: GitHubEvent) => item.id,
-    [],
-  );
+  const keyExtractor = useCallback((item: GitHubEvent) => item.id, []);
 
   const renderItem = useCallback(
     ({ item }: { item: GitHubEvent }) => (
-      <EventItem
-        event={item}
-        colors={colors}
-        onPress={handleEventPress}
-      />
+      <EventItem event={item} colors={colors} onPress={handleEventPress} />
     ),
     [colors, handleEventPress],
   );
@@ -330,7 +335,7 @@ export default function FollowingFeedScreen() {
       {isError ? (
         <View style={s.emptyContainer}>
           <Octicons name="alert" size={48} color={colors.danger} />
-          <Text style={s.emptyTitle}>Couldn't load activity</Text>
+          <Text style={s.emptyTitle}>Couldn{"'"}t load activity</Text>
           <Text style={s.emptySubtitle}>
             {error?.message || "Something went wrong. Please try again later."}
           </Text>
