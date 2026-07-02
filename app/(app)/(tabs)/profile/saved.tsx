@@ -16,9 +16,9 @@ import { FlashList } from "@shopify/flash-list";
 import { RepoCard } from "@/components/repo/RepoCard";
 import { SearchBar } from "@/components/shared/SearchBar";
 import { useDebounce } from "@/hooks/useDebounce";
-import { useRepos } from "@/hooks/useRepos";
 import { useSearchIndex } from "@/hooks/useSearchIndex";
 import { useStarred } from "@/hooks/useStarred";
+import { useWatchlistRepos } from "@/hooks/useWatchlistRepos";
 import { prefetchRepoDetails, prefetchRoute } from "@/lib/prefetch";
 import { queryKeys } from "@/lib/query-client";
 import { encodeRepoId } from "@/lib/utils";
@@ -60,14 +60,8 @@ export default function SavedScreen() {
     isFetchingNextPage: isFetchingNextStarred,
   } = useStarred({ search: debouncedSearch, sort: "pushed" });
 
-  const { repos: allRepos, isLoading: watchlistLoading } = useRepos();
-
-  const watchlistedRepos = useMemo(() => {
-    return allRepos.filter((repo) => {
-      const repoId = encodeRepoId(repo.owner.login, repo.name);
-      return watchlistIds.includes(repoId);
-    });
-  }, [allRepos, watchlistIds]);
+  const { repos: watchlistedRepos, isLoading: watchlistLoading } =
+    useWatchlistRepos();
 
   const filteredWatchlist = useSearchIndex(watchlistedRepos, debouncedSearch);
 
@@ -79,7 +73,7 @@ export default function SavedScreen() {
     if (tab === "stars") {
       await queryClient.invalidateQueries({ queryKey: queryKeys.starred() });
     } else {
-      await queryClient.invalidateQueries({ queryKey: queryKeys.repos() });
+      await queryClient.invalidateQueries({ queryKey: ["repo"] });
     }
     setRefreshing(false);
   }, [queryClient, tab]);
@@ -114,10 +108,7 @@ export default function SavedScreen() {
     [handleRepoPress, handleRepoPressIn, isDark, colors],
   );
 
-  const keyExtractor = useCallback(
-    (item: GitHubRepo) => String(item.id),
-    [],
-  );
+  const keyExtractor = useCallback((item: GitHubRepo) => String(item.id), []);
 
   const s = useMemo(() => buildStyles(colors), [colors]);
 
@@ -206,7 +197,9 @@ export default function SavedScreen() {
             value={search}
             onChangeText={setSearch}
             placeholder={
-              tab === "stars" ? "Search starred repos..." : "Search watchlist..."
+              tab === "stars"
+                ? "Search starred repos..."
+                : "Search watchlist..."
             }
           />
         </View>
