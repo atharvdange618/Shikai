@@ -288,7 +288,11 @@ export default function SignInScreen() {
       >
         <View style={s.logoMark}>
           <Image
-            source={require("@/assets/images/splash-icon.png")}
+            source={
+              isDark
+                ? require("@/assets/images/splash-icon-dark.png")
+                : require("@/assets/images/splash-icon.png")
+            }
             style={s.logoImage}
             contentFit="contain"
           />
@@ -397,9 +401,9 @@ function buildStyles(
     },
 
     logoMark: {
-      width: 80,
-      height: 80,
-      borderRadius: 22,
+      width: 96,
+      height: 96,
+      borderRadius: 24,
       backgroundColor: colors.accentSubtle,
       alignItems: "center",
       justifyContent: "center",
@@ -410,8 +414,8 @@ function buildStyles(
     },
 
     logoImage: {
-      width: 56,
-      height: 56,
+      width: 120,
+      height: 120,
     },
 
     appName: {

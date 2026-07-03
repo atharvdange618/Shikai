@@ -15,7 +15,6 @@ import {
 } from "react-native";
 
 import {
-  type ColorTokens,
   FontFamily,
   FontSize,
   IconSize,
@@ -24,6 +23,7 @@ import {
   Shadows,
   Spacing,
   useTheme,
+  type ColorTokens,
 } from "@/constants/theme";
 
 const APP_VERSION = Constants.expoConfig?.version ?? "1.0.0";
@@ -32,18 +32,30 @@ const FEATURES = [
   { icon: "repo" as const, text: "Browse repos, files, and branches" },
   { icon: "graph" as const, text: "Contribution graphs and streaks" },
   { icon: "bell" as const, text: "Notifications with attention filtering" },
-  { icon: "people" as const, text: "Following activity feed from followed users" },
+  {
+    icon: "people" as const,
+    text: "Following activity feed from followed users",
+  },
   { icon: "issue-opened" as const, text: "Issue and PR detail screens" },
   { icon: "history" as const, text: "Commit history per branch" },
   { icon: "markdown" as const, text: "In-app README and markdown preview" },
-  { icon: "search" as const, text: "Global search across repos, users, issues" },
+  {
+    icon: "search" as const,
+    text: "Global search across repos, users, issues",
+  },
   { icon: "bookmark" as const, text: "Saved repos with Stars and Watchlist" },
-  { icon: "paintbrush" as const, text: "5 themes: Light, Dark, Tokyo Night, Dracula, Atom One" },
+  {
+    icon: "paintbrush" as const,
+    text: "5 themes: Light, Dark, Tokyo Night, Dracula, Atom One",
+  },
   { icon: "key" as const, text: "PAT support for notifications and following" },
   { icon: "keyboard" as const, text: "Keyboard shortcuts for iPad/macOS" },
   { icon: "signal" as const, text: "Offline support with disk caching" },
   { icon: "arrow-up" as const, text: "In-app version update check" },
-  { icon: "lock" as const, text: "Read-only \u00B7 No data leaves your device" },
+  {
+    icon: "lock" as const,
+    text: "Read-only \u00B7 No data leaves your device",
+  },
 ];
 
 const CREDITS = [
@@ -85,12 +97,18 @@ export default function AboutScreen() {
       showsVerticalScrollIndicator={false}
     >
       <View style={s.heroSection}>
-        <Image
-          source={require("@/assets/images/splash-icon.png")}
-          style={s.logoImage}
-          contentFit="contain"
-          transition={200}
-        />
+        <View style={s.logoMark}>
+          <Image
+            source={
+              isDark
+                ? require("@/assets/images/splash-icon-dark.png")
+                : require("@/assets/images/splash-icon.png")
+            }
+            style={s.logoImage}
+            contentFit="contain"
+            transition={200}
+          />
+        </View>
         <Text style={s.appName}>Shikai</Text>
         <Text style={s.tagline}>Your GitHub dashboard, at a glance.</Text>
         <View style={s.versionBadge}>
@@ -288,10 +306,22 @@ function buildStyles(colors: ColorTokens, shadows: object) {
       paddingVertical: Spacing.xl,
     },
 
-    logoImage: {
+    logoMark: {
       width: 96,
       height: 96,
       borderRadius: 24,
+      backgroundColor: colors.accentSubtle,
+      alignItems: "center",
+      justifyContent: "center",
+      borderWidth: 1,
+      borderColor: colors.border,
+      overflow: "hidden",
+      ...shadows,
+    },
+
+    logoImage: {
+      width: 120,
+      height: 120,
     },
 
     appName: {
