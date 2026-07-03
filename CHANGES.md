@@ -34,6 +34,14 @@
 - **Markdown image support** - MarkdownRenderer resolves relative image paths to absolute GitHub raw URLs. README images now render correctly in-app.
 - **Developer mode override** - Developers with Android dev options enabled can bypass the security block by accepting a risk warning. Root and debugger detection remain hard-blocked. Override persisted via SharedPreferences.
 - **Post-build automation** - `npm run prebuild:clean` script auto-restores Android build customizations (ABI splits, R8 minification, resource shrinking) that are wiped by `expo prebuild --clean`.
+- **Watchlist for any repo** - Bookmark any repo from anywhere in the app, not just your own. Stars (from GitHub) and Watchlist (local bookmarks) combined in one screen with search and filter.
+- **File tree search** - Search within a repo's file tree by filename to quickly locate files.
+- **Contribution stats summary** - Streaks and most active day stats displayed alongside the contribution graph.
+- **Health badge tooltips** - Tooltips explaining repo health badges (missing license, no topics, etc.) with mutual exclusivity.
+- **File viewer virtualization** - Large files rendered via chunk-based FlashList for smooth scrolling.
+- **Profile page caching** - Profile data heavily cached with 30 min staleTime for faster tab switches.
+- **Beta program links** - README section with Google Form links for beta sign-up and feedback.
+- **Activity feed infinite scroll** - Activity feed supports paginated loading as you scroll.
 
 ### Bug Fixes
 
@@ -49,9 +57,24 @@
 - **Activity Feed** - Skip initial `onEndReached` to prevent unwanted prefetch on mount.
 - **Stars Prefetch** - Limit prefetch to first 3 repos for faster tab load.
 - **Tooltip** - Remove undefined `onLayout` prop that caused warnings.
-- **Share button** - Repo share button now copies the GitHub URL on Android. Previously used the `url` field which Android ignores.
 - **List performance** - Pre-built styles, hoisted `isDark`, `overrideItemLayout`/`getItemType` for FlashList virtualization, `drawDistance: 400`, nested ScrollView removal for topics.
 - **Shadows useMemo** - Wrapped shadows conditional in useMemo to resolve lint warnings.
+- **Contribution graph coloring** - Use GitHub's `contributionLevel` for heatmap coloring instead of count-based thresholds.
+- **Sign-in race condition** - Resolve initial data loading race condition on sign-in.
+- **Search API** - Use GitHub search API for repos and stars search to find all results instead of local-only filtering.
+- **Contribution streak calculation** - Use local date instead of UTC for streak calculations to avoid off-by-one errors.
+- **fetchRepoCount errors** - Propagate fetchRepoCount errors instead of silently returning 0.
+- **Invalid dates** - Handle invalid dates gracefully, centralize query keys, remove invalid easing values.
+- **Commits stale cache** - Include branch in commits query key to prevent stale cached data across branch switches.
+- **Back button navigation** - Prevent back button from navigating to sign-in screen.
+- **Accessibility** - Address remaining LOW-priority issues and accessibility improvements across components.
+- **Palette naming** - Rename `Palette.white` to `Palette.offWhite` to match actual color value.
+- **MMKV cache clear** - Clear MMKV cache on both sign-in and sign-out to prevent stale data.
+- **Share button** - Repo share button now copies the GitHub URL on Android. Previously used the `url` field which Android ignores.
+- **LoadingProgress crash** - Move hooks before early return in LoadingProgress component to prevent render crash.
+- **Sign-in screen imports** - Add missing `useMemo` import in sign-in screen.
+- **OAuth header** - Remove dual authorization header paths in API functions.
+- **Duplicate imports** - Merge duplicate expo-router imports in pull-requests screen.
 
 ### Refactoring
 
@@ -60,7 +83,9 @@
 - **Import Ordering** - Fixed import ordering and formatting across all components for consistency.
 - **GitHub-native syntax highlighting** - Replaced highlight.js with GitHub's `pl-*` CSS classes for syntax-colored code blocks. Zero JS dependency.
 - **TypeScript strictness** - Enabled `noUnusedLocals` and `noUnusedParameters` in tsconfig.
-- **Native search filtering** - Replaced minisearch library with native substring matching in `useSearchIndex` hook.
+- **Profile drawer replaced** - Replaced profile drawer with stack navigation for About screen.
+- **Activity feed virtualization** - Migrated activity feed from FlatList to FlashList for better performance.
+- **Sign-in console cleanup** - Removed all `console.log`/`console.error` debug statements from sign-in flow and API interceptors.
 
 ### UI/UX
 
@@ -70,14 +95,20 @@
 ### Security
 
 - **Developer options detection** - Narrowed OAuth scopes to read-only access, corrected Android setting key for developer options detection.
+- **URL validation** - Validate URLs before opening in browser to prevent open redirect attacks.
+- **Path parameter encoding** - Encode all path parameters in REST API URLs to prevent injection.
+- **Pending token TTL** - Add TTL to pendingToken to prevent indefinite token retention if install flow is abandoned.
+- **OAuth proxy hardening** - Validate client_id and sanitize OAuth proxy response.
 
 ### Build
 
 - **ABI splits** - Release builds produce 3 APKs: arm64-v8a (~42MB), x86_64 (~43MB), universal (~84MB).
+- **ABI splits for AAB** - Disabled ABI splits for AAB builds to prevent `bundleRelease` conflict.
 - **R8 minification and resource shrinking** - Enabled for release builds.
 - **Animated WebP disabled** - Saves ~3.4MB per APK.
+- **Android build scripts** - Added scripts for assembly and bundling (`assembleRelease`, `bundleRelease`).
 
 ### Removed
 
 - **Dead code cleanup** - Removed unused `usePrefetchOnPress` and `useRecentActivity` hooks.
-- **Dependency cleanup** - Removed `minisearch` package, replaced with native filtering.
+- **Dependency cleanup** - Removed `minisearch` package, replaced with GitHub Search API for accurate results.
