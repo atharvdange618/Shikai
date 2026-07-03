@@ -6,6 +6,7 @@ import {
   FontFamily,
   FontSize,
   Layout,
+  Radius,
   Spacing,
   useTheme,
   type ColorTokens,
@@ -214,7 +215,7 @@ function ContributionGraphSkeleton({ colors }: { colors: ColorTokens }) {
         style={{
           height: 16,
           width: 120,
-          borderRadius: 4,
+          borderRadius: Radius.sm,
           backgroundColor: colors.surfaceSecondary,
         }}
       />
