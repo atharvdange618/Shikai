@@ -91,7 +91,11 @@ export function AnimatedSplashScreen({
     >
       <Animated.View style={[styles.logoContainer, logoAnimatedStyle]}>
         <Image
-          source={require("@/assets/images/splash-icon.png")}
+          source={
+            isDark
+              ? require("@/assets/images/splash-icon-dark.png")
+              : require("@/assets/images/splash-icon.png")
+          }
           style={styles.logo}
           resizeMode="contain"
         />
