@@ -3,14 +3,15 @@ import { ScrollView, StyleSheet, Text, View } from "react-native";
 import Svg, { Rect, Text as SvgText } from "react-native-svg";
 
 import {
-  type ColorTokens,
   FontFamily,
   FontSize,
   Layout,
   Spacing,
   useTheme,
+  type ColorTokens,
 } from "@/constants/theme";
 import type {
+  ContributionDay,
   ContributionStats,
   ContributionWeek,
 } from "@/types/github-graphql.types";
@@ -20,8 +21,6 @@ const CELL = Layout.heatmapCellSize;
 const GAP = Layout.heatmapCellGap;
 const STEP = CELL + GAP;
 const DAYS = 7;
-const WEEKS = 52;
-
 const MONTH_LABEL_HEIGHT = 16;
 const SVG_HEIGHT = MONTH_LABEL_HEIGHT + DAYS * STEP;
 
@@ -32,11 +31,32 @@ const DAY_LABELS: { label: string; row: number }[] = [
 ];
 const DAY_LABEL_WIDTH = 28;
 
-function getContributionColor(count: number, colors: ColorTokens): string {
+function getContributionColor(
+  level: ContributionDay["contributionLevel"] | undefined,
+  count: number,
+  colors: ColorTokens,
+): string {
+  if (level) {
+    const normalized = level.toUpperCase();
+    switch (normalized) {
+      case "NONE":
+        return colors.contributeEmpty;
+      case "FIRST_QUARTILE":
+        return colors.contributeL1;
+      case "SECOND_QUARTILE":
+        return colors.contributeL2;
+      case "THIRD_QUARTILE":
+        return colors.contributeL3;
+      case "FOURTH_QUARTILE":
+        return colors.contributeL4;
+    }
+  }
+
+  // Fallback to count-based mapping if level is undefined (e.g. from persisted cache)
   if (count === 0) return colors.contributeEmpty;
-  if (count <= 3) return colors.contributeL1;
-  if (count <= 6) return colors.contributeL2;
-  if (count <= 9) return colors.contributeL3;
+  if (count <= 2) return colors.contributeL1;
+  if (count <= 4) return colors.contributeL2;
+  if (count <= 6) return colors.contributeL3;
   return colors.contributeL4;
 }
 
@@ -93,7 +113,7 @@ export function ContributionGraph({
     }
   });
 
-  const svgWidth = WEEKS * STEP;
+  const svgWidth = weeks.length * STEP;
 
   return (
     <View
@@ -158,7 +178,11 @@ export function ContributionGraph({
                   height={CELL}
                   rx={2}
                   ry={2}
-                  fill={getContributionColor(day.contributionCount, colors)}
+                  fill={getContributionColor(
+                    day.contributionLevel,
+                    day.contributionCount,
+                    colors,
+                  )}
                 />
               )),
             )}

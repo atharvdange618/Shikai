@@ -41,12 +41,14 @@ export const queryClient = new QueryClient({
 export const queryKeys = {
   user: () => ["user"] as const,
   userProfile: (username: string) => ["userProfile", username] as const,
-  userProfileRepos: (username: string) => ["userProfile", username, "repos"] as const,
-  userProfileEvents: (username: string) => ["userProfile", username, "events"] as const,
+  userProfileRepos: (username: string) =>
+    ["userProfile", username, "repos"] as const,
+  userProfileEvents: (username: string) =>
+    ["userProfile", username, "events"] as const,
   repos: () => ["repos"] as const,
   starred: () => ["starred"] as const,
   pinned: () => ["pinned"] as const,
-  contributions: () => ["contributions"] as const,
+  contributions: () => ["contributions-v2"] as const,
   events: (username: string) => ["events", username] as const,
   repo: (owner: string, repo: string) => ["repo", owner, repo] as const,
   repoLanguages: (owner: string, repo: string) =>
@@ -71,8 +73,11 @@ export const queryKeys = {
     ["repo", owner, repo, "issuesPRStats"] as const,
   repoIssues: (owner: string, repo: string, state: "open" | "closed" | "all") =>
     ["repo", owner, repo, "issues", state] as const,
-  repoPullRequests: (owner: string, repo: string, state: "open" | "closed" | "all") =>
-    ["repo", owner, repo, "pullRequests", state] as const,
+  repoPullRequests: (
+    owner: string,
+    repo: string,
+    state: "open" | "closed" | "all",
+  ) => ["repo", owner, repo, "pullRequests", state] as const,
   issueDetail: (owner: string, repo: string, number: number) =>
     ["repo", owner, repo, "issue", number] as const,
   issueComments: (owner: string, repo: string, number: number) =>
