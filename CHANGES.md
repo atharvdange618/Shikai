@@ -42,9 +42,13 @@
 - **Profile page caching** - Profile data heavily cached with 30 min staleTime for faster tab switches.
 - **Beta program links** - README section with Google Form links for beta sign-up and feedback.
 - **Activity feed infinite scroll** - Activity feed supports paginated loading as you scroll.
+- **Repo details scroll indicator** - Bouncing chevron at the bottom of repo details screen hints that README content is available below. Fades out after scrolling, reappears when scrolling back to top.
 
 ### Bug Fixes
 
+- **App icon assets** - Regenerated `icon.png`, `adaptive-icon.png`, and `splash-icon.png` from finalized `logo-lens.svg` instead of the simplified `logo-simple.svg`. Added dark mode splash variant from `logo-lens-dark.svg`. Updated all 25 native Android resources in-place without requiring `expo prebuild`.
+- **Splash icon dark mode** - App, sign-in, and about screens now use the dark splash variant in dark mode. `AnimatedSplashScreen`, sign-in, and about components updated to select the correct asset based on color scheme.
+- **Responsive Overview screen** - `PinnedRepoCard` width now adapts to screen size (70% of width, clamped 180-260px). `ActivityFeed` height scales with screen (45% instead of fixed 400px). Replaced hardcoded font sizes with theme tokens.
 - **Notification navigation routes** - Fixed incorrect `(repo)` route group in notification press handlers. Routes now correctly use `/(app)/repo/` matching the actual file structure.
 - **Following feed endpoint** - Fixed 404 error by correcting the API endpoint from non-existent `/user/received_events` to `/users/{username}/received_events`.
 - **PAT persistence on boot** - PAT is now loaded from SecureStore independently from the main OAuth token, preventing loss during auth reset cycles.
