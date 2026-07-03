@@ -1,99 +1,145 @@
-# Shikai
+<p align="center">
+  <img src="https://github.com/atharvdange618/Shikai/blob/main/assets/images/splash-icon.png?raw=true" width="120" alt="Shikai logo">
+</p>
 
-> A read-only GitHub companion for Android.
+<h1 align="center">Shikai</h1>
 
-**Shikai** shows you your GitHub data the way it deserves to be seen. Your repos, your contributions, your activity - presented clearly, without the noise of the full GitHub mobile experience.
+<p align="center">
+  <strong>A read-only GitHub companion for Android.</strong>
+</p>
 
-GitHub's mobile app is built for _work_ - reviewing PRs, responding to issues, managing projects. Shikai is built for _you_. No write operations. No anxiety about accidentally merging something on a tiny screen. Just your work, at a glance.
+<p align="center">
+  <a href="https://github.com/atharvdange618/Shikai/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License"></a>
+  <a href="https://github.com/atharvdange618/Shikai/releases"><img src="https://img.shields.io/github/v/release/atharvdange618/Shikai?label=version" alt="Version"></a>
+  <a href="https://github.com/atharvdange618/Shikai/releases"><img src="https://img.shields.io/badge/platform-Android-brightgreen.svg" alt="Platform"></a>
+</p>
+
+<p align="center">
+  Your repos, your contributions, your activity, presented clearly without the noise of the full GitHub mobile experience.
+</p>
+
+<p align="center">
+  GitHub's mobile app is built for <em>work</em>. Shikai is built for <em>you</em>.
+</p>
+
+---
+
+## Overview
+
+Shikai gives you a clean, read-only view of your GitHub world. No write operations. No accidental merges on a tiny screen. Just your work, at a glance.
+
+<table>
+  <tr>
+    <td><img src="https://img.shields.io/badge/-Dashboard-blueviolet?style=flat-square" alt="Dashboard"> Pinned repos, contribution graph with streaks, and a live activity feed</td>
+    <td><img src="https://img.shields.io/badge/-Repositories-blue?style=flat-square" alt="Repos"> Browse repos with filters, file trees, syntax highlighting, and health badges</td>
+  </tr>
+  <tr>
+    <td><img src="https://img.shields.io/badge/-Search-green?style=flat-square" alt="Search"> Global search across repos, users, and issues with fuzzy matching</td>
+    <td><img src="https://img.shields.io/badge/-Profile-orange?style=flat-square" alt="Profile"> Your GitHub card with stats, social links, notifications, and saved repos</td>
+  </tr>
+</table>
 
 ---
 
 ## Features
 
-**Overview** - Pinned repos, contribution graph with streaks, and a live activity feed. Pushes, stars, forks, releases, PRs, and issues - all in one place. Tap any item to jump to the repo.
+### Core
 
-**Repositories** - Browse all your repos with smart filters by language, type, or sort order. Explore file trees, view files with syntax highlighting, browse commit history per branch, and track issues and pull requests. Health badges flag missing licenses, no topics, and stale repos. Branch selector lets you switch branches across file tree and commits views.
+| Feature                | Description                                                                              |
+| ---------------------- | ---------------------------------------------------------------------------------------- |
+| **Overview Dashboard** | Pinned repos, contribution graph with streaks, live activity feed, and following preview |
+| **Repository Browser** | File trees, syntax highlighting, commit history, issues, PRs, and branch selector        |
+| **Global Search**      | Fuzzy search across repos, users, and issues with debounced input and eager pagination   |
+| **User Profiles**      | View any GitHub user's profile with avatar, bio, stats, and top repositories             |
 
-**Search** - Global search across repos, users, and issues with fuzzy matching via MiniSearch. Tab switching between result types, debounced input, eager-load pagination. Navigate in-app to any repo, user profile, or issue detail.
+### Personal Access Token
 
-**Profile** - Your GitHub card with stats, social links, location, and hireable status. Access notifications via bell icon (requires PAT), saved repos, and settings via gear icon.
+Optional PAT support unlocks features beyond the GitHub App token:
 
-**Personal Access Token** - Optional PAT support for features not accessible via the GitHub App token. Settings screen lets you paste a token with `notifications` and `repo` scopes. Token is validated, stored securely, and used for notifications and following feed.
+| Feature            | Required Scopes         |
+| ------------------ | ----------------------- |
+| **Notifications**  | `notifications`         |
+| **Following Feed** | `notifications`, `repo` |
 
-**Notifications** - GitHub notifications with attention-worthy filtering. Review requests, mentions, and assignments are highlighted. All/Unread/Attention filters with mark-all-read. Tap to navigate to issues and PRs. Requires a Personal Access Token with the `notifications` scope.
+Tokens are validated, stored securely in `expo-secure-store`, and used only for direct GitHub API calls.
 
-**Following Feed** - See recent activity from people you follow on GitHub. Compact preview on the Overview dashboard with a full feed view. Requires a Personal Access Token with the `notifications` and `repo` scopes. Your own events are filtered out.
+### Themes
 
-**Saved Repos** - Bookmark any repo from anywhere in the app. Stars (from GitHub) and Watchlist (local bookmarks) combined in one screen with search and filter.
+Choose from 5 palettes, each with unique contribution graph colors:
 
-**Themes** - Choose from 5 carefully crafted palettes: Light, Dark, Tokyo Night, Dracula, and Atom One Dark. Theme selection persists across app restarts. Each theme includes unique contribution graph colors.
+|      Light       |       Dark       |  Tokyo Night  |   Dracula    | Atom One Dark  |
+| :--------------: | :--------------: | :-----------: | :----------: | :------------: |
+| Clean and bright | Easy on the eyes | Neon-inspired | Rich purples | Warm and muted |
 
-**User Profiles** - View any GitHub user's profile - avatar, bio, stats, social links, top repositories. Tappable from search results and contributor lists. Skeleton states and pull-to-refresh.
+Pick your favorite from Profile > Settings > Theme. Selection persists across app restarts.
 
-**Keyboard Shortcuts** - Cmd/Ctrl + 1-4 for tab switching, Cmd/Ctrl + F for search, arrow keys for list navigation, Escape to dismiss.
+### Offline Support
 
-**Offline Support** - Network state detection with MMKV-backed disk persistence. Offline banner with safe area support. Ephemeral queries excluded from cache.
+Network state detection with MMKV-backed disk persistence. The app works offline with cached data and shows a banner when you're disconnected. Ephemeral queries are excluded from disk cache.
 
-**Version Check** - Shikai checks for updates on launch and shows a dismissible banner when a new version is available.
+### Additional Features
 
-**Error Recovery** - Crash recovery with ErrorBoundary wrapping root and tabs layouts. Custom 404 screen for invalid routes.
-
----
-
-## Design Principles
-
-- **Read-only by design.** No write operations means no accidental mistakes. This is your safe viewing space.
-- **Mobile-first, native feel.** Smooth animations, haptic feedback, and a UI that feels at home on your phone.
-- **Information at the right density.** Not too sparse, not overwhelming. Just enough detail to be useful, with deeper views when you need them.
-
-Light and dark themes are supported with 5 palettes to choose from: Light, Dark, Tokyo Night, Dracula, and Atom One Dark. Pick your favorite from Profile > Settings > Theme. Typography uses Inter for body text and JetBrains Mono for code.
-
----
-
-## Security
-
-Your token is handled via a secure Cloudflare Worker proxy and never leaves your device after the initial exchange. All subsequent API requests go directly from your phone to GitHub. The app detects rooted devices and debuggers to prevent usage on compromised environments. Tokens are encrypted on-device using `expo-secure-store`. MMKV cache is cleared on sign-in and sign-out.
-
-If you choose to use a Personal Access Token for notifications and following, it is stored alongside your OAuth token in `expo-secure-store` and never transmitted anywhere except directly to GitHub's API.
-
-Shikai requests only read-only access to your GitHub data. It cannot modify, create, or delete anything.
-
-**Developer mode** is blocked by default on release builds. Developers who need to use Shikai with dev options enabled can override this restriction after accepting a warning about potential data access via ADB.
+- **Keyboard Shortcuts** - Cmd/Ctrl + 1-4 for tabs, Cmd/Ctrl + F for search, arrow keys for navigation
+- **Version Check** - Dismissible update banner when a new release is available
+- **Error Recovery** - ErrorBoundary wrapping root and tabs layouts with a custom 404 screen
+- **Saved Repos** - Bookmark any repo. Stars and Watchlist combined in one screen with search and filter
+- **Markdown Preview** - README and markdown files rendered inline with syntax-highlighted code blocks
 
 ---
 
 ## Getting Started
 
 1. Open Shikai and tap **Sign in with GitHub**
-2. Authorize the app - it only requests read permissions
-3. You're in. Your dashboard loads instantly.
-4. (Optional) Go to Profile > Settings > Notifications & Following to add a Personal Access Token for notifications and activity feed.
+2. Authorize the app (read-only permissions only)
+3. Your dashboard loads instantly
+4. Optionally, add a PAT in Profile > Settings > Notifications & Following for notifications and activity feed
 
 ---
 
 ## Keyboard Shortcuts
 
-| Shortcut | Action |
-|----------|--------|
+| Shortcut       | Action              |
+| -------------- | ------------------- |
 | Cmd/Ctrl + 1-4 | Switch between tabs |
-| Cmd/Ctrl + F | Focus search bar |
-| Arrow Up/Down | Navigate lists |
-| Escape | Dismiss search |
+| Cmd/Ctrl + F   | Focus search bar    |
+| Arrow Up/Down  | Navigate lists      |
+| Escape         | Dismiss search      |
+
+---
+
+## Security
+
+Shikai takes security seriously:
+
+- **Read-only access** - Cannot modify, create, or delete anything on your GitHub account
+- **Secure token exchange** - OAuth tokens are exchanged via a Cloudflare Worker proxy and never leave your device
+- **On-device encryption** - Tokens stored with `expo-secure-store` (Keychain/Keystore)
+- **Root/debugger detection** - Blocks usage on compromised environments
+- **No data transmission** - PATs are used only for direct GitHub API calls, never sent elsewhere
+- **Cache hygiene** - MMKV cache cleared on sign-in and sign-out
+
+Developer mode is blocked by default on release builds. Developers can override this after accepting a risk warning.
 
 ---
 
 ## Beta Program
 
-Want early access to new features? Join the Shikai beta program:
+Want early access to new features?
 
-- **Join the Beta**: [Sign up here](https://forms.gle/qdw2xTKfH9kGsmwt9)
-- **Share Feedback**: [Let us know what you think](https://forms.gle/dDrchwJTrqDJyjQm9)
+- **Join the Beta** - [Sign up for early access](https://forms.gle/qdw2xTKfH9kGsmwt9)
+- **Share Feedback** - [Lemme know what you think](https://forms.gle/dDrchwJTrqDJyjQm9)
 
 ---
 
 ## Built With
 
-React Native · Expo · TypeScript · React Query · Zustand · Reanimated · FlashList · MMKV · GitHub REST & GraphQL APIs · GitHub OAuth (PKCE) · Cloudflare Workers
+| Layer         | Technologies                               |
+| ------------- | ------------------------------------------ |
+| **Framework** | React Native, Expo, TypeScript             |
+| **State**     | React Query, Zustand, MMKV                 |
+| **UI**        | Reanimated, FlashList                      |
+| **APIs**      | GitHub REST & GraphQL, GitHub OAuth (PKCE) |
+| **Infra**     | Cloudflare Workers                         |
 
 ---
 
@@ -107,4 +153,6 @@ MIT
 
 ---
 
-Built by [Atharv Dange](https://x.com/atharvdangedev).
+<p align="center">
+  Built by <a href="https://x.com/atharvdangedev">Atharv Dange</a>
+</p>
