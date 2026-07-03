@@ -58,3 +58,5 @@ modules/*/android/build/
 app-marketing-context.md
 play-store-checklist.md
 GITHUB-RELEASE.md
+releases/
+close-testing-email.txt
