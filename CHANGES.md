@@ -102,7 +102,7 @@
 
 ### Build
 
-- **ABI splits** - Release builds produce 3 APKs: arm64-v8a (~42MB), x86_64 (~43MB), universal (~84MB).
+- **ABI splits** - Release builds produce 3 APKs: arm64-v8a (~37MB), x86_64 (~39MB), universal (~82MB).
 - **ABI splits for AAB** - Disabled ABI splits for AAB builds to prevent `bundleRelease` conflict.
 - **R8 minification and resource shrinking** - Enabled for release builds.
 - **Animated WebP disabled** - Saves ~3.4MB per APK.
