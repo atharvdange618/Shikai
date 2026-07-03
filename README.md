@@ -82,6 +82,15 @@ Shikai requests only read-only access to your GitHub data. It cannot modify, cre
 
 ---
 
+## Beta Program
+
+Want early access to new features? Join the Shikai beta program:
+
+- **Join the Beta**: [Sign up here](https://forms.gle/qdw2xTKfH9kGsmwt9)
+- **Share Feedback**: [Let us know what you think](https://forms.gle/dDrchwJTrqDJyjQm9)
+
+---
+
 ## Built With
 
 React Native · Expo · TypeScript · React Query · Zustand · Reanimated · FlashList · MMKV · GitHub REST & GraphQL APIs · GitHub OAuth (PKCE) · Cloudflare Workers
