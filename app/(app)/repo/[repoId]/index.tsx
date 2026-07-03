@@ -582,7 +582,13 @@ export default function RepoDetailsScreen() {
           onPressIn={handleCodePressIn}
         >
           <Octicons name="code" size={IconSize.sm} color={colors.textPrimary} />
-          <Text style={s.actionButtonOutlineText}>Code</Text>
+          <Text
+            style={s.actionButtonOutlineText}
+            numberOfLines={1}
+            adjustsFontSizeToFit
+          >
+            Code
+          </Text>
         </Pressable>
 
         <Pressable
@@ -599,7 +605,13 @@ export default function RepoDetailsScreen() {
             size={IconSize.sm}
             color={colors.textOnAccent}
           />
-          <Text style={s.actionButtonFilledText}>Commits</Text>
+          <Text
+            style={s.actionButtonFilledText}
+            numberOfLines={1}
+            adjustsFontSizeToFit
+          >
+            Commits
+          </Text>
         </Pressable>
 
         <Pressable
@@ -622,6 +634,8 @@ export default function RepoDetailsScreen() {
               s.actionButtonOutlineText,
               copiedUrl && { color: colors.success },
             ]}
+            numberOfLines={1}
+            adjustsFontSizeToFit
           >
             {copiedUrl ? "Copied!" : "Share"}
           </Text>
@@ -840,6 +854,9 @@ function buildStyles(colors: ColorTokens, bottomInset: number) {
       paddingVertical: Spacing.lg,
       gap: Spacing.lg,
       paddingBottom: bottomInset,
+      maxWidth: 680,
+      width: "100%",
+      alignSelf: "center",
     },
 
     centered: {
@@ -1111,7 +1128,7 @@ function buildStyles(colors: ColorTokens, bottomInset: number) {
       flexDirection: "row",
       alignItems: "center",
       justifyContent: "center",
-      gap: Spacing.sm,
+      gap: 6,
       height: 44,
       borderRadius: Radius.md,
     },

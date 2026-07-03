@@ -115,7 +115,11 @@ export function BlockingScreen({
             {loading ? (
               <ActivityIndicator color={colors.textSecondary} />
             ) : (
-              <Text style={[TextStyles.label, { color: colors.textSecondary }]}>
+              <Text
+                style={[TextStyles.label, { color: colors.textSecondary }]}
+                numberOfLines={1}
+                adjustsFontSizeToFit
+              >
                 {"I'm a developer - allow anyway"}
               </Text>
             )}
