@@ -22,6 +22,7 @@ import { Href, useRouter } from "expo-router";
 import { useMemo, useState } from "react";
 import {
   ActivityIndicator,
+  Dimensions,
   Pressable,
   StyleSheet,
   Text,
@@ -329,7 +330,8 @@ function groupEvents(
   return grouped;
 }
 
-const ACTIVITY_FEED_HEIGHT = 400;
+const { height: SCREEN_HEIGHT } = Dimensions.get("window");
+const ACTIVITY_FEED_HEIGHT = Math.round(SCREEN_HEIGHT * 0.45);
 
 export function ActivityFeed({
   events,
@@ -374,7 +376,7 @@ export function ActivityFeed({
         {Array.from({ length: 5 }).map((_, i) => (
           <View key={i} style={s.skeletonItem}>
             <View style={s.skeletonIcon} />
-            <View style={{ flex: 1, gap: 6 }}>
+            <View style={{ flex: 1, gap: Spacing.xs }}>
               <View style={[s.skeletonLine, { width: "70%" }]} />
               <View style={[s.skeletonLine, { width: "45%" }]} />
             </View>

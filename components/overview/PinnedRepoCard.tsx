@@ -2,7 +2,7 @@ import { Octicons } from "@expo/vector-icons";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { useCallback, useMemo } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Dimensions, Pressable, StyleSheet, Text, View } from "react-native";
 
 import {
   type ColorTokens,
@@ -20,7 +20,8 @@ import languageColors from "@/constants/language-colors.json";
 import { prefetchRepoDetails, prefetchRoute } from "@/lib/prefetch";
 import { encodeRepoId, formatCount } from "@/lib/utils";
 
-const CARD_WIDTH = 220;
+const { width: SCREEN_WIDTH } = Dimensions.get("window");
+const CARD_WIDTH = Math.min(Math.max(SCREEN_WIDTH * 0.7, 180), 260);
 
 interface PinnedRepoCardProps {
   repo: PinnedRepoNode;
@@ -153,7 +154,7 @@ function buildStyles(colors: ColorTokens, shadows: object) {
 
     privateBadgeText: {
       fontFamily: FontFamily.medium,
-      fontSize: 9,
+      fontSize: FontSize.caption,
       color: colors.badgePrivateText,
     },
 

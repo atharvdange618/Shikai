@@ -5,6 +5,7 @@ import { Href, useRouter } from "expo-router";
 import { useCallback, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
+  Dimensions,
   Pressable,
   RefreshControl,
   ScrollView,
@@ -34,6 +35,7 @@ import {
   type ColorTokens,
   FontFamily,
   FontSize,
+  Layout,
   Radius,
   Spacing,
   useTheme,
@@ -243,7 +245,7 @@ const followStyles = StyleSheet.create({
   },
   timeText: {
     fontFamily: FontFamily.regular,
-    fontSize: 10,
+    fontSize: FontSize.caption,
   },
 });
 
