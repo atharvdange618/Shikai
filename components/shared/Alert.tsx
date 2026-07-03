@@ -79,6 +79,8 @@ function AlertDialog({
 
   const variant = config.variant ?? "info";
   const actions = config.actions ?? [{ text: "OK", style: "default" }];
+  const shouldStack =
+    actions.some((action) => action.text.length > 8) || actions.length > 2;
 
   const variantColor = {
     info: colors.accent,
@@ -146,7 +148,9 @@ function AlertDialog({
             </Text>
           )}
 
-          <View style={styles.actions}>
+          <View
+            style={[styles.actions, shouldStack && { flexDirection: "column" }]}
+          >
             {actions.map((action, i) => {
               const isDestructive = action.style === "destructive";
               const isCancel = action.style === "cancel";
@@ -170,7 +174,12 @@ function AlertDialog({
                         backgroundColor: colors.accent,
                         borderColor: colors.accent,
                       },
-                    !isLast && { marginRight: Spacing.sm },
+                    shouldStack
+                      ? [
+                          { flex: 0, width: "100%" },
+                          !isLast && { marginBottom: Spacing.sm },
+                        ]
+                      : !isLast && { marginRight: Spacing.sm },
                     pressed && { opacity: 0.7 },
                   ]}
                   onPress={() => handleAction(action)}
@@ -186,6 +195,8 @@ function AlertDialog({
                             : colors.textOnAccent,
                       },
                     ]}
+                    numberOfLines={1}
+                    adjustsFontSizeToFit
                   >
                     {action.text}
                   </Text>

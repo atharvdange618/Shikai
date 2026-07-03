@@ -19,7 +19,6 @@ import { prefetchRepoDetails } from "@/lib/prefetch";
 
 import {
   AvatarSize,
-  type ColorTokens,
   FontFamily,
   FontSize,
   IconSize,
@@ -28,6 +27,7 @@ import {
   Shadows,
   Spacing,
   useTheme,
+  type ColorTokens,
 } from "@/constants/theme";
 import { encodeRepoId, formatCount } from "@/lib/utils";
 import type { GitHubRepo } from "@/types/github.types";
@@ -257,7 +257,7 @@ export default function UserProfileScreen() {
       ) : topRepos?.repos && topRepos.repos.length > 0 ? (
         <View style={s.section}>
           <Text style={s.sectionTitle}>Top Repositories</Text>
-          {topRepos.repos.slice(0, 5).map((repo) => (
+          {topRepos.repos.slice(0, 5).map((repo: GitHubRepo) => (
             <RepoRow
               key={repo.id}
               repo={repo}
@@ -579,6 +579,9 @@ function buildStyles(colors: ColorTokens, shadows: object) {
       paddingTop: Spacing.xl,
       paddingBottom: Spacing.xxl,
       gap: Spacing.lg,
+      maxWidth: 680,
+      width: "100%",
+      alignSelf: "center",
     },
 
     section: {

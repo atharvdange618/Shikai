@@ -13,6 +13,7 @@ import {
   usePullRequestDetail,
 } from "@/hooks/usePullRequestDetail";
 import { decodeRepoId, relativeTime } from "@/lib/utils";
+import type { GitHubComment, GitHubLabel } from "@/types/github.types";
 import { Octicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { useLocalSearchParams, useNavigation } from "expo-router";
@@ -126,7 +127,7 @@ export default function PullRequestDetailScreen() {
 
       {pr.labels.length > 0 && (
         <View style={s.labelsRow}>
-          {pr.labels.map((label) => (
+          {pr.labels.map((label: GitHubLabel) => (
             <View
               key={label.id}
               style={[
@@ -177,7 +178,7 @@ export default function PullRequestDetailScreen() {
         <View style={[s.separator, { backgroundColor: colors.border }]} />
       )}
 
-      {comments.map((comment, _index) => (
+      {comments.map((comment: GitHubComment, _index: number) => (
         <View key={comment.id}>
           <View
             style={[
@@ -221,6 +222,9 @@ const s = StyleSheet.create({
     paddingTop: Spacing.lg,
     paddingBottom: Spacing.xxl + 60 + Spacing.lg,
     gap: Spacing.md,
+    maxWidth: 680,
+    width: "100%",
+    alignSelf: "center",
   },
   centered: {
     flex: 1,

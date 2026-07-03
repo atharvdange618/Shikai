@@ -298,6 +298,9 @@ function buildStyles(colors: ColorTokens, shadows: object) {
       paddingTop: Spacing.xl,
       paddingBottom: Spacing.xxl,
       gap: Spacing.lg,
+      maxWidth: 680,
+      width: "100%",
+      alignSelf: "center",
     },
 
     heroSection: {
