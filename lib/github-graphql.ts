@@ -86,6 +86,7 @@ const CONTRIBUTION_GRAPH_QUERY = `
             contributionDays {
               date
               contributionCount
+              contributionLevel
               weekday
             }
           }
