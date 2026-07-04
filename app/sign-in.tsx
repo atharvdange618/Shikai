@@ -38,7 +38,13 @@ import {
 import { clearAllMMKV } from "@/lib/mmkv";
 import { prefetchOverview } from "@/lib/prefetch";
 import { queryClient, queryKeys } from "@/lib/query-client";
-import { getStoredPAT, saveToken } from "@/lib/secure-storage";
+import {
+  clearPendingAuth,
+  getPendingAuth,
+  getStoredPAT,
+  savePendingAuth,
+  saveToken,
+} from "@/lib/secure-storage";
 import { useAuthStore } from "@/stores/auth.store";
 import { useSignInStore } from "@/stores/signin.store";
 
@@ -73,6 +79,121 @@ export default function SignInScreen() {
 
   const redirectUri = makeRedirectUri({ scheme: "shikai" });
 
+  const completeAuth = useCallback(
+    async (code: string, codeVerifier: string) => {
+      const { setLoading, setError, setNeedsInstall, setPendingToken } =
+        useSignInStore.getState();
+
+      setLoading(true);
+      setError(null);
+
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 30000);
+
+        let accessToken: string;
+
+        try {
+          const tokenResponse = await fetch(OAUTH_PROXY_URL, {
+            signal: controller.signal,
+            method: "POST",
+            headers: {
+              Accept: "application/json",
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              client_id: CLIENT_ID,
+              code,
+              redirect_uri: redirectUri,
+              code_verifier: codeVerifier,
+            }),
+          });
+
+          const tokenData = await tokenResponse.json();
+
+          if (tokenData.error || !tokenData.access_token) {
+            setError("Could not get access token. Please try again.");
+            setLoading(false);
+            await clearPendingAuth();
+            return;
+          }
+
+          accessToken = tokenData.access_token;
+        } finally {
+          clearTimeout(timeoutId);
+        }
+
+        await clearPendingAuth();
+
+        githubAxios.defaults.headers.common["Authorization"] =
+          `Bearer ${accessToken}`;
+
+        const installations = await fetchUserInstallations();
+
+        if (installations.length === 0) {
+          setPendingToken(accessToken);
+          setLoading(false);
+          setNeedsInstall(true);
+          return;
+        }
+
+        const [, user] = await Promise.all([
+          saveToken(accessToken),
+          fetchAuthenticatedUser(),
+        ]);
+
+        const storedPAT = await getStoredPAT();
+        if (storedPAT) setPat(storedPAT);
+
+        setToken(accessToken);
+        setUser(user);
+
+        clearAllMMKV();
+        queryClient.clear();
+        queryClient.setQueryData(queryKeys.user(), user);
+        prefetchOverview(queryClient, user.login);
+
+        setLoading(false);
+        router.replace("/(app)/(tabs)/overview" as Href);
+      } catch {
+        setError("Something went wrong. Check your connection and try again.");
+        setLoading(false);
+        await clearPendingAuth();
+      }
+    },
+    [redirectUri, setToken, setUser, router, setPat],
+  );
+
+  useEffect(() => {
+    const handleDeepLink = async (event: { url: string }) => {
+      const parsed = Linking.parse(event.url);
+      const code = parsed.queryParams?.code as string | undefined;
+      if (!code) return;
+
+      const pendingAuth = await getPendingAuth();
+      if (!pendingAuth) return;
+
+      await completeAuth(code, pendingAuth.codeVerifier);
+    };
+
+    Linking.getInitialURL().then((url) => {
+      if (url) handleDeepLink({ url });
+    });
+
+    const subscription = Linking.addEventListener("url", handleDeepLink);
+    return () => subscription.remove();
+  }, [completeAuth]);
+
+  useEffect(() => {
+    const recoverPendingAuth = async () => {
+      const pendingAuth = await getPendingAuth();
+      if (pendingAuth) {
+        useSignInStore.getState().setLoading(true);
+      }
+    };
+    recoverPendingAuth();
+  }, []);
+
   const buttonScale = useSharedValue(1);
   const buttonStyle = useAnimatedStyle(() => ({
     transform: [{ scale: buttonScale.value }],
@@ -86,8 +207,7 @@ export default function SignInScreen() {
   }
 
   const handleSignIn = useCallback(async () => {
-    const { setLoading, setError, setNeedsInstall, setPendingToken } =
-      useSignInStore.getState();
+    const { setLoading, setError, setNeedsInstall } = useSignInStore.getState();
 
     setLoading(true);
     setError(null);
@@ -114,6 +234,8 @@ export default function SignInScreen() {
         .replace(/\+/g, "-")
         .replace(/\//g, "_");
 
+      await savePendingAuth(codeVerifier);
+
       const authUrl =
         `https://github.com/login/oauth/authorize` +
         `?client_id=${CLIENT_ID}` +
@@ -122,96 +244,13 @@ export default function SignInScreen() {
         `&code_challenge=${codeChallenge}` +
         `&code_challenge_method=S256`;
 
-      const result = await WebBrowser.openAuthSessionAsync(
-        authUrl,
-        redirectUri,
-      );
-
-      if (result.type !== "success") {
-        setLoading(false);
-        return;
-      }
-
-      const parsed = Linking.parse(result.url);
-      const code = parsed.queryParams?.code as string | undefined;
-
-      if (!code) {
-        setError("Authorization failed. Please try again.");
-        setLoading(false);
-        return;
-      }
-
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 30000);
-
-      let accessToken: string;
-
-      try {
-        const tokenResponse = await fetch(OAUTH_PROXY_URL, {
-          signal: controller.signal,
-          method: "POST",
-          headers: {
-            Accept: "application/json",
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            client_id: CLIENT_ID,
-            code,
-            redirect_uri: redirectUri,
-            code_verifier: codeVerifier,
-          }),
-        });
-
-        const tokenData = await tokenResponse.json();
-
-        if (tokenData.error || !tokenData.access_token) {
-          setError("Could not get access token. Please try again.");
-          setLoading(false);
-          return;
-        }
-
-        accessToken = tokenData.access_token;
-      } finally {
-        clearTimeout(timeoutId);
-      }
-
-      githubAxios.defaults.headers.common["Authorization"] =
-        `Bearer ${accessToken}`;
-
-      const installations = await fetchUserInstallations();
-
-      if (installations.length === 0) {
-        setPendingToken(accessToken);
-        setLoading(false);
-        setNeedsInstall(true);
-        return;
-      }
-
-      const [, user] = await Promise.all([
-        saveToken(accessToken),
-        fetchAuthenticatedUser(),
-      ]);
-
-      const storedPAT = await getStoredPAT();
-      if (storedPAT) setPat(storedPAT);
-
-      // Set auth store FIRST so hooks have data on mount
-      setToken(accessToken);
-      setUser(user);
-
-      // Then clear and repopulate query cache
-      clearAllMMKV();
-      queryClient.clear();
-      queryClient.setQueryData(queryKeys.user(), user);
-      prefetchOverview(queryClient, user.login);
-
-      setLoading(false);
-      router.replace("/(app)/(tabs)/overview" as Href);
+      await Linking.openURL(authUrl);
     } catch {
       setError("Something went wrong. Check your connection and try again.");
       setLoading(false);
+      await clearPendingAuth();
     }
-  }, [redirectUri, setToken, setUser, router, setPat]);
+  }, [redirectUri]);
 
   const handleInstall = useCallback(async () => {
     const { setLoading, setError, setNeedsInstall, setPendingToken } =
@@ -256,11 +295,9 @@ export default function SignInScreen() {
       const storedPAT = await getStoredPAT();
       if (storedPAT) setPat(storedPAT);
 
-      // Set auth store FIRST so hooks have data on mount
       setToken(pendingToken);
       setUser(user);
 
-      // Then clear and repopulate query cache
       clearAllMMKV();
       queryClient.clear();
       queryClient.setQueryData(queryKeys.user(), user);

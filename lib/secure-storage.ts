@@ -3,7 +3,15 @@ import * as SecureStore from "expo-secure-store";
 const KEYS = {
   GITHUB_TOKEN: "shikai_github_token",
   GITHUB_PAT: "shikai_github_pat",
+  PENDING_AUTH: "shikai_pending_auth",
 } as const;
+
+const PENDING_AUTH_TTL_MS = 10 * 60 * 1000;
+
+export interface PendingAuth {
+  codeVerifier: string;
+  timestamp: number;
+}
 
 function isValidToken(token: string | null): token is string {
   if (!token || token.length < 10 || token.length > 500) return false;
@@ -60,6 +68,38 @@ export async function savePAT(pat: string): Promise<void> {
 export async function deletePAT(): Promise<void> {
   try {
     await SecureStore.deleteItemAsync(KEYS.GITHUB_PAT);
+  } catch {
+    // Silent fail
+  }
+}
+
+export async function savePendingAuth(codeVerifier: string): Promise<void> {
+  try {
+    const data: PendingAuth = { codeVerifier, timestamp: Date.now() };
+    await SecureStore.setItemAsync(KEYS.PENDING_AUTH, JSON.stringify(data));
+  } catch {
+    // Silent fail - auth flow will rely on in-memory state
+  }
+}
+
+export async function getPendingAuth(): Promise<PendingAuth | null> {
+  try {
+    const raw = await SecureStore.getItemAsync(KEYS.PENDING_AUTH);
+    if (!raw) return null;
+    const data: PendingAuth = JSON.parse(raw);
+    if (Date.now() - data.timestamp > PENDING_AUTH_TTL_MS) {
+      await SecureStore.deleteItemAsync(KEYS.PENDING_AUTH);
+      return null;
+    }
+    return data;
+  } catch {
+    return null;
+  }
+}
+
+export async function clearPendingAuth(): Promise<void> {
+  try {
+    await SecureStore.deleteItemAsync(KEYS.PENDING_AUTH);
   } catch {
     // Silent fail
   }

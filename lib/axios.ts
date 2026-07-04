@@ -8,6 +8,11 @@ import axios, {
 const GITHUB_API_BASE = "https://api.github.com";
 const GITHUB_API_VERSION = "2022-11-28";
 
+let authReady = false;
+export function setAuthReady(ready: boolean) {
+  authReady = ready;
+}
+
 export interface RateLimitState {
   limit: number | null;
   remaining: number | null;
@@ -82,7 +87,7 @@ githubAxios.interceptors.response.use(
     const message =
       (data?.message as string) ?? error.message ?? "Unknown error";
 
-    if (status === 401) {
+    if (status === 401 && authReady) {
       useAuthStore.getState().clearAuth();
     }
 
