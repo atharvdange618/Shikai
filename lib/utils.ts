@@ -1,3 +1,18 @@
+export function compactTimeAgo(dateStr: string): string {
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const mins = Math.floor(diff / 60_000);
+  if (mins < 1) return "now";
+  if (mins < 60) return `${mins}m`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `${hours}h`;
+  const days = Math.floor(hours / 24);
+  if (days < 7) return `${days}d`;
+  const weeks = Math.floor(days / 7);
+  if (weeks < 4) return `${weeks}w`;
+  const months = Math.floor(days / 30);
+  return `${months}mo`;
+}
+
 export function relativeTime(dateStr: string): string {
   if (!dateStr) return "";
   const dateMs = new Date(dateStr).getTime();
@@ -140,4 +155,16 @@ export function getLanguage(filename: string): string {
     default:
       return "text";
   }
+}
+
+export function parseGitHubUrl(url: string): string | null {
+  const match = url.match(
+    /github\.com\/([^/]+)\/([^/]+)(?:\/(issues|pull)\/(\d+))?/,
+  );
+  if (!match) return null;
+  const [, owner, repo, type, number] = match;
+  const repoId = encodeRepoId(owner, repo);
+  if (type === "issues" && number) return `/(app)/repo/${repoId}/issue/${number}`;
+  if (type === "pull" && number) return `/(app)/repo/${repoId}/pr/${number}`;
+  return `/(app)/repo/${repoId}`;
 }
