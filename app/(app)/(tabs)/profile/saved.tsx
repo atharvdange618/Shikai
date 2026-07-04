@@ -14,6 +14,7 @@ import {
 import { FlashList } from "@shopify/flash-list";
 
 import { RepoCard } from "@/components/repo/RepoCard";
+import { ListItemSeparator } from "@/components/shared/ListItemSeparator";
 import { SearchBar } from "@/components/shared/SearchBar";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useSearchIndex } from "@/hooks/useSearchIndex";
@@ -211,6 +212,7 @@ export default function SavedScreen() {
         renderItem={renderItem}
         keyExtractor={keyExtractor}
         contentContainerStyle={s.listContent}
+        ItemSeparatorComponent={ListItemSeparator}
         ListEmptyComponent={ListEmpty}
         onEndReached={onEndReached}
         onEndReachedThreshold={0.5}
