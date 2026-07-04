@@ -114,6 +114,7 @@ export function getLanguage(filename: string): string {
     case "cpp":
     case "cxx":
     case "cc":
+    case "ino":
       return "cpp";
     case "c":
       return "c";
@@ -146,6 +147,7 @@ export function getLanguage(filename: string): string {
     case "yaml":
       return "yaml";
     case "xml":
+    case "svg":
       return "xml";
     case "sql":
       return "sql";
@@ -164,7 +166,8 @@ export function parseGitHubUrl(url: string): string | null {
   if (!match) return null;
   const [, owner, repo, type, number] = match;
   const repoId = encodeRepoId(owner, repo);
-  if (type === "issues" && number) return `/(app)/repo/${repoId}/issue/${number}`;
+  if (type === "issues" && number)
+    return `/(app)/repo/${repoId}/issue/${number}`;
   if (type === "pull" && number) return `/(app)/repo/${repoId}/pr/${number}`;
   return `/(app)/repo/${repoId}`;
 }
