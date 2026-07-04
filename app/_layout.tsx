@@ -25,8 +25,9 @@ import {
 } from "@/components";
 import { OfflineBanner } from "@/components/OfflineBanner";
 import { ThemeProvider, useTheme } from "@/contexts/ThemeContext";
+import { setAuthReady } from "@/lib/axios";
 import { fetchAuthenticatedUser } from "@/lib/github-rest";
-import { mmkvPersister, PERSISTENCE_MAX_AGE } from "@/lib/persister";
+import { PERSISTENCE_MAX_AGE, mmkvPersister } from "@/lib/persister";
 import { queryClient, setupFocusManager } from "@/lib/query-client";
 import { getStoredPAT, getStoredToken } from "@/lib/secure-storage";
 import { useOnlineManager } from "@/lib/use-online-manager";
@@ -101,6 +102,7 @@ export default function RootLayout() {
         // No stored token - routing handles sending user to sign-in
       } finally {
         setBootComplete(true);
+        setAuthReady(true);
       }
     }
 
@@ -108,6 +110,7 @@ export default function RootLayout() {
       boot();
     } else {
       setBootComplete(true);
+      setAuthReady(true);
     }
   }, [fontsLoaded, fontError, setToken, setUser, setPat]);
 
