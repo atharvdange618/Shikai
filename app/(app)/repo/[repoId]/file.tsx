@@ -8,19 +8,19 @@ import {
   Animated,
   Easing,
   Image,
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
   Text,
-  useWindowDimensions,
   View,
+  useWindowDimensions,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { WebView } from "react-native-webview";
 
-import { VirtualizedCodeViewer } from "@/components/repo/VirtualizedCodeViewer";
 import { MarkdownRenderer } from "@/components/shared/MarkdownRenderer";
 import {
-  type ColorTokens,
   FontFamily,
   FontSize,
   IconSize,
@@ -28,6 +28,7 @@ import {
   Radius,
   Spacing,
   useTheme,
+  type ColorTokens,
 } from "@/constants/theme";
 import { useFileContent } from "@/hooks/useRepoDetails";
 import { decodeRepoId, getLanguage, isImageFile } from "@/lib/utils";
@@ -145,6 +146,16 @@ export default function FileViewerScreen() {
     [fileName],
   );
 
+  const isSvg = useMemo(
+    () => fileName?.toLowerCase().endsWith(".svg") ?? false,
+    [fileName],
+  );
+
+  const isPdf = useMemo(
+    () => fileName?.toLowerCase().endsWith(".pdf") ?? false,
+    [fileName],
+  );
+
   const isMarkdown = useMemo(() => {
     if (!fileName) return false;
     const lower = fileName.toLowerCase();
@@ -215,7 +226,7 @@ export default function FileViewerScreen() {
 
           {showContent && (
             <View style={s.imageWrapper}>
-              {(imageLoading || imageError) && (
+              {(imageLoading || imageError) && !isSvg && (
                 <View style={s.centered}>
                   {imageLoading && (
                     <>
@@ -235,32 +246,103 @@ export default function FileViewerScreen() {
                   )}
                 </View>
               )}
-              {data?.meta.download_url && !imageError && (
-                <Image
-                  source={{ uri: data.meta.download_url }}
-                  style={[
-                    s.image,
-                    {
+              {data?.meta.download_url &&
+                (isSvg ? (
+                  <WebView
+                    source={{
+                      html: `
+                        <!DOCTYPE html>
+                        <html>
+                        <head>
+                          <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+                          <style>
+                            body {
+                              margin: 0;
+                              padding: 16px;
+                              display: flex;
+                              justify-content: center;
+                              align-items: center;
+                              min-height: 100vh;
+                              background-color: ${colors.background};
+                            }
+                            img {
+                              max-width: 100%;
+                              max-height: 90vh;
+                              object-fit: contain;
+                            }
+                          </style>
+                        </head>
+                        <body>
+                          <img src="${data.meta.download_url}" />
+                        </body>
+                        </html>
+                      `,
+                    }}
+                    style={{
                       width: screenWidth - Spacing.lg * 2,
-                      maxHeight: 600,
-                      opacity: imageLoading ? 0 : 1,
-                    },
-                  ]}
-                  resizeMode="contain"
-                  onLoadStart={() => setImageLoading(true)}
-                  onLoadEnd={() => setImageLoading(false)}
-                  onError={() => {
-                    setImageLoading(false);
-                    setImageError(true);
-                  }}
-                />
-              )}
+                      height: 400,
+                      backgroundColor: "transparent",
+                    }}
+                    scrollEnabled={false}
+                  />
+                ) : (
+                  !imageError && (
+                    <Image
+                      source={{ uri: data.meta.download_url }}
+                      style={[
+                        s.image,
+                        {
+                          width: screenWidth - Spacing.lg * 2,
+                          maxHeight: 600,
+                          opacity: imageLoading ? 0 : 1,
+                        },
+                      ]}
+                      resizeMode="contain"
+                      onLoadStart={() => setImageLoading(true)}
+                      onLoadEnd={() => setImageLoading(false)}
+                      onError={() => {
+                        setImageLoading(false);
+                        setImageError(true);
+                      }}
+                    />
+                  )
+                ))}
             </View>
           )}
         </ScrollView>
       )}
 
-      {!isImage && isMarkdown && (
+      {!isImage && isPdf && (
+        <View style={{ flex: 1 }}>
+          <LoadingProgress
+            isLoading={isLoading}
+            fileName={fileName ?? ""}
+            colors={colors}
+          />
+
+          {isError && (
+            <View style={s.centered}>
+              <Octicons name="alert" size={IconSize.lg} color={colors.danger} />
+              <Text style={s.errorText}>Failed to load file</Text>
+              <Text style={s.errorSubtext}>{(error as Error)?.message}</Text>
+            </View>
+          )}
+
+          {showContent && data?.meta.download_url && (
+            <WebView
+              source={{
+                uri:
+                  Platform.OS === "ios"
+                    ? data.meta.download_url
+                    : `https://docs.google.com/gview?embedded=true&url=${encodeURIComponent(data.meta.download_url)}`,
+              }}
+              style={{ flex: 1, backgroundColor: colors.background }}
+            />
+          )}
+        </View>
+      )}
+
+      {!isImage && !isPdf && (
         <ScrollView
           style={s.contentScroll}
           contentContainerStyle={s.markdownContent}
@@ -299,61 +381,16 @@ export default function FileViewerScreen() {
                 </Pressable>
               </View>
               <MarkdownRenderer
-                markdown={data.content}
+                markdown={
+                  isMarkdown
+                    ? data.content
+                    : `\`\`\`${fileName ? getLanguage(fileName) : ""}\n${data.content}\n\`\`\``
+                }
                 context={`${owner}/${repoName}`}
               />
             </>
           )}
         </ScrollView>
-      )}
-
-      {!isImage && !isMarkdown && (
-        <VirtualizedCodeViewer
-          content={showContent ? data.content : ""}
-          language={fileName ? getLanguage(fileName) : "text"}
-          ListHeaderComponent={
-            <>
-              <LoadingProgress
-                isLoading={isLoading}
-                fileName={fileName ?? ""}
-                colors={colors}
-              />
-
-              {isError && (
-                <View style={s.centered}>
-                  <Octicons
-                    name="alert"
-                    size={IconSize.lg}
-                    color={colors.danger}
-                  />
-                  <Text style={s.errorText}>Failed to load file</Text>
-                  <Text style={s.errorSubtext}>
-                    {(error as Error)?.message}
-                  </Text>
-                </View>
-              )}
-
-              {showContent && (
-                <View style={s.codeHeader}>
-                  <Pressable
-                    style={({ pressed }) => [
-                      s.copyButton,
-                      pressed && s.copyButtonPressed,
-                      copied && s.copyButtonCopied,
-                    ]}
-                    onPress={handleCopy}
-                  >
-                    <Octicons
-                      name={copied ? "check" : "copy"}
-                      size={IconSize.sm}
-                      color={copied ? colors.success : colors.textPrimary}
-                    />
-                  </Pressable>
-                </View>
-              )}
-            </>
-          }
-        />
       )}
     </SafeAreaView>
   );
