@@ -1,7 +1,7 @@
 import { useTheme } from "@/constants/theme";
 import { githubAxios } from "@/lib/axios";
 import * as Clipboard from "expo-clipboard";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { StyleSheet, View, type StyleProp, type ViewStyle } from "react-native";
 import type { WebViewMessageEvent } from "react-native-webview";
 import RNWebView from "react-native-webview";
@@ -311,76 +311,125 @@ function buildHtml(html: string, isDark: boolean): string {
   function renderMermaid(blocks) {
     if (blocks.length === 0) return;
     var isDark = ${isDark ? "true" : "false"};
-    var script = document.createElement('script');
-    script.src = 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js';
-    script.onload = function() {
-      mermaid.initialize({
-        startOnLoad: false,
-        theme: isDark ? 'dark' : 'default',
-        securityLevel: 'loose',
-        fontFamily: 'ui-sans-serif, system-ui, -apple-system, sans-serif',
-        fontSize: 14,
+
+    blocks.forEach(function(item) {
+      var placeholder = document.createElement('div');
+      placeholder.className = 'mermaid-wrapper';
+      placeholder.style.color = isDark ? '#8B949E' : '#5A6B7B';
+      placeholder.style.fontStyle = 'italic';
+      placeholder.style.fontSize = '13px';
+      placeholder.textContent = 'Loading diagram\\u2026';
+      item.el.parentNode.replaceChild(placeholder, item.el);
+      item._placeholder = placeholder;
+    });
+    postHeight();
+
+    fetch('https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js')
+      .then(function(r) {
+        return r.text();
+      })
+      .then(function(code) {
+        var s = document.createElement('script');
+        s.textContent = code;
+        document.head.appendChild(s);
+
+        mermaid.initialize({
+          startOnLoad: false,
+          theme: isDark ? 'dark' : 'default',
+          securityLevel: 'loose',
+          fontFamily: 'ui-sans-serif, system-ui, -apple-system, sans-serif',
+          fontSize: 14,
+        });
+        var pending = blocks.length;
+        blocks.forEach(function(item, i) {
+          var id = 'mermaid-diagram-' + i + '-' + Date.now();
+          mermaid.render(id, item.source)
+            .then(function(result) {
+              var wrapper = document.createElement('div');
+              wrapper.className = 'mermaid-wrapper';
+              wrapper.innerHTML = result.svg;
+              if (item._placeholder.parentNode) {
+                item._placeholder.parentNode.replaceChild(wrapper, item._placeholder);
+              }
+            })
+            .catch(function(err) {
+              var errDiv = document.createElement('div');
+              errDiv.className = 'mermaid-error';
+              errDiv.textContent = 'Mermaid diagram failed to render';
+              if (item._placeholder.parentNode) {
+                item._placeholder.parentNode.replaceChild(errDiv, item._placeholder);
+              }
+            })
+            .finally(function() {
+              pending--;
+              if (pending === 0) { postHeight(); setTimeout(postHeight, 150); }
+            });
+        });
+      })
+      .catch(function(err) {
+        blocks.forEach(function(item) {
+          if (item._placeholder.parentNode) {
+            item._placeholder.textContent = 'Could not load Mermaid renderer';
+            item._placeholder.className = 'mermaid-error';
+            item._placeholder.style.fontStyle = '';
+          }
+        });
+        postHeight();
       });
-      var pending = blocks.length;
-      blocks.forEach(function(item, i) {
-        var id = 'mermaid-diagram-' + i + '-' + Date.now();
-        mermaid.render(id, item.source)
-          .then(function(result) {
-            var wrapper = document.createElement('div');
-            wrapper.className = 'mermaid-wrapper';
-            wrapper.innerHTML = result.svg;
-            item.el.parentNode.replaceChild(wrapper, item.el);
-          })
-          .catch(function() {
-            var err = document.createElement('div');
-            err.className = 'mermaid-error';
-            err.textContent = 'Mermaid diagram failed to render';
-            item.el.parentNode.replaceChild(err, item.el);
-          })
-          .finally(function() {
-            pending--;
-            if (pending === 0) { postHeight(); setTimeout(postHeight, 150); }
-          });
-      });
-    };
-    script.onerror = function() {
-      blocks.forEach(function(item) {
-        var err = document.createElement('div');
-        err.className = 'mermaid-error';
-        err.textContent = 'Could not load Mermaid renderer';
-        item.el.parentNode.replaceChild(err, item.el);
-      });
-    };
-    document.head.appendChild(script);
   }
 
   function init() {
-    var mermaidBlocks = [];
+    window.__mermaidBlocks = [];
 
-    document.querySelectorAll('.markdown-body .highlight[class*="highlight-source"]').forEach(function(hl) {
+    // 1. New GitHub-native mermaid section elements
+    var sections = document.querySelectorAll('.markdown-body section[data-type="mermaid"], .markdown-body .render-needs-enrichment[data-type="mermaid"]');
+    sections.forEach(function(section) {
+      var pre = section.querySelector('pre');
+      var src = pre ? pre.textContent : '';
+      if (!src) {
+        var target = section.querySelector('.js-render-enrichment-target');
+        src = target ? target.getAttribute('data-plain') : '';
+      }
+      if (src) {
+        window.__mermaidBlocks.push({ el: section, source: src });
+      }
+    });
+
+    // 2. Standard highlight code blocks
+    var highlights = document.querySelectorAll('.markdown-body .highlight[class*="highlight-source"]');
+
+    highlights.forEach(function(hl) {
+      if (hl.closest('section[data-type="mermaid"]') || hl.closest('.render-needs-enrichment')) return;
+
       if (isMermaid(hl)) {
         var pre = hl.querySelector('pre');
-        mermaidBlocks.push({ el: hl, source: pre ? (pre.innerText || pre.textContent) : '' });
+        var src = pre ? pre.textContent : '';
+        window.__mermaidBlocks.push({ el: hl, source: src });
         return;
       }
       var lang = extractLang(hl);
       var pre = hl.querySelector('pre');
-      wrapBlock(hl, lang, function() { return pre ? pre.innerText : hl.innerText; });
+      wrapBlock(hl, lang, function() { return pre ? pre.textContent : hl.textContent; });
     });
 
+    // 3. Raw pre elements
     document.querySelectorAll('.markdown-body pre').forEach(function(pre) {
-      if (pre.closest('.code-block-wrapper') || pre.closest('.highlight')) return;
+      if (pre.closest('.code-block-wrapper') || pre.closest('.highlight') || pre.closest('section[data-type="mermaid"]') || pre.closest('.render-needs-enrichment')) return;
       var code = pre.querySelector('code');
       var rawLang = code ? (code.className.match(/language-([\w+]+)/) || [])[1] || '' : '';
-      if (rawLang === 'mermaid') {
-        mermaidBlocks.push({ el: pre, source: code ? (code.innerText || code.textContent) : '' });
+      var isMermaidPre = (rawLang === 'mermaid') || (pre.getAttribute('lang') === 'mermaid');
+      if (isMermaidPre) {
+        var src = code ? code.textContent : pre.textContent;
+        window.__mermaidBlocks.push({ el: pre, source: src });
         return;
       }
       var label = LANG_LABELS[rawLang] || rawLang.toUpperCase();
-      wrapBlock(pre, label, function() { return pre.innerText; });
+      wrapBlock(pre, label, function() { return pre.textContent; });
     });
 
-    renderMermaid(mermaidBlocks);
+    if (window.__mermaidBlocks.length > 0) {
+      renderMermaid(window.__mermaidBlocks);
+    }
   }
 
   function postHeight() {
@@ -411,7 +460,6 @@ export function MarkdownRenderer({
   const { colors, isDark } = useTheme();
   const [html, setHtml] = useState<string | null>(null);
   const [height, setHeight] = useState(300);
-  const webViewRef = useRef<any>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -488,7 +536,6 @@ export function MarkdownRenderer({
 
   return (
     <WebView
-      ref={webViewRef}
       source={{ html }}
       style={[s.webview, { height }, style]}
       scrollEnabled={false}
@@ -496,6 +543,7 @@ export function MarkdownRenderer({
       showsHorizontalScrollIndicator={false}
       onMessage={onMessage}
       originWhitelist={["*"]}
+      allowUniversalAccessFromFileURLs
       javaScriptEnabled
       textEncodingUsage="utf-8"
     />
