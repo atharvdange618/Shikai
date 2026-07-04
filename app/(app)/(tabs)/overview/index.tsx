@@ -5,7 +5,6 @@ import { Href, useRouter } from "expo-router";
 import { useCallback, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
-  Dimensions,
   Pressable,
   RefreshControl,
   ScrollView,
@@ -23,6 +22,7 @@ import { useReceivedEvents } from "@/hooks/useReceivedEvents";
 import { useUser } from "@/hooks/useUser";
 import { prefetchProfile, prefetchRoute } from "@/lib/prefetch";
 import { queryKeys } from "@/lib/query-client";
+import { compactTimeAgo } from "@/lib/utils";
 import { useAuthStore } from "@/stores/auth.store";
 import type { GitHubEvent } from "@/types/github.types";
 
@@ -35,7 +35,6 @@ import {
   type ColorTokens,
   FontFamily,
   FontSize,
-  Layout,
   Radius,
   Spacing,
   useTheme,
@@ -76,18 +75,6 @@ function getFollowingEventText(event: GitHubEvent): string {
     default:
       return `${actor} activity in ${repoName}`;
   }
-}
-
-function getTimeAgo(dateStr: string): string {
-  const diff = Date.now() - new Date(dateStr).getTime();
-  const mins = Math.floor(diff / 60000);
-  if (mins < 1) return "now";
-  if (mins < 60) return `${mins}m`;
-  const hours = Math.floor(mins / 60);
-  if (hours < 24) return `${hours}h`;
-  const days = Math.floor(hours / 24);
-  if (days < 7) return `${days}d`;
-  return `${Math.floor(days / 7)}w`;
 }
 
 function FollowingPreview({
@@ -171,7 +158,7 @@ function FollowingPreview({
               <Text
                 style={[followStyles.timeText, { color: colors.textMuted }]}
               >
-                {getTimeAgo(event.created_at)}
+                {compactTimeAgo(event.created_at)}
               </Text>
             </View>
           </View>

@@ -29,6 +29,7 @@ import {
   Spacing,
   useTheme,
 } from "@/constants/theme";
+import { compactTimeAgo } from "@/lib/utils";
 import type { GitHubNotification } from "@/types/github.types";
 
 const ATTENTION_REASONS = new Set([
@@ -64,28 +65,6 @@ const TYPE_ICONS: Record<string, keyof typeof Octicons.glyphMap> = {
 
 function extractRepoName(fullName: string): string {
   return fullName.split("/").pop() ?? fullName;
-}
-
-function getTimeAgo(dateStr: string): string {
-  const now = Date.now();
-  const then = new Date(dateStr).getTime();
-  const diff = now - then;
-
-  const mins = Math.floor(diff / 60000);
-  if (mins < 1) return "now";
-  if (mins < 60) return `${mins}m`;
-
-  const hours = Math.floor(mins / 60);
-  if (hours < 24) return `${hours}h`;
-
-  const days = Math.floor(hours / 24);
-  if (days < 7) return `${days}d`;
-
-  const weeks = Math.floor(days / 7);
-  if (weeks < 4) return `${weeks}w`;
-
-  const months = Math.floor(days / 30);
-  return `${months}mo`;
 }
 
 function NotificationItem({
@@ -146,7 +125,7 @@ function NotificationItem({
             {extractRepoName(notification.repository.full_name)}
           </Text>
           <Text style={s.dot}>{dots}</Text>
-          <Text style={s.time}>{getTimeAgo(notification.updated_at)}</Text>
+          <Text style={s.time}> {compactTimeAgo(notification.updated_at)}</Text>
         </View>
       </View>
 

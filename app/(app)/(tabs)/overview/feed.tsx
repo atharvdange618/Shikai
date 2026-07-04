@@ -1,6 +1,6 @@
 import { Octicons } from "@expo/vector-icons";
 import { useQueryClient } from "@tanstack/react-query";
-import { Href, useRouter } from "expo-router";
+import { type Href, useRouter } from "expo-router";
 import { useCallback, useMemo, useRef, useState } from "react";
 import {
   Pressable,
@@ -15,8 +15,9 @@ import { Image } from "expo-image";
 
 import { ListItemSeparator } from "@/components/shared/ListItemSeparator";
 import { useReceivedEvents } from "@/hooks/useReceivedEvents";
+import { getEventDisplay } from "@/lib/github-utils";
 import { queryKeys } from "@/lib/query-client";
-import { encodeRepoId } from "@/lib/utils";
+import { compactTimeAgo, parseGitHubUrl } from "@/lib/utils";
 import type { GitHubEvent } from "@/types/github.types";
 
 import {
@@ -27,146 +28,6 @@ import {
   Spacing,
   useTheme,
 } from "@/constants/theme";
-
-function parseGitHubUrl(url: string): Href | null {
-  const match = url.match(
-    /github\.com\/([^/]+)\/([^/]+)(?:\/(issues|pull)\/(\d+))?/,
-  );
-  if (!match) return null;
-  const [, owner, repo, type, number] = match;
-  const repoId = encodeRepoId(owner, repo);
-  if (type === "issues" && number)
-    return `/(app)/repo/${repoId}/issue/${number}` as Href;
-  if (type === "pull" && number)
-    return `/(app)/repo/${repoId}/pr/${number}` as Href;
-  return `/(app)/repo/${repoId}` as Href;
-}
-
-function getEventDisplay(
-  event: GitHubEvent,
-  colors: ColorTokens,
-): {
-  icon: keyof typeof Octicons.glyphMap;
-  iconColor: string;
-  text: string;
-  url: string;
-} | null {
-  const repoName = event.repo.name.split("/")[1] || event.repo.name;
-
-  switch (event.type) {
-    case "PushEvent": {
-      const payload = event.payload;
-      const commitCount = payload.size ?? 1;
-      const branch = payload.ref?.replace("refs/heads/", "") ?? "main";
-      return {
-        icon: "repo-push",
-        iconColor: colors.accent,
-        text: `Pushed ${commitCount} commit${commitCount > 1 ? "s" : ""} to ${repoName} → ${branch}`,
-        url:
-          payload.commits?.[0]?.url
-            ?.replace("api.github.com/repos", "github.com")
-            .replace("/commits/", "/commit/") ??
-          `https://github.com/${event.repo.name}`,
-      };
-    }
-    case "WatchEvent":
-      return {
-        icon: "star",
-        iconColor: "#f9c513",
-        text: `Starred ${repoName}`,
-        url: `https://github.com/${event.repo.name}`,
-      };
-    case "ForkEvent": {
-      const payload = event.payload;
-      const forkName = payload.forkee?.full_name;
-      return {
-        icon: "repo-forked",
-        iconColor: "#58a6ff",
-        text: `Forked ${repoName}${forkName ? ` → ${forkName.split("/")[1]}` : ""}`,
-        url:
-          payload.forkee?.html_url ?? `https://github.com/${event.repo.name}`,
-      };
-    }
-    case "CreateEvent": {
-      const payload = event.payload;
-      const refType = payload.ref_type;
-      const ref = payload.ref;
-      return {
-        icon: refType === "tag" ? "tag" : "git-branch",
-        iconColor: colors.success,
-        text: `Created ${refType}${ref ? `: ${ref}` : ""} in ${repoName}`,
-        url: `https://github.com/${event.repo.name}`,
-      };
-    }
-    case "PullRequestEvent": {
-      const payload = event.payload;
-      const prNumber = payload.pull_request?.number;
-      const merged = payload.pull_request?.merged;
-      const action = merged ? "Merged" : (payload.action ?? "Opened");
-      return {
-        icon: "git-pull-request",
-        iconColor: merged ? "#a371f7" : colors.accent,
-        text: `${action.charAt(0).toUpperCase() + action.slice(1)} PR${prNumber ? ` #${prNumber}` : ""} in ${repoName}`,
-        url:
-          payload.pull_request?.html_url ??
-          `https://github.com/${event.repo.name}`,
-      };
-    }
-    case "IssuesEvent": {
-      const payload = event.payload;
-      const issueNumber = payload.issue?.number;
-      const action = payload.action ?? "Opened";
-      return {
-        icon: action === "closed" ? "issue-closed" : "issue-opened",
-        iconColor: action === "closed" ? "#a371f7" : colors.success,
-        text: `${action.charAt(0).toUpperCase() + action.slice(1)} issue${issueNumber ? ` #${issueNumber}` : ""} in ${repoName}`,
-        url: payload.issue?.html_url ?? `https://github.com/${event.repo.name}`,
-      };
-    }
-    case "ReleaseEvent": {
-      const payload = event.payload;
-      const tagName = payload.release?.tag_name;
-      return {
-        icon: "tag",
-        iconColor: "#f97316",
-        text: `Released ${tagName ?? "new version"} in ${repoName}`,
-        url:
-          payload.release?.html_url ?? `https://github.com/${event.repo.name}`,
-      };
-    }
-    case "PublicEvent":
-      return {
-        icon: "repo",
-        iconColor: colors.success,
-        text: `Made ${repoName} public`,
-        url: `https://github.com/${event.repo.name}`,
-      };
-    default:
-      return null;
-  }
-}
-
-function getTimeAgo(dateStr: string): string {
-  const now = Date.now();
-  const then = new Date(dateStr).getTime();
-  const diff = now - then;
-
-  const mins = Math.floor(diff / 60000);
-  if (mins < 1) return "now";
-  if (mins < 60) return `${mins}m`;
-
-  const hours = Math.floor(mins / 60);
-  if (hours < 24) return `${hours}h`;
-
-  const days = Math.floor(hours / 24);
-  if (days < 7) return `${days}d`;
-
-  const weeks = Math.floor(days / 7);
-  if (weeks < 4) return `${weeks}w`;
-
-  const months = Math.floor(days / 30);
-  return `${months}mo`;
-}
 
 function EventItem({
   event,
@@ -198,7 +59,7 @@ function EventItem({
           <Text style={s.actor} numberOfLines={1}>
             {event.actor.login}
           </Text>
-          <Text style={s.time}>{getTimeAgo(event.created_at)}</Text>
+          <Text style={s.time}>{compactTimeAgo(event.created_at)}</Text>
         </View>
         <View style={s.eventRow}>
           <View
@@ -207,7 +68,7 @@ function EventItem({
             <Octicons name={display.icon} size={12} color={display.iconColor} />
           </View>
           <Text style={s.eventText} numberOfLines={2}>
-            {display.text}
+            {display.primaryText} to {display.secondaryText}
           </Text>
         </View>
       </View>
@@ -301,7 +162,7 @@ export default function FollowingFeedScreen() {
     (url: string) => {
       const route = parseGitHubUrl(url);
       if (route) {
-        router.push(route);
+        router.push(route as Href);
       }
     },
     [router],
