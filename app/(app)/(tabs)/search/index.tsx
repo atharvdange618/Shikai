@@ -38,7 +38,8 @@ const TABS: { key: SearchTab; label: string }[] = [
   { key: "issues", label: "Issues" },
 ];
 
-const keyExtractor = (item: any) => String(item.id);
+const keyExtractor = (item: GitHubRepo | GitHubUser | GitHubIssue) =>
+  String(item.id);
 
 export default function SearchScreen() {
   const { colors, isDark } = useTheme();
@@ -172,10 +173,10 @@ export default function SearchScreen() {
   );
 
   const renderItem = useCallback(
-    ({ item }: { item: any }) => {
-      if (tab === "repos") return renderRepoItem({ item });
-      if (tab === "users") return renderUserItem({ item });
-      return renderIssueItem({ item });
+    ({ item }: { item: GitHubRepo | GitHubUser | GitHubIssue }) => {
+      if (tab === "repos") return renderRepoItem({ item: item as GitHubRepo });
+      if (tab === "users") return renderUserItem({ item: item as GitHubUser });
+      return renderIssueItem({ item: item as GitHubIssue });
     },
     [tab, renderRepoItem, renderUserItem, renderIssueItem],
   );

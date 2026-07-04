@@ -44,7 +44,7 @@ export const RepoCard = memo(function RepoCard({
   const toggleWatchlist = useWatchlistStore((state) => state.toggleWatchlist);
 
   const handleBookmarkPress = useCallback(
-    (e: any) => {
+    (e: { stopPropagation?: () => void }) => {
       e.stopPropagation?.();
       toggleWatchlist(repoId);
     },
