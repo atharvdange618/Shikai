@@ -1,4 +1,4 @@
-import { githubAxios, GitHubApiError } from "@/lib/axios";
+import { GitHubApiError, githubAxios } from "@/lib/axios";
 import { useAuthStore } from "@/stores/auth.store";
 import type {
   GitHubBranch,
@@ -236,11 +236,16 @@ export async function searchRepos(
   per_page: number = 10,
   sort?: "stars" | "forks" | "help-wanted-issues" | "updated",
   order?: "desc" | "asc",
-): Promise<{ repos: GitHubRepo[]; totalCount: number; pagination: GitHubPagination }> {
-  const { data, headers } = await githubAxios.get<GitHubSearchResult<GitHubRepo>>(
-    "/search/repositories",
-    { params: { q: query, page, per_page, sort, order } },
-  );
+): Promise<{
+  repos: GitHubRepo[];
+  totalCount: number;
+  pagination: GitHubPagination;
+}> {
+  const { data, headers } = await githubAxios.get<
+    GitHubSearchResult<GitHubRepo>
+  >("/search/repositories", {
+    params: { q: query, page, per_page, sort, order },
+  });
   return {
     repos: data.items,
     totalCount: data.total_count,
@@ -254,11 +259,14 @@ export async function searchUsers(
   per_page: number = 10,
   sort?: "followers" | "repositories" | "joined",
   order?: "desc" | "asc",
-): Promise<{ users: GitHubUser[]; totalCount: number; pagination: GitHubPagination }> {
-  const { data, headers } = await githubAxios.get<GitHubSearchResult<GitHubUser>>(
-    "/search/users",
-    { params: { q: query, page, per_page, sort, order } },
-  );
+): Promise<{
+  users: GitHubUser[];
+  totalCount: number;
+  pagination: GitHubPagination;
+}> {
+  const { data, headers } = await githubAxios.get<
+    GitHubSearchResult<GitHubUser>
+  >("/search/users", { params: { q: query, page, per_page, sort, order } });
   return {
     users: data.items,
     totalCount: data.total_count,
@@ -272,11 +280,14 @@ export async function searchIssues(
   per_page: number = 10,
   sort?: "comments" | "reactions" | "interactions" | "created" | "updated",
   order?: "desc" | "asc",
-): Promise<{ issues: GitHubIssue[]; totalCount: number; pagination: GitHubPagination }> {
-  const { data, headers } = await githubAxios.get<GitHubSearchResult<GitHubIssue>>(
-    "/search/issues",
-    { params: { q: query, page, per_page, sort, order } },
-  );
+): Promise<{
+  issues: GitHubIssue[];
+  totalCount: number;
+  pagination: GitHubPagination;
+}> {
+  const { data, headers } = await githubAxios.get<
+    GitHubSearchResult<GitHubIssue>
+  >("/search/issues", { params: { q: query, page, per_page, sort, order } });
   return {
     issues: data.items,
     totalCount: data.total_count,
@@ -333,12 +344,12 @@ export async function fetchFileContent(
     `/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/contents/${encodeURIComponent(path)}`,
   );
 
-  if (data.type !== "file" || !data.content) {
+  if (data.type !== "file") {
     throw new Error(`"${path}" is not a file`);
   }
 
   return {
-    content: decodeBase64(data.content),
+    content: data.content ? decodeBase64(data.content) : "",
     meta: data,
   };
 }
@@ -413,10 +424,9 @@ export async function fetchReceivedEvents(
       pagination: parseLinkHeader(headers.get("link") ?? undefined),
     };
   }
-  const { data, headers } = await githubAxios.get<GitHubEvent[]>(
-    path,
-    { params: { page, per_page } },
-  );
+  const { data, headers } = await githubAxios.get<GitHubEvent[]>(path, {
+    params: { page, per_page },
+  });
 
   return {
     events: data,
@@ -533,7 +543,10 @@ export interface FetchNotificationsResult {
 async function fetchWithPAT(
   path: string,
   pat: string,
-  options?: { method?: string; params?: Record<string, string | number | boolean> },
+  options?: {
+    method?: string;
+    params?: Record<string, string | number | boolean>;
+  },
 ): Promise<{ data: unknown; headers: Headers }> {
   const url = new URL(path, "https://api.github.com");
   if (options?.params) {
@@ -551,7 +564,8 @@ async function fetchWithPAT(
   });
   if (!response.ok) {
     const body = await response.json().catch(() => ({}));
-    const message = (body as Record<string, unknown>).message ?? response.statusText;
+    const message =
+      (body as Record<string, unknown>).message ?? response.statusText;
     throw new GitHubApiError(response.status, String(message));
   }
   const data = await response.json();
@@ -583,15 +597,22 @@ export async function fetchNotifications(
   };
 }
 
-export async function markNotificationAsRead(threadId: string, pat?: string | null): Promise<void> {
+export async function markNotificationAsRead(
+  threadId: string,
+  pat?: string | null,
+): Promise<void> {
   if (pat) {
-    await fetchWithPAT(`/notifications/threads/${threadId}`, pat, { method: "PATCH" });
+    await fetchWithPAT(`/notifications/threads/${threadId}`, pat, {
+      method: "PATCH",
+    });
     return;
   }
   await githubAxios.patch(`/notifications/threads/${threadId}`);
 }
 
-export async function markAllNotificationsAsRead(pat?: string | null): Promise<void> {
+export async function markAllNotificationsAsRead(
+  pat?: string | null,
+): Promise<void> {
   if (pat) {
     await fetchWithPAT("/notifications", pat, { method: "PUT" });
     return;
