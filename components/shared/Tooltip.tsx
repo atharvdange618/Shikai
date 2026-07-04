@@ -13,6 +13,7 @@ import {
   Text,
   useWindowDimensions,
   View,
+  type ViewStyle,
 } from "react-native";
 
 import {
@@ -94,7 +95,7 @@ export function Tooltip({ content, children, align = "left" }: TooltipProps) {
 
   const tooltipWidth = 250;
   const padding = 16;
-  let alignStyle: any;
+  let alignStyle: ViewStyle;
 
   if (layoutInfo) {
     const { pageX, width: containerWidth } = layoutInfo;
@@ -205,7 +206,7 @@ export function InfoDot({
 
   const tooltipWidth = 250;
   const padding = 16;
-  let alignStyle: any;
+  let alignStyle: ViewStyle;
 
   if (layoutInfo) {
     const { pageX, width: containerWidth } = layoutInfo;

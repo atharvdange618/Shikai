@@ -38,6 +38,8 @@ import {
   StyleSheet,
   Text,
   View,
+  type NativeScrollEvent,
+  type NativeSyntheticEvent,
 } from "react-native";
 import Animated, {
   Easing,
@@ -310,7 +312,7 @@ export default function RepoDetailsScreen() {
   }, [chevronTranslateY]);
 
   const handleScroll = useCallback(
-    (e: any) => {
+    (e: NativeSyntheticEvent<NativeScrollEvent>) => {
       const y = e.nativeEvent.contentOffset.y;
       if (y > 300 && !hasScrolledPast.current) {
         hasScrolledPast.current = true;
