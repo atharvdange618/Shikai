@@ -31,6 +31,7 @@ import { PERSISTENCE_MAX_AGE, mmkvPersister } from "@/lib/persister";
 import { queryClient, setupFocusManager } from "@/lib/query-client";
 import { getStoredPAT, getStoredToken } from "@/lib/secure-storage";
 import { useOnlineManager } from "@/lib/use-online-manager";
+import { useOTAUpdates } from "@/lib/use-ota-updates";
 import { useAuthStore } from "@/stores/auth.store";
 import { runSecurityChecks } from "shikai-security";
 
@@ -60,6 +61,7 @@ export default function RootLayout() {
   const setUser = useAuthStore((s) => s.setUser);
   const setPat = useAuthStore((s) => s.setPat);
   useOnlineManager();
+  useOTAUpdates();
 
   const [bootComplete, setBootComplete] = useState(false);
   const [showSplash, setShowSplash] = useState(true);
