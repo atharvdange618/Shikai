@@ -1,0 +1,42 @@
+import { useEffect, useRef } from "react";
+import * as Updates from "expo-updates";
+
+import { useOnlineManager } from "@/lib/use-online-manager";
+
+function logUpdateEvent(type: "check" | "available" | "downloading" | "ready" | "error", message?: string) {
+  if (__DEV__) {
+    console.log(`[OTA] ${type}`, message ?? "");
+  }
+}
+
+export function useOTAUpdates() {
+  const isOnline = useOnlineManager();
+  const hasChecked = useRef(false);
+
+  useEffect(() => {
+    if (!isOnline || hasChecked.current || !Updates.isAvailable) return;
+
+    hasChecked.current = true;
+
+    async function run() {
+      try {
+        logUpdateEvent("check", "checking for updates…");
+        const update = await Updates.checkForUpdateAsync();
+
+        if (update.isAvailable) {
+          logUpdateEvent("available", update.id ?? "unknown");
+          logUpdateEvent("downloading");
+          await Updates.fetchUpdateAsync();
+          logUpdateEvent("ready", "reloading…");
+          await Updates.reloadAsync();
+        } else {
+          logUpdateEvent("check", "no update available");
+        }
+      } catch (error) {
+        logUpdateEvent("error", String(error));
+      }
+    }
+
+    run();
+  }, [isOnline]);
+}
