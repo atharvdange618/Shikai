@@ -42,11 +42,25 @@
         }
       ],
       "expo-web-browser",
+      "expo-updates",
       "./plugins/withAndroidPackaging"
     ],
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "391eb75d-56e7-4c27-8e1b-5d20e3d75ba9"
+      }
+    },
+    "owner": "atharvdange618",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/391eb75d-56e7-4c27-8e1b-5d20e3d75ba9"
     }
   }
 }
