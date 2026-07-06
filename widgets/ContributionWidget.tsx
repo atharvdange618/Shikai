@@ -3,35 +3,59 @@
 import React from "react";
 
 import { FlexWidget, TextWidget } from "react-native-android-widget";
-import type { WidgetContributionWeek } from "../lib/widget-data";
+import type {
+  WidgetContributionDay,
+  WidgetContributionWeek,
+} from "../lib/widget-data";
+
+export interface WidgetThemeColors {
+  bg: `#${string}`;
+  text: `#${string}`;
+  muted: `#${string}`;
+  empty: `#${string}`;
+  l1: `#${string}`;
+  l2: `#${string}`;
+  l3: `#${string}`;
+  l4: `#${string}`;
+}
+
+export const DEFAULT_WIDGET_COLORS: WidgetThemeColors = {
+  bg: "#161B22",
+  text: "#E6EDF3",
+  muted: "#6E7681",
+  empty: "#161B22",
+  l1: "#0E4429",
+  l2: "#006D32",
+  l3: "#26A641",
+  l4: "#39D353",
+};
 
 interface Props {
   totalContributions: number;
   weeks: WidgetContributionWeek[];
   currentStreak: number;
   longestStreak: number;
+  themeColors?: WidgetThemeColors;
   widgetWidth?: number;
   widgetHeight?: number;
 }
 
-const LIGHT_COLORS: Record<string, `#${string}`> = {
-  NONE: "#ebedf0",
-  FIRST_QUARTILE: "#9be9a8",
-  SECOND_QUARTILE: "#40c463",
-  THIRD_QUARTILE: "#30a14e",
-  FOURTH_QUARTILE: "#216e39",
-};
-
-const DARK_COLORS: Record<string, `#${string}`> = {
-  NONE: "#161b22",
-  FIRST_QUARTILE: "#0e4429",
-  SECOND_QUARTILE: "#006d32",
-  THIRD_QUARTILE: "#26a641",
-  FOURTH_QUARTILE: "#39d353",
-};
-
-function getColors(darkMode: boolean) {
-  return darkMode ? DARK_COLORS : LIGHT_COLORS;
+function levelColor(
+  level: WidgetContributionDay["contributionLevel"],
+  c: WidgetThemeColors,
+): `#${string}` {
+  switch (level) {
+    case "FIRST_QUARTILE":
+      return c.l1;
+    case "SECOND_QUARTILE":
+      return c.l2;
+    case "THIRD_QUARTILE":
+      return c.l3;
+    case "FOURTH_QUARTILE":
+      return c.l4;
+    default:
+      return c.empty;
+  }
 }
 
 const CELL_GAP = 2;
@@ -54,15 +78,11 @@ export function ContributionWidget({
   weeks,
   currentStreak,
   longestStreak,
+  themeColors = DEFAULT_WIDGET_COLORS,
   widgetWidth = 250,
   widgetHeight = 110,
 }: Props) {
-  const isDark = false;
-  const colors = getColors(isDark);
-  const bgColor: `#${string}` = isDark ? "#0d1117" : "#ffffff";
-  const textColor: `#${string}` = isDark ? "#e6edf3" : "#1f2328";
-  const mutedColor: `#${string}` = isDark ? "#7d8590" : "#656d76";
-
+  const c = themeColors;
   const { cellSize, weeksToShow } = calcLayout(widgetWidth, widgetHeight);
   const recentWeeks = weeks.slice(-weeksToShow);
 
@@ -71,7 +91,7 @@ export function ContributionWidget({
       style={{
         height: "match_parent",
         width: "match_parent",
-        backgroundColor: bgColor,
+        backgroundColor: c.bg,
         borderRadius: 16,
         padding: PADDING,
         justifyContent: "space-between",
@@ -79,42 +99,24 @@ export function ContributionWidget({
       clickAction="OPEN_APP"
       accessibilityLabel={`GitHub contribution widget. ${currentStreak} day streak. ${totalContributions} contributions this year.`}
     >
-      <FlexWidget
-        style={{
-          flexDirection: "row",
-          alignItems: "center",
-        }}
-      >
+      <FlexWidget style={{ flexDirection: "row", alignItems: "center" }}>
         <TextWidget
           text={currentStreak.toString()}
           style={{
             fontSize: 20,
             fontFamily: "Inter",
             fontWeight: "700",
-            color: textColor,
+            color: c.text,
           }}
         />
-        <FlexWidget
-          style={{
-            flexDirection: "column",
-            marginLeft: 6,
-          }}
-        >
+        <FlexWidget style={{ flexDirection: "column", marginLeft: 6 }}>
           <TextWidget
             text="day streak"
-            style={{
-              fontSize: 11,
-              fontFamily: "Inter",
-              color: mutedColor,
-            }}
+            style={{ fontSize: 11, fontFamily: "Inter", color: c.muted }}
           />
           <TextWidget
             text={`best: ${longestStreak}`}
-            style={{
-              fontSize: 9,
-              fontFamily: "Inter",
-              color: mutedColor,
-            }}
+            style={{ fontSize: 9, fontFamily: "Inter", color: c.muted }}
           />
         </FlexWidget>
       </FlexWidget>
@@ -130,10 +132,7 @@ export function ContributionWidget({
         {recentWeeks.map((week, weekIdx) => (
           <FlexWidget
             key={weekIdx}
-            style={{
-              flexDirection: "column",
-              flexGap: CELL_GAP,
-            }}
+            style={{ flexDirection: "column", flexGap: CELL_GAP }}
           >
             {week.contributionDays.map((day, dayIdx) => (
               <FlexWidget
@@ -141,7 +140,7 @@ export function ContributionWidget({
                 style={{
                   width: cellSize,
                   height: cellSize,
-                  backgroundColor: colors[day.contributionLevel] ?? colors.NONE,
+                  backgroundColor: levelColor(day.contributionLevel, c),
                   borderRadius: Math.max(1, Math.floor(cellSize / 5)),
                 }}
               />
@@ -152,11 +151,7 @@ export function ContributionWidget({
 
       <TextWidget
         text={`${totalContributions.toLocaleString()} contributions this year`}
-        style={{
-          fontSize: 11,
-          fontFamily: "Inter",
-          color: mutedColor,
-        }}
+        style={{ fontSize: 11, fontFamily: "Inter", color: c.muted }}
       />
     </FlexWidget>
   );

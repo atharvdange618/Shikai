@@ -13,9 +13,9 @@ import {
 } from "react-native";
 
 import { useAlert } from "@/components";
+import { validatePAT } from "@/lib/github-rest";
 import { clearAllMMKV } from "@/lib/mmkv";
 import { deletePAT, deleteToken, savePAT } from "@/lib/secure-storage";
-import { validatePAT } from "@/lib/github-rest";
 
 import {
   FontFamily,
@@ -30,8 +30,9 @@ import {
   type ThemeName,
 } from "@/constants/themes";
 import { useThemeContext } from "@/contexts/ThemeContext";
-import { useQueryClient } from "@tanstack/react-query";
+import { refreshWidgetTheme } from "@/lib/widget-refresh";
 import { useAuthStore } from "@/stores/auth.store";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function SettingsScreen() {
   const { theme, themeName, setThemeName } = useThemeContext();
@@ -64,7 +65,9 @@ export default function SettingsScreen() {
       setValidating(false);
 
       if (!valid) {
-        setPatError("Invalid token. Make sure it has the 'notifications' scope.");
+        setPatError(
+          "Invalid token. Make sure it has the 'notifications' scope.",
+        );
         return;
       }
 
@@ -82,7 +85,8 @@ export default function SettingsScreen() {
     alert.show({
       variant: "danger",
       title: "Remove token",
-      message: "Notifications will stop working without a Personal Access Token.",
+      message:
+        "Notifications will stop working without a Personal Access Token.",
       actions: [
         { text: "Cancel", style: "cancel" },
         {
@@ -143,7 +147,10 @@ export default function SettingsScreen() {
                   !isLast && s.themeRowBorder,
                   pressed && s.themeRowPressed,
                 ]}
-                onPress={() => setThemeName(t.name as ThemeName)}
+                onPress={() => {
+                  setThemeName(t.name as ThemeName);
+                  refreshWidgetTheme(t.name as ThemeName).catch(() => {});
+                }}
               >
                 <View style={s.themeInfo}>
                   <View style={s.themeDots}>
@@ -162,11 +169,7 @@ export default function SettingsScreen() {
                   </Text>
                 </View>
                 {isActive && (
-                  <Octicons
-                    name="check"
-                    size={16}
-                    color={colors.accent}
-                  />
+                  <Octicons name="check" size={16} color={colors.accent} />
                 )}
               </Pressable>
             );
@@ -179,17 +182,21 @@ export default function SettingsScreen() {
         <View style={s.card}>
           <View style={s.patInfo}>
             <Text style={s.patDescription}>
-              A Personal Access Token enables the Notifications tab and the Following activity feed. Without one, these features are hidden.
+              A Personal Access Token enables the Notifications tab and the
+              Following activity feed. Without one, these features are hidden.
             </Text>
             <Pressable
               onPress={() =>
-                Linking.openURL("https://github.com/settings/tokens/new?scopes=notifications,repo&description=Shikai%20Notifications")
+                Linking.openURL(
+                  "https://github.com/settings/tokens/new?scopes=notifications,repo&description=Shikai%20Notifications",
+                )
               }
             >
               <Text style={s.patLink}>Create a token here</Text>
             </Pressable>
             <Text style={s.patDescription}>
-              with the <Text style={s.patBold}>notifications</Text> and <Text style={s.patBold}>repo</Text> scopes, then paste it below.
+              with the <Text style={s.patBold}>notifications</Text> and{" "}
+              <Text style={s.patBold}>repo</Text> scopes, then paste it below.
             </Text>
           </View>
 
@@ -256,7 +263,11 @@ export default function SettingsScreen() {
             style={({ pressed }) => [s.menuRow, pressed && s.menuRowPressed]}
             onPress={() => router.push("/(app)/(tabs)/profile/about" as Href)}
           >
-            <Octicons name="info" size={IconSize.md} color={colors.textSecondary} />
+            <Octicons
+              name="info"
+              size={IconSize.md}
+              color={colors.textSecondary}
+            />
             <Text style={s.menuText}>About Shikai</Text>
             <Octicons name="chevron-right" size={13} color={colors.textMuted} />
           </Pressable>
@@ -274,7 +285,11 @@ export default function SettingsScreen() {
             ]}
             onPress={handleSignOut}
           >
-            <Octicons name="sign-out" size={IconSize.md} color={colors.danger} />
+            <Octicons
+              name="sign-out"
+              size={IconSize.md}
+              color={colors.danger}
+            />
             <Text style={s.dangerText}>Sign out</Text>
           </Pressable>
         </View>
