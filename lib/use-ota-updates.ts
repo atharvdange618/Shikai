@@ -14,7 +14,7 @@ export function useOTAUpdates() {
   const hasChecked = useRef(false);
 
   useEffect(() => {
-    if (!isOnline || hasChecked.current || !Updates.isAvailable) return;
+    if (!isOnline || hasChecked.current) return;
 
     hasChecked.current = true;
 
@@ -24,7 +24,7 @@ export function useOTAUpdates() {
         const update = await Updates.checkForUpdateAsync();
 
         if (update.isAvailable) {
-          logUpdateEvent("available", update.id ?? "unknown");
+          logUpdateEvent("available", update.manifest?.id ?? "unknown");
           logUpdateEvent("downloading");
           await Updates.fetchUpdateAsync();
           logUpdateEvent("ready", "reloading…");

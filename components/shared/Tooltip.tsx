@@ -1,4 +1,5 @@
 import { Octicons } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
 import React, {
   createContext,
   useCallback,
@@ -38,6 +39,7 @@ let nextId = 0;
 
 export function TooltipProvider({ children }: { children: React.ReactNode }) {
   const [activeId, setActiveId] = useState<string | null>(null);
+  const navigation = useNavigation();
 
   const register = useCallback((id: string) => {
     setActiveId(id);
@@ -47,9 +49,21 @@ export function TooltipProvider({ children }: { children: React.ReactNode }) {
     setActiveId((current) => (current === id ? null : current));
   }, []);
 
+  const dismiss = useCallback(() => {
+    setActiveId(null);
+  }, []);
+
+  useEffect(() => {
+    const unsubscribe = navigation.addListener("state", () => {
+      setActiveId(null);
+    });
+    return unsubscribe;
+  }, [navigation]);
+
   return (
     <TooltipContext.Provider value={{ activeId, register, unregister }}>
       {children}
+      {activeId && <Pressable style={s.overlay} onPress={dismiss} />}
     </TooltipContext.Provider>
   );
 }
@@ -274,6 +288,10 @@ export function InfoDot({
 }
 
 const s = StyleSheet.create({
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+    zIndex: ZIndex.tooltip - 1,
+  },
   container: {
     position: "relative",
   },

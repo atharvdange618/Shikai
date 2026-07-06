@@ -18,9 +18,31 @@ const ROOT = cwd.endsWith("scripts") ? path.resolve(cwd, "..") : cwd;
 const ANDROID_APP = path.join(ROOT, "android", "app");
 const GRADLE_PROPS = path.join(ROOT, "android", "gradle.properties");
 const BUILD_GRADLE = path.join(ANDROID_APP, "build.gradle");
+const KEYSTORE_SRC = path.join(ROOT, "keystore", "release.keystore");
+const KEYSTORE_DEST = path.join(ANDROID_APP, "release.keystore");
 
 const log = (msg) => console.log(`[post-prebuild] ${msg}`);
 const warn = (msg) => console.warn(`[post-prebuild] WARNING: ${msg}`);
+
+// ─── keystore restore ───
+function restoreKeystore() {
+  log("Restoring release keystore...");
+
+  if (!fs.existsSync(KEYSTORE_SRC)) {
+    warn(`Release keystore not found at ${KEYSTORE_SRC}`);
+    warn("Release builds will use debug signing. This is NOT suitable for Play Store.");
+    return false;
+  }
+
+  if (fs.existsSync(KEYSTORE_DEST)) {
+    log("  release.keystore already exists in android/app/");
+    return true;
+  }
+
+  fs.copyFileSync(KEYSTORE_SRC, KEYSTORE_DEST);
+  log("  Copied release.keystore from keystore/ directory");
+  return true;
+}
 
 // ─── gradle.properties patches ───
 const GRADLE_PROPERTIES_PATCHES = {
@@ -47,6 +69,12 @@ const GRADLE_PROPERTIES_PATCHES = {
     expected: "false",
     fallback: "false",
     description: "Animated WebP support (disabled to save space)",
+  },
+  // Release keystore password
+  KEYSTORE_PASSWORD: {
+    expected: "***REDACTED-ROTATED-PASSWORD***",
+    fallback: "***REDACTED-ROTATED-PASSWORD***",
+    description: "Release keystore password",
   },
 };
 
@@ -96,12 +124,48 @@ const SPLITS_BLOCK = `    splits {
 
 const PACKAGING_EXCLUDE = `        excludes += 'META-INF/versions/9/OSGI-INF/MANIFEST.MF'`;
 
+const RELEASE_SIGNING_CONFIG = `        release {
+            storeFile file('release.keystore')
+            storePassword KEYSTORE_PASSWORD
+            keyAlias 'shikai'
+            keyPassword KEYSTORE_PASSWORD
+        }`;
+
 function patchBuildGradle() {
   log("Patching build.gradle...");
   let content = fs.readFileSync(BUILD_GRADLE, "utf8");
   let changed = false;
 
-  // 1. Add ABI splits block
+  // 1. Add release signing config
+  if (content.includes("release {") && content.includes("storeFile file('release.keystore')")) {
+    log("  Release signing config already exists");
+  } else if (fs.existsSync(KEYSTORE_DEST)) {
+    if (content.includes("signingConfigs {")) {
+      // Add release config after debug config
+      content = content.replace(
+        /(signingConfigs\s*\{\s*debug\s*\{[^}]+\}\s*)/,
+        `$1\n${RELEASE_SIGNING_CONFIG}\n`,
+      );
+      log("  Added release signing config");
+      changed = true;
+    }
+  } else {
+    warn("  Release keystore not found - skipping signing config");
+  }
+
+  // 2. Update release build type to use release signing config
+  if (content.includes("release {") && content.includes("signingConfig signingConfigs.debug")) {
+    content = content.replace(
+      /(release\s*\{[^}]*signingConfig\s+)signingConfigs\.debug/,
+      `$1signingConfigs.release`,
+    );
+    log("  Updated release build type to use release signing config");
+    changed = true;
+  } else if (content.includes("signingConfig signingConfigs.release")) {
+    log("  Release build type already uses release signing config");
+  }
+
+  // 3. Add ABI splits block
   if (content.includes("splits {")) {
     log("  splits block already exists");
   } else {
@@ -118,7 +182,7 @@ function patchBuildGradle() {
     }
   }
 
-  // 2. Add META-INF exclusion to packagingOptions
+  // 4. Add META-INF exclusion to packagingOptions
   if (content.includes("META-INF/versions/9/OSGI-INF/MANIFEST.MF")) {
     log("  META-INF exclusion already exists");
   } else {
@@ -157,11 +221,15 @@ function main() {
     process.exit(1);
   }
 
+  restoreKeystore();
+  console.log("");
   patchGradleProperties();
   console.log("");
   patchBuildGradle();
 
   log("\nDone. Configurations applied:");
+  log("  - Release keystore restored");
+  log("  - Release signing config added");
   log("  - ABI splits: arm64-v8a, x86_64, universal");
   log("  - R8 minification: enabled");
   log("  - Resource shrinking: enabled");
