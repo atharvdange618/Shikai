@@ -7,9 +7,12 @@
 
 import { fetchContributionGraph } from "@/lib/github-graphql";
 import { queryKeys } from "@/lib/query-client";
+import { fetchContributionsForWidget } from "@/lib/widget-data";
 import type { ContributionStats } from "@/types/github-graphql.types";
 import { queryOptions, useQuery } from "@tanstack/react-query";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
+import { requestWidgetUpdate } from "react-native-android-widget";
+import { ContributionWidget } from "@/widgets/ContributionWidget";
 
 export const contributionsQueryOptions = queryOptions({
   queryKey: queryKeys.contributions(),
@@ -19,6 +22,35 @@ export const contributionsQueryOptions = queryOptions({
 
 export function useContributions() {
   const query = useQuery(contributionsQueryOptions);
+
+  useEffect(() => {
+    if (query.data?.weeks.length) {
+      requestWidgetUpdate({
+        widgetName: "ContributionGraph",
+        renderWidget: async () => {
+          const data = await fetchContributionsForWidget();
+          if (data) {
+            return (
+              <ContributionWidget
+                totalContributions={data.totalContributions}
+                weeks={data.weeks}
+                currentStreak={data.currentStreak}
+                longestStreak={data.longestStreak}
+              />
+            );
+          }
+          return (
+            <ContributionWidget
+              totalContributions={0}
+              weeks={[]}
+              currentStreak={0}
+              longestStreak={0}
+            />
+          );
+        },
+      });
+    }
+  }, [query.data?.weeks.length]);
 
   const stats = useMemo<ContributionStats | null>(() => {
     if (!query.data?.weeks.length) return null;
