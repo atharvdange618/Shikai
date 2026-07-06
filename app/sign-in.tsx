@@ -47,6 +47,7 @@ import {
 } from "@/lib/secure-storage";
 import { useAuthStore } from "@/stores/auth.store";
 import { useSignInStore } from "@/stores/signin.store";
+import { requestWidgetUpdate } from "react-native-android-widget";
 
 const CLIENT_ID = process.env.EXPO_PUBLIC_GITHUB_CLIENT_ID!;
 const APP_SLUG = process.env.EXPO_PUBLIC_GITHUB_APP_SLUG!;
@@ -152,6 +153,36 @@ export default function SignInScreen() {
         queryClient.clear();
         queryClient.setQueryData(queryKeys.user(), user);
         prefetchOverview(queryClient, user.login);
+        requestWidgetUpdate({
+          widgetName: "ContributionGraph",
+          renderWidget: async () => {
+            const { fetchContributionsForWidget } = await import(
+              "@/lib/widget-data"
+            );
+            const { ContributionWidget } = await import(
+              "@/widgets/ContributionWidget"
+            );
+            const data = await fetchContributionsForWidget();
+            if (data) {
+              return (
+                <ContributionWidget
+                  totalContributions={data.totalContributions}
+                  weeks={data.weeks}
+                  currentStreak={data.currentStreak}
+                  longestStreak={data.longestStreak}
+                />
+              );
+            }
+            return (
+              <ContributionWidget
+                totalContributions={0}
+                weeks={[]}
+                currentStreak={0}
+                longestStreak={0}
+              />
+            );
+          },
+        });
 
         setLoading(false);
         router.replace("/(app)/(tabs)/overview" as Href);

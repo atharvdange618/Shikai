@@ -19,6 +19,9 @@ expo-env.d.ts
 *.key
 *.mobileprovision
 
+# Release keystore (backed up outside android/ for prebuild safety)
+keystore/
+
 # Metro
 .metro-health-check*
 
