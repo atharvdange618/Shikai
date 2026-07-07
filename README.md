@@ -51,6 +51,7 @@ Shikai gives you a clean, read-only view of your GitHub world. No write operatio
 | **Repository Browser** | File trees, syntax highlighting, commit history, issues, PRs, and branch selector        |
 | **Global Search**      | Fuzzy search across repos, users, and issues with debounced input and eager pagination   |
 | **User Profiles**      | View any GitHub user's profile with avatar, bio, stats, and top repositories             |
+| **Android Widget**     | Home screen widget showing contribution streak with longest streak and recent activity   |
 
 ### Personal Access Token
 
@@ -79,6 +80,8 @@ Network state detection with MMKV-backed disk persistence. The app works offline
 
 ### Additional Features
 
+- **OTA Updates** - Silent over-the-air updates via expo-updates. App checks and applies updates transparently on launch.
+- **File Viewer** - SVG and PDF rendering alongside markdown files. Syntax-highlighted code blocks with copy buttons.
 - **Keyboard Shortcuts** - Cmd/Ctrl + 1-4 for tabs, Cmd/Ctrl + F for search, arrow keys for navigation
 - **Version Check** - Dismissible update banner when a new release is available
 - **Error Recovery** - ErrorBoundary wrapping root and tabs layouts with a custom 404 screen
@@ -139,6 +142,7 @@ Want early access to new features?
 | **State**     | React Query, Zustand, MMKV                 |
 | **UI**        | Reanimated, FlashList                      |
 | **APIs**      | GitHub REST & GraphQL, GitHub OAuth (PKCE) |
+| **Updates**   | expo-updates (OTA), EAS Build              |
 | **Infra**     | Cloudflare Workers                         |
 
 ---

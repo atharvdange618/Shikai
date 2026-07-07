@@ -1,5 +1,34 @@
 # Changelog
 
+## Unreleased
+
+### Features
+
+- **GitHub Contribution Streak Widget** - Android home screen widget displaying your contribution streak. Shows current streak, longest streak, and recent activity. Widget syncs with app theme and updates on data refresh.
+- **OTA Updates** - Silent over-the-air updates via `expo-updates` with EAS build profiles. App checks for updates on launch and applies them transparently without user intervention.
+- **SVG and PDF Rendering** - File viewer now supports SVG and PDF files with native rendering. Replaced `VirtualizedCodeViewer` with `MarkdownRenderer` for unified markdown/file display.
+- **Item Separators in Saved Repos** - Visual dividers between saved repos for better readability.
+
+### Bug Fixes
+
+- **Tooltip behavior** - Tooltips now close on outside press and tab change for cleaner UX.
+- **OAuth 2FA flow** - Opens OAuth in external browser and handles deep link redirect to survive 2FA authentication flows.
+- **Null-safety for file content** - Added null-safety checks for file content responses and proper API type formatting.
+- **Mermaid diagram loading** - Improved loading with fetch API and loading placeholders for better UX.
+- **TypeScript annotations** - Replaced `any` types with proper TypeScript annotations across codebase.
+
+### Refactoring
+
+- **Repo detail decomposition** - Decomposed repo detail screen into focused sub-components for better maintainability.
+- **Utility extraction** - Extracted duplicated utility functions into shared modules.
+
+### Chores
+
+- **Language mappings** - Added `.ino` and `.svg` file language mappings for syntax highlighting.
+- **Dependency cleanup** - Removed unused syntax highlighter dependency and dead code.
+
+---
+
 ## v1.2.0
 
 ### Features

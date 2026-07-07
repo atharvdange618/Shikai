@@ -1,12 +1,27 @@
 # Shikai Roadmap
 
-> **Version:** 1.2.0 · **Last Updated:** June 30, 2026 · **Status:** Active Development
+> **Version:** 1.3.0 · **Last Updated:** July 07, 2026 · **Status:** Active Development
 
 This document tracks the feature backlog and development progress for Shikai.
 
 ---
 
-## Completed
+## Completed (since v1.2.0)
+
+| Feature                           | Description                                                                                                                                     | Status |
+| --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
+| GitHub Contribution Streak Widget | Android home screen widget displaying current streak, longest streak, and recent activity. Syncs with app theme and updates on data refresh.    | Done   |
+| OTA Updates                       | Silent over-the-air updates via `expo-updates` with EAS build profiles. App checks for updates on launch and applies them transparently.        | Done   |
+| SVG and PDF Rendering             | File viewer now supports SVG and PDF files with native rendering. Replaced `VirtualizedCodeViewer` with `MarkdownRenderer` for unified display. | Done   |
+| OAuth 2FA Fix                     | Opens OAuth in external browser and handles deep link redirect to survive 2FA authentication flows.                                             | Done   |
+| Tooltip Behavior Fix              | Tooltips close on outside press and tab change for cleaner UX.                                                                                  | Done   |
+| Mermaid Diagram Improvements      | Improved loading with fetch API and loading placeholders.                                                                                       | Done   |
+| Repo Detail Decomposition         | Decomposed repo detail screen into focused sub-components for better maintainability.                                                           | Done   |
+| Utility Extraction                | Extracted duplicated utility functions into shared modules.                                                                                     | Done   |
+
+---
+
+## Completed (v1.2.0)
 
 | Feature                             | Description                                                                                                                                                                                                                                                             | Status |
 | ----------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
