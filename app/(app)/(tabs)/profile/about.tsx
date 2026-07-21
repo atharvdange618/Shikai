@@ -53,6 +53,15 @@ const FEATURES = [
   { icon: "signal" as const, text: "Offline support with disk caching" },
   { icon: "arrow-up" as const, text: "In-app version update check" },
   {
+    icon: "device-mobile" as const,
+    text: "Home screen widget with contribution streak",
+  },
+  { icon: "sync" as const, text: "OTA updates for seamless app refresh" },
+  {
+    icon: "file" as const,
+    text: "SVG and PDF rendering in file viewer",
+  },
+  {
     icon: "lock" as const,
     text: "Read-only \u00B7 No data leaves your device",
   },
