@@ -1,31 +1,39 @@
 # Changelog
 
-## Unreleased
+## v1.3.0
 
 ### Features
 
-- **GitHub Contribution Streak Widget** - Android home screen widget displaying your contribution streak. Shows current streak, longest streak, and recent activity. Widget syncs with app theme and updates on data refresh.
-- **OTA Updates** - Silent over-the-air updates via `expo-updates` with EAS build profiles. App checks for updates on launch and applies them transparently without user intervention.
-- **SVG and PDF Rendering** - File viewer now supports SVG and PDF files with native rendering. Replaced `VirtualizedCodeViewer` with `MarkdownRenderer` for unified markdown/file display.
-- **Item Separators in Saved Repos** - Visual dividers between saved repos for better readability.
+- **GitHub Contribution Streak Widget** - Android home screen widget displaying your contribution streak. Shows current streak, longest streak, and recent activity. Widget syncs with app theme and updates on data refresh. ([#13](https://github.com/atharvdange618/Shikai/pull/13), [`d82ac9e`](https://github.com/atharvdange618/Shikai/commit/d82ac9e), [`b52038d`](https://github.com/atharvdange618/Shikai/commit/b52038d))
+- **OTA Updates** - Silent over-the-air updates via `expo-updates` with EAS build profiles. App checks for updates on launch and applies them transparently without user intervention. ([`213b332`](https://github.com/atharvdange618/Shikai/commit/213b332), [`f6cab90`](https://github.com/atharvdange618/Shikai/commit/f6cab90))
+- **SVG and PDF Rendering** - File viewer now supports SVG and PDF files with native rendering. Replaced `VirtualizedCodeViewer` with `MarkdownRenderer` for unified markdown/file display. ([`310427f`](https://github.com/atharvdange618/Shikai/commit/310427f))
+- **Item Separators in Saved Repos** - Visual dividers between saved repos for better readability. ([`4b16d78`](https://github.com/atharvdange618/Shikai/commit/4b16d78))
+- **Scroll Indicator on Repo Details** - Bouncing chevron hints at README content below the fold. Fades out after scrolling, reappears at top. ([`66fcca6`](https://github.com/atharvdange618/Shikai/commit/66fcca6))
 
 ### Bug Fixes
 
-- **Tooltip behavior** - Tooltips now close on outside press and tab change for cleaner UX.
-- **OAuth 2FA flow** - Opens OAuth in external browser and handles deep link redirect to survive 2FA authentication flows.
-- **Null-safety for file content** - Added null-safety checks for file content responses and proper API type formatting.
-- **Mermaid diagram loading** - Improved loading with fetch API and loading placeholders for better UX.
-- **TypeScript annotations** - Replaced `any` types with proper TypeScript annotations across codebase.
+- **Tooltip behavior** - Tooltips now close on outside press and tab change for cleaner UX. ([`91159f0`](https://github.com/atharvdange618/Shikai/commit/91159f0))
+- **OAuth 2FA flow** - Opens OAuth in external browser and handles deep link redirect to survive 2FA authentication flows. ([`a96bdf7`](https://github.com/atharvdange618/Shikai/commit/a96bdf7))
+- **Null-safety for file content** - Added null-safety checks for file content responses and proper API type formatting. ([`93d8754`](https://github.com/atharvdange618/Shikai/commit/93d8754))
+- **Mermaid diagram loading** - Improved loading with fetch API and loading placeholders for better UX. ([`b0134c1`](https://github.com/atharvdange618/Shikai/commit/b0134c1))
+- **TypeScript annotations** - Replaced `any` types with proper TypeScript annotations across codebase. ([`1589ad0`](https://github.com/atharvdange618/Shikai/commit/1589ad0))
+- **OTA TypeScript errors** - Resolved expo-updates API type errors for OTA builds. ([`c2db409`](https://github.com/atharvdange618/Shikai/commit/c2db409))
+- **App icon assets** - Replaced logo-simple assets with finalized logo-lens design. ([`875c65b`](https://github.com/atharvdange618/Shikai/commit/875c65b))
 
 ### Refactoring
 
-- **Repo detail decomposition** - Decomposed repo detail screen into focused sub-components for better maintainability.
-- **Utility extraction** - Extracted duplicated utility functions into shared modules.
+- **Repo detail decomposition** - Decomposed repo detail screen into focused sub-components for better maintainability. ([`6643856`](https://github.com/atharvdange618/Shikai/commit/6643856))
+- **Utility extraction** - Extracted duplicated utility functions into shared modules. ([`fb0fe52`](https://github.com/atharvdange618/Shikai/commit/fb0fe52))
+
+### UI/UX
+
+- **Responsive Overview screen** - Overview screen now adapts across mobile sizes. ([`11d55a9`](https://github.com/atharvdange618/Shikai/commit/11d55a9))
+- **Layout responsiveness** - Enhanced layout proportions and logo sizing. ([`0ead377`](https://github.com/atharvdange618/Shikai/commit/0ead377))
 
 ### Chores
 
-- **Language mappings** - Added `.ino` and `.svg` file language mappings for syntax highlighting.
-- **Dependency cleanup** - Removed unused syntax highlighter dependency and dead code.
+- **Language mappings** - Added `.ino` and `.svg` file language mappings for syntax highlighting. ([`c474979`](https://github.com/atharvdange618/Shikai/commit/c474979))
+- **Dependency cleanup** - Removed unused syntax highlighter dependency and dead code. ([`afeec04`](https://github.com/atharvdange618/Shikai/commit/afeec04))
 
 ---
 
