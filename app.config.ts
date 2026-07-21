@@ -12,8 +12,7 @@ const widgetConfig: WithAndroidWidgetsParams = {
       minHeight: "110dp",
       targetCellWidth: 4,
       targetCellHeight: 2,
-      description:
-        "Your GitHub contribution streak and activity graph",
+      description: "Your GitHub contribution streak and activity graph",
       previewImage: "./assets/widget-preview/contribution.png",
       updatePeriodMillis: 30 * 60 * 1000,
     },
@@ -24,7 +23,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
   name: "Shikai",
   slug: "shikai",
-  version: "1.2.0",
+  version: "1.3.0",
   orientation: "portrait",
   icon: "./assets/images/icon.png",
   scheme: "shikai",

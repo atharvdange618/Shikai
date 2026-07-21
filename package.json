@@ -1,7 +1,7 @@
 {
   "name": "shikai",
   "description": "A read-only GitHub dashboard for Android. Browse repos, contribution graphs, stars, and activity.",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "author": "Atharv Dange (https://x.com/atharvdangedev)",
   "license": "MIT",
   "homepage": "https://github.com/atharvdange618/Shikai#readme",
