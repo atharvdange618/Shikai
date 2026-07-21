@@ -41,6 +41,12 @@ Shikai gives you a clean, read-only view of your GitHub world. No write operatio
 
 ---
 
+## Screenshots
+
+Take a look at Shikai before you install: **[View Screenshots on Google Drive](https://drive.google.com/drive/folders/1dKMHCwih0Yz0xiURWmrEhmi5Uzm-9iNS?usp=sharing)**
+
+---
+
 ## Features
 
 ### Core
