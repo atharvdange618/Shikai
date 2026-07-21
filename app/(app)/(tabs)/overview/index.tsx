@@ -16,7 +16,6 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { useContributions } from "@/hooks/useContributions";
 import { useEvents } from "@/hooks/useEvents";
-import { useLatestRelease } from "@/hooks/useLatestRelease";
 import { usePinnedRepos } from "@/hooks/usePinnedRepos";
 import { useReceivedEvents } from "@/hooks/useReceivedEvents";
 import { useUser } from "@/hooks/useUser";
@@ -29,7 +28,6 @@ import type { GitHubEvent } from "@/types/github.types";
 import { ActivityFeed } from "@/components/overview/ActivityFeed";
 import { ContributionGraph } from "@/components/overview/ContributionGraph";
 import { PinnedRepoCard } from "@/components/overview/PinnedRepoCard";
-import { VersionCheckBanner } from "@/components/VersionCheckBanner";
 
 import {
   type ColorTokens,
@@ -268,7 +266,6 @@ export default function OverviewScreen() {
   } = useEvents(eventsUsername);
   const { events: followingEvents, isLoading: followingLoading } =
     useReceivedEvents();
-  const { updateAvailable, latestVersion, releaseUrl } = useLatestRelease();
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -346,13 +343,6 @@ export default function OverviewScreen() {
           />
         }
       >
-        {updateAvailable && latestVersion && (
-          <VersionCheckBanner
-            latestVersion={latestVersion}
-            releaseUrl={releaseUrl}
-          />
-        )}
-
         <View style={s.section}>
           <Text style={s.sectionTitle}>Pinned</Text>
 

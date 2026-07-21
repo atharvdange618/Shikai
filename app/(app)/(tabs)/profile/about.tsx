@@ -1,11 +1,9 @@
-import { useLatestRelease } from "@/hooks/useLatestRelease";
 import { Octicons } from "@expo/vector-icons";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import Constants from "expo-constants";
 import { Image } from "expo-image";
 import { useMemo } from "react";
 import {
-  ActivityIndicator,
   Linking,
   Pressable,
   ScrollView,
@@ -51,7 +49,6 @@ const FEATURES = [
   { icon: "key" as const, text: "PAT support for notifications and following" },
   { icon: "keyboard" as const, text: "Keyboard shortcuts for iPad/macOS" },
   { icon: "signal" as const, text: "Offline support with disk caching" },
-  { icon: "arrow-up" as const, text: "In-app version update check" },
   {
     icon: "device-mobile" as const,
     text: "Home screen widget with contribution streak",
@@ -94,8 +91,6 @@ const CREDITS = [
 export default function AboutScreen() {
   const { colors, isDark } = useTheme();
   const shadows = useMemo(() => (isDark ? {} : Shadows.light.sm), [isDark]);
-  const { updateAvailable, latestVersion, isLoading, releaseUrl } =
-    useLatestRelease();
 
   const s = useMemo(() => buildStyles(colors, shadows), [colors, shadows]);
 
@@ -123,37 +118,6 @@ export default function AboutScreen() {
         <View style={s.versionBadge}>
           <Text style={s.versionText}>v{APP_VERSION}</Text>
         </View>
-
-        {isLoading ? (
-          <View style={s.updateRow}>
-            <ActivityIndicator size="small" color={colors.textMuted} />
-            <Text style={s.updateText}>Checking for updates…</Text>
-          </View>
-        ) : updateAvailable ? (
-          <Pressable
-            style={({ pressed }) => [
-              s.updateRow,
-              s.updateRowAvailable,
-              pressed && { opacity: 0.7 },
-            ]}
-            onPress={() => Linking.openURL(releaseUrl)}
-          >
-            <Octicons name="arrow-up" size={14} color={colors.accent} />
-            <Text style={[s.updateText, { color: colors.accent }]}>
-              v{latestVersion} available
-            </Text>
-            <Octicons name="link-external" size={12} color={colors.accent} />
-          </Pressable>
-        ) : (
-          <View style={s.updateRow}>
-            <Octicons
-              name="check-circle-fill"
-              size={14}
-              color={colors.success}
-            />
-            <Text style={s.updateText}>You&apos;re on the latest version</Text>
-          </View>
-        )}
       </View>
 
       <View style={s.card}>
@@ -357,25 +321,6 @@ function buildStyles(colors: ColorTokens, shadows: object) {
     },
 
     versionText: {
-      fontFamily: FontFamily.medium,
-      fontSize: FontSize.caption,
-      color: colors.textMuted,
-    },
-
-    updateRow: {
-      flexDirection: "row",
-      alignItems: "center",
-      gap: Spacing.xs,
-    },
-
-    updateRowAvailable: {
-      backgroundColor: colors.surfaceSecondary,
-      borderRadius: Radius.full,
-      paddingHorizontal: Spacing.md,
-      paddingVertical: Spacing.xs,
-    },
-
-    updateText: {
       fontFamily: FontFamily.medium,
       fontSize: FontSize.caption,
       color: colors.textMuted,

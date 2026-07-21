@@ -13,7 +13,6 @@ import type {
   GitHubPagination,
   GitHubPullRequest,
   GitHubReadme,
-  GitHubRelease,
   GitHubRepo,
   GitHubSocialAccount,
   GitHubTree,
@@ -480,20 +479,6 @@ export async function fetchPullRequests(
     pullRequests: data,
     pagination: parseLinkHeader(headers["link"]),
   };
-}
-
-const SHIKAI_REPO_OWNER = "atharvdange618";
-const SHIKAI_REPO_NAME = "Shikai";
-
-export async function fetchLatestRelease(): Promise<GitHubRelease | null> {
-  try {
-    const { data } = await githubAxios.get<GitHubRelease>(
-      `/repos/${SHIKAI_REPO_OWNER}/${SHIKAI_REPO_NAME}/releases/latest`,
-    );
-    return data;
-  } catch {
-    return null;
-  }
 }
 
 export async function fetchIssue(

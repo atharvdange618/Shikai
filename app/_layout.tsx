@@ -30,6 +30,7 @@ import { fetchAuthenticatedUser } from "@/lib/github-rest";
 import { PERSISTENCE_MAX_AGE, mmkvPersister } from "@/lib/persister";
 import { queryClient, setupFocusManager } from "@/lib/query-client";
 import { getStoredPAT, getStoredToken } from "@/lib/secure-storage";
+import { useInAppUpdates } from "@/hooks/useInAppUpdates";
 import { useOnlineManager } from "@/lib/use-online-manager";
 import { useOTAUpdates } from "@/lib/use-ota-updates";
 import { useAuthStore } from "@/stores/auth.store";
@@ -62,6 +63,7 @@ export default function RootLayout() {
   const setPat = useAuthStore((s) => s.setPat);
   useOnlineManager();
   useOTAUpdates();
+  useInAppUpdates();
 
   const [bootComplete, setBootComplete] = useState(false);
   const [showSplash, setShowSplash] = useState(true);
