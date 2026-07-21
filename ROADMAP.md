@@ -18,6 +18,8 @@ This document tracks the feature backlog and development progress for Shikai.
 | Mermaid Diagram Improvements      | Improved loading with fetch API and loading placeholders.                                                                                       | Done   |
 | Repo Detail Decomposition         | Decomposed repo detail screen into focused sub-components for better maintainability.                                                           | Done   |
 | Utility Extraction                | Extracted duplicated utility functions into shared modules.                                                                                     | Done   |
+| Scroll Indicator                  | Bouncing chevron on repo details hints at README below the fold. Fades out after scrolling, reappears at top.                                   | Done   |
+| Responsive Overview               | Overview screen adapts across mobile sizes. Pinned repos and activity feed scale with screen width.                                             | Done   |
 
 ---
 
