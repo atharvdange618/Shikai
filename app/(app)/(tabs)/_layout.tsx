@@ -95,9 +95,14 @@ export default function TabsLayout() {
 
   useKeyboardShortcuts({
     onTabSwitch: (index: number) => {
-      const routes = ["/overview", "/repos", "/search", "/profile"];
+      const routes = [
+        "/(app)/(tabs)/overview",
+        "/(app)/(tabs)/repos",
+        "/(app)/(tabs)/search",
+        "/(app)/(tabs)/profile",
+      ] as const;
       const route = routes[index];
-      if (route) router.push(`/(app)/(tabs)${route}` as any);
+      if (route) router.push(route);
     },
   });
 

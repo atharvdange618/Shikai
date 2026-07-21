@@ -99,7 +99,10 @@ export default function SearchScreen() {
       <Pressable
         style={({ pressed }) => [s.userCard, pressed && { opacity: 0.7 }]}
         onPress={() => {
-          router.push(`/(app)/user/${item.login}` as any);
+          router.push({
+            pathname: "/(app)/user/[username]",
+            params: { username: item.login },
+          });
         }}
       >
         {item.avatar_url ? (
@@ -137,7 +140,10 @@ export default function SearchScreen() {
           if (repoMatch) {
             const [, owner, repo] = repoMatch;
             const repoId = encodeRepoId(owner, repo);
-            router.push(`/(app)/repo/${repoId}/issue/${item.number}` as any);
+            router.push({
+              pathname: "/(app)/repo/[repoId]/issue/[number]",
+              params: { repoId, number: String(item.number) },
+            });
           }
         }}
       >

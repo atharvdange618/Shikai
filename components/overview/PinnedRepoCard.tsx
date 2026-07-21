@@ -39,8 +39,8 @@ export function PinnedRepoCard({ repo }: PinnedRepoCardProps) {
   const route = `/(app)/repo/${repoId}`;
 
   const handlePress = useCallback(() => {
-    router.push(route as any);
-  }, [router, route]);
+    router.push({ pathname: "/(app)/repo/[repoId]", params: { repoId } });
+  }, [router, repoId]);
 
   const handlePressIn = useCallback(() => {
     prefetchRoute(route);

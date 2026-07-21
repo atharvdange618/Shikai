@@ -217,7 +217,7 @@ export default function RepoDetailsScreen() {
     router.push({
       pathname: "/(app)/user/[username]",
       params: { username: owner },
-    } as any);
+    });
   }, [router, owner]);
 
   const insets = useSafeAreaInsets();

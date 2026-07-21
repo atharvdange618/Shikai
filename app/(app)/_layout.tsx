@@ -13,6 +13,7 @@ export default function AppLayout() {
     >
       <Stack.Screen name="(tabs)" />
       <Stack.Screen name="repo" />
+      <Stack.Screen name="user" />
     </Stack>
   );
 }

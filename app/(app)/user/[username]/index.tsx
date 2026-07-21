@@ -72,7 +72,7 @@ export default function UserProfileScreen() {
   const handleRepoPress = useCallback(
     (repo: GitHubRepo) => {
       const repoId = encodeRepoId(repo.owner.login, repo.name);
-      router.push(`/(app)/repo/${repoId}` as any);
+      router.push({ pathname: "/(app)/repo/[repoId]", params: { repoId } });
     },
     [router],
   );

@@ -188,7 +188,10 @@ const IssueItem = memo(function IssueItem({
   const router = useRouter();
 
   const handlePress = useCallback(() => {
-    router.push(`/(app)/repo/${repoId}/issue/${issue.number}` as any);
+    router.push({
+      pathname: "/(app)/repo/[repoId]/issue/[number]",
+      params: { repoId, number: String(issue.number) },
+    });
   }, [router, repoId, issue.number]);
 
   const isOpen = issue.state === "open";

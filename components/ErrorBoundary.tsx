@@ -63,7 +63,7 @@ function ErrorFallback({
         style={[s.button, { backgroundColor: colors.accent }]}
         onPress={() => {
           onRetry();
-          router.replace("/(app)/(tabs)/overview" as any);
+          router.replace("/(app)/(tabs)/overview");
         }}
       >
         <Text style={[s.buttonText, { color: "#FFFFFF" }]}>Go to Home</Text>
