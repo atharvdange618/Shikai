@@ -11,7 +11,7 @@ import {
 import type { Query } from "@tanstack/react-query";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 import { useFonts } from "expo-font";
-import { Stack } from "expo-router";
+import { Stack, useRouter } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import * as SystemUI from "expo-system-ui";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -25,12 +25,12 @@ import {
 } from "@/components";
 import { OfflineBanner } from "@/components/OfflineBanner";
 import { ThemeProvider, useTheme } from "@/contexts/ThemeContext";
+import { useInAppUpdates } from "@/hooks/useInAppUpdates";
 import { setAuthReady } from "@/lib/axios";
 import { fetchAuthenticatedUser } from "@/lib/github-rest";
 import { PERSISTENCE_MAX_AGE, mmkvPersister } from "@/lib/persister";
 import { queryClient, setupFocusManager } from "@/lib/query-client";
 import { getStoredPAT, getStoredToken } from "@/lib/secure-storage";
-import { useInAppUpdates } from "@/hooks/useInAppUpdates";
 import { useOnlineManager } from "@/lib/use-online-manager";
 import { useOTAUpdates } from "@/lib/use-ota-updates";
 import { useAuthStore } from "@/stores/auth.store";
@@ -213,6 +213,26 @@ export default function RootLayout() {
 
 function AppStack({ token }: { token: string | null }) {
   const theme = useTheme();
+  const router = useRouter();
+  const prevTokenRef = useRef(token);
+  const mountedRef = useRef(false);
+
+  useEffect(() => {
+    if (!mountedRef.current) {
+      mountedRef.current = true;
+      prevTokenRef.current = token;
+      return;
+    }
+
+    const prevToken = prevTokenRef.current;
+    prevTokenRef.current = token;
+
+    if (token && !prevToken) {
+      router.replace("/(app)/(tabs)/overview");
+    } else if (!token && prevToken) {
+      router.replace("/sign-in");
+    }
+  }, [token, router]);
 
   return (
     <Stack
