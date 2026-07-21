@@ -119,12 +119,11 @@ export default function SettingsScreen() {
             useAuthStore.getState().clearAuth();
             queryClient.clear();
             clearAllMMKV();
-            router.replace("/sign-in" as Href);
           },
         },
       ],
     });
-  }, [router, alert, queryClient]);
+  }, [alert, queryClient]);
 
   return (
     <ScrollView

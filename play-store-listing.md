@@ -42,7 +42,7 @@ THEMES
 Choose from 5 carefully crafted palettes: Light, Dark, Tokyo Night, Dracula, and Atom One Dark. Theme selection persists across app restarts.
 
 OTA UPDATES
-The app updates itself silently in the background. No manual installs needed. Updates are checked on launch and applied transparently.
+The app updates itself silently in the background. No manual installs needed. Updates are checked on launch and applied through the Play Store.
 
 OFFLINE SUPPORT
 Network state detection with disk persistence. Continue viewing cached data when offline. Automatic cache updates when connection restores.

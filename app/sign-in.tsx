@@ -3,7 +3,6 @@ import { makeRedirectUri } from "expo-auth-session";
 import * as Crypto from "expo-crypto";
 import { Image } from "expo-image";
 import * as Linking from "expo-linking";
-import { Href, useRouter } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
 import { useCallback, useEffect, useMemo } from "react";
 import {
@@ -59,7 +58,6 @@ const SCOPES = ["read:user", "user:email", "repo:status", "read:repo"].join(
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 export default function SignInScreen() {
-  const router = useRouter();
   const { colors, isDark } = useTheme();
   const shadows = useMemo(() => (isDark ? {} : Shadows.light.md), [isDark]);
   const insets = useSafeAreaInsets();
@@ -185,14 +183,13 @@ export default function SignInScreen() {
         });
 
         setLoading(false);
-        router.replace("/(app)/(tabs)/overview" as Href);
       } catch {
         setError("Something went wrong. Check your connection and try again.");
         setLoading(false);
         await clearPendingAuth();
       }
     },
-    [redirectUri, setToken, setUser, router, setPat],
+    [redirectUri, setToken, setUser, setPat],
   );
 
   useEffect(() => {
@@ -336,12 +333,11 @@ export default function SignInScreen() {
 
       setLoading(false);
       setNeedsInstall(false);
-      router.replace("/(app)/(tabs)/overview" as Href);
     } catch {
       setError("Installation failed. You can set it up later from settings.");
       setLoading(false);
     }
-  }, [redirectUri, setUser, router, setToken, setPat]);
+  }, [redirectUri, setUser, setToken, setPat]);
 
   const s = useMemo(
     () => buildStyles(colors, isDark, shadows, insets.top, insets.bottom),

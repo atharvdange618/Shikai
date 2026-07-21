@@ -9,6 +9,7 @@
 - **SVG and PDF Rendering** - File viewer now supports SVG and PDF files with native rendering. Replaced `VirtualizedCodeViewer` with `MarkdownRenderer` for unified markdown/file display. ([`310427f`](https://github.com/atharvdange618/Shikai/commit/310427f))
 - **Item Separators in Saved Repos** - Visual dividers between saved repos for better readability. ([`4b16d78`](https://github.com/atharvdange618/Shikai/commit/4b16d78))
 - **Scroll Indicator on Repo Details** - Bouncing chevron hints at README content below the fold. Fades out after scrolling, reappears at top. ([`66fcca6`](https://github.com/atharvdange618/Shikai/commit/66fcca6))
+- **Play Store In-App Updates** - Replaced GitHub releases version check with native Play Store update flow via `expo-in-app-updates`. App now checks the Play Store on launch and prompts users to update through the native Play Store overlay.
 
 ### Bug Fixes
 
@@ -34,6 +35,10 @@
 
 - **Language mappings** - Added `.ino` and `.svg` file language mappings for syntax highlighting. ([`c474979`](https://github.com/atharvdange618/Shikai/commit/c474979))
 - **Dependency cleanup** - Removed unused syntax highlighter dependency and dead code. ([`afeec04`](https://github.com/atharvdange618/Shikai/commit/afeec04))
+
+### Removed
+
+- **GitHub releases update check** - Removed `useLatestRelease` hook, `VersionCheckBanner` component, and `fetchLatestRelease` API function. Replaced by Play Store in-app updates.
 
 ---
 
