@@ -18,13 +18,16 @@ OVERVIEW
 Your personal GitHub dashboard with pinned repos, contribution graph with streaks, and a live activity feed. Pushes, stars, forks, releases, PRs, and issues, all in one place. Tap any item to jump to the repo.
 
 REPOSITORIES
-Browse all your repos with smart filters by language, type, or sort order. Explore file trees, view files with syntax highlighting, browse commit history per branch, and track issues and pull requests. Health badges flag missing licenses, no topics, and stale repos.
+Browse all your repos with smart filters by language, type, or sort order. Explore file trees, view files with syntax highlighting, browse commit history per branch, and track issues and pull requests. Health badges flag missing licenses, no topics, and stale repos. SVG and PDF files render inline alongside markdown.
 
 SEARCH
 Global search across repos, users, and issues with fuzzy matching. Tab switching between result types, debounced input, eager-load pagination. Navigate in-app to any repo, user profile, or issue detail.
 
 PROFILE
 Your GitHub card with stats, social links, location, and hireable status. Access notifications via bell icon, saved repos, and settings via gear icon.
+
+HOME SCREEN WIDGET
+Add the contribution streak widget to your Android home screen. See your current streak, longest streak, and recent activity without opening the app. Syncs with your app theme.
 
 NOTIFICATIONS (Requires PAT)
 GitHub notifications with attention-worthy filtering. Review requests, mentions, and assignments are highlighted. All/Unread/Attention filters with mark-all-read. Tap to navigate to issues and PRs.
@@ -37,6 +40,9 @@ Bookmark any repo from anywhere in the app. Stars and Watchlist combined in one 
 
 THEMES
 Choose from 5 carefully crafted palettes: Light, Dark, Tokyo Night, Dracula, and Atom One Dark. Theme selection persists across app restarts.
+
+OTA UPDATES
+The app updates itself silently in the background. No manual installs needed. Updates are checked on launch and applied transparently.
 
 OFFLINE SUPPORT
 Network state detection with disk persistence. Continue viewing cached data when offline. Automatic cache updates when connection restores.
