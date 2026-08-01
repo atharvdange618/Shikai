@@ -41,6 +41,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     edgeToEdgeEnabled: true,
     predictiveBackGestureEnabled: false,
     package: "com.atharvdange618.Shikai",
+    versionCode: 3,
   },
   web: {
     output: "static",
@@ -65,6 +66,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     "expo-web-browser",
     "expo-updates",
     "./plugins/withAndroidPackaging",
+    "./plugins/withGradleProperties",
     ["react-native-android-widget", widgetConfig],
   ],
   experiments: {

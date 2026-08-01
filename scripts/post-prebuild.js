@@ -3,6 +3,14 @@
  * Post-prebuild script - re-applies custom Android build configurations
  * that are wiped by `expo prebuild --clean`.
  *
+ * R8, shrinkResources, architecture, and webp patches are handled by
+ * config plugins (withGradleProperties.js). This script handles:
+ * - Keystore restore from keystore/ to android/app/
+ * - Release signing config in build.gradle
+ * - ABI splits in build.gradle
+ * - META-INF exclusion in build.gradle
+ * - KEYSTORE_PASSWORD in gradle.properties
+ *
  * Usage:
  *   node scripts/post-prebuild.js
  *
@@ -45,32 +53,11 @@ function restoreKeystore() {
 }
 
 // ─── gradle.properties patches ───
+// R8, shrinkResources, architecture, and webp are now handled by
+// plugins/withGradleProperties.js (runs during expo prebuild for both
+// local and EAS builds). Only the keystore password stays here since
+// it's too sensitive to commit in a config plugin.
 const GRADLE_PROPERTIES_PATCHES = {
-  // Architecture filter - match ABI splits config
-  reactNativeArchitectures: {
-    expected: "arm64-v8a,x86_64",
-    fallback: "arm64-v8a,x86_64",
-    description: "Architecture filter for ABI splits",
-  },
-  // R8 minification
-  "android.enableMinifyInReleaseBuilds": {
-    expected: "true",
-    fallback: "true",
-    description: "R8 minification for release builds",
-  },
-  // Resource shrinking
-  "android.enableShrinkResourcesInReleaseBuilds": {
-    expected: "true",
-    fallback: "true",
-    description: "Resource shrinking for release builds",
-  },
-  // Animated WebP - disabled to save ~3.4MB
-  "expo.webp.animated": {
-    expected: "false",
-    fallback: "false",
-    description: "Animated WebP support (disabled to save space)",
-  },
-  // Release keystore password
   KEYSTORE_PASSWORD: {
     expected: "***REDACTED-ROTATED-PASSWORD***",
     fallback: "***REDACTED-ROTATED-PASSWORD***",
@@ -230,11 +217,10 @@ function main() {
   log("\nDone. Configurations applied:");
   log("  - Release keystore restored");
   log("  - Release signing config added");
+  log("  - Release keystore password set");
   log("  - ABI splits: arm64-v8a, x86_64, universal");
-  log("  - R8 minification: enabled");
-  log("  - Resource shrinking: enabled");
-  log("  - Animated WebP: disabled");
   log("  - META-INF conflict exclusion: added");
+  log("  (R8, shrinkResources, architecture, webp handled by withGradleProperties plugin)");
 }
 
 main();
