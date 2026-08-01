@@ -19,6 +19,10 @@
 </p>
 
 <p align="center">
+  <a href="https://play.google.com/store/apps/details?id=com.atharvdange618.Shikai"><img src="https://github.com/nicehash/Play-Store-Badges/blob/master/en_badge_web_generic.png?raw=true" width="250" alt="Get it on Google Play"></a>
+</p>
+
+<p align="center">
   GitHub's mobile app is built for <em>work</em>. Shikai is built for <em>you</em>.
 </p>
 
