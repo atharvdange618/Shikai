@@ -288,6 +288,7 @@ export default function OverviewScreen() {
     totalContributions,
     stats,
     isLoading: contribLoading,
+    dataUpdatedAt: contribUpdatedAt,
   } = useContributions();
   const eventsUsername = user?.login ?? storeUser?.login ?? "";
   const {
@@ -422,6 +423,7 @@ export default function OverviewScreen() {
               totalContributions={totalContributions}
               isLoading={contribLoading}
               stats={stats}
+              dataUpdatedAt={contribUpdatedAt}
             />
           </View>
         </FadeInView>

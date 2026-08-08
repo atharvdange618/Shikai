@@ -26,6 +26,16 @@ const DAYS = 7;
 const MONTH_LABEL_HEIGHT = 16;
 const SVG_HEIGHT = MONTH_LABEL_HEIGHT + DAYS * STEP;
 
+function formatRelativeTime(timestamp: number): string {
+  const diff = Date.now() - timestamp;
+  const minutes = Math.floor(diff / 60000);
+  if (minutes < 1) return "just now";
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  return `${Math.floor(hours / 24)}d ago`;
+}
+
 const DAY_LABELS: { label: string; row: number }[] = [
   { label: "Mon", row: 1 },
   { label: "Wed", row: 3 },
@@ -67,6 +77,7 @@ interface ContributionGraphProps {
   totalContributions: number;
   isLoading?: boolean;
   stats?: ContributionStats | null;
+  dataUpdatedAt?: number;
 }
 
 export function ContributionGraph({
@@ -74,6 +85,7 @@ export function ContributionGraph({
   totalContributions,
   isLoading = false,
   stats,
+  dataUpdatedAt,
 }: ContributionGraphProps) {
   const { colors } = useTheme();
   const scrollRef = useRef<ScrollView>(null);
@@ -131,9 +143,17 @@ export function ContributionGraph({
     >
       <View style={s.header}>
         <Text style={s.sectionTitle}>Contributions</Text>
-        <Text style={s.totalCount}>
-          {totalContributions.toLocaleString()} this year
-        </Text>
+        <View style={s.headerRight}>
+          <Text style={s.totalCount}>
+            {totalContributions.toLocaleString()} this year
+          </Text>
+          {dataUpdatedAt != null &&
+            Date.now() - dataUpdatedAt > 1000 * 60 * 5 && (
+              <Text style={s.updatedAgo}>
+                Updated {formatRelativeTime(dataUpdatedAt)}
+              </Text>
+            )}
+        </View>
       </View>
 
       {stats && <ContributionStatsRow stats={stats} />}
@@ -249,6 +269,11 @@ function buildStyles(colors: ColorTokens) {
       justifyContent: "space-between",
     },
 
+    headerRight: {
+      alignItems: "flex-end",
+      gap: 2,
+    },
+
     sectionTitle: {
       fontFamily: FontFamily.semiBold,
       fontSize: FontSize.title,
@@ -259,6 +284,12 @@ function buildStyles(colors: ColorTokens) {
       fontFamily: FontFamily.regular,
       fontSize: FontSize.label,
       color: colors.textSecondary,
+    },
+
+    updatedAgo: {
+      fontFamily: FontFamily.regular,
+      fontSize: FontSize.caption,
+      color: colors.textMuted,
     },
 
     graphRow: {

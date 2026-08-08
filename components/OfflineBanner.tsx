@@ -1,7 +1,8 @@
+import { Octicons } from "@expo/vector-icons";
 import { TextStyles, useTheme } from "@/constants/theme";
 import NetInfo from "@react-native-community/netinfo";
 import { useEffect, useState } from "react";
-import { StyleSheet, Text } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import Animated, {
   FadeIn,
   FadeOut,
@@ -31,12 +32,15 @@ export function OfflineBanner() {
       layout={LinearTransition.duration(200)}
       style={[
         styles.banner,
-        { backgroundColor: colors.warningSubtle, paddingTop: insets.top },
+        { backgroundColor: colors.accent, paddingTop: insets.top + 6 },
       ]}
     >
-      <Text style={[TextStyles.caption, { color: colors.textSecondary }]}>
-        You{"'"}re offline - showing cached data
-      </Text>
+      <View style={styles.content}>
+        <Octicons name="cloud-offline" size={14} color={colors.textOnAccent} />
+        <Text style={[TextStyles.caption, { color: colors.textOnAccent }]}>
+          {"You're offline - showing cached data"}
+        </Text>
+      </View>
     </Animated.View>
   );
 }
@@ -45,7 +49,12 @@ const styles = StyleSheet.create({
   banner: {
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 6,
+    paddingVertical: 8,
     paddingHorizontal: 16,
+  },
+  content: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
   },
 });

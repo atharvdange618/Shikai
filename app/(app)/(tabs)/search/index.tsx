@@ -1,8 +1,9 @@
 import { Octicons } from "@expo/vector-icons";
+import NetInfo from "@react-native-community/netinfo";
 import { useQueryClient } from "@tanstack/react-query";
 import { Image } from "expo-image";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Pressable,
@@ -52,7 +53,16 @@ export default function SearchScreen() {
 
   const [search, setSearch] = useState(params.q ?? "");
   const [tab, setTab] = useState<SearchTab>("repos");
+  const [isOffline, setIsOffline] = useState(false);
   const debouncedSearch = useDebounce(search, 300);
+
+  useEffect(() => {
+    return NetInfo.addEventListener((state) => {
+      setIsOffline(
+        state.isConnected === false || state.isInternetReachable === false,
+      );
+    });
+  }, []);
 
   const {
     repos,
@@ -218,6 +228,19 @@ export default function SearchScreen() {
         </View>
       );
     }
+    if (isOffline && debouncedSearch && data.length === 0) {
+      return (
+        <View style={s.emptyContainer}>
+          <Octicons name="cloud-offline" size={32} color={colors.textMuted} />
+          <Text style={s.emptyTitle}>
+            Search requires internet connection
+          </Text>
+          <Text style={s.emptySubtitle}>
+            Connect to GitHub to search repositories, users, and issues
+          </Text>
+        </View>
+      );
+    }
     if (!debouncedSearch) {
       return (
         <View style={s.emptyContainer}>
@@ -235,7 +258,7 @@ export default function SearchScreen() {
         <Text style={s.emptySubtitle}>Try a different search term</Text>
       </View>
     );
-  }, [isLoading, debouncedSearch, s, colors]);
+  }, [isLoading, isOffline, debouncedSearch, data.length, s, colors]);
 
   const ListFooter = isFetchingNextPage ? (
     <View style={s.footerLoader}>

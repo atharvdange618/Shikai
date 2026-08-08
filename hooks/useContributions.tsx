@@ -113,5 +113,6 @@ export function useContributions() {
     isLoading: query.isLoading,
     isError: query.isError,
     error: query.error,
+    dataUpdatedAt: query.dataUpdatedAt,
   };
 }
