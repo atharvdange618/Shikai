@@ -7,6 +7,8 @@ import Animated, {
   withSpring,
 } from "react-native-reanimated";
 
+import { useReducedMotion } from "@/hooks/useReducedMotion";
+
 export type TabIconName =
   | "home"
   | "home-fill"
@@ -36,18 +38,21 @@ export function TabBarIcon({
   size,
   focused,
 }: TabBarIconProps) {
+  const reducedMotion = useReducedMotion();
   const scale = useSharedValue(focused ? 1.1 : 1.0);
 
   useEffect(() => {
     if (focused) {
       Haptics.selectionAsync();
     }
-    scale.value = withSpring(focused ? 1.1 : 1.0, {
-      damping: 15,
-      stiffness: 300,
-      mass: 0.8,
-    });
-  }, [focused, scale]);
+    scale.value = reducedMotion
+      ? focused ? 1.1 : 1.0
+      : withSpring(focused ? 1.1 : 1.0, {
+          damping: 15,
+          stiffness: 300,
+          mass: 0.8,
+        });
+  }, [focused, scale, reducedMotion]);
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],

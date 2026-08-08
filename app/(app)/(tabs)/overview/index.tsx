@@ -20,6 +20,7 @@ import { useContributions } from "@/hooks/useContributions";
 import { useEvents } from "@/hooks/useEvents";
 import { usePinnedRepos } from "@/hooks/usePinnedRepos";
 import { useReceivedEvents } from "@/hooks/useReceivedEvents";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { useUser } from "@/hooks/useUser";
 import { prefetchProfile, prefetchRoute } from "@/lib/prefetch";
 import { queryKeys } from "@/lib/query-client";
@@ -56,7 +57,8 @@ function FadeInView({
   children: React.ReactNode;
   delay?: number;
 }) {
-  const opacity = useSharedValue(0);
+  const reducedMotion = useReducedMotion();
+  const opacity = useSharedValue(reducedMotion ? 1 : 0);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -65,10 +67,10 @@ function FadeInView({
   }, [delay]);
 
   useEffect(() => {
-    if (mounted) {
+    if (mounted && !reducedMotion) {
       opacity.value = withTiming(1, { duration: 300 });
     }
-  }, [mounted, opacity]);
+  }, [mounted, opacity, reducedMotion]);
 
   return (
     <Animated.View style={{ opacity }}>
