@@ -371,7 +371,13 @@ export default function OverviewScreen() {
               ))}
             </ScrollView>
           ) : (
-            <Text style={s.emptyText}>No pinned repositories.</Text>
+            <View style={s.emptyState}>
+              <Octicons name="repo" size={24} color={colors.textMuted} />
+              <Text style={s.emptyStateTitle}>No pinned repos</Text>
+              <Text style={s.emptyStateSubtitle}>
+                Pin repos on GitHub to see them here
+              </Text>
+            </View>
           )}
         </View>
 
@@ -492,6 +498,25 @@ function buildStyles(colors: ColorTokens) {
       fontFamily: FontFamily.regular,
       fontSize: FontSize.body,
       color: colors.textMuted,
+    },
+
+    emptyState: {
+      alignItems: "center",
+      gap: Spacing.xs,
+      paddingVertical: Spacing.xl,
+    },
+
+    emptyStateTitle: {
+      fontFamily: FontFamily.semiBold,
+      fontSize: FontSize.body,
+      color: colors.textSecondary,
+    },
+
+    emptyStateSubtitle: {
+      fontFamily: FontFamily.regular,
+      fontSize: FontSize.label,
+      color: colors.textMuted,
+      textAlign: "center",
     },
   });
 }

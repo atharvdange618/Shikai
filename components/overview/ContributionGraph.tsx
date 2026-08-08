@@ -1,3 +1,4 @@
+import { Octicons } from "@expo/vector-icons";
 import { useCallback, useMemo, useRef } from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import Svg, { Rect, Text as SvgText } from "react-native-svg";
@@ -91,7 +92,13 @@ export function ContributionGraph({
     return (
       <View style={s.container}>
         <Text style={s.sectionTitle}>Contributions</Text>
-        <Text style={s.emptyText}>No contribution data available.</Text>
+        <View style={s.emptyState}>
+          <Octicons name="graph" size={24} color={colors.textMuted} />
+          <Text style={s.emptyStateTitle}>No contributions yet</Text>
+          <Text style={s.emptyStateSubtitle}>
+            Start pushing code to see your activity here
+          </Text>
+        </View>
       </View>
     );
   }
@@ -308,6 +315,25 @@ function buildStyles(colors: ColorTokens) {
       fontSize: FontSize.body,
       color: colors.textMuted,
       paddingVertical: Spacing.md,
+    },
+
+    emptyState: {
+      alignItems: "center",
+      gap: Spacing.xs,
+      paddingVertical: Spacing.xl,
+    },
+
+    emptyStateTitle: {
+      fontFamily: FontFamily.semiBold,
+      fontSize: FontSize.body,
+      color: colors.textSecondary,
+    },
+
+    emptyStateSubtitle: {
+      fontFamily: FontFamily.regular,
+      fontSize: FontSize.label,
+      color: colors.textMuted,
+      textAlign: "center",
     },
   });
 }
