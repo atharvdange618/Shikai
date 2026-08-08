@@ -23,8 +23,10 @@ import {
   BlockingScreen,
   ErrorBoundary,
 } from "@/components";
+import { AppRatingPrompt } from "@/components/AppRatingPrompt";
 import { OfflineBanner } from "@/components/OfflineBanner";
 import { ThemeProvider, useTheme } from "@/contexts/ThemeContext";
+import { useAppRatingPrompt } from "@/hooks/useAppRatingPrompt";
 import { useInAppUpdates } from "@/hooks/useInAppUpdates";
 import { setAuthReady } from "@/lib/axios";
 import { fetchAuthenticatedUser } from "@/lib/github-rest";
@@ -63,6 +65,7 @@ export default function RootLayout() {
   const setPat = useAuthStore((s) => s.setPat);
   useOnlineManager();
   useOTAUpdates();
+  const { visible, rate, dismiss } = useAppRatingPrompt();
   useInAppUpdates();
 
   const [bootComplete, setBootComplete] = useState(false);
@@ -186,6 +189,7 @@ export default function RootLayout() {
       >
         <AlertProvider>
           <OfflineBanner />
+          <AppRatingPrompt visible={visible} onRate={rate} onDismiss={dismiss} />
           <ThemeEffects />
           {showSplash && (
             <AnimatedSplashScreen
