@@ -1,14 +1,7 @@
 import { Tooltip } from "@/components/shared/Tooltip";
 import { Octicons } from "@expo/vector-icons";
-import { useEffect, useMemo } from "react";
+import { useMemo } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import Animated, {
-  useAnimatedStyle,
-  useSharedValue,
-  withRepeat,
-  withSequence,
-  withTiming,
-} from "react-native-reanimated";
 
 import {
   type ColorTokens,
@@ -19,7 +12,6 @@ import {
   useTheme,
 } from "@/constants/theme";
 import type { ContributionStats } from "@/types/github-graphql.types";
-import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 interface Props {
   stats: ContributionStats;
@@ -36,7 +28,6 @@ const STAT_INFO: Record<string, string> = {
 export function ContributionStatsRow({ stats }: Props) {
   const { colors } = useTheme();
   const s = useMemo(() => buildStyles(colors), [colors]);
-  const reducedMotion = useReducedMotion();
 
   const streakProgress =
     stats.longestStreak > 0
@@ -44,40 +35,17 @@ export function ContributionStatsRow({ stats }: Props) {
       : 0;
   const isStreakActive = stats.currentStreak > 0;
 
-  const flameScale = useSharedValue(1);
-
-  useEffect(() => {
-    if (isStreakActive && !reducedMotion) {
-      flameScale.value = withRepeat(
-        withSequence(
-          withTiming(1.2, { duration: 400 }),
-          withTiming(1, { duration: 400 }),
-        ),
-        -1,
-        false,
-      );
-    } else {
-      flameScale.value = 1;
-    }
-  }, [isStreakActive, reducedMotion, flameScale]);
-
-  const flameStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: flameScale.value }],
-  }));
-
   return (
     <View style={s.row}>
       <View
         style={s.item}
         accessibilityLabel={`${stats.currentStreak} day streak`}
       >
-        <Animated.View style={flameStyle}>
-          <Octicons
-            name="flame"
-            size={16}
-            color={isStreakActive ? colors.success : colors.textMuted}
-          />
-        </Animated.View>
+        <Octicons
+          name="flame"
+          size={16}
+          color={isStreakActive ? colors.success : colors.textMuted}
+        />
         <Text
           style={[
             s.value,
