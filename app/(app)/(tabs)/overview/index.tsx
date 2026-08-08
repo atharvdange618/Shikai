@@ -3,7 +3,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
 import { Href, useRouter } from "expo-router";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Pressable,
@@ -13,6 +13,7 @@ import {
   Text,
   View,
 } from "react-native";
+import Animated, { useSharedValue, withTiming } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { useContributions } from "@/hooks/useContributions";
@@ -46,6 +47,34 @@ function getGreeting() {
   if (hour < 12) return "Good morning";
   if (hour < 18) return "Good afternoon";
   return "Good evening";
+}
+
+function FadeInView({
+  children,
+  delay = 0,
+}: {
+  children: React.ReactNode;
+  delay?: number;
+}) {
+  const opacity = useSharedValue(0);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setMounted(true), delay);
+    return () => clearTimeout(timer);
+  }, [delay]);
+
+  useEffect(() => {
+    if (mounted) {
+      opacity.value = withTiming(1, { duration: 300 });
+    }
+  }, [mounted, opacity]);
+
+  return (
+    <Animated.View style={{ opacity }}>
+      {children}
+    </Animated.View>
+  );
 }
 
 function getFollowingEventText(event: GitHubEvent): string {
@@ -347,66 +376,71 @@ export default function OverviewScreen() {
           />
         }
       >
-        <View style={s.section}>
-          <Text style={s.sectionTitle}>Pinned</Text>
+        <FadeInView delay={0}>
+          <View style={s.section}>
+            <Text style={s.sectionTitle}>Pinned</Text>
 
-          {pinnedLoading ? (
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              style={s.pinnedScroll}
-            >
-              {Array.from({ length: 3 }).map((_, i) => (
-                <View key={i} style={s.pinnedSkeleton} />
-              ))}
-            </ScrollView>
-          ) : pinnedRepos && pinnedRepos.length > 0 ? (
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              style={s.pinnedScroll}
-              contentContainerStyle={s.pinnedContent}
-            >
-              {pinnedRepos.map((repo) => (
-                <PinnedRepoCard key={repo.url} repo={repo} />
-              ))}
-            </ScrollView>
+            {pinnedLoading ? (
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                style={s.pinnedScroll}
+              >
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <View key={i} style={s.pinnedSkeleton} />
+                ))}
+              </ScrollView>
+            ) : pinnedRepos && pinnedRepos.length > 0 ? (
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                style={s.pinnedScroll}
+                contentContainerStyle={s.pinnedContent}
+              >
+                {pinnedRepos.map((repo) => (
+                  <PinnedRepoCard key={repo.url} repo={repo} />
+                ))}
+              </ScrollView>
+            ) : (
+              <View style={s.emptyState}>
+                <Octicons name="repo" size={24} color={colors.textMuted} />
+                <Text style={s.emptyStateTitle}>No pinned repos</Text>
+                <Text style={s.emptyStateSubtitle}>
+                  Pin repos on GitHub to see them here
+                </Text>
+              </View>
+            )}
+          </View>
+        </FadeInView>
+
+        <FadeInView delay={100}>
+          <View style={s.section}>
+            <ContributionGraph
+              weeks={weeks}
+              totalContributions={totalContributions}
+              isLoading={contribLoading}
+              stats={stats}
+            />
+          </View>
+        </FadeInView>
+
+        <FadeInView delay={200}>
+          {pat ? (
+            <FollowingPreview
+              events={followingEvents}
+              isLoading={followingLoading}
+              onPress={() => router.push("/(app)/(tabs)/overview/feed" as Href)}
+              colors={colors}
+            />
           ) : (
-            <View style={s.emptyState}>
-              <Octicons name="repo" size={24} color={colors.textMuted} />
-              <Text style={s.emptyStateTitle}>No pinned repos</Text>
-              <Text style={s.emptyStateSubtitle}>
-                Pin repos on GitHub to see them here
-              </Text>
-            </View>
-          )}
-        </View>
-
-        <View style={s.section}>
-          <ContributionGraph
-            weeks={weeks}
-            totalContributions={totalContributions}
-            isLoading={contribLoading}
-            stats={stats}
-          />
-        </View>
-
-        {pat ? (
-          <FollowingPreview
-            events={followingEvents}
-            isLoading={followingLoading}
-            onPress={() => router.push("/(app)/(tabs)/overview/feed" as Href)}
-            colors={colors}
-          />
-        ) : (
-          <Pressable
-            style={({ pressed }) => [
-              s.patPrompt,
-              { borderColor: colors.border, backgroundColor: colors.surface },
-              pressed && { opacity: 0.7 },
-            ]}
-            onPress={() => router.push("/(app)/(tabs)/profile/settings" as Href)}
-          >
+            <Pressable
+              style={({ pressed }) => [
+                s.patPrompt,
+                { borderColor: colors.border, backgroundColor: colors.surface },
+                pressed && { opacity: 0.7 },
+              ]}
+              onPress={() => router.push("/(app)/(tabs)/profile/settings" as Href)}
+            >
             <View style={s.patPromptHeader}>
               <Octicons name="bell" size={18} color={colors.accent} />
               <Text style={[s.patPromptTitle, { color: colors.textPrimary }]}>
@@ -432,16 +466,19 @@ export default function OverviewScreen() {
               </View>
             </View>
           </Pressable>
-        )}
+          )}
+        </FadeInView>
 
-        <View style={s.section}>
-          <ActivityFeed
-            events={events}
-            isLoading={activityLoading}
-            isLoadingMore={isFetchingNextPage}
-            onEndReached={handleActivityEndReached}
-          />
-        </View>
+        <FadeInView delay={300}>
+          <View style={s.section}>
+            <ActivityFeed
+              events={events}
+              isLoading={activityLoading}
+              isLoadingMore={isFetchingNextPage}
+              onEndReached={handleActivityEndReached}
+            />
+          </View>
+        </FadeInView>
       </ScrollView>
     </SafeAreaView>
   );
