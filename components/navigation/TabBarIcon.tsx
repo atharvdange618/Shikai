@@ -1,4 +1,5 @@
 import { Octicons } from "@expo/vector-icons";
+import * as Haptics from "expo-haptics";
 import { useEffect } from "react";
 import Animated, {
   useAnimatedStyle,
@@ -38,6 +39,9 @@ export function TabBarIcon({
   const scale = useSharedValue(focused ? 1.1 : 1.0);
 
   useEffect(() => {
+    if (focused) {
+      Haptics.selectionAsync();
+    }
     scale.value = withSpring(focused ? 1.1 : 1.0, {
       damping: 15,
       stiffness: 300,

@@ -1,5 +1,6 @@
 import { Octicons } from "@expo/vector-icons";
 import { useQueryClient } from "@tanstack/react-query";
+import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
 import { Href, useRouter } from "expo-router";
 import { useCallback, useMemo, useRef, useState } from "react";
@@ -280,6 +281,7 @@ export default function OverviewScreen() {
       });
     }
     setRefreshing(false);
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
   }, [queryClient, user?.login, storeUser?.login]);
 
   const s = useMemo(() => buildStyles(colors), [colors]);

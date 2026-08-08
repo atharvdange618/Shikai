@@ -1,5 +1,6 @@
 import { FontAwesome6, Octicons } from "@expo/vector-icons";
 import { useQueryClient } from "@tanstack/react-query";
+import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
 import { Href, useRouter } from "expo-router";
 import { useCallback, useMemo, useState } from "react";
@@ -73,6 +74,7 @@ export default function ProfileScreen() {
       queryClient.invalidateQueries({ queryKey: queryKeys.notifications() }),
     ]);
     setRefreshing(false);
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
   }, [queryClient]);
 
   const s = useMemo(() => buildStyles(colors, shadows), [colors, shadows]);

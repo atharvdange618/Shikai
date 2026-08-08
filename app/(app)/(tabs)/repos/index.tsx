@@ -13,6 +13,8 @@ import {
   View,
 } from "react-native";
 
+import * as Haptics from "expo-haptics";
+
 import { RepoCard } from "@/components/repo/RepoCard";
 import type { SortOption, TypeOption } from "@/components/repo/RepoFilters";
 import { RepoFilters } from "@/components/repo/RepoFilters";
@@ -119,6 +121,7 @@ export default function ReposScreen() {
     setRefreshing(true);
     await queryClient.invalidateQueries({ queryKey: queryKeys.repos() });
     setRefreshing(false);
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
   }, [queryClient]);
 
   const handleRepoPressIn = useCallback(

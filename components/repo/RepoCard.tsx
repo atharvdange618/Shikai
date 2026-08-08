@@ -1,4 +1,5 @@
 import { Octicons } from "@expo/vector-icons";
+import * as Haptics from "expo-haptics";
 import { memo, useCallback, useMemo } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
@@ -48,6 +49,7 @@ export const RepoCard = memo(function RepoCard({
   const handleBookmarkPress = useCallback(
     (e: { stopPropagation?: () => void }) => {
       e.stopPropagation?.();
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
       toggleWatchlist(repoId);
     },
     [repoId, toggleWatchlist],
