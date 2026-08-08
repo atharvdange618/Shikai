@@ -10,12 +10,10 @@ import { useSearchIndex } from "@/hooks/useSearchIndex";
 import { fetchStarred, searchRepos } from "@/lib/github-rest";
 import { queryKeys } from "@/lib/query-client";
 import { useAuthStore } from "@/stores/auth.store";
-import type { GitHubRepo } from "@/types/github.types";
+import type { GitHubRepo, RepoListParams } from "@/types/github.types";
 import { useInfiniteQuery } from "@tanstack/react-query";
 
 const PER_PAGE = 10;
-
-import type { RepoListParams } from "@/types/github.types";
 
 export interface StarredFilters {
   sort?: NonNullable<RepoListParams["sort"]>;

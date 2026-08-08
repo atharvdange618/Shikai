@@ -218,7 +218,7 @@ interface WatchEventPayload {
   action: "started";
 }
 
-interface PublicEventPayload { }
+type PublicEventPayload = Record<string, never>;
 
 type KnownEventPayload =
   | { type: "PushEvent"; payload: PushEventPayload }

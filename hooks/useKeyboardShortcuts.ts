@@ -1,6 +1,6 @@
 import * as Haptics from "expo-haptics";
-import { useEffect } from "react";
-import { Platform } from "react-native";
+import { useEffect, useRef } from "react";
+import { DeviceEventEmitter, Platform } from "react-native";
 
 interface KeyboardShortcutHandlers {
   onTabSwitch?: (index: number) => void;
@@ -12,62 +12,58 @@ interface KeyboardShortcutHandlers {
 }
 
 export function useKeyboardShortcuts(handlers: KeyboardShortcutHandlers) {
+  const handlersRef = useRef(handlers);
+  handlersRef.current = handlers;
+
   useEffect(() => {
     if (Platform.OS !== "ios") return;
 
-    const { DeviceEventEmitter } = require("react-native");
     const subscription = DeviceEventEmitter.addListener(
       "KeyboardShortcut",
       (event: { action: string }) => {
         const { action } = event;
 
+        const h = handlersRef.current;
         switch (action) {
           case "tab1":
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            handlers.onTabSwitch?.(0);
+            h.onTabSwitch?.(0);
             break;
           case "tab2":
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            handlers.onTabSwitch?.(1);
+            h.onTabSwitch?.(1);
             break;
           case "tab3":
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            handlers.onTabSwitch?.(2);
+            h.onTabSwitch?.(2);
             break;
           case "tab4":
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            handlers.onTabSwitch?.(3);
+            h.onTabSwitch?.(3);
             break;
           case "search":
-            handlers.onSearchFocus?.();
+            h.onSearchFocus?.();
             break;
           case "escape":
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            handlers.onEscape?.();
+            h.onEscape?.();
             break;
           case "arrowUp":
             Haptics.selectionAsync();
-            handlers.onArrowUp?.();
+            h.onArrowUp?.();
             break;
           case "arrowDown":
             Haptics.selectionAsync();
-            handlers.onArrowDown?.();
+            h.onArrowDown?.();
             break;
           case "enter":
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-            handlers.onEnter?.();
+            h.onEnter?.();
             break;
         }
       },
     );
 
     return () => subscription.remove();
-  }, [
-    handlers.onTabSwitch,
-    handlers.onSearchFocus,
-    handlers.onEscape,
-    handlers.onArrowUp,
-    handlers.onArrowDown,
-    handlers.onEnter,
-  ]);
+  }, []);
 }

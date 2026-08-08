@@ -39,6 +39,7 @@ export class GitHubApiError extends Error {
   }
 }
 
+// eslint-disable-next-line import/no-named-as-default-member
 export const githubAxios: AxiosInstance = axios.create({
   baseURL: GITHUB_API_BASE,
   timeout: 15_000,
