@@ -29,14 +29,32 @@ export function ContributionStatsRow({ stats }: Props) {
   const { colors } = useTheme();
   const s = useMemo(() => buildStyles(colors), [colors]);
 
+  const streakProgress =
+    stats.longestStreak > 0
+      ? Math.min(stats.currentStreak / stats.longestStreak, 1)
+      : 0;
+  const isStreakActive = stats.currentStreak > 0;
+
   return (
     <View style={s.row}>
       <View
         style={s.item}
         accessibilityLabel={`${stats.currentStreak} day streak`}
       >
-        <Octicons name="flame" size={14} color={colors.success} />
-        <Text style={s.value}>{stats.currentStreak}</Text>
+        <Octicons
+          name="flame"
+          size={16}
+          color={isStreakActive ? colors.success : colors.textMuted}
+        />
+        <Text
+          style={[
+            s.value,
+            s.streakValue,
+            isStreakActive && { color: colors.success },
+          ]}
+        >
+          {stats.currentStreak}
+        </Text>
         <View style={s.labelRow}>
           <Text style={s.label}>Day streak</Text>
           <Tooltip content={STAT_INFO.streak} align="left">
@@ -45,6 +63,21 @@ export function ContributionStatsRow({ stats }: Props) {
             </Pressable>
           </Tooltip>
         </View>
+        {stats.longestStreak > 0 && (
+          <View style={s.progressTrack}>
+            <View
+              style={[
+                s.progressFill,
+                {
+                  width: `${streakProgress * 100}%`,
+                  backgroundColor: isStreakActive
+                    ? colors.success
+                    : colors.textMuted,
+                },
+              ]}
+            />
+          </View>
+        )}
       </View>
 
       <View style={s.divider} />
@@ -114,6 +147,11 @@ function buildStyles(colors: ColorTokens) {
       color: colors.textPrimary,
       fontVariant: ["tabular-nums"],
     },
+
+    streakValue: {
+      fontSize: FontSize.heading,
+    },
+
     labelRow: {
       flexDirection: "row",
       alignItems: "center",
@@ -123,6 +161,20 @@ function buildStyles(colors: ColorTokens) {
       fontFamily: FontFamily.regular,
       fontSize: FontSize.caption,
       color: colors.textMuted,
+    },
+
+    progressTrack: {
+      width: "80%",
+      height: 3,
+      backgroundColor: colors.surfaceSecondary,
+      borderRadius: 2,
+      marginTop: 4,
+      overflow: "hidden",
+    },
+
+    progressFill: {
+      height: "100%",
+      borderRadius: 2,
     },
   });
 }
