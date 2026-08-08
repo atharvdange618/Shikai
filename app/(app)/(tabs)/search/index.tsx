@@ -21,6 +21,7 @@ import { ListItemSeparator } from "@/components/shared/ListItemSeparator";
 import { useDebounce } from "@/hooks/useDebounce";
 import { SearchTab, useGlobalSearch } from "@/hooks/useGlobalSearch";
 import { prefetchRepoDetails, prefetchRoute } from "@/lib/prefetch";
+import { useRecentSearchesStore } from "@/stores/recent-searches.store";
 import { encodeRepoId } from "@/lib/utils";
 import type { GitHubIssue, GitHubRepo, GitHubUser } from "@/types/github.types";
 
@@ -55,6 +56,15 @@ export default function SearchScreen() {
   const [tab, setTab] = useState<SearchTab>("repos");
   const [isOffline, setIsOffline] = useState(false);
   const debouncedSearch = useDebounce(search, 300);
+
+  const recentTerms = useRecentSearchesStore((s) => s.terms);
+  const addRecentTerm = useRecentSearchesStore((s) => s.addTerm);
+  const removeRecentTerm = useRecentSearchesStore((s) => s.removeTerm);
+  const clearRecentTerms = useRecentSearchesStore((s) => s.clearAll);
+
+  useEffect(() => {
+    useRecentSearchesStore.getState().init();
+  }, []);
 
   useEffect(() => {
     return NetInfo.addEventListener((state) => {
@@ -102,6 +112,15 @@ export default function SearchScreen() {
     },
     [],
   );
+
+  const handleRecentTermPress = useCallback((term: string) => {
+    setSearch(term);
+  }, []);
+
+  const handleSubmitEditing = useCallback(() => {
+    const trimmed = search.trim();
+    if (trimmed) addRecentTerm(trimmed);
+  }, [search, addRecentTerm]);
 
   const renderRepoItem = useCallback(
     ({ item }: { item: GitHubRepo }) => (
@@ -242,6 +261,44 @@ export default function SearchScreen() {
       );
     }
     if (!debouncedSearch) {
+      if (recentTerms.length > 0) {
+        return (
+          <View style={s.recentContainer}>
+            <View style={s.recentHeader}>
+              <Text style={s.recentTitle}>Recent searches</Text>
+              <Pressable onPress={clearRecentTerms} hitSlop={8}>
+                <Text style={s.clearAll}>Clear all</Text>
+              </Pressable>
+            </View>
+            {recentTerms.map((term) => (
+              <Pressable
+                key={term}
+                style={({ pressed }) => [
+                  s.recentItem,
+                  pressed && { opacity: 0.7 },
+                ]}
+                onPress={() => handleRecentTermPress(term)}
+              >
+                <Octicons name="history" size={14} color={colors.textMuted} />
+                <Text style={s.recentTerm} numberOfLines={1}>
+                  {term}
+                </Text>
+                <Pressable
+                  onPress={() => removeRecentTerm(term)}
+                  hitSlop={8}
+                  style={s.recentRemove}
+                >
+                  <Octicons
+                    name="x"
+                    size={12}
+                    color={colors.textMuted}
+                  />
+                </Pressable>
+              </Pressable>
+            ))}
+          </View>
+        );
+      }
       return (
         <View style={s.emptyContainer}>
           <Octicons name="search" size={32} color={colors.textMuted} />
@@ -258,7 +315,7 @@ export default function SearchScreen() {
         <Text style={s.emptySubtitle}>Try a different search term</Text>
       </View>
     );
-  }, [isLoading, isOffline, debouncedSearch, data.length, s, colors]);
+  }, [isLoading, isOffline, debouncedSearch, data.length, recentTerms, s, colors, clearRecentTerms, handleRecentTermPress, removeRecentTerm]);
 
   const ListFooter = isFetchingNextPage ? (
     <View style={s.footerLoader}>
@@ -277,6 +334,7 @@ export default function SearchScreen() {
             style={s.searchInput}
             value={search}
             onChangeText={setSearch}
+            onSubmitEditing={handleSubmitEditing}
             placeholder="Search GitHub..."
             placeholderTextColor={colors.textMuted}
             autoCapitalize="none"
@@ -436,6 +494,51 @@ function buildStyles(colors: ColorTokens) {
     footerLoader: {
       paddingVertical: Spacing.lg,
       alignItems: "center",
+    },
+
+    recentContainer: {
+      paddingTop: Spacing.md,
+      gap: Spacing.xs,
+    },
+
+    recentHeader: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      paddingHorizontal: Spacing.xs,
+      paddingBottom: Spacing.xs,
+    },
+
+    recentTitle: {
+      fontFamily: FontFamily.medium,
+      fontSize: FontSize.label,
+      color: colors.textMuted,
+    },
+
+    clearAll: {
+      fontFamily: FontFamily.medium,
+      fontSize: FontSize.caption,
+      color: colors.accent,
+    },
+
+    recentItem: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: Spacing.sm,
+      paddingVertical: Spacing.sm,
+      paddingHorizontal: Spacing.md,
+      borderRadius: Radius.md,
+    },
+
+    recentTerm: {
+      flex: 1,
+      fontFamily: FontFamily.regular,
+      fontSize: FontSize.body,
+      color: colors.textPrimary,
+    },
+
+    recentRemove: {
+      padding: 4,
     },
 
     userCard: {
