@@ -18,6 +18,7 @@ import * as Haptics from "expo-haptics";
 import { RepoCard } from "@/components/repo/RepoCard";
 import type { SortOption, TypeOption } from "@/components/repo/RepoFilters";
 import { RepoFilters } from "@/components/repo/RepoFilters";
+import { KeyboardAvoid } from "@/components/shared/KeyboardAvoid";
 import { SearchBar } from "@/components/shared/SearchBar";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { useRepos } from "@/hooks/useRepos";
@@ -230,7 +231,8 @@ export default function ReposScreen() {
   const listKey = debouncedSearch.length > 0 ? "search" : "default";
 
   return (
-    <View style={s.container}>
+    <KeyboardAvoid>
+      <View style={s.container}>
       <View style={s.listHeader}>
         <SearchBar
           ref={searchInputRef}
@@ -276,7 +278,8 @@ export default function ReposScreen() {
         removeClippedSubviews
         drawDistance={400}
       />
-    </View>
+      </View>
+    </KeyboardAvoid>
   );
 }
 

@@ -15,6 +15,7 @@ import {
 import { FlashList } from "@shopify/flash-list";
 
 import { RepoCard } from "@/components/repo/RepoCard";
+import { KeyboardAvoid } from "@/components/shared/KeyboardAvoid";
 import { ListItemSeparator } from "@/components/shared/ListItemSeparator";
 import { useDebounce } from "@/hooks/useDebounce";
 import { SearchTab, useGlobalSearch } from "@/hooks/useGlobalSearch";
@@ -243,7 +244,8 @@ export default function SearchScreen() {
   ) : null;
 
   return (
-    <View style={s.container}>
+    <KeyboardAvoid>
+      <View style={s.container}>
       <View style={s.searchContainer}>
         <View style={s.searchBar}>
           <Octicons name="search" size={15} color={colors.textMuted} />
@@ -306,7 +308,8 @@ export default function SearchScreen() {
         removeClippedSubviews
         drawDistance={400}
       />
-    </View>
+      </View>
+    </KeyboardAvoid>
   );
 }
 

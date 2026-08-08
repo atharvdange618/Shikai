@@ -13,6 +13,7 @@ import {
 } from "react-native";
 
 import { useAlert } from "@/components";
+import { KeyboardAvoid } from "@/components/shared/KeyboardAvoid";
 import { validatePAT } from "@/lib/github-rest";
 import { clearAllMMKV } from "@/lib/mmkv";
 import { deletePAT, deleteToken, savePAT } from "@/lib/secure-storage";
@@ -126,11 +127,12 @@ export default function SettingsScreen() {
   }, [alert, queryClient]);
 
   return (
-    <ScrollView
-      style={s.scroll}
-      contentContainerStyle={s.content}
-      showsVerticalScrollIndicator={false}
-    >
+    <KeyboardAvoid>
+      <ScrollView
+        style={s.scroll}
+        contentContainerStyle={s.content}
+        showsVerticalScrollIndicator={false}
+      >
       <View style={s.section}>
         <Text style={s.sectionTitle}>Appearance</Text>
         <View style={s.card}>
@@ -293,7 +295,8 @@ export default function SettingsScreen() {
           </Pressable>
         </View>
       </View>
-    </ScrollView>
+      </ScrollView>
+    </KeyboardAvoid>
   );
 }
 
