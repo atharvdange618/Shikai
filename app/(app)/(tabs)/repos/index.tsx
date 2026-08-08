@@ -147,6 +147,7 @@ export default function ReposScreen() {
         sort={sort}
         colors={colors}
         isDark={isDark}
+        showOwner={false}
         onPress={handleRepoPress}
         onPressIn={handleRepoPressIn}
         onTopicPress={handleTopicPress}

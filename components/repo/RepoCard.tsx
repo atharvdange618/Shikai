@@ -21,6 +21,7 @@ interface RepoCardProps {
   sort?: RepoListParams["sort"];
   colors: ColorTokens;
   isDark: boolean;
+  showOwner?: boolean;
   onPress?: (repo: GitHubRepo) => void;
   onPressIn?: (repo: GitHubRepo) => void;
   onTopicPress?: (topic: string) => void;
@@ -31,6 +32,7 @@ export const RepoCard = memo(function RepoCard({
   sort = "pushed",
   colors,
   isDark,
+  showOwner = true,
   onPress,
   onPressIn,
   onTopicPress,
@@ -86,8 +88,12 @@ export const RepoCard = memo(function RepoCard({
           style={s.repoIcon}
         />
         <Text style={s.repoName} numberOfLines={1}>
-          {repo.owner.login}
-          <Text style={{ color: colors.textMuted }}> / </Text>
+          {showOwner && (
+            <>
+              {repo.owner.login}
+              <Text style={{ color: colors.textMuted }}> / </Text>
+            </>
+          )}
           {repo.name}
         </Text>
         {repo.fork && <ForkBadge colors={colors} />}
