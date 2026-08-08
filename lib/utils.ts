@@ -84,6 +84,12 @@ export function isImageFile(filename: string): boolean {
   return IMAGE_EXTENSIONS.some((ext) => filename.toLowerCase().endsWith(ext));
 }
 
+const VIDEO_EXTENSIONS = [".mp4", ".mov", ".webm", ".mkv", ".avi", ".m4v"];
+
+export function isVideoFile(filename: string): boolean {
+  return VIDEO_EXTENSIONS.some((ext) => filename.toLowerCase().endsWith(ext));
+}
+
 const REPO_ID_SEPARATOR = "~~";
 
 export function encodeRepoId(owner: string, name: string): string {

@@ -3,6 +3,7 @@ import * as Clipboard from "expo-clipboard";
 import * as Haptics from "expo-haptics";
 import { useLocalSearchParams, useNavigation } from "expo-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { VideoView, useVideoPlayer } from "expo-video";
 import {
   ActivityIndicator,
   Animated,
@@ -31,7 +32,7 @@ import {
   type ColorTokens,
 } from "@/constants/theme";
 import { useFileContent } from "@/hooks/useRepoDetails";
-import { decodeRepoId, getLanguage, isImageFile } from "@/lib/utils";
+import { decodeRepoId, getLanguage, isImageFile, isVideoFile } from "@/lib/utils";
 
 interface LoadingProgressProps {
   isLoading: boolean;
@@ -146,6 +147,11 @@ export default function FileViewerScreen() {
     [fileName],
   );
 
+  const isVideo = useMemo(
+    () => (fileName ? isVideoFile(fileName) : false),
+    [fileName],
+  );
+
   const isSvg = useMemo(
     () => fileName?.toLowerCase().endsWith(".svg") ?? false,
     [fileName],
@@ -201,6 +207,12 @@ export default function FileViewerScreen() {
   const s = useMemo(() => buildStyles(colors), [colors]);
 
   const showContent = data && !isLoading && !isError;
+
+  const videoPlayer = useVideoPlayer(
+    showContent && isVideo && data?.meta.download_url
+      ? { uri: data.meta.download_url }
+      : null,
+  );
 
   return (
     <SafeAreaView style={s.container} edges={["bottom"]}>
@@ -312,7 +324,44 @@ export default function FileViewerScreen() {
         </ScrollView>
       )}
 
-      {!isImage && isPdf && (
+      {!isImage && isVideo && (
+        <ScrollView
+          style={s.contentScroll}
+          contentContainerStyle={s.scrollContentImage}
+          showsVerticalScrollIndicator={false}
+        >
+          <LoadingProgress
+            isLoading={isLoading}
+            fileName={fileName ?? ""}
+            colors={colors}
+          />
+
+          {isError && (
+            <View style={s.centered}>
+              <Octicons name="alert" size={IconSize.lg} color={colors.danger} />
+              <Text style={s.errorText}>Failed to load file</Text>
+              <Text style={s.errorSubtext}>{(error as Error)?.message}</Text>
+            </View>
+          )}
+
+          {showContent && data?.meta.download_url && (
+            <View style={s.imageWrapper}>
+              <VideoView
+                player={videoPlayer}
+                style={{
+                  width: screenWidth - Spacing.lg * 2,
+                  height: 300,
+                  borderRadius: Radius.md,
+                }}
+                contentFit="contain"
+                nativeControls
+              />
+            </View>
+          )}
+        </ScrollView>
+      )}
+
+      {!isImage && !isVideo && isPdf && (
         <View style={{ flex: 1 }}>
           <LoadingProgress
             isLoading={isLoading}
@@ -342,7 +391,7 @@ export default function FileViewerScreen() {
         </View>
       )}
 
-      {!isImage && !isPdf && (
+      {!isImage && !isVideo && !isPdf && (
         <ScrollView
           style={s.contentScroll}
           contentContainerStyle={s.markdownContent}
