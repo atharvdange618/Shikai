@@ -31,6 +31,7 @@ import { ContributionGraph } from "@/components/overview/ContributionGraph";
 import { PinnedRepoCard } from "@/components/overview/PinnedRepoCard";
 
 import {
+  BorderWidth,
   type ColorTokens,
   FontFamily,
   FontSize,
@@ -390,13 +391,47 @@ export default function OverviewScreen() {
           />
         </View>
 
-        {pat && (
+        {pat ? (
           <FollowingPreview
             events={followingEvents}
             isLoading={followingLoading}
             onPress={() => router.push("/(app)/(tabs)/overview/feed" as Href)}
             colors={colors}
           />
+        ) : (
+          <Pressable
+            style={({ pressed }) => [
+              s.patPrompt,
+              { borderColor: colors.border, backgroundColor: colors.surface },
+              pressed && { opacity: 0.7 },
+            ]}
+            onPress={() => router.push("/(app)/(tabs)/profile/settings" as Href)}
+          >
+            <View style={s.patPromptHeader}>
+              <Octicons name="bell" size={18} color={colors.accent} />
+              <Text style={[s.patPromptTitle, { color: colors.textPrimary }]}>
+                Unlock notifications
+              </Text>
+            </View>
+            <Text style={[s.patPromptBody, { color: colors.textSecondary }]}>
+              Add a Personal Access Token to see who&apos;s following you and get
+              real-time notifications.
+            </Text>
+            <View style={s.patPromptFeatures}>
+              <View style={s.patPromptFeature}>
+                <Octicons name="people" size={12} color={colors.textMuted} />
+                <Text style={[s.patPromptFeatureText, { color: colors.textMuted }]}>
+                  Following feed
+                </Text>
+              </View>
+              <View style={s.patPromptFeature}>
+                <Octicons name="bell" size={12} color={colors.textMuted} />
+                <Text style={[s.patPromptFeatureText, { color: colors.textMuted }]}>
+                  Push notifications
+                </Text>
+              </View>
+            </View>
+          </Pressable>
         )}
 
         <View style={s.section}>
@@ -517,6 +552,48 @@ function buildStyles(colors: ColorTokens) {
       fontSize: FontSize.label,
       color: colors.textMuted,
       textAlign: "center",
+    },
+
+    patPrompt: {
+      marginHorizontal: Spacing.lg,
+      borderRadius: Radius.lg,
+      borderWidth: BorderWidth.normal,
+      padding: Spacing.lg,
+      gap: Spacing.sm,
+    },
+
+    patPromptHeader: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: Spacing.sm,
+    },
+
+    patPromptTitle: {
+      fontFamily: FontFamily.semiBold,
+      fontSize: FontSize.body,
+    },
+
+    patPromptBody: {
+      fontFamily: FontFamily.regular,
+      fontSize: FontSize.label,
+      lineHeight: 18,
+    },
+
+    patPromptFeatures: {
+      flexDirection: "row",
+      gap: Spacing.lg,
+      marginTop: Spacing.xs,
+    },
+
+    patPromptFeature: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: Spacing.xs,
+    },
+
+    patPromptFeatureText: {
+      fontFamily: FontFamily.regular,
+      fontSize: FontSize.caption,
     },
   });
 }
