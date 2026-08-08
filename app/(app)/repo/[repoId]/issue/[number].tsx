@@ -9,14 +9,15 @@ import {
   useTheme,
 } from "@/constants/theme";
 import { useIssueComments, useIssueDetail } from "@/hooks/useIssueDetail";
-import { decodeRepoId, relativeTime } from "@/lib/utils";
+import { decodeRepoId, encodeRepoId, relativeTime } from "@/lib/utils";
 import type { GitHubComment, GitHubLabel } from "@/types/github.types";
 import { Octicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
-import { useLocalSearchParams, useNavigation } from "expo-router";
+import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import { useEffect } from "react";
 import {
   ActivityIndicator,
+  Pressable,
   ScrollView,
   StyleSheet,
   Text,
@@ -29,6 +30,7 @@ export default function IssueDetailScreen() {
     number: string;
   }>();
   const navigation = useNavigation();
+  const router = useRouter();
   const { colors } = useTheme();
 
   const [owner, repoName] = decodeRepoId(repoId ?? "");
@@ -89,6 +91,18 @@ export default function IssueDetailScreen() {
           {issue.title}
         </Text>
       </View>
+
+      <Pressable
+        onPress={() => {
+          const id = encodeRepoId(owner, repoName);
+          router.push(`/(app)/repo/${id}`);
+        }}
+        style={({ pressed }) => [{ opacity: pressed ? 0.6 : 1 }]}
+      >
+        <Text style={[s.repoLink, { color: colors.accent }]}>
+          {owner}/{repoName}
+        </Text>
+      </Pressable>
 
       {issue.labels.length > 0 && (
         <View style={s.labelsRow}>
@@ -212,6 +226,11 @@ const s = StyleSheet.create({
     fontFamily: FontFamily.bold,
     fontSize: FontSize.heading,
     lineHeight: FontSize.heading * 1.35,
+  },
+
+  repoLink: {
+    fontFamily: FontFamily.medium,
+    fontSize: FontSize.label,
   },
 
   labelsRow: {

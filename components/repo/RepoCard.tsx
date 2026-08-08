@@ -82,6 +82,8 @@ export const RepoCard = memo(function RepoCard({
           style={s.repoIcon}
         />
         <Text style={s.repoName} numberOfLines={1}>
+          {repo.owner.login}
+          <Text style={{ color: colors.textMuted }}> / </Text>
           {repo.name}
         </Text>
         {repo.fork && <ForkBadge colors={colors} />}
