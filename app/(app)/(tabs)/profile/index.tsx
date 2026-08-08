@@ -21,6 +21,7 @@ import { queryKeys } from "@/lib/query-client";
 
 import {
   AvatarSize,
+  BorderWidth,
   FontFamily,
   FontSize,
   IconSize,
@@ -170,6 +171,23 @@ export default function ProfileScreen() {
 
         {user?.bio && <Text style={s.bio}>{user.bio}</Text>}
       </View>
+
+      {user && !user.bio && (
+        <Pressable
+          style={({ pressed }) => [
+            s.profilePrompt,
+            { borderColor: colors.border, backgroundColor: colors.surface },
+            pressed && { opacity: 0.7 },
+          ]}
+          onPress={() => Linking.openURL("https://github.com/settings/profile")}
+        >
+          <Octicons name="person" size={14} color={colors.accent} />
+          <Text style={[s.profilePromptText, { color: colors.textSecondary }]}>
+            Add a bio to your profile
+          </Text>
+          <Octicons name="link-external" size={10} color={colors.textMuted} />
+        </Pressable>
+      )}
 
       <View style={[s.statsCard, shadows]}>
         <StatBlock
@@ -652,6 +670,24 @@ function buildStyles(
     skeleton: {
       borderRadius: 4,
       backgroundColor: colors.surfaceSecondary,
+    },
+
+    profilePrompt: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: Spacing.sm,
+      marginHorizontal: Spacing.lg,
+      marginTop: Spacing.sm,
+      paddingHorizontal: Spacing.md,
+      paddingVertical: Spacing.sm,
+      borderRadius: Radius.md,
+      borderWidth: BorderWidth.normal,
+    },
+
+    profilePromptText: {
+      fontFamily: FontFamily.regular,
+      fontSize: FontSize.label,
+      flex: 1,
     },
   });
 }
