@@ -10,7 +10,7 @@ import { queryKeys } from "@/lib/query-client";
 
 const PER_PAGE = 10;
 
-export type SearchTab = "repos" | "users" | "issues";
+export type SearchTab = "repos" | "users" | "issues" | "topics";
 
 interface UseGlobalSearchOptions {
   query: string;
@@ -48,7 +48,24 @@ export function useGlobalSearch({ query, tab, enabled = true }: UseGlobalSearchO
     enabled: enabled && tab === "issues" && trimmedQuery.length > 0,
   });
 
-  const activeQuery = tab === "repos" ? reposQuery : tab === "users" ? usersQuery : issuesQuery;
+  const topicsQuery = useInfiniteQuery({
+    queryKey: queryKeys.searchRepos(`topic:${trimmedQuery}`),
+    queryFn: ({ pageParam }) =>
+      searchRepos(`topic:${trimmedQuery}`, pageParam, PER_PAGE),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) => lastPage.pagination.next ?? undefined,
+    staleTime: 1000 * 60 * 5,
+    enabled: enabled && tab === "topics" && trimmedQuery.length > 0,
+  });
+
+  const activeQuery =
+    tab === "repos"
+      ? reposQuery
+      : tab === "users"
+        ? usersQuery
+        : tab === "topics"
+          ? topicsQuery
+          : issuesQuery;
 
   const repos = useMemo(
     () => reposQuery.data?.pages.flatMap((p) => p.repos) ?? [],
@@ -65,10 +82,16 @@ export function useGlobalSearch({ query, tab, enabled = true }: UseGlobalSearchO
     [issuesQuery.data],
   );
 
+  const topics = useMemo(
+    () => topicsQuery.data?.pages.flatMap((p) => p.repos) ?? [],
+    [topicsQuery.data],
+  );
+
   return {
     repos,
     users,
     issues,
+    topics,
     totalCount: activeQuery.data?.pages[0]?.totalCount ?? 0,
     fetchNextPage: activeQuery.fetchNextPage,
     hasNextPage: activeQuery.hasNextPage,

@@ -22,6 +22,7 @@ interface RepoCardProps {
   isDark: boolean;
   onPress?: (repo: GitHubRepo) => void;
   onPressIn?: (repo: GitHubRepo) => void;
+  onTopicPress?: (topic: string) => void;
 }
 
 export const RepoCard = memo(function RepoCard({
@@ -31,6 +32,7 @@ export const RepoCard = memo(function RepoCard({
   isDark,
   onPress,
   onPressIn,
+  onTopicPress,
 }: RepoCardProps) {
   const s = useMemo(
     () => buildStyles(colors, isDark ? {} : Shadows.light.sm),
@@ -164,9 +166,16 @@ export const RepoCard = memo(function RepoCard({
       {repo.topics.length > 0 && (
         <View style={s.topicsContainer}>
           {repo.topics.slice(0, 4).map((topic) => (
-            <View key={topic} style={s.topicPill}>
+            <Pressable
+              key={topic}
+              style={s.topicPill}
+              onPress={(e) => {
+                e.stopPropagation();
+                onTopicPress?.(topic);
+              }}
+            >
               <Text style={s.topicText}>{topic}</Text>
-            </View>
+            </Pressable>
           ))}
         </View>
       )}

@@ -130,6 +130,13 @@ export default function ReposScreen() {
     [queryClient],
   );
 
+  const handleTopicPress = useCallback(
+    (topic: string) => {
+      router.push({ pathname: "/(app)/(tabs)/search", params: { q: topic } });
+    },
+    [router],
+  );
+
   const renderItem = useCallback(
     ({ item }: { item: GitHubRepo }) => (
       <RepoCard
@@ -139,9 +146,10 @@ export default function ReposScreen() {
         isDark={isDark}
         onPress={handleRepoPress}
         onPressIn={handleRepoPressIn}
+        onTopicPress={handleTopicPress}
       />
     ),
-    [handleRepoPress, handleRepoPressIn, sort, isDark, colors],
+    [handleRepoPress, handleRepoPressIn, handleTopicPress, sort, isDark, colors],
   );
 
   const onViewableItemsChanged = useMemo(

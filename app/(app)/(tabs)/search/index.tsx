@@ -1,7 +1,7 @@
 import { Octicons } from "@expo/vector-icons";
 import { useQueryClient } from "@tanstack/react-query";
 import { Image } from "expo-image";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
@@ -36,6 +36,7 @@ const TABS: { key: SearchTab; label: string }[] = [
   { key: "repos", label: "Repos" },
   { key: "users", label: "Users" },
   { key: "issues", label: "Issues" },
+  { key: "topics", label: "Topics" },
 ];
 
 const keyExtractor = (item: GitHubRepo | GitHubUser | GitHubIssue) =>
@@ -46,8 +47,9 @@ export default function SearchScreen() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const searchInputRef = useRef<TextInput>(null);
+  const params = useLocalSearchParams<{ q?: string }>();
 
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState(params.q ?? "");
   const [tab, setTab] = useState<SearchTab>("repos");
   const debouncedSearch = useDebounce(search, 300);
 
@@ -55,6 +57,7 @@ export default function SearchScreen() {
     repos,
     users,
     issues,
+    topics,
     totalCount,
     fetchNextPage,
     hasNextPage,
@@ -81,6 +84,14 @@ export default function SearchScreen() {
     [queryClient],
   );
 
+  const handleTopicPress = useCallback(
+    (topic: string) => {
+      setSearch(topic);
+      setTab("topics");
+    },
+    [],
+  );
+
   const renderRepoItem = useCallback(
     ({ item }: { item: GitHubRepo }) => (
       <RepoCard
@@ -89,9 +100,10 @@ export default function SearchScreen() {
         isDark={isDark}
         onPress={handleRepoPress}
         onPressIn={handleRepoPressIn}
+        onTopicPress={handleTopicPress}
       />
     ),
-    [handleRepoPress, handleRepoPressIn, isDark, colors],
+    [handleRepoPress, handleRepoPressIn, handleTopicPress, isDark, colors],
   );
 
   const renderUserItem = useCallback(
@@ -187,7 +199,14 @@ export default function SearchScreen() {
     [tab, renderRepoItem, renderUserItem, renderIssueItem],
   );
 
-  const data = tab === "repos" ? repos : tab === "users" ? users : issues;
+  const data =
+    tab === "repos"
+      ? repos
+      : tab === "users"
+        ? users
+        : tab === "topics"
+          ? topics
+          : issues;
 
   const ListEmpty = useMemo(() => {
     if (isLoading) {

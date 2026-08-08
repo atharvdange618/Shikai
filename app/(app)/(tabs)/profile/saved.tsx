@@ -96,6 +96,13 @@ export default function SavedScreen() {
     [queryClient],
   );
 
+  const handleTopicPress = useCallback(
+    (topic: string) => {
+      router.push({ pathname: "/(app)/(tabs)/search", params: { q: topic } });
+    },
+    [router],
+  );
+
   const renderItem = useCallback(
     ({ item }: { item: GitHubRepo }) => (
       <RepoCard
@@ -104,9 +111,10 @@ export default function SavedScreen() {
         isDark={isDark}
         onPress={handleRepoPress}
         onPressIn={handleRepoPressIn}
+        onTopicPress={handleTopicPress}
       />
     ),
-    [handleRepoPress, handleRepoPressIn, isDark, colors],
+    [handleRepoPress, handleRepoPressIn, handleTopicPress, isDark, colors],
   );
 
   const keyExtractor = useCallback((item: GitHubRepo) => String(item.id), []);
