@@ -18,8 +18,10 @@ import * as Haptics from "expo-haptics";
 import { RepoCard } from "@/components/repo/RepoCard";
 import type { SortOption, TypeOption } from "@/components/repo/RepoFilters";
 import { RepoFilters } from "@/components/repo/RepoFilters";
+import { FirstBookmarkNudge } from "@/components/FirstBookmarkNudge";
 import { KeyboardAvoid } from "@/components/shared/KeyboardAvoid";
 import { SearchBar } from "@/components/shared/SearchBar";
+import { useFirstBookmarkNudge } from "@/hooks/useFirstBookmarkNudge";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { useRepos } from "@/hooks/useRepos";
 import { prefetchRepoDetails, prefetchRoute } from "@/lib/prefetch";
@@ -67,8 +69,9 @@ export default function ReposScreen() {
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState<SortOption>("pushed");
   const [type, setType] = useState<TypeOption>("all");
-
   const debouncedSearch = useDebounce(search, 300);
+  const { visible: nudgeVisible, dismiss: dismissNudge } =
+    useFirstBookmarkNudge();
 
   const prefetchMap = useRef(new Set<number>());
   const viewportTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -247,6 +250,8 @@ export default function ReposScreen() {
           onTypeChange={setType}
         />
       </View>
+
+      <FirstBookmarkNudge visible={nudgeVisible} onDismiss={dismissNudge} />
 
       <FlashList
         ref={flashListRef}

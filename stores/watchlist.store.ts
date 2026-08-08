@@ -19,12 +19,17 @@ function saveWatchlist(ids: string[]) {
   watchlistStorage.set(STORAGE_KEY, JSON.stringify(ids));
 }
 
+type FirstBookmarkCallback = () => void;
+
 interface WatchlistState {
   watchlistIds: string[];
   isWatchlisted: (repoId: string) => boolean;
   toggleWatchlist: (repoId: string) => void;
   init: () => void;
+  onFirstBookmark: (cb: FirstBookmarkCallback) => void;
 }
+
+let firstBookmarkListener: FirstBookmarkCallback | null = null;
 
 export const useWatchlistStore = create<WatchlistState>((set, get) => ({
   watchlistIds: [],
@@ -33,14 +38,22 @@ export const useWatchlistStore = create<WatchlistState>((set, get) => ({
 
   toggleWatchlist: (repoId: string) => {
     const { watchlistIds } = get();
+    const isFirst = watchlistIds.length === 0;
     const next = watchlistIds.includes(repoId)
       ? watchlistIds.filter((id) => id !== repoId)
       : [...watchlistIds, repoId];
     saveWatchlist(next);
     set({ watchlistIds: next });
+    if (isFirst && next.length === 1 && firstBookmarkListener) {
+      firstBookmarkListener();
+    }
   },
 
   init: () => {
     set({ watchlistIds: loadWatchlist() });
+  },
+
+  onFirstBookmark: (cb: FirstBookmarkCallback) => {
+    firstBookmarkListener = cb;
   },
 }));
