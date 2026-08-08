@@ -313,6 +313,7 @@ export default function OverviewScreen() {
           <Pressable
             onPress={() => router.push("/(app)/(tabs)/profile" as Href)}
             onPressIn={handleAvatarPressIn}
+            hitSlop={8}
           >
             {user?.avatar_url || storeUser?.avatar_url ? (
               <Image

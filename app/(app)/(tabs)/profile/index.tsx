@@ -103,6 +103,7 @@ export default function ProfileScreen() {
               onPress={() =>
                 router.push("/(app)/(tabs)/profile/notifications" as Href)
               }
+              hitSlop={8}
             >
               <Octicons name="bell" size={20} color={colors.textSecondary} />
               {unreadCount > 0 && (
@@ -122,6 +123,7 @@ export default function ProfileScreen() {
             onPress={() =>
               router.push("/(app)/(tabs)/profile/settings" as Href)
             }
+            hitSlop={8}
           >
             <Octicons name="gear" size={20} color={colors.textSecondary} />
           </Pressable>
@@ -272,6 +274,7 @@ export default function ProfileScreen() {
             pressed && s.githubButtonPressed,
           ]}
           onPress={() => Linking.openURL(user.html_url)}
+          hitSlop={8}
         >
           <Octicons
             name="mark-github"
@@ -289,6 +292,7 @@ export default function ProfileScreen() {
           pressed && s.savedButtonPressed,
         ]}
         onPress={() => router.push("/(app)/(tabs)/profile/saved" as Href)}
+        hitSlop={8}
       >
         <Octicons
           name="bookmark"

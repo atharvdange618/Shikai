@@ -48,7 +48,7 @@ export function RepoHeader({
 
   return (
     <View style={s.headerCard}>
-      <Pressable onPress={onOwnerPress} hitSlop={4}>
+      <Pressable onPress={onOwnerPress} hitSlop={8}>
         {({ pressed }) => (
           <Text
             style={[
