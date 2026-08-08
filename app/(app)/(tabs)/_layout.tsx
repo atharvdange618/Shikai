@@ -31,7 +31,7 @@ function IOSTabBarBackground() {
   );
 }
 
-const renderHomeIcon = ({
+const renderOverviewIcon = ({
   color,
   size,
   focused,
@@ -126,7 +126,7 @@ export default function TabsLayout() {
 
               tabBarLabelStyle: {
                 fontFamily: FontFamily.medium,
-                fontSize: 10,
+                fontSize: 12,
                 marginTop: -2,
                 marginBottom: Platform.OS === "android" ? 4 : 0,
               },
@@ -160,7 +160,7 @@ export default function TabsLayout() {
               name="overview"
               options={{
                 title: "Overview",
-                tabBarIcon: renderHomeIcon,
+                tabBarIcon: renderOverviewIcon,
               }}
             />
 

@@ -36,8 +36,6 @@ export function Card({
     }
   };
 
-  const shadowStyle = elevated ? Shadows.light.sm : {};
-
   return (
     <View
       style={[
@@ -45,11 +43,11 @@ export function Card({
         {
           backgroundColor: getBackgroundColor(),
           borderRadius: Radius.lg,
-          borderWidth: BorderWidth.normal,
-          borderColor: colors.border,
+          borderWidth: elevated ? 0 : BorderWidth.normal,
+          borderColor: elevated ? undefined : colors.border,
           padding: Spacing[padding],
         },
-        shadowStyle,
+        elevated ? Shadows.light.sm : undefined,
         style,
       ]}
     >

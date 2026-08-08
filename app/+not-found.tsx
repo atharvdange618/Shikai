@@ -34,7 +34,7 @@ export default function NotFoundScreen() {
           ]}
           onPress={() => router.replace("/(app)/(tabs)/overview")}
         >
-          <Text style={s.buttonText}>Go to Home</Text>
+          <Text style={s.buttonText}>Go to Overview</Text>
         </Pressable>
       </View>
     </SafeAreaView>

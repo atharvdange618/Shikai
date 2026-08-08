@@ -51,7 +51,7 @@ const FEATURES = [
   { icon: "signal" as const, text: "Offline support with disk caching" },
   {
     icon: "device-mobile" as const,
-    text: "Home screen widget with contribution streak",
+    text: "Overview screen widget with contribution streak",
   },
   { icon: "sync" as const, text: "OTA updates for seamless app refresh" },
   {
