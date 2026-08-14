@@ -11,6 +11,7 @@ import {
 import type { Query } from "@tanstack/react-query";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 import { useFonts } from "expo-font";
+import * as Linking from "expo-linking";
 import { Stack, useRouter } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import * as SystemUI from "expo-system-ui";
@@ -36,6 +37,11 @@ import { getStoredPAT, getStoredToken } from "@/lib/secure-storage";
 import { useOnlineManager } from "@/lib/use-online-manager";
 import { useOTAUpdates } from "@/lib/use-ota-updates";
 import { useAuthStore } from "@/stores/auth.store";
+import { exchangeGithubCode } from "@/lib/github-oauth";
+import {
+  hasCompletedOnboarding,
+  setOnboardingCompleteListener,
+} from "@/app/(onboarding)/index";
 import { runSecurityChecks } from "shikai-security";
 
 SplashScreen.preventAutoHideAsync();
@@ -70,6 +76,9 @@ export default function RootLayout() {
 
   const [bootComplete, setBootComplete] = useState(false);
   const [showSplash, setShowSplash] = useState(true);
+  const [needsOnboarding, setNeedsOnboarding] = useState(
+    () => !useAuthStore.getState().token && !hasCompletedOnboarding(),
+  );
 
   const [securityStatus, setSecurityStatus] = useState<
     "pending" | "passed" | "blocked"
@@ -85,6 +94,22 @@ export default function RootLayout() {
     JetBrainsMono_400Regular,
     JetBrainsMono_500Medium,
   });
+
+  useEffect(() => {
+    const handleDeepLink = async (event: { url: string }) => {
+      const parsed = Linking.parse(event.url);
+      const code = parsed.queryParams?.code as string | undefined;
+      if (!code) return;
+      await exchangeGithubCode(code);
+    };
+
+    Linking.getInitialURL().then((url) => {
+      if (url) handleDeepLink({ url });
+    });
+
+    const subscription = Linking.addEventListener("url", handleDeepLink);
+    return () => subscription.remove();
+  }, []);
 
   useEffect(() => {
     if (!fontsLoaded && !fontError) return;
@@ -206,7 +231,11 @@ export default function RootLayout() {
           )}
           {!showSplash && securityStatus === "passed" && (
             <ErrorBoundary>
-              <AppStack token={token} />
+              <AppStack
+                token={token}
+                needsOnboarding={needsOnboarding}
+                setNeedsOnboarding={setNeedsOnboarding}
+              />
             </ErrorBoundary>
           )}
         </AlertProvider>
@@ -215,16 +244,36 @@ export default function RootLayout() {
   );
 }
 
-function AppStack({ token }: { token: string | null }) {
+function AppStack({
+  token,
+  needsOnboarding,
+  setNeedsOnboarding,
+}: {
+  token: string | null;
+  needsOnboarding: boolean;
+  setNeedsOnboarding: (v: boolean) => void;
+}) {
   const theme = useTheme();
   const router = useRouter();
   const prevTokenRef = useRef(token);
+  const prevOnboardingRef = useRef(needsOnboarding);
   const mountedRef = useRef(false);
+
+  useEffect(() => {
+    setOnboardingCompleteListener(() => setNeedsOnboarding(false));
+  }, [setNeedsOnboarding]);
 
   useEffect(() => {
     if (!mountedRef.current) {
       mountedRef.current = true;
       prevTokenRef.current = token;
+      prevOnboardingRef.current = needsOnboarding;
+
+      if (token) {
+        router.replace("/(app)/(tabs)/overview");
+      } else if (!needsOnboarding) {
+        router.replace("/sign-in");
+      }
       return;
     }
 
@@ -236,7 +285,11 @@ function AppStack({ token }: { token: string | null }) {
     } else if (!token && prevToken) {
       router.replace("/sign-in");
     }
-  }, [token, router]);
+  }, [token, router, needsOnboarding]);
+
+  useEffect(() => {
+    prevOnboardingRef.current = needsOnboarding;
+  }, [needsOnboarding]);
 
   return (
     <Stack
@@ -248,7 +301,9 @@ function AppStack({ token }: { token: string | null }) {
         },
       }}
     >
-      {token ? <Stack.Screen name="(app)" /> : <Stack.Screen name="sign-in" />}
+      <Stack.Screen name="(onboarding)" />
+      <Stack.Screen name="sign-in" />
+      <Stack.Screen name="(app)" />
     </Stack>
   );
 }
