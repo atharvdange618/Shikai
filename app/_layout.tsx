@@ -95,7 +95,13 @@ export default function RootLayout() {
     JetBrainsMono_500Medium,
   });
 
+  const fontsReady = Boolean(fontsLoaded || fontError);
+
+  // Deep-link handling exchanges an OAuth code for a token, so it must wait
+  // for the security check to pass, same as boot() below.
   useEffect(() => {
+    if (securityStatus !== "passed") return;
+
     const handleDeepLink = async (event: { url: string }) => {
       const parsed = Linking.parse(event.url);
       const code = parsed.queryParams?.code as string | undefined;
@@ -109,10 +115,29 @@ export default function RootLayout() {
 
     const subscription = Linking.addEventListener("url", handleDeepLink);
     return () => subscription.remove();
-  }, []);
+  }, [securityStatus]);
+
+  // Security check runs first, independent of auth boot, so a blocked
+  // device never gets its stored token restored or used.
+  useEffect(() => {
+    if (fontsReady && securityStatus === "pending") {
+      runSecurityChecks().then((result) => {
+        if (result.isBlocked) {
+          setSecurityStatus("blocked");
+          setSecurityReasons(result.reasons);
+          setDevModeBlocked(result.devModeBlocked);
+        } else {
+          setSecurityStatus("passed");
+        }
+      });
+    }
+  }, [fontsReady, securityStatus]);
+
+  const bootStartedRef = useRef(false);
 
   useEffect(() => {
-    if (!fontsLoaded && !fontError) return;
+    if (securityStatus !== "passed" || bootStartedRef.current) return;
+    bootStartedRef.current = true;
 
     async function boot() {
       try {
@@ -144,33 +169,20 @@ export default function RootLayout() {
       setBootComplete(true);
       setAuthReady(true);
     }
-  }, [fontsLoaded, fontError, setToken, setUser, setPat]);
+  }, [securityStatus, setToken, setUser, setPat]);
+
+  // A blocked device never runs boot(), so it doesn't wait on bootComplete.
+  const authPhaseComplete =
+    securityStatus === "blocked" ||
+    (securityStatus === "passed" && bootComplete);
 
   useEffect(() => {
-    if (
-      (fontsLoaded || fontError) &&
-      bootComplete &&
-      securityStatus !== "pending"
-    ) {
+    if (fontsReady && securityStatus !== "pending" && authPhaseComplete) {
       SplashScreen.hideAsync();
     }
-  }, [fontsLoaded, fontError, bootComplete, securityStatus]);
+  }, [fontsReady, securityStatus, authPhaseComplete]);
 
-  const appReady = bootComplete && Boolean(fontsLoaded || fontError);
-
-  useEffect(() => {
-    if (appReady && securityStatus === "pending") {
-      runSecurityChecks().then((result) => {
-        if (result.isBlocked) {
-          setSecurityStatus("blocked");
-          setSecurityReasons(result.reasons);
-          setDevModeBlocked(result.devModeBlocked);
-        } else {
-          setSecurityStatus("passed");
-        }
-      });
-    }
-  }, [appReady, securityStatus]);
+  const appReady = fontsReady && authPhaseComplete;
 
   const handleRecheck = useCallback(async () => {
     const result = await runSecurityChecks();
