@@ -1,4 +1,4 @@
-import { GitHubApiError, githubAxios } from "@/lib/axios";
+import { githubAxios } from "@/lib/axios";
 import type {
   GitHubBranch,
   GitHubComment,
@@ -404,19 +404,10 @@ export async function fetchReceivedEvents(
   per_page: number = 30,
   pat?: string | null,
 ): Promise<FetchEventsResult> {
-  const path = `/users/${encodeURIComponent(username)}/received_events`;
-  if (pat) {
-    const { data, headers } = await fetchWithPAT(path, pat, {
-      params: { page, per_page },
-    });
-    return {
-      events: data as GitHubEvent[],
-      pagination: parseLinkHeader(headers.get("link") ?? undefined),
-    };
-  }
-  const { data, headers } = await githubAxios.get<GitHubEvent[]>(path, {
-    params: { page, per_page },
-  });
+  const { data, headers } = await githubAxios.get<GitHubEvent[]>(
+    `/users/${encodeURIComponent(username)}/received_events`,
+    { params: { page, per_page }, headers: patHeaders(pat) },
+  );
 
   return {
     events: data,
@@ -516,36 +507,10 @@ export interface FetchNotificationsResult {
   pagination: GitHubPagination;
 }
 
-async function fetchWithPAT(
-  path: string,
-  pat: string,
-  options?: {
-    method?: string;
-    params?: Record<string, string | number | boolean>;
-  },
-): Promise<{ data: unknown; headers: Headers }> {
-  const url = new URL(path, "https://api.github.com");
-  if (options?.params) {
-    for (const [key, value] of Object.entries(options.params)) {
-      url.searchParams.set(key, String(value));
-    }
-  }
-  const response = await fetch(url.toString(), {
-    method: options?.method ?? "GET",
-    headers: {
-      Authorization: `Bearer ${pat}`,
-      Accept: "application/vnd.github+json",
-      "X-GitHub-Api-Version": "2022-11-28",
-    },
-  });
-  if (!response.ok) {
-    const body = await response.json().catch(() => ({}));
-    const message =
-      (body as Record<string, unknown>).message ?? response.statusText;
-    throw new GitHubApiError(response.status, String(message));
-  }
-  const data = await response.json();
-  return { data, headers: response.headers };
+// A PAT auths a request in place of the active OAuth session; the axios
+// interceptor leaves an explicitly-set Authorization header alone.
+function patHeaders(pat?: string | null): { Authorization: string } | undefined {
+  return pat ? { Authorization: `Bearer ${pat}` } : undefined;
 }
 
 export async function fetchNotifications(
@@ -554,18 +519,9 @@ export async function fetchNotifications(
   all: boolean = false,
   pat?: string | null,
 ): Promise<FetchNotificationsResult> {
-  if (pat) {
-    const { data, headers } = await fetchWithPAT("/notifications", pat, {
-      params: { page, per_page, all },
-    });
-    return {
-      notifications: data as GitHubNotification[],
-      pagination: parseLinkHeader(headers.get("link") ?? undefined),
-    };
-  }
   const { data, headers } = await githubAxios.get<GitHubNotification[]>(
     "/notifications",
-    { params: { page, per_page, all } },
+    { params: { page, per_page, all }, headers: patHeaders(pat) },
   );
   return {
     notifications: data,
@@ -577,35 +533,23 @@ export async function markNotificationAsRead(
   threadId: string,
   pat?: string | null,
 ): Promise<void> {
-  if (pat) {
-    await fetchWithPAT(`/notifications/threads/${threadId}`, pat, {
-      method: "PATCH",
-    });
-    return;
-  }
-  await githubAxios.patch(`/notifications/threads/${threadId}`);
+  await githubAxios.patch(`/notifications/threads/${threadId}`, undefined, {
+    headers: patHeaders(pat),
+  });
 }
 
 export async function markAllNotificationsAsRead(
   pat?: string | null,
 ): Promise<void> {
-  if (pat) {
-    await fetchWithPAT("/notifications", pat, { method: "PUT" });
-    return;
-  }
-  await githubAxios.put("/notifications");
+  await githubAxios.put("/notifications", undefined, {
+    headers: patHeaders(pat),
+  });
 }
 
 export async function validatePAT(pat: string): Promise<boolean> {
   try {
-    const response = await fetch("https://api.github.com/user", {
-      headers: {
-        Authorization: `Bearer ${pat}`,
-        Accept: "application/vnd.github+json",
-        "X-GitHub-Api-Version": "2022-11-28",
-      },
-    });
-    return response.ok;
+    await githubAxios.get("/user", { headers: patHeaders(pat) });
+    return true;
   } catch {
     return false;
   }

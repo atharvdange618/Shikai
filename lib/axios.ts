@@ -58,6 +58,16 @@ export const githubAxios: AxiosInstance = axios.create({
   },
 });
 
+// A 401 should only clear the OAuth session if that session's token is what
+// actually got rejected. A request authed with an explicit override (a PAT,
+// or validateToken's candidate token) failing shouldn't sign out the session.
+function usedSessionToken(config: InternalAxiosRequestConfig | undefined): boolean {
+  const usedAuth = config?.headers.get("Authorization");
+  const sessionToken = useAuthStore.getState().token;
+  const sessionAuth = sessionToken ? `Bearer ${sessionToken}` : undefined;
+  return usedAuth === sessionAuth;
+}
+
 githubAxios.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     // A request that already set its own Authorization header (e.g. to
@@ -100,7 +110,7 @@ githubAxios.interceptors.response.use(
     const message =
       (data?.message as string) ?? error.message ?? "Unknown error";
 
-    if (status === 401 && authReady) {
+    if (status === 401 && authReady && usedSessionToken(error.config)) {
       useAuthStore.getState().clearAuth();
     }
 
