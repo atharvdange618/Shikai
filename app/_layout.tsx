@@ -11,7 +11,6 @@ import {
 import type { Query } from "@tanstack/react-query";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 import { useFonts } from "expo-font";
-import * as Linking from "expo-linking";
 import { Stack, useRouter } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import * as SystemUI from "expo-system-ui";
@@ -37,7 +36,6 @@ import { getStoredPAT, getStoredToken } from "@/lib/secure-storage";
 import { useOnlineManager } from "@/lib/use-online-manager";
 import { useOTAUpdates } from "@/lib/use-ota-updates";
 import { useAuthStore } from "@/stores/auth.store";
-import { exchangeGithubCode } from "@/lib/github-oauth";
 import {
   hasCompletedOnboarding,
   setOnboardingCompleteListener,
@@ -96,26 +94,6 @@ export default function RootLayout() {
   });
 
   const fontsReady = Boolean(fontsLoaded || fontError);
-
-  // Deep-link handling exchanges an OAuth code for a token, so it must wait
-  // for the security check to pass, same as boot() below.
-  useEffect(() => {
-    if (securityStatus !== "passed") return;
-
-    const handleDeepLink = async (event: { url: string }) => {
-      const parsed = Linking.parse(event.url);
-      const code = parsed.queryParams?.code as string | undefined;
-      if (!code) return;
-      await exchangeGithubCode(code);
-    };
-
-    Linking.getInitialURL().then((url) => {
-      if (url) handleDeepLink({ url });
-    });
-
-    const subscription = Linking.addEventListener("url", handleDeepLink);
-    return () => subscription.remove();
-  }, [securityStatus]);
 
   // Security check runs first, independent of auth boot, so a blocked
   // device never gets its stored token restored or used.
