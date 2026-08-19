@@ -1,6 +1,6 @@
 import { Octicons } from "@expo/vector-icons";
 import * as Linking from "expo-linking";
-import { Href, useRouter } from "expo-router";
+import { Href, useFocusEffect, useRouter } from "expo-router";
 import { useCallback, useMemo, useState } from "react";
 import {
   ActivityIndicator,
@@ -14,9 +14,11 @@ import {
 
 import { useAlert } from "@/components";
 import { KeyboardAvoid } from "@/components/shared/KeyboardAvoid";
+import { rateLimit } from "@/lib/axios";
 import { validatePAT } from "@/lib/github-rest";
 import { clearAllMMKV } from "@/lib/mmkv";
 import { deletePAT, deleteToken, savePAT } from "@/lib/secure-storage";
+import { format24HourTime } from "@/lib/utils";
 
 import {
   FontFamily,
@@ -48,6 +50,19 @@ export default function SettingsScreen() {
   const [patInput, setPatInput] = useState("");
   const [validating, setValidating] = useState(false);
   const [patError, setPatError] = useState<string | null>(null);
+
+  // rateLimit is a plain mutable object updated by the axios interceptor,
+  // not reactive state, so snapshot it fresh each time this screen is
+  // focused rather than trying to subscribe to it.
+  const [rateLimitSnapshot, setRateLimitSnapshot] = useState(() => ({
+    ...rateLimit,
+  }));
+
+  useFocusEffect(
+    useCallback(() => {
+      setRateLimitSnapshot({ ...rateLimit });
+    }, []),
+  );
 
   const handleSavePAT = useCallback(async () => {
     const trimmed = patInput.trim();
@@ -104,6 +119,16 @@ export default function SettingsScreen() {
       ],
     });
   }, [alert, setPat, queryClient]);
+
+  const handleClearCache = useCallback(() => {
+    clearAllMMKV();
+    queryClient.clear();
+    alert.show({
+      variant: "success",
+      title: "Cache cleared",
+      message: "Data will be refetched as you use the app.",
+    });
+  }, [alert, queryClient]);
 
   const handleSignOut = useCallback(() => {
     alert.show({
@@ -254,6 +279,46 @@ export default function SettingsScreen() {
               </Pressable>
             </View>
           )}
+        </View>
+      </View>
+
+      <View style={s.section}>
+        <Text style={s.sectionTitle}>Data & Storage</Text>
+        <View style={s.card}>
+          <View style={s.menuRow}>
+            <Octicons
+              name="graph"
+              size={IconSize.md}
+              color={colors.textSecondary}
+            />
+            <View style={s.rateLimitInfo}>
+              <Text style={s.menuText}>API rate limit</Text>
+              <Text style={s.rateLimitDetail}>
+                {rateLimitSnapshot.remaining !== null &&
+                rateLimitSnapshot.limit !== null
+                  ? `${rateLimitSnapshot.remaining} / ${rateLimitSnapshot.limit} requests remaining` +
+                    (rateLimitSnapshot.reset
+                      ? `, resets at ${format24HourTime(rateLimitSnapshot.reset.toISOString())}`
+                      : "")
+                  : "No API activity yet this session"}
+              </Text>
+            </View>
+          </View>
+          <Pressable
+            style={({ pressed }) => [
+              s.menuRow,
+              s.rateLimitDivider,
+              pressed && s.menuRowPressed,
+            ]}
+            onPress={handleClearCache}
+          >
+            <Octicons
+              name="trash"
+              size={IconSize.md}
+              color={colors.textSecondary}
+            />
+            <Text style={s.menuText}>Clear cache</Text>
+          </Pressable>
         </View>
       </View>
 
@@ -411,6 +476,22 @@ function buildStyles(colors: ColorTokens) {
 
     dangerRow: {
       gap: Spacing.md,
+    },
+
+    rateLimitInfo: {
+      flex: 1,
+      gap: 2,
+    },
+
+    rateLimitDetail: {
+      fontFamily: FontFamily.regular,
+      fontSize: FontSize.caption,
+      color: colors.textMuted,
+    },
+
+    rateLimitDivider: {
+      borderTopWidth: 1,
+      borderTopColor: colors.border,
     },
 
     dangerText: {
