@@ -28,6 +28,7 @@ export function useGlobalSearch({ query, tab, enabled = true }: UseGlobalSearchO
     getNextPageParam: (lastPage) => lastPage.pagination.next ?? undefined,
     staleTime: 1000 * 60 * 5,
     enabled: enabled && tab === "repos" && trimmedQuery.length > 0,
+    meta: { persist: false },
   });
 
   const usersQuery = useInfiniteQuery({
@@ -37,6 +38,7 @@ export function useGlobalSearch({ query, tab, enabled = true }: UseGlobalSearchO
     getNextPageParam: (lastPage) => lastPage.pagination.next ?? undefined,
     staleTime: 1000 * 60 * 5,
     enabled: enabled && tab === "users" && trimmedQuery.length > 0,
+    meta: { persist: false },
   });
 
   const issuesQuery = useInfiniteQuery({
@@ -46,6 +48,7 @@ export function useGlobalSearch({ query, tab, enabled = true }: UseGlobalSearchO
     getNextPageParam: (lastPage) => lastPage.pagination.next ?? undefined,
     staleTime: 1000 * 60 * 5,
     enabled: enabled && tab === "issues" && trimmedQuery.length > 0,
+    meta: { persist: false },
   });
 
   const topicsQuery = useInfiniteQuery({
@@ -56,6 +59,7 @@ export function useGlobalSearch({ query, tab, enabled = true }: UseGlobalSearchO
     getNextPageParam: (lastPage) => lastPage.pagination.next ?? undefined,
     staleTime: 1000 * 60 * 5,
     enabled: enabled && tab === "topics" && trimmedQuery.length > 0,
+    meta: { persist: false },
   });
 
   const activeQuery =
