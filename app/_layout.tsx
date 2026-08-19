@@ -22,6 +22,7 @@ import {
   AnimatedSplashScreen,
   BlockingScreen,
   ErrorBoundary,
+  useAlert,
 } from "@/components";
 import { AppRatingPrompt } from "@/components/AppRatingPrompt";
 import { OfflineBanner } from "@/components/OfflineBanner";
@@ -62,13 +63,39 @@ function ThemeEffects() {
   );
 }
 
+// Rendered inside AlertProvider so it can prompt the user instead of
+// silently reloading the app out from under them mid-session.
+function OTAUpdateEffects() {
+  const alert = useAlert();
+  const { updateReady, reload } = useOTAUpdates();
+
+  const alertRef = useRef(alert);
+  alertRef.current = alert;
+  const reloadRef = useRef(reload);
+  reloadRef.current = reload;
+
+  useEffect(() => {
+    if (!updateReady) return;
+    alertRef.current.show({
+      variant: "info",
+      title: "Update ready",
+      message: "Restart the app to get the latest version.",
+      actions: [
+        { text: "Later", style: "cancel" },
+        { text: "Restart", onPress: () => reloadRef.current() },
+      ],
+    });
+  }, [updateReady]);
+
+  return null;
+}
+
 export default function RootLayout() {
   const token = useAuthStore((s) => s.token);
   const setToken = useAuthStore((s) => s.setToken);
   const setUser = useAuthStore((s) => s.setUser);
   const setPat = useAuthStore((s) => s.setPat);
   useOnlineManager();
-  useOTAUpdates();
   const { visible, rate, dismiss } = useAppRatingPrompt();
   useInAppUpdates();
 
@@ -206,6 +233,7 @@ export default function RootLayout() {
           <OfflineBanner />
           <AppRatingPrompt visible={visible} onRate={rate} onDismiss={dismiss} />
           <ThemeEffects />
+          <OTAUpdateEffects />
           {showSplash && (
             <AnimatedSplashScreen
               isReady={allReady}
