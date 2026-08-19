@@ -8,7 +8,7 @@
  *   1 min   - commits, events (most likely to be fresh)
  */
 
-import { GitHubApiError } from "@/lib/axios";
+import { GitHubApiError, isRateLimited } from "@/lib/axios";
 import { QueryClient, focusManager } from "@tanstack/react-query";
 import { AppState } from "react-native";
 
@@ -29,6 +29,7 @@ export const queryClient = new QueryClient({
       retry: (failureCount, error) => {
         if (error instanceof GitHubApiError) {
           if (error.status === 401 || error.status === 404) return false;
+          if (error.status === 403 && isRateLimited()) return false;
         }
         return failureCount < 2;
       },

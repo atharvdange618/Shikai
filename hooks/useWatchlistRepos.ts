@@ -14,6 +14,7 @@
 
 import { useQueries } from "@tanstack/react-query";
 
+import { isRateLimited } from "@/lib/axios";
 import { fetchRepo } from "@/lib/github-rest";
 import { queryKeys } from "@/lib/query-client";
 import { decodeRepoId } from "@/lib/utils";
@@ -32,7 +33,9 @@ export function useWatchlistRepos(): {
       return {
         queryKey: queryKeys.repo(owner, name),
         queryFn: () => fetchRepo(owner, name),
-        enabled: Boolean(owner && name),
+        // Don't fan out a request per watchlisted repo into a rate limit
+        // we already know is exhausted; already-cached repos still render.
+        enabled: Boolean(owner && name) && !isRateLimited(),
         staleTime: 1000 * 60 * 5,
       };
     }),

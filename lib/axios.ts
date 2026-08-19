@@ -27,6 +27,14 @@ export const rateLimit: RateLimitState = {
   used: null,
 };
 
+export function isRateLimited(): boolean {
+  return (
+    rateLimit.remaining === 0 &&
+    rateLimit.reset !== null &&
+    Date.now() < rateLimit.reset.getTime()
+  );
+}
+
 export class GitHubApiError extends Error {
   status: number;
   message: string;
