@@ -25,9 +25,13 @@ import {
   useTheme,
   type ColorTokens,
 } from "@/constants/theme";
-import { mmkv } from "@/lib/mmkv";
+import { createMMKV } from "react-native-mmkv";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
+
+// A dedicated instance, not the shared cache: this flag is device-level and
+// must survive clearAllMMKV(), which runs on every sign-in and sign-out.
+const onboardingStorage = createMMKV({ id: "shikai-onboarding" });
 
 const ONBOARDING_KEY = "onboarding_completed";
 
@@ -66,12 +70,12 @@ export function setOnboardingCompleteListener(cb: () => void) {
 }
 
 export function markOnboardingComplete() {
-  mmkv.set(ONBOARDING_KEY, true);
+  onboardingStorage.set(ONBOARDING_KEY, true);
   _onCompleteCallback?.();
 }
 
 export function hasCompletedOnboarding(): boolean {
-  return mmkv.getBoolean(ONBOARDING_KEY) === true;
+  return onboardingStorage.getBoolean(ONBOARDING_KEY) === true;
 }
 
 export default function OnboardingScreen() {
