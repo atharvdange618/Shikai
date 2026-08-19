@@ -57,10 +57,13 @@ function restoreKeystore() {
 // plugins/withGradleProperties.js (runs during expo prebuild for both
 // local and EAS builds). Only the keystore password stays here since
 // it's too sensitive to commit in a config plugin.
+//
+// The password itself must never be hardcoded in this file — set it in
+// your shell (or a local, gitignored .env you source) as SHIKAI_KEYSTORE_PASSWORD
+// before running this script.
 const GRADLE_PROPERTIES_PATCHES = {
   KEYSTORE_PASSWORD: {
-    expected: "***REDACTED-ROTATED-PASSWORD***",
-    fallback: "***REDACTED-ROTATED-PASSWORD***",
+    value: process.env.SHIKAI_KEYSTORE_PASSWORD,
     description: "Release keystore password",
   },
 };
@@ -71,21 +74,31 @@ function patchGradleProperties() {
   let changed = false;
 
   for (const [key, config] of Object.entries(GRADLE_PROPERTIES_PATCHES)) {
+    if (!config.value) {
+      if (fs.existsSync(KEYSTORE_DEST)) {
+        warn(
+          `  SHIKAI_KEYSTORE_PASSWORD is not set - skipping ${key}. ` +
+            `Release builds will fail signing until it's set and this script is re-run.`,
+        );
+      }
+      continue;
+    }
+
     const regex = new RegExp(`^${key}=.*$`, "m");
-    const newValue = `${key}=${config.fallback}`;
+    const newValue = `${key}=${config.value}`;
 
     if (regex.test(content)) {
       const current = content.match(regex)[0];
       if (current !== newValue) {
         content = content.replace(regex, newValue);
-        log(`  Updated ${key} → ${config.fallback} (${config.description})`);
+        log(`  Updated ${key} (${config.description})`);
         changed = true;
       } else {
         log(`  ${key} already correct`);
       }
     } else {
       content += `\n${newValue}`;
-      log(`  Added ${key}=${config.fallback} (${config.description})`);
+      log(`  Added ${key} (${config.description})`);
       changed = true;
     }
   }
