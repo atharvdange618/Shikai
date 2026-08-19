@@ -13,6 +13,11 @@ import {
 
 interface Props {
   children: ReactNode;
+  // "home" (default) resets all the way to Overview - for the app-wide
+  // boundary. "back" returns to the previous screen - for a boundary
+  // scoped to one deep screen, so a crash there doesn't dump the user
+  // out of the whole app.
+  fallback?: "home" | "back";
 }
 
 interface State {
@@ -32,6 +37,7 @@ export class ErrorBoundary extends Component<Props, State> {
       return (
         <ErrorFallback
           error={this.state.error}
+          fallback={this.props.fallback}
           onRetry={() => this.setState({ hasError: false, error: null })}
         />
       );
@@ -42,9 +48,11 @@ export class ErrorBoundary extends Component<Props, State> {
 
 function ErrorFallback({
   error,
+  fallback = "home",
   onRetry,
 }: {
   error: Error | null;
+  fallback?: "home" | "back";
   onRetry: () => void;
 }) {
   const { colors } = useTheme();
@@ -63,10 +71,16 @@ function ErrorFallback({
         style={[s.button, { backgroundColor: colors.accent }]}
         onPress={() => {
           onRetry();
-          router.replace("/(app)/(tabs)/overview");
+          if (fallback === "back" && router.canGoBack()) {
+            router.back();
+          } else {
+            router.replace("/(app)/(tabs)/overview");
+          }
         }}
       >
-        <Text style={[s.buttonText, { color: "#FFFFFF" }]}>Go to Home</Text>
+        <Text style={[s.buttonText, { color: "#FFFFFF" }]}>
+          {fallback === "back" ? "Go Back" : "Go to Home"}
+        </Text>
       </Pressable>
     </View>
   );

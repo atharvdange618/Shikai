@@ -1,3 +1,4 @@
+import { ErrorBoundary } from "@/components";
 import { MarkdownRenderer } from "@/components/shared/MarkdownRenderer";
 import {
   FontFamily,
@@ -27,6 +28,14 @@ import {
 } from "react-native";
 
 export default function PullRequestDetailScreen() {
+  return (
+    <ErrorBoundary fallback="back">
+      <PullRequestDetailScreenContent />
+    </ErrorBoundary>
+  );
+}
+
+function PullRequestDetailScreenContent() {
   const { repoId, number } = useLocalSearchParams<{
     repoId: string;
     number: string;

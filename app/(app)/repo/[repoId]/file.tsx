@@ -20,6 +20,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { WebView } from "react-native-webview";
 
+import { ErrorBoundary } from "@/components";
 import { MarkdownRenderer } from "@/components/shared/MarkdownRenderer";
 import {
   FontFamily,
@@ -128,6 +129,14 @@ function LoadingProgress({
 }
 
 export default function FileViewerScreen() {
+  return (
+    <ErrorBoundary fallback="back">
+      <FileViewerScreenContent />
+    </ErrorBoundary>
+  );
+}
+
+function FileViewerScreenContent() {
   const { repoId, path, fileName } = useLocalSearchParams<{
     repoId: string;
     path: string;
