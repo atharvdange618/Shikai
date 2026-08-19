@@ -26,6 +26,7 @@ interface WatchlistState {
   isWatchlisted: (repoId: string) => boolean;
   toggleWatchlist: (repoId: string) => void;
   init: () => void;
+  reset: () => void;
   onFirstBookmark: (cb: FirstBookmarkCallback) => void;
 }
 
@@ -51,6 +52,11 @@ export const useWatchlistStore = create<WatchlistState>((set, get) => ({
 
   init: () => {
     set({ watchlistIds: loadWatchlist() });
+  },
+
+  reset: () => {
+    saveWatchlist([]);
+    set({ watchlistIds: [] });
   },
 
   onFirstBookmark: (cb: FirstBookmarkCallback) => {
