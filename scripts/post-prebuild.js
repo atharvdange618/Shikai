@@ -31,6 +31,10 @@ const KEYSTORE_DEST = path.join(ANDROID_APP, "release.keystore");
 
 const log = (msg) => console.log(`[post-prebuild] ${msg}`);
 const warn = (msg) => console.warn(`[post-prebuild] WARNING: ${msg}`);
+const fail = (msg) => {
+  console.error(`[post-prebuild] ERROR: ${msg}`);
+  process.exit(1);
+};
 
 // ─── keystore restore ───
 function restoreKeystore() {
@@ -76,9 +80,9 @@ function patchGradleProperties() {
   for (const [key, config] of Object.entries(GRADLE_PROPERTIES_PATCHES)) {
     if (!config.value) {
       if (fs.existsSync(KEYSTORE_DEST)) {
-        warn(
-          `  SHIKAI_KEYSTORE_PASSWORD is not set - skipping ${key}. ` +
-            `Release builds will fail signing until it's set and this script is re-run.`,
+        fail(
+          `SHIKAI_KEYSTORE_PASSWORD is not set, but a release keystore is present. ` +
+            `Set it before running this script - a release build would otherwise fail signing.`,
         );
       }
       continue;
@@ -137,65 +141,92 @@ function patchBuildGradle() {
   let changed = false;
 
   // 1. Add release signing config
-  if (content.includes("release {") && content.includes("storeFile file('release.keystore')")) {
+  let signingConfigPresent = content.includes(
+    "storeFile file('release.keystore')",
+  );
+  if (signingConfigPresent) {
     log("  Release signing config already exists");
   } else if (fs.existsSync(KEYSTORE_DEST)) {
-    if (content.includes("signingConfigs {")) {
-      // Add release config after debug config
+    const signingConfigsRegex = /(signingConfigs\s*\{\s*debug\s*\{[^}]+\}\s*)/;
+    if (signingConfigsRegex.test(content)) {
       content = content.replace(
-        /(signingConfigs\s*\{\s*debug\s*\{[^}]+\}\s*)/,
+        signingConfigsRegex,
         `$1\n${RELEASE_SIGNING_CONFIG}\n`,
       );
       log("  Added release signing config");
       changed = true;
+      signingConfigPresent = true;
+    } else {
+      fail(
+        "Could not find 'signingConfigs { debug { ... } }' in build.gradle to " +
+          "insert the release signing config. Expo's generated file structure " +
+          "may have changed - update this script before building a release.",
+      );
     }
   } else {
-    warn("  Release keystore not found - skipping signing config");
+    log("  Release keystore not found - skipping signing config (debug builds only)");
   }
 
-  // 2. Update release build type to use release signing config
-  if (content.includes("release {") && content.includes("signingConfig signingConfigs.debug")) {
-    content = content.replace(
-      /(release\s*\{[^}]*signingConfig\s+)signingConfigs\.debug/,
-      `$1signingConfigs.release`,
-    );
-    log("  Updated release build type to use release signing config");
-    changed = true;
-  } else if (content.includes("signingConfig signingConfigs.release")) {
-    log("  Release build type already uses release signing config");
+  // 2. Point the release build type at the release signing config, but only
+  // once that config actually exists - otherwise a release build would fail
+  // on a signingConfig that was never added, instead of falling back to debug.
+  if (signingConfigPresent) {
+    if (content.includes("signingConfig signingConfigs.release")) {
+      log("  Release build type already uses release signing config");
+    } else {
+      const buildTypeRegex =
+        /(release\s*\{[^}]*signingConfig\s+)signingConfigs\.debug/;
+      if (buildTypeRegex.test(content)) {
+        content = content.replace(buildTypeRegex, `$1signingConfigs.release`);
+        log("  Updated release build type to use release signing config");
+        changed = true;
+      } else {
+        fail(
+          "Could not find the release build type's signingConfig reference to " +
+            "switch to signingConfigs.release. Expo's generated file structure " +
+            "may have changed - update this script before building a release.",
+        );
+      }
+    }
   }
 
   // 3. Add ABI splits block
   if (content.includes("splits {")) {
     log("  splits block already exists");
   } else {
-    const splitsInsert = `\n${SPLITS_BLOCK}\n`;
-    if (content.includes("androidResources {")) {
+    const androidResourcesRegex = /(androidResources\s*\{[^}]*\}\s*)/;
+    if (androidResourcesRegex.test(content)) {
       content = content.replace(
-        /(androidResources\s*\{[^}]*\}\s*)/,
-        `$1${splitsInsert}`,
+        androidResourcesRegex,
+        `$1\n${SPLITS_BLOCK}\n`,
       );
       log("  Added ABI splits block");
       changed = true;
     } else {
-      warn("  Could not find androidResources block - add splits manually");
+      fail(
+        "Could not find 'androidResources { ... }' in build.gradle to insert " +
+          "the ABI splits block. Expo's generated file structure may have " +
+          "changed - update this script before building.",
+      );
     }
   }
 
   // 4. Add META-INF exclusion to packagingOptions
   if (content.includes("META-INF/versions/9/OSGI-INF/MANIFEST.MF")) {
     log("  META-INF exclusion already exists");
+  } else if (content.includes("packagingOptions {")) {
+    content = content.replace(
+      /(packagingOptions\s*\{)/,
+      `$1\n${PACKAGING_EXCLUDE}`,
+    );
+    log("  Added META-INF exclusion");
+    changed = true;
   } else {
-    if (content.includes("packagingOptions {")) {
-      content = content.replace(
-        /(packagingOptions\s*\{)/,
-        `$1\n${PACKAGING_EXCLUDE}`,
-      );
-      log("  Added META-INF exclusion");
-      changed = true;
-    } else {
-      warn("  Could not find packagingOptions block - add exclusion manually");
-    }
+    fail(
+      "Could not find 'packagingOptions { ... }' in build.gradle to insert " +
+        "the META-INF exclusion. Expo's generated file structure may have " +
+        "changed - update this script before building.",
+    );
   }
 
   if (changed) {
@@ -210,15 +241,15 @@ function main() {
   log("Re-applying post-prebuild configurations...\n");
 
   if (!fs.existsSync(GRADLE_PROPS)) {
-    warn(`gradle.properties not found at ${GRADLE_PROPS}`);
-    warn("Run 'npx expo prebuild --clean' first");
-    process.exit(1);
+    fail(
+      `gradle.properties not found at ${GRADLE_PROPS}. Run 'npx expo prebuild --clean' first.`,
+    );
   }
 
   if (!fs.existsSync(BUILD_GRADLE)) {
-    warn(`build.gradle not found at ${BUILD_GRADLE}`);
-    warn("Run 'npx expo prebuild --clean' first");
-    process.exit(1);
+    fail(
+      `build.gradle not found at ${BUILD_GRADLE}. Run 'npx expo prebuild --clean' first.`,
+    );
   }
 
   restoreKeystore();
