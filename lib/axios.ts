@@ -52,10 +52,14 @@ export const githubAxios: AxiosInstance = axios.create({
 
 githubAxios.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    const token = useAuthStore.getState().token;
+    // A request that already set its own Authorization header (e.g. to
+    // validate a token that isn't the active session's) keeps it as-is.
+    if (!config.headers.has("Authorization")) {
+      const token = useAuthStore.getState().token;
 
-    if (token) {
-      config.headers.set("Authorization", `Bearer ${token}`);
+      if (token) {
+        config.headers.set("Authorization", `Bearer ${token}`);
+      }
     }
 
     return config;

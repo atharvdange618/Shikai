@@ -1,5 +1,4 @@
 import { GitHubApiError, githubAxios } from "@/lib/axios";
-import { useAuthStore } from "@/stores/auth.store";
 import type {
   GitHubBranch,
   GitHubComment,
@@ -93,18 +92,10 @@ export async function fetchUserInstallations(): Promise<GitHubInstallation[]> {
 }
 
 export async function validateToken(token: string): Promise<GitHubUser> {
-  const prevToken = useAuthStore.getState().token;
-  useAuthStore.getState().setToken(token);
-  try {
-    const { data } = await githubAxios.get<GitHubUser>("/user");
-    return data;
-  } finally {
-    if (prevToken) {
-      useAuthStore.getState().setToken(prevToken);
-    } else {
-      useAuthStore.getState().clearAuth();
-    }
-  }
+  const { data } = await githubAxios.get<GitHubUser>("/user", {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return data;
 }
 
 export async function fetchSocialAccounts(): Promise<GitHubSocialAccount[]> {
