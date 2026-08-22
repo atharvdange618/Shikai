@@ -1,7 +1,7 @@
 import { Octicons } from "@expo/vector-icons";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Pressable,
@@ -47,11 +47,6 @@ export default function SavedScreen() {
   const [refreshing, setRefreshing] = useState(false);
 
   const watchlistIds = useWatchlistStore((state) => state.watchlistIds);
-  const init = useWatchlistStore((state) => state.init);
-
-  useEffect(() => {
-    init();
-  }, [init]);
 
   const {
     repos: starredRepos,

@@ -78,11 +78,6 @@ export default function RepoDetailsScreen() {
     s.isWatchlisted(repoIdEncoded),
   );
   const toggleWatchlist = useWatchlistStore((s) => s.toggleWatchlist);
-  const initWatchlist = useWatchlistStore((s) => s.init);
-
-  useEffect(() => {
-    initWatchlist();
-  }, [initWatchlist]);
 
   const handleBookmarkToggle = useCallback(() => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);

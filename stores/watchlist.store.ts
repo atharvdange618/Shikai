@@ -1,23 +1,24 @@
 import { createMMKV } from "react-native-mmkv";
 import { create } from "zustand";
+import { persist, type PersistStorage } from "zustand/middleware";
 
-const watchlistStorage = createMMKV({ id: "shikai-watchlist" });
-
+const watchlistMMKV = createMMKV({ id: "shikai-watchlist" });
 const STORAGE_KEY = "watchlist_repo_ids";
 
-function loadWatchlist(): string[] {
-  const raw = watchlistStorage.getString(STORAGE_KEY);
-  if (!raw) return [];
-  try {
-    return JSON.parse(raw);
-  } catch {
-    return [];
-  }
-}
-
-function saveWatchlist(ids: string[]) {
-  watchlistStorage.set(STORAGE_KEY, JSON.stringify(ids));
-}
+const watchlistStorage: PersistStorage<string[]> = {
+  getItem: (name) => {
+    const raw = watchlistMMKV.getString(name);
+    if (!raw) return null;
+    try {
+      return { state: JSON.parse(raw) };
+    } catch {
+      return { state: [] };
+    }
+  },
+  setItem: (name, value) =>
+    watchlistMMKV.set(name, JSON.stringify(value.state)),
+  removeItem: (name) => watchlistMMKV.remove(name),
+};
 
 type FirstBookmarkCallback = () => void;
 
@@ -25,41 +26,45 @@ interface WatchlistState {
   watchlistIds: string[];
   isWatchlisted: (repoId: string) => boolean;
   toggleWatchlist: (repoId: string) => void;
-  init: () => void;
   reset: () => void;
   onFirstBookmark: (cb: FirstBookmarkCallback) => void;
 }
 
 let firstBookmarkListener: FirstBookmarkCallback | null = null;
 
-export const useWatchlistStore = create<WatchlistState>((set, get) => ({
-  watchlistIds: [],
+export const useWatchlistStore = create<WatchlistState>()(
+  persist(
+    (set, get) => ({
+      watchlistIds: [],
 
-  isWatchlisted: (repoId: string) => get().watchlistIds.includes(repoId),
+      isWatchlisted: (repoId: string) => get().watchlistIds.includes(repoId),
 
-  toggleWatchlist: (repoId: string) => {
-    const { watchlistIds } = get();
-    const isFirst = watchlistIds.length === 0;
-    const next = watchlistIds.includes(repoId)
-      ? watchlistIds.filter((id) => id !== repoId)
-      : [...watchlistIds, repoId];
-    saveWatchlist(next);
-    set({ watchlistIds: next });
-    if (isFirst && next.length === 1 && firstBookmarkListener) {
-      firstBookmarkListener();
-    }
-  },
+      toggleWatchlist: (repoId: string) => {
+        const { watchlistIds } = get();
+        const isFirst = watchlistIds.length === 0;
+        const next = watchlistIds.includes(repoId)
+          ? watchlistIds.filter((id) => id !== repoId)
+          : [...watchlistIds, repoId];
+        set({ watchlistIds: next });
+        if (isFirst && next.length === 1 && firstBookmarkListener) {
+          firstBookmarkListener();
+        }
+      },
 
-  init: () => {
-    set({ watchlistIds: loadWatchlist() });
-  },
+      reset: () => set({ watchlistIds: [] }),
 
-  reset: () => {
-    saveWatchlist([]);
-    set({ watchlistIds: [] });
-  },
-
-  onFirstBookmark: (cb: FirstBookmarkCallback) => {
-    firstBookmarkListener = cb;
-  },
-}));
+      onFirstBookmark: (cb: FirstBookmarkCallback) => {
+        firstBookmarkListener = cb;
+      },
+    }),
+    {
+      name: STORAGE_KEY,
+      storage: watchlistStorage,
+      partialize: (state) => state.watchlistIds,
+      merge: (persisted, current) => ({
+        ...current,
+        watchlistIds: Array.isArray(persisted) ? persisted : [],
+      }),
+    },
+  ),
+);

@@ -63,10 +63,6 @@ export default function SearchScreen() {
   const clearRecentTerms = useRecentSearchesStore((s) => s.clearAll);
 
   useEffect(() => {
-    useRecentSearchesStore.getState().init();
-  }, []);
-
-  useEffect(() => {
     return NetInfo.addEventListener((state) => {
       setIsOffline(
         state.isConnected === false || state.isInternetReachable === false,
