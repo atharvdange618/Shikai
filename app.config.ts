@@ -23,7 +23,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
   name: "Shikai",
   slug: "shikai",
-  version: "1.3.0",
+  version: "1.3.1",
   orientation: "portrait",
   icon: "./assets/images/icon.png",
   scheme: "shikai",
@@ -41,7 +41,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     edgeToEdgeEnabled: true,
     predictiveBackGestureEnabled: false,
     package: "com.atharvdange618.Shikai",
-    versionCode: 3,
+    versionCode: 4,
   },
   web: {
     output: "static",
