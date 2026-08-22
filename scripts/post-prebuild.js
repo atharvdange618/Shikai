@@ -65,54 +65,39 @@ function restoreKeystore() {
 // The password itself must never be hardcoded in this file — set it in
 // your shell (or a local, gitignored .env you source) as SHIKAI_KEYSTORE_PASSWORD
 // before running this script.
-const GRADLE_PROPERTIES_PATCHES = {
-  KEYSTORE_PASSWORD: {
-    value: process.env.SHIKAI_KEYSTORE_PASSWORD,
-    description: "Release keystore password",
-  },
-};
-
 function patchGradleProperties() {
   log("Patching gradle.properties...");
+  const password = process.env.SHIKAI_KEYSTORE_PASSWORD;
+
+  if (!password) {
+    if (fs.existsSync(KEYSTORE_DEST)) {
+      fail(
+        `SHIKAI_KEYSTORE_PASSWORD is not set, but a release keystore is present. ` +
+          `Set it before running this script - a release build would otherwise fail signing.`,
+      );
+    }
+    log("  SHIKAI_KEYSTORE_PASSWORD not set - skipping");
+    return;
+  }
+
   let content = fs.readFileSync(GRADLE_PROPS, "utf8");
-  let changed = false;
+  const regex = /^KEYSTORE_PASSWORD=.*$/m;
+  const newValue = `KEYSTORE_PASSWORD=${password}`;
 
-  for (const [key, config] of Object.entries(GRADLE_PROPERTIES_PATCHES)) {
-    if (!config.value) {
-      if (fs.existsSync(KEYSTORE_DEST)) {
-        fail(
-          `SHIKAI_KEYSTORE_PASSWORD is not set, but a release keystore is present. ` +
-            `Set it before running this script - a release build would otherwise fail signing.`,
-        );
-      }
-      continue;
+  if (regex.test(content)) {
+    if (content.match(regex)[0] === newValue) {
+      log("  KEYSTORE_PASSWORD already correct");
+      return;
     }
-
-    const regex = new RegExp(`^${key}=.*$`, "m");
-    const newValue = `${key}=${config.value}`;
-
-    if (regex.test(content)) {
-      const current = content.match(regex)[0];
-      if (current !== newValue) {
-        content = content.replace(regex, newValue);
-        log(`  Updated ${key} (${config.description})`);
-        changed = true;
-      } else {
-        log(`  ${key} already correct`);
-      }
-    } else {
-      content += `\n${newValue}`;
-      log(`  Added ${key} (${config.description})`);
-      changed = true;
-    }
-  }
-
-  if (changed) {
-    fs.writeFileSync(GRADLE_PROPS, content, "utf8");
-    log("  gradle.properties written");
+    content = content.replace(regex, newValue);
+    log("  Updated KEYSTORE_PASSWORD");
   } else {
-    log("  gradle.properties unchanged");
+    content += `\n${newValue}`;
+    log("  Added KEYSTORE_PASSWORD");
   }
+
+  fs.writeFileSync(GRADLE_PROPS, content, "utf8");
+  log("  gradle.properties written");
 }
 
 // ─── build.gradle patches ───
