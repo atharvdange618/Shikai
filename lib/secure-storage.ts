@@ -23,67 +23,55 @@ function isValidPAT(pat: string | null): pat is string {
   return pat.startsWith("ghp_") || pat.startsWith("github_pat_");
 }
 
-export async function getStoredToken(): Promise<string | null> {
+async function safeRead<T>(fn: () => Promise<T>, fallback: T): Promise<T> {
   try {
+    return await fn();
+  } catch {
+    return fallback;
+  }
+}
+
+// Silent fail - callers keep the in-memory (Zustand) value regardless.
+async function safeWrite(fn: () => Promise<void>): Promise<void> {
+  try {
+    await fn();
+  } catch {
+    // ignore
+  }
+}
+
+export const getStoredToken = (): Promise<string | null> =>
+  safeRead(async () => {
     const token = await SecureStore.getItemAsync(KEYS.GITHUB_TOKEN);
     return isValidToken(token) ? token : null;
-  } catch {
-    return null;
-  }
-}
+  }, null);
 
-export async function saveToken(token: string): Promise<void> {
-  try {
-    await SecureStore.setItemAsync(KEYS.GITHUB_TOKEN, token);
-  } catch {
-    // Silent fail - token is still in Zustand for this session
-  }
-}
+export const saveToken = (token: string): Promise<void> =>
+  safeWrite(() => SecureStore.setItemAsync(KEYS.GITHUB_TOKEN, token));
 
-export async function deleteToken(): Promise<void> {
-  try {
-    await SecureStore.deleteItemAsync(KEYS.GITHUB_TOKEN);
-  } catch {
-    // Silent fail - token is cleared from Zustand regardless
-  }
-}
+export const deleteToken = (): Promise<void> =>
+  safeWrite(() => SecureStore.deleteItemAsync(KEYS.GITHUB_TOKEN));
 
-export async function getStoredPAT(): Promise<string | null> {
-  try {
+export const getStoredPAT = (): Promise<string | null> =>
+  safeRead(async () => {
     const pat = await SecureStore.getItemAsync(KEYS.GITHUB_PAT);
     return isValidPAT(pat) ? pat : null;
-  } catch {
-    return null;
-  }
-}
+  }, null);
 
-export async function savePAT(pat: string): Promise<void> {
-  try {
-    await SecureStore.setItemAsync(KEYS.GITHUB_PAT, pat);
-  } catch {
-    // Silent fail
-  }
-}
+export const savePAT = (pat: string): Promise<void> =>
+  safeWrite(() => SecureStore.setItemAsync(KEYS.GITHUB_PAT, pat));
 
-export async function deletePAT(): Promise<void> {
-  try {
-    await SecureStore.deleteItemAsync(KEYS.GITHUB_PAT);
-  } catch {
-    // Silent fail
-  }
-}
+export const deletePAT = (): Promise<void> =>
+  safeWrite(() => SecureStore.deleteItemAsync(KEYS.GITHUB_PAT));
 
-export async function savePendingAuth(codeVerifier: string): Promise<void> {
-  try {
+export const savePendingAuth = (codeVerifier: string): Promise<void> =>
+  safeWrite(() => {
     const data: PendingAuth = { codeVerifier, timestamp: Date.now() };
-    await SecureStore.setItemAsync(KEYS.PENDING_AUTH, JSON.stringify(data));
-  } catch {
-    // Silent fail - auth flow will rely on in-memory state
-  }
-}
+    return SecureStore.setItemAsync(KEYS.PENDING_AUTH, JSON.stringify(data));
+  });
 
-export async function getPendingAuth(): Promise<PendingAuth | null> {
-  try {
+export const getPendingAuth = (): Promise<PendingAuth | null> =>
+  safeRead(async () => {
     const raw = await SecureStore.getItemAsync(KEYS.PENDING_AUTH);
     if (!raw) return null;
     const data: PendingAuth = JSON.parse(raw);
@@ -92,15 +80,7 @@ export async function getPendingAuth(): Promise<PendingAuth | null> {
       return null;
     }
     return data;
-  } catch {
-    return null;
-  }
-}
+  }, null);
 
-export async function clearPendingAuth(): Promise<void> {
-  try {
-    await SecureStore.deleteItemAsync(KEYS.PENDING_AUTH);
-  } catch {
-    // Silent fail
-  }
-}
+export const clearPendingAuth = (): Promise<void> =>
+  safeWrite(() => SecureStore.deleteItemAsync(KEYS.PENDING_AUTH));
