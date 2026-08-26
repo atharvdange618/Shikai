@@ -37,10 +37,6 @@ import { getStoredPAT, getStoredToken } from "@/lib/secure-storage";
 import { useOnlineManager } from "@/lib/use-online-manager";
 import { useOTAUpdates } from "@/lib/use-ota-updates";
 import { useAuthStore } from "@/stores/auth.store";
-import {
-  hasCompletedOnboarding,
-  setOnboardingCompleteListener,
-} from "@/app/(onboarding)/index";
 import { runSecurityChecks } from "shikai-security";
 
 SplashScreen.preventAutoHideAsync();
@@ -101,9 +97,6 @@ export default function RootLayout() {
 
   const [bootComplete, setBootComplete] = useState(false);
   const [showSplash, setShowSplash] = useState(true);
-  const [needsOnboarding, setNeedsOnboarding] = useState(
-    () => !useAuthStore.getState().token && !hasCompletedOnboarding(),
-  );
 
   const [securityStatus, setSecurityStatus] = useState<
     "pending" | "passed" | "blocked"
@@ -249,11 +242,7 @@ export default function RootLayout() {
           )}
           {!showSplash && securityStatus === "passed" && (
             <ErrorBoundary>
-              <AppStack
-                token={token}
-                needsOnboarding={needsOnboarding}
-                setNeedsOnboarding={setNeedsOnboarding}
-              />
+              <AppStack token={token} />
             </ErrorBoundary>
           )}
         </AlertProvider>
@@ -262,36 +251,18 @@ export default function RootLayout() {
   );
 }
 
-function AppStack({
-  token,
-  needsOnboarding,
-  setNeedsOnboarding,
-}: {
-  token: string | null;
-  needsOnboarding: boolean;
-  setNeedsOnboarding: (v: boolean) => void;
-}) {
+function AppStack({ token }: { token: string | null }) {
   const theme = useTheme();
   const router = useRouter();
   const prevTokenRef = useRef(token);
-  const prevOnboardingRef = useRef(needsOnboarding);
   const mountedRef = useRef(false);
-
-  useEffect(() => {
-    setOnboardingCompleteListener(() => setNeedsOnboarding(false));
-  }, [setNeedsOnboarding]);
 
   useEffect(() => {
     if (!mountedRef.current) {
       mountedRef.current = true;
       prevTokenRef.current = token;
-      prevOnboardingRef.current = needsOnboarding;
 
-      if (token) {
-        router.replace("/(app)/(tabs)/overview");
-      } else if (!needsOnboarding) {
-        router.replace("/sign-in");
-      }
+      router.replace(token ? "/(app)/(tabs)/overview" : "/sign-in");
       return;
     }
 
@@ -303,11 +274,7 @@ function AppStack({
     } else if (!token && prevToken) {
       router.replace("/sign-in");
     }
-  }, [token, router, needsOnboarding]);
-
-  useEffect(() => {
-    prevOnboardingRef.current = needsOnboarding;
-  }, [needsOnboarding]);
+  }, [token, router]);
 
   return (
     <Stack
@@ -319,7 +286,6 @@ function AppStack({
         },
       }}
     >
-      <Stack.Screen name="(onboarding)" />
       <Stack.Screen name="sign-in" />
       <Stack.Screen name="(app)" />
     </Stack>
