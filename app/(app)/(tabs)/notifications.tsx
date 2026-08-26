@@ -9,6 +9,7 @@ import {
   Text,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 import { FlashList } from "@shopify/flash-list";
 
@@ -342,7 +343,7 @@ export default function NotificationsScreen() {
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   return (
-    <View style={s.container}>
+    <SafeAreaView style={s.container} edges={["top"]}>
       <View style={s.header}>
         <View style={s.headerRow}>
           <View>
@@ -460,7 +461,7 @@ export default function NotificationsScreen() {
           contentContainerStyle={s.listContent}
         />
       )}
-    </View>
+    </SafeAreaView>
   );
 }
 

@@ -14,7 +14,6 @@ import {
   View,
 } from "react-native";
 
-import { useNotifications } from "@/hooks/useNotifications";
 import { useRepoCount } from "@/hooks/useRepoCount";
 import { useUser } from "@/hooks/useUser";
 import { queryKeys } from "@/lib/query-client";
@@ -32,7 +31,6 @@ import {
   useTheme,
 } from "@/constants/theme";
 import { useSocialAccounts } from "@/hooks/useSocialAccounts";
-import { useAuthStore } from "@/stores/auth.store";
 
 export default function ProfileScreen() {
   const { colors, isDark } = useTheme();
@@ -43,13 +41,6 @@ export default function ProfileScreen() {
   const { data: user, isLoading } = useUser();
   const { data: socialAccounts } = useSocialAccounts();
   const { data: repoCount } = useRepoCount();
-  const pat = useAuthStore((s) => s.pat);
-  const { notifications } = useNotifications();
-
-  const unreadCount = useMemo(
-    () => notifications.filter((n) => n.unread).length,
-    [notifications],
-  );
 
   const linkedInUrl = socialAccounts?.find((account) =>
     account.url.includes("linkedin.com"),
@@ -72,7 +63,6 @@ export default function ProfileScreen() {
       queryClient.invalidateQueries({ queryKey: queryKeys.user() }),
       queryClient.invalidateQueries({ queryKey: queryKeys.socialAccounts() }),
       queryClient.invalidateQueries({ queryKey: queryKeys.repoCount() }),
-      queryClient.invalidateQueries({ queryKey: queryKeys.notifications() }),
     ]);
     setRefreshing(false);
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
@@ -97,27 +87,6 @@ export default function ProfileScreen() {
       <View style={s.headerRow}>
         <View style={s.headerSpacer} />
         <View style={s.headerIcons}>
-          {pat && (
-            <Pressable
-              style={({ pressed }) => [
-                s.headerIconButton,
-                pressed && s.headerIconButtonPressed,
-              ]}
-              onPress={() =>
-                router.push("/(app)/(tabs)/profile/notifications" as Href)
-              }
-              hitSlop={8}
-            >
-              <Octicons name="bell" size={20} color={colors.textSecondary} />
-              {unreadCount > 0 && (
-                <View style={[s.badge, { backgroundColor: colors.accent }]}>
-                  <Text style={s.badgeText}>
-                    {unreadCount > 99 ? "99+" : unreadCount}
-                  </Text>
-                </View>
-              )}
-            </Pressable>
-          )}
           <Pressable
             style={({ pressed }) => [
               s.headerIconButton,
@@ -492,24 +461,6 @@ function buildStyles(
 
     headerIconButtonPressed: {
       opacity: 0.7,
-    },
-
-    badge: {
-      position: "absolute",
-      top: 4,
-      right: 4,
-      minWidth: 16,
-      height: 16,
-      borderRadius: 8,
-      alignItems: "center",
-      justifyContent: "center",
-      paddingHorizontal: 4,
-    },
-
-    badgeText: {
-      fontFamily: FontFamily.bold,
-      fontSize: 9,
-      color: "#fff",
     },
 
     heroSection: {

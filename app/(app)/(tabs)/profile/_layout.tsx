@@ -59,14 +59,6 @@ export default function ProfileLayout() {
           title: "Saved Repos",
         }}
       />
-      <Stack.Screen
-        name="notifications"
-        options={{
-          ...sharedHeaderOptions,
-          headerShown: true,
-          title: "Notifications",
-        }}
-      />
     </Stack>
   );
 }

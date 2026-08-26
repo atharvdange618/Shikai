@@ -18,6 +18,7 @@ import {
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { useUser } from "@/hooks/useUser";
 import { prefetchOverview, prefetchProfile } from "@/lib/prefetch";
+import { useAuthStore } from "@/stores/auth.store";
 
 function IOSTabBarBackground() {
   const { isDark } = useTheme();
@@ -69,6 +70,24 @@ const renderSearchIcon = ({
   focused: boolean;
 }) => <TabBarIcon name="search" color={color} size={size} focused={focused} />;
 
+const renderNotificationsIcon = ({
+  color,
+  size,
+  focused,
+}: {
+  color: string;
+  size: number;
+  focused: boolean;
+}) => (
+  <TabBarIcon
+    name="bell"
+    filledName="bell-fill"
+    color={color}
+    size={size}
+    focused={focused}
+  />
+);
+
 const renderProfileIcon = ({
   color,
   size,
@@ -107,6 +126,7 @@ export default function TabsLayout() {
   });
 
   const { data: user } = useUser();
+  const pat = useAuthStore((s) => s.pat);
 
   useEffect(() => {
     prefetchProfile(queryClient);
@@ -177,6 +197,15 @@ export default function TabsLayout() {
               options={{
                 title: "Search",
                 tabBarIcon: renderSearchIcon,
+              }}
+            />
+
+            <Tabs.Screen
+              name="notifications"
+              options={{
+                title: "Notifications",
+                tabBarIcon: renderNotificationsIcon,
+                href: pat ? undefined : null,
               }}
             />
 
