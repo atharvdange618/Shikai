@@ -1,7 +1,7 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { BlurView } from "expo-blur";
 import { Tabs, useRouter } from "expo-router";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { Platform, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -16,6 +16,7 @@ import {
   useTheme,
 } from "@/constants/theme";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
+import { useNotifications } from "@/hooks/useNotifications";
 import { useUser } from "@/hooks/useUser";
 import { prefetchOverview, prefetchProfile } from "@/lib/prefetch";
 import { useAuthStore } from "@/stores/auth.store";
@@ -128,6 +129,12 @@ export default function TabsLayout() {
   const { data: user } = useUser();
   const pat = useAuthStore((s) => s.pat);
 
+  const { notifications } = useNotifications(Boolean(pat));
+  const unreadCount = useMemo(
+    () => notifications.filter((n) => n.unread).length,
+    [notifications],
+  );
+
   useEffect(() => {
     prefetchProfile(queryClient);
     prefetchOverview(queryClient, user?.login);
@@ -205,6 +212,12 @@ export default function TabsLayout() {
               options={{
                 title: "Notifications",
                 tabBarIcon: renderNotificationsIcon,
+                tabBarBadge:
+                  unreadCount > 0
+                    ? unreadCount > 99
+                      ? "99+"
+                      : unreadCount
+                    : undefined,
                 href: pat ? undefined : null,
               }}
             />

@@ -5,7 +5,7 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 
 const PER_PAGE = 50;
 
-export function useNotifications() {
+export function useNotifications(enabled: boolean = true) {
   const pat = useAuthStore((s) => s.pat);
 
   const query = useInfiniteQuery({
@@ -14,6 +14,7 @@ export function useNotifications() {
     initialPageParam: 1,
     getNextPageParam: (lastPage) => lastPage.pagination.next ?? undefined,
     staleTime: 1000 * 60 * 2,
+    enabled,
   });
 
   return {
