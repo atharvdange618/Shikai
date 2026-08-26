@@ -1,6 +1,7 @@
 import { ErrorBoundary } from "@/components";
 import { MarkdownRenderer } from "@/components/shared/MarkdownRenderer";
 import {
+  type ColorTokens,
   FontFamily,
   FontSize,
   IconSize,
@@ -10,17 +11,36 @@ import {
   useTheme,
 } from "@/constants/theme";
 import {
-  usePullRequestComments,
+  type CheckSummaryItem,
+  useChecks,
+  usePullRequestCommits,
   usePullRequestDetail,
+  usePullRequestFiles,
+  usePullRequestReviewComments,
+  usePullRequestReviews,
+  useRequestedReviewers,
 } from "@/hooks/usePullRequestDetail";
+import { useIssueComments } from "@/hooks/useIssueDetail";
 import { decodeRepoId, relativeTime } from "@/lib/utils";
-import type { GitHubComment, GitHubLabel } from "@/types/github.types";
+import type {
+  GitHubComment,
+  GitHubCommit,
+  GitHubLabel,
+  GitHubPullRequestFile,
+  GitHubReview,
+  GitHubReviewComment,
+  GitHubReviewState,
+  GitHubUserSummary,
+} from "@/types/github.types";
 import { Octicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { useLocalSearchParams, useNavigation } from "expo-router";
-import { useEffect } from "react";
+import * as Clipboard from "expo-clipboard";
+import { useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
+  Linking,
+  Pressable,
   ScrollView,
   StyleSheet,
   Text,
@@ -51,12 +71,37 @@ function PullRequestDetailScreenContent() {
     isLoading,
     isError,
   } = usePullRequestDetail(owner, repoName, prNumber);
-  const { data: commentsData } = usePullRequestComments(
+  const { data: commentsData } = useIssueComments(owner, repoName, prNumber);
+  const comments = commentsData?.comments ?? [];
+
+  const { data: reviewCommentsData } = usePullRequestReviewComments(
     owner,
     repoName,
     prNumber,
   );
-  const comments = commentsData?.comments ?? [];
+  const reviewComments = reviewCommentsData?.comments ?? [];
+
+  const { data: filesData } = usePullRequestFiles(owner, repoName, prNumber);
+  const files = filesData?.files ?? [];
+
+  const { data: reviews = [] } = usePullRequestReviews(
+    owner,
+    repoName,
+    prNumber,
+  );
+  const { data: requestedReviewers } = useRequestedReviewers(
+    owner,
+    repoName,
+    prNumber,
+  );
+
+  const { data: commits = [] } = usePullRequestCommits(
+    owner,
+    repoName,
+    prNumber,
+  );
+
+  const { data: checks = [] } = useChecks(owner, repoName, pr?.head.sha ?? "");
 
   const isMerged = pr?.merged_at !== null;
   const isOpen = pr?.state === "open";
@@ -154,6 +199,14 @@ function PullRequestDetailScreenContent() {
         </View>
       )}
 
+      {checks.length > 0 && <ChecksSection checks={checks} colors={colors} />}
+
+      <ReviewersSection
+        reviews={reviews}
+        requestedReviewers={requestedReviewers?.users ?? []}
+        colors={colors}
+      />
+
       <View style={s.authorBar}>
         <Image
           source={{ uri: pr.user.avatar_url }}
@@ -181,6 +234,17 @@ function PullRequestDetailScreenContent() {
         >
           <MarkdownRenderer markdown={pr.body} />
         </View>
+      )}
+
+      {commits.length > 0 && <CommitsSection commits={commits} colors={colors} />}
+
+      {files.length > 0 && (
+        <FilesChangedSection
+          files={files}
+          reviewComments={reviewComments}
+          colors={colors}
+          repoContext={`${owner}/${repoName}`}
+        />
       )}
 
       {comments.length > 0 && (
@@ -220,6 +284,585 @@ function PullRequestDetailScreenContent() {
       <View style={{ height: Spacing.xxl + 60 + Spacing.lg }} />
     </ScrollView>
   );
+}
+
+function getCheckDisplay(
+  conclusion: CheckSummaryItem["conclusion"],
+  colors: ColorTokens,
+): { icon: React.ComponentProps<typeof Octicons>["name"]; color: string } {
+  switch (conclusion) {
+    case "success":
+      return { icon: "check-circle-fill", color: colors.success };
+    case "failure":
+    case "error":
+    case "timed_out":
+    case "action_required":
+      return { icon: "x-circle-fill", color: colors.danger };
+    case "cancelled":
+    case "skipped":
+    case "neutral":
+      return { icon: "skip", color: colors.textMuted };
+    case "pending":
+    default:
+      return { icon: "clock", color: colors.warning };
+  }
+}
+
+function ChecksSection({
+  checks,
+  colors,
+}: {
+  checks: CheckSummaryItem[];
+  colors: ColorTokens;
+}) {
+  const s = useMemo(() => sectionStyles(colors), [colors]);
+  const failing = checks.filter((c) => c.conclusion === "failure").length;
+  const pending = checks.filter((c) => c.conclusion === "pending").length;
+
+  const summary =
+    failing > 0
+      ? `${failing} failing`
+      : pending > 0
+        ? `${pending} pending`
+        : "All checks passed";
+  const summaryColor =
+    failing > 0 ? colors.danger : pending > 0 ? colors.warning : colors.success;
+
+  return (
+    <View style={[s.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+      <View style={s.sectionHeader}>
+        <Text style={[s.sectionTitle, { color: colors.textPrimary }]}>Checks</Text>
+        <Text style={[s.sectionMeta, { color: summaryColor }]}>{summary}</Text>
+      </View>
+      {checks.map((check) => {
+        const display = getCheckDisplay(check.conclusion, colors);
+        return (
+          <Pressable
+            key={check.key}
+            style={({ pressed }) => [s.row, pressed && s.rowPressed]}
+            onPress={() => check.url && Linking.openURL(check.url)}
+            disabled={!check.url}
+          >
+            <Octicons name={display.icon} size={14} color={display.color} />
+            <Text
+              style={[s.rowText, { color: colors.textSecondary }]}
+              numberOfLines={1}
+            >
+              {check.name}
+            </Text>
+          </Pressable>
+        );
+      })}
+    </View>
+  );
+}
+
+function getReviewStateDisplay(
+  state: GitHubReviewState,
+  colors: ColorTokens,
+): { icon: React.ComponentProps<typeof Octicons>["name"]; color: string; label: string } {
+  switch (state) {
+    case "APPROVED":
+      return { icon: "check-circle-fill", color: colors.success, label: "Approved" };
+    case "CHANGES_REQUESTED":
+      return { icon: "x-circle-fill", color: colors.danger, label: "Changes requested" };
+    case "COMMENTED":
+      return { icon: "comment", color: colors.textMuted, label: "Commented" };
+    case "DISMISSED":
+      return { icon: "circle-slash", color: colors.textMuted, label: "Dismissed" };
+    case "PENDING":
+    default:
+      return { icon: "clock", color: colors.warning, label: "Pending" };
+  }
+}
+
+interface ReviewerEntry {
+  user: GitHubUserSummary;
+  state: GitHubReviewState;
+}
+
+function buildReviewerEntries(
+  reviews: GitHubReview[],
+  requestedReviewers: GitHubUserSummary[],
+): ReviewerEntry[] {
+  const latestByUser = new Map<number, GitHubReview>();
+  for (const review of reviews) {
+    const existing = latestByUser.get(review.user.id);
+    if (
+      !existing ||
+      (review.submitted_at ?? "") > (existing.submitted_at ?? "")
+    ) {
+      latestByUser.set(review.user.id, review);
+    }
+  }
+
+  const entries: ReviewerEntry[] = Array.from(latestByUser.values()).map(
+    (review) => ({ user: review.user, state: review.state }),
+  );
+
+  for (const user of requestedReviewers) {
+    if (!latestByUser.has(user.id)) {
+      entries.push({ user, state: "PENDING" });
+    }
+  }
+
+  return entries;
+}
+
+function ReviewersSection({
+  reviews,
+  requestedReviewers,
+  colors,
+}: {
+  reviews: GitHubReview[];
+  requestedReviewers: GitHubUserSummary[];
+  colors: ColorTokens;
+}) {
+  const s = useMemo(() => sectionStyles(colors), [colors]);
+  const entries = useMemo(
+    () => buildReviewerEntries(reviews, requestedReviewers),
+    [reviews, requestedReviewers],
+  );
+
+  if (entries.length === 0) return null;
+
+  return (
+    <View style={[s.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+      <View style={s.sectionHeader}>
+        <Text style={[s.sectionTitle, { color: colors.textPrimary }]}>Reviewers</Text>
+      </View>
+      {entries.map((entry) => {
+        const display = getReviewStateDisplay(entry.state, colors);
+        return (
+          <View key={entry.user.id} style={s.row}>
+            <Image
+              source={{ uri: entry.user.avatar_url }}
+              style={s.reviewerAvatar}
+              contentFit="cover"
+              transition={100}
+            />
+            <Text
+              style={[s.rowText, { color: colors.textPrimary }]}
+              numberOfLines={1}
+            >
+              {entry.user.login}
+            </Text>
+            <View style={s.statePill}>
+              <Octicons name={display.icon} size={11} color={display.color} />
+              <Text style={[s.stateText, { color: display.color }]}>
+                {display.label}
+              </Text>
+            </View>
+          </View>
+        );
+      })}
+    </View>
+  );
+}
+
+function CommitsSection({
+  commits,
+  colors,
+}: {
+  commits: GitHubCommit[];
+  colors: ColorTokens;
+}) {
+  const s = useMemo(() => sectionStyles(colors), [colors]);
+  const [expanded, setExpanded] = useState(false);
+
+  return (
+    <View style={[s.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+      <Pressable
+        style={s.sectionHeader}
+        onPress={() => setExpanded((v) => !v)}
+      >
+        <Text style={[s.sectionTitle, { color: colors.textPrimary }]}>
+          {commits.length} commit{commits.length === 1 ? "" : "s"}
+        </Text>
+        <Octicons
+          name={expanded ? "chevron-up" : "chevron-down"}
+          size={14}
+          color={colors.textMuted}
+        />
+      </Pressable>
+      {expanded &&
+        commits.map((commit) => (
+          <CommitRow key={commit.sha} commit={commit} colors={colors} s={s} />
+        ))}
+    </View>
+  );
+}
+
+function CommitRow({
+  commit,
+  colors,
+  s,
+}: {
+  commit: GitHubCommit;
+  colors: ColorTokens;
+  s: ReturnType<typeof sectionStyles>;
+}) {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async () => {
+    await Clipboard.setStringAsync(commit.sha);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <View style={s.row}>
+      <Octicons name="git-commit" size={14} color={colors.textMuted} />
+      <View style={{ flex: 1, gap: 2 }}>
+        <Text
+          style={[s.rowText, { color: colors.textPrimary }]}
+          numberOfLines={1}
+        >
+          {commit.commit.message.split("\n")[0]}
+        </Text>
+        <Text style={s.commitMeta}>
+          {commit.commit.author.name} · {relativeTime(commit.commit.author.date)}
+        </Text>
+      </View>
+      <Pressable onPress={handleCopy} hitSlop={8} style={s.shaBadge}>
+        <Text style={[s.shaText, copied && { color: colors.success }]}>
+          {copied ? "Copied" : commit.sha.slice(0, 7)}
+        </Text>
+      </Pressable>
+    </View>
+  );
+}
+
+interface ReviewThread {
+  root: GitHubReviewComment;
+  replies: GitHubReviewComment[];
+}
+
+function groupThreadsByPath(
+  comments: GitHubReviewComment[],
+): Map<string, ReviewThread[]> {
+  const byPath = new Map<string, GitHubReviewComment[]>();
+  for (const comment of comments) {
+    const list = byPath.get(comment.path) ?? [];
+    list.push(comment);
+    byPath.set(comment.path, list);
+  }
+
+  const result = new Map<string, ReviewThread[]>();
+  for (const [path, list] of byPath) {
+    const roots = list
+      .filter((c) => !c.in_reply_to_id)
+      .sort((a, b) => a.created_at.localeCompare(b.created_at));
+    result.set(
+      path,
+      roots.map((root) => ({
+        root,
+        replies: list
+          .filter((c) => c.in_reply_to_id === root.id)
+          .sort((a, b) => a.created_at.localeCompare(b.created_at)),
+      })),
+    );
+  }
+  return result;
+}
+
+function getFileStatusDisplay(
+  status: GitHubPullRequestFile["status"],
+  colors: ColorTokens,
+): { icon: React.ComponentProps<typeof Octicons>["name"]; color: string } {
+  switch (status) {
+    case "added":
+      return { icon: "diff-added", color: colors.success };
+    case "removed":
+      return { icon: "diff-removed", color: colors.danger };
+    case "renamed":
+      return { icon: "diff-renamed", color: colors.textMuted };
+    default:
+      return { icon: "diff-modified", color: colors.warning };
+  }
+}
+
+function FilesChangedSection({
+  files,
+  reviewComments,
+  colors,
+  repoContext,
+}: {
+  files: GitHubPullRequestFile[];
+  reviewComments: GitHubReviewComment[];
+  colors: ColorTokens;
+  repoContext: string;
+}) {
+  const s = useMemo(() => sectionStyles(colors), [colors]);
+  const [sectionExpanded, setSectionExpanded] = useState(false);
+  const [expandedFiles, setExpandedFiles] = useState<Set<string>>(new Set());
+
+  const threadsByPath = useMemo(
+    () => groupThreadsByPath(reviewComments),
+    [reviewComments],
+  );
+
+  const totalAdditions = files.reduce((sum, f) => sum + f.additions, 0);
+  const totalDeletions = files.reduce((sum, f) => sum + f.deletions, 0);
+
+  const toggleFile = (filename: string) => {
+    setExpandedFiles((prev) => {
+      const next = new Set(prev);
+      if (next.has(filename)) next.delete(filename);
+      else next.add(filename);
+      return next;
+    });
+  };
+
+  return (
+    <View style={[s.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+      <Pressable
+        style={s.sectionHeader}
+        onPress={() => setSectionExpanded((v) => !v)}
+      >
+        <Text style={[s.sectionTitle, { color: colors.textPrimary }]}>
+          {files.length} file{files.length === 1 ? "" : "s"} changed
+        </Text>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: Spacing.sm }}>
+          <Text style={s.diffStat}>
+            <Text style={{ color: colors.success }}>+{totalAdditions}</Text>{" "}
+            <Text style={{ color: colors.danger }}>-{totalDeletions}</Text>
+          </Text>
+          <Octicons
+            name={sectionExpanded ? "chevron-up" : "chevron-down"}
+            size={14}
+            color={colors.textMuted}
+          />
+        </View>
+      </Pressable>
+
+      {sectionExpanded &&
+        files.map((file) => {
+          const isExpanded = expandedFiles.has(file.filename);
+          const display = getFileStatusDisplay(file.status, colors);
+          const threads = threadsByPath.get(file.filename) ?? [];
+
+          return (
+            <View key={file.filename}>
+              <Pressable
+                style={({ pressed }) => [s.row, pressed && s.rowPressed]}
+                onPress={() => toggleFile(file.filename)}
+              >
+                <Octicons name={display.icon} size={14} color={display.color} />
+                <Text
+                  style={[s.rowText, { color: colors.textPrimary }]}
+                  numberOfLines={1}
+                >
+                  {file.filename}
+                </Text>
+                <Text style={s.diffStat}>
+                  <Text style={{ color: colors.success }}>+{file.additions}</Text>{" "}
+                  <Text style={{ color: colors.danger }}>-{file.deletions}</Text>
+                </Text>
+                {threads.length > 0 && (
+                  <View style={s.commentBadge}>
+                    <Octicons name="comment" size={10} color={colors.textMuted} />
+                    <Text style={s.commentBadgeText}>{threads.length}</Text>
+                  </View>
+                )}
+              </Pressable>
+
+              {isExpanded && (
+                <View style={s.diffWrapper}>
+                  {file.patch ? (
+                    <MarkdownRenderer
+                      markdown={`\`\`\`diff\n${file.patch}\n\`\`\``}
+                      context={repoContext}
+                    />
+                  ) : (
+                    <Text style={s.emptyDiffText}>
+                      {file.status === "renamed"
+                        ? "File renamed, no content changes."
+                        : "Binary file or diff too large to display."}
+                    </Text>
+                  )}
+
+                  {threads.map((thread) => (
+                    <View key={thread.root.id} style={s.threadCard}>
+                      <ThreadComment comment={thread.root} colors={colors} s={s} />
+                      {thread.replies.map((reply) => (
+                        <View key={reply.id} style={s.threadReply}>
+                          <ThreadComment comment={reply} colors={colors} s={s} />
+                        </View>
+                      ))}
+                    </View>
+                  ))}
+                </View>
+              )}
+            </View>
+          );
+        })}
+    </View>
+  );
+}
+
+function ThreadComment({
+  comment,
+  colors,
+  s,
+}: {
+  comment: GitHubReviewComment;
+  colors: ColorTokens;
+  s: ReturnType<typeof sectionStyles>;
+}) {
+  return (
+    <View style={s.threadCommentRow}>
+      <Image
+        source={{ uri: comment.user.avatar_url }}
+        style={s.threadAvatar}
+        contentFit="cover"
+        transition={100}
+      />
+      <View style={{ flex: 1, gap: 2 }}>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+          <Text style={[s.rowText, { color: colors.textPrimary }]}>
+            {comment.user.login}
+          </Text>
+          <Text style={s.commitMeta}>{relativeTime(comment.created_at)}</Text>
+        </View>
+        <Text style={[s.threadBody, { color: colors.textSecondary }]}>
+          {comment.body}
+        </Text>
+      </View>
+    </View>
+  );
+}
+
+function sectionStyles(colors: ColorTokens) {
+  return StyleSheet.create({
+    card: {
+      borderWidth: StyleSheet.hairlineWidth,
+      borderRadius: Radius.lg,
+      overflow: "hidden",
+    },
+    sectionHeader: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      paddingHorizontal: Spacing.md,
+      paddingVertical: Spacing.sm,
+    },
+    sectionTitle: {
+      fontFamily: FontFamily.semiBold,
+      fontSize: FontSize.label,
+    },
+    sectionMeta: {
+      fontFamily: FontFamily.medium,
+      fontSize: FontSize.caption,
+    },
+    row: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: Spacing.sm,
+      paddingHorizontal: Spacing.md,
+      paddingVertical: Spacing.sm,
+      borderTopWidth: StyleSheet.hairlineWidth,
+      borderTopColor: colors.border,
+    },
+    rowPressed: {
+      backgroundColor: colors.surfaceSecondary,
+    },
+    rowText: {
+      flex: 1,
+      fontFamily: FontFamily.regular,
+      fontSize: FontSize.caption,
+    },
+    reviewerAvatar: {
+      width: 22,
+      height: 22,
+      borderRadius: 11,
+    },
+    statePill: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 4,
+    },
+    stateText: {
+      fontFamily: FontFamily.medium,
+      fontSize: 11,
+    },
+    commitMeta: {
+      fontFamily: FontFamily.regular,
+      fontSize: 11,
+      color: colors.textMuted,
+    },
+    shaBadge: {
+      paddingHorizontal: Spacing.sm,
+      paddingVertical: 3,
+      borderRadius: Radius.sm,
+      backgroundColor: colors.surfaceSecondary,
+    },
+    shaText: {
+      fontFamily: FontFamily.mono,
+      fontSize: 11,
+      color: colors.textSecondary,
+    },
+    diffStat: {
+      fontFamily: FontFamily.mono,
+      fontSize: 11,
+    },
+    commentBadge: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 3,
+      backgroundColor: colors.surfaceSecondary,
+      paddingHorizontal: 6,
+      paddingVertical: 2,
+      borderRadius: Radius.full,
+    },
+    commentBadgeText: {
+      fontFamily: FontFamily.medium,
+      fontSize: 10,
+      color: colors.textMuted,
+    },
+    diffWrapper: {
+      padding: Spacing.sm,
+      gap: Spacing.sm,
+      borderTopWidth: StyleSheet.hairlineWidth,
+      borderTopColor: colors.border,
+    },
+    emptyDiffText: {
+      fontFamily: FontFamily.regular,
+      fontSize: FontSize.caption,
+      color: colors.textMuted,
+      fontStyle: "italic",
+      padding: Spacing.sm,
+    },
+    threadCard: {
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: colors.border,
+      borderRadius: Radius.md,
+      padding: Spacing.sm,
+      gap: Spacing.sm,
+      backgroundColor: colors.background,
+    },
+    threadReply: {
+      marginLeft: Spacing.md,
+      paddingLeft: Spacing.sm,
+      borderLeftWidth: 2,
+      borderLeftColor: colors.border,
+    },
+    threadCommentRow: {
+      flexDirection: "row",
+      gap: Spacing.sm,
+    },
+    threadAvatar: {
+      width: 20,
+      height: 20,
+      borderRadius: 10,
+      marginTop: 2,
+    },
+    threadBody: {
+      fontFamily: FontFamily.regular,
+      fontSize: FontSize.caption,
+      lineHeight: FontSize.caption * 1.4,
+    },
+  });
 }
 
 const s = StyleSheet.create({

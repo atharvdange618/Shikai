@@ -85,8 +85,18 @@ export const queryKeys = {
     ["repo", owner, repo, "issue", number, "comments"] as const,
   prDetail: (owner: string, repo: string, number: number) =>
     ["repo", owner, repo, "pr", number] as const,
-  prComments: (owner: string, repo: string, number: number) =>
-    ["repo", owner, repo, "pr", number, "comments"] as const,
+  prReviewComments: (owner: string, repo: string, number: number) =>
+    ["repo", owner, repo, "pr", number, "reviewComments"] as const,
+  prFiles: (owner: string, repo: string, number: number) =>
+    ["repo", owner, repo, "pr", number, "files"] as const,
+  prReviews: (owner: string, repo: string, number: number) =>
+    ["repo", owner, repo, "pr", number, "reviews"] as const,
+  prRequestedReviewers: (owner: string, repo: string, number: number) =>
+    ["repo", owner, repo, "pr", number, "requestedReviewers"] as const,
+  prCommits: (owner: string, repo: string, number: number) =>
+    ["repo", owner, repo, "pr", number, "commits"] as const,
+  commitChecks: (owner: string, repo: string, ref: string) =>
+    ["repo", owner, repo, "commit", ref, "checks"] as const,
   recentActivity: () => ["recentActivity"] as const,
   socialAccounts: () => ["socialAccounts"] as const,
   repoCount: () => ["repoCount"] as const,

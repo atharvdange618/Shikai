@@ -314,8 +314,8 @@ export interface GitHubPullRequest {
   closed_at: string | null;
   merged_at: string | null;
   merged: boolean;
-  head: { ref: string; label: string };
-  base: { ref: string; label: string };
+  head: { ref: string; label: string; sha: string };
+  base: { ref: string; label: string; sha: string };
 }
 
 export interface GitHubRelease {
@@ -342,6 +342,96 @@ export interface GitHubComment {
   user: GitHubUserSummary;
   created_at: string;
   updated_at: string;
+}
+
+export interface GitHubReviewComment {
+  id: number;
+  body: string;
+  user: GitHubUserSummary;
+  created_at: string;
+  updated_at: string;
+  path: string;
+  line: number | null;
+  original_line: number | null;
+  diff_hunk: string;
+  in_reply_to_id?: number;
+  pull_request_review_id: number | null;
+}
+
+export type GitHubReviewState =
+  | "APPROVED"
+  | "CHANGES_REQUESTED"
+  | "COMMENTED"
+  | "DISMISSED"
+  | "PENDING";
+
+export interface GitHubReview {
+  id: number;
+  user: GitHubUserSummary;
+  body: string | null;
+  state: GitHubReviewState;
+  submitted_at: string | null;
+  commit_id: string;
+}
+
+export interface GitHubRequestedReviewers {
+  users: GitHubUserSummary[];
+  teams: { name: string; slug: string }[];
+}
+
+export type GitHubFileStatus =
+  | "added"
+  | "removed"
+  | "modified"
+  | "renamed"
+  | "copied"
+  | "changed"
+  | "unchanged";
+
+export interface GitHubPullRequestFile {
+  sha: string;
+  filename: string;
+  previous_filename?: string;
+  status: GitHubFileStatus;
+  additions: number;
+  deletions: number;
+  changes: number;
+  patch?: string;
+}
+
+export type GitHubCheckStatus = "queued" | "in_progress" | "completed";
+
+export type GitHubCheckConclusion =
+  | "success"
+  | "failure"
+  | "neutral"
+  | "cancelled"
+  | "skipped"
+  | "timed_out"
+  | "action_required"
+  | null;
+
+export interface GitHubCheckRun {
+  id: number;
+  name: string;
+  status: GitHubCheckStatus;
+  conclusion: GitHubCheckConclusion;
+  html_url: string;
+  started_at: string;
+  completed_at: string | null;
+}
+
+export type GitHubCombinedStatusState = "pending" | "success" | "failure" | "error";
+
+export interface GitHubCombinedStatus {
+  state: GitHubCombinedStatusState;
+  total_count: number;
+  statuses: {
+    context: string;
+    state: GitHubCombinedStatusState;
+    description: string | null;
+    target_url: string | null;
+  }[];
 }
 
 export interface GitHubNotification {

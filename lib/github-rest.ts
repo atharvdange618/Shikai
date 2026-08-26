@@ -1,6 +1,8 @@
 import { githubAxios } from "@/lib/axios";
 import type {
   GitHubBranch,
+  GitHubCheckRun,
+  GitHubCombinedStatus,
   GitHubComment,
   GitHubCommit,
   GitHubContent,
@@ -11,8 +13,12 @@ import type {
   GitHubNotification,
   GitHubPagination,
   GitHubPullRequest,
+  GitHubPullRequestFile,
   GitHubReadme,
   GitHubRepo,
+  GitHubRequestedReviewers,
+  GitHubReview,
+  GitHubReviewComment,
   GitHubSocialAccount,
   GitHubTree,
   GitHubUser,
@@ -555,14 +561,14 @@ export async function validatePAT(pat: string): Promise<boolean> {
   }
 }
 
-export async function fetchPullRequestComments(
+export async function fetchPullRequestReviewComments(
   owner: string,
   repo: string,
   prNumber: number,
   page: number = 1,
-  per_page: number = 30,
-): Promise<{ comments: GitHubComment[]; pagination: GitHubPagination }> {
-  const { data, headers } = await githubAxios.get<GitHubComment[]>(
+  per_page: number = 100,
+): Promise<{ comments: GitHubReviewComment[]; pagination: GitHubPagination }> {
+  const { data, headers } = await githubAxios.get<GitHubReviewComment[]>(
     `/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/pulls/${prNumber}/comments`,
     { params: { page, per_page } },
   );
@@ -570,4 +576,79 @@ export async function fetchPullRequestComments(
     comments: data,
     pagination: parseLinkHeader(headers["link"]),
   };
+}
+
+export async function fetchPullRequestFiles(
+  owner: string,
+  repo: string,
+  prNumber: number,
+  page: number = 1,
+  per_page: number = 30,
+): Promise<{ files: GitHubPullRequestFile[]; pagination: GitHubPagination }> {
+  const { data, headers } = await githubAxios.get<GitHubPullRequestFile[]>(
+    `/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/pulls/${prNumber}/files`,
+    { params: { page, per_page } },
+  );
+  return {
+    files: data,
+    pagination: parseLinkHeader(headers["link"]),
+  };
+}
+
+export async function fetchPullRequestReviews(
+  owner: string,
+  repo: string,
+  prNumber: number,
+): Promise<GitHubReview[]> {
+  const { data } = await githubAxios.get<GitHubReview[]>(
+    `/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/pulls/${prNumber}/reviews`,
+    { params: { per_page: 100 } },
+  );
+  return data;
+}
+
+export async function fetchRequestedReviewers(
+  owner: string,
+  repo: string,
+  prNumber: number,
+): Promise<GitHubRequestedReviewers> {
+  const { data } = await githubAxios.get<GitHubRequestedReviewers>(
+    `/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/pulls/${prNumber}/requested_reviewers`,
+  );
+  return data;
+}
+
+export async function fetchPullRequestCommits(
+  owner: string,
+  repo: string,
+  prNumber: number,
+): Promise<GitHubCommit[]> {
+  const { data } = await githubAxios.get<GitHubCommit[]>(
+    `/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/pulls/${prNumber}/commits`,
+    { params: { per_page: 100 } },
+  );
+  return data;
+}
+
+export async function fetchCheckRuns(
+  owner: string,
+  repo: string,
+  ref: string,
+): Promise<GitHubCheckRun[]> {
+  const { data } = await githubAxios.get<{ check_runs: GitHubCheckRun[] }>(
+    `/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/commits/${ref}/check-runs`,
+    { params: { per_page: 100 } },
+  );
+  return data.check_runs;
+}
+
+export async function fetchCombinedStatus(
+  owner: string,
+  repo: string,
+  ref: string,
+): Promise<GitHubCombinedStatus> {
+  const { data } = await githubAxios.get<GitHubCombinedStatus>(
+    `/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/commits/${ref}/status`,
+  );
+  return data;
 }
