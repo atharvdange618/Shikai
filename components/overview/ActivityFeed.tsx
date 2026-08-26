@@ -364,6 +364,7 @@ export function ActivityFeed({
         onEndReachedThreshold={0.5}
         removeClippedSubviews
         drawDistance={100}
+        nestedScrollEnabled
       />
     </View>
   );
