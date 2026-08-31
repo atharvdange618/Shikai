@@ -9,6 +9,9 @@ import {
   Text,
   View,
 } from "react-native";
+import Swipeable, {
+  type SwipeableMethods,
+} from "react-native-gesture-handler/ReanimatedSwipeable";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { FlashList } from "@shopify/flash-list";
@@ -71,10 +74,12 @@ function extractRepoName(fullName: string): string {
 function NotificationItem({
   notification,
   onPress,
+  onMarkRead,
   colors,
 }: {
   notification: GitHubNotification;
   onPress: () => void;
+  onMarkRead: () => void;
   colors: ColorTokens;
 }) {
   const isAttention = ATTENTION_REASONS.has(notification.reason);
@@ -82,8 +87,9 @@ function NotificationItem({
   const reasonIcon = REASON_ICONS[notification.reason] ?? "bell";
 
   const s = useMemo(() => itemStyles(colors), [colors]);
+  const swipeableRef = useRef<SwipeableMethods>(null);
 
-  return (
+  const row = (
     <Pressable
       onPress={onPress}
       style={({ pressed }) => [s.container, pressed && s.pressed]}
@@ -134,6 +140,31 @@ function NotificationItem({
         <View style={[s.attentionDot, { backgroundColor: colors.accent }]} />
       )}
     </Pressable>
+  );
+
+  if (!notification.unread) return row;
+
+  return (
+    <Swipeable
+      ref={swipeableRef}
+      friction={2}
+      overshootRight={false}
+      rightThreshold={40}
+      renderRightActions={() => (
+        <Pressable
+          style={[s.markReadAction, { backgroundColor: colors.success }]}
+          onPress={() => {
+            swipeableRef.current?.close();
+            onMarkRead();
+          }}
+        >
+          <Octicons name="check" size={18} color="#fff" />
+          <Text style={s.markReadActionText}>Read</Text>
+        </Pressable>
+      )}
+    >
+      {row}
+    </Swipeable>
   );
 }
 
@@ -209,11 +240,35 @@ function itemStyles(colors: ColorTokens) {
       borderRadius: 4,
       marginTop: 6,
     },
+    markReadAction: {
+      width: 76,
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 2,
+    },
+    markReadActionText: {
+      fontFamily: FontFamily.medium,
+      fontSize: FontSize.caption,
+      color: "#fff",
+    },
   });
 }
 
 const FILTERS = ["all", "unread", "attention"] as const;
 type Filter = (typeof FILTERS)[number];
+
+// Unread items that need a decision (review/mention/assign) float above
+// everything else, so they aren't buried under routine activity noise.
+function sortByAttention(
+  notifications: GitHubNotification[],
+): GitHubNotification[] {
+  return [...notifications].sort((a, b) => {
+    const aAttention = a.unread && ATTENTION_REASONS.has(a.reason) ? 1 : 0;
+    const bAttention = b.unread && ATTENTION_REASONS.has(b.reason) ? 1 : 0;
+    if (aAttention !== bAttention) return bAttention - aAttention;
+    return b.updated_at.localeCompare(a.updated_at);
+  });
+}
 
 function getFilteredNotifications(
   notifications: GitHubNotification[],
@@ -221,14 +276,16 @@ function getFilteredNotifications(
 ): GitHubNotification[] {
   switch (filter) {
     case "unread":
-      return notifications.filter((n) => n.unread);
+      return sortByAttention(notifications.filter((n) => n.unread));
     case "attention":
-      return notifications.filter(
-        (n) => n.unread && ATTENTION_REASONS.has(n.reason),
+      return sortByAttention(
+        notifications.filter(
+          (n) => n.unread && ATTENTION_REASONS.has(n.reason),
+        ),
       );
     case "all":
     default:
-      return notifications;
+      return sortByAttention(notifications);
   }
 }
 
@@ -267,13 +324,20 @@ export default function NotificationsScreen() {
     [notifications],
   );
 
+  const markRead = useCallback(
+    async (notification: GitHubNotification) => {
+      await markNotificationAsRead(notification.id, pat);
+      queryClient.invalidateQueries({
+        queryKey: [...queryKeys.notifications(), pat ? "pat" : "oauth"],
+      });
+    },
+    [queryClient, pat],
+  );
+
   const handleNotificationPress = useCallback(
     async (notification: GitHubNotification) => {
       if (notification.unread) {
-        await markNotificationAsRead(notification.id, pat);
-        queryClient.invalidateQueries({
-          queryKey: [...queryKeys.notifications(), pat ? "pat" : "oauth"],
-        });
+        await markRead(notification);
       }
 
       if (notification.subject.url) {
@@ -308,7 +372,7 @@ export default function NotificationsScreen() {
         }
       }
     },
-    [queryClient, router, pat],
+    [router, markRead],
   );
 
   const handleMarkAllRead = useCallback(async () => {
@@ -441,6 +505,7 @@ export default function NotificationsScreen() {
             <NotificationItem
               notification={item}
               onPress={() => handleNotificationPress(item)}
+              onMarkRead={() => markRead(item)}
               colors={colors}
             />
           )}

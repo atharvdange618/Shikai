@@ -16,6 +16,7 @@ import * as SplashScreen from "expo-splash-screen";
 import * as SystemUI from "expo-system-ui";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { StatusBar } from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 import {
   AlertProvider,
@@ -210,44 +211,46 @@ export default function RootLayout() {
   const allReady = appReady && securityReady;
 
   return (
-    <ThemeProvider>
-      <PersistQueryClientProvider
-        client={queryClient}
-        persistOptions={{
-          persister: mmkvPersister,
-          maxAge: PERSISTENCE_MAX_AGE,
-          dehydrateOptions: {
-            shouldDehydrateQuery: (query: Query) =>
-              query.state.status === "success" && query.meta?.persist !== false,
-          },
-        }}
-      >
-        <AlertProvider>
-          <OfflineBanner />
-          <AppRatingPrompt visible={visible} onRate={rate} onDismiss={dismiss} />
-          <ThemeEffects />
-          <OTAUpdateEffects />
-          {showSplash && (
-            <AnimatedSplashScreen
-              isReady={allReady}
-              onComplete={() => setShowSplash(false)}
-            />
-          )}
-          {!showSplash && securityStatus === "blocked" && (
-            <BlockingScreen
-              reasons={securityReasons}
-              devModeBlocked={devModeBlocked}
-              onOverride={handleRecheck}
-            />
-          )}
-          {!showSplash && securityStatus === "passed" && (
-            <ErrorBoundary>
-              <AppStack token={token} />
-            </ErrorBoundary>
-          )}
-        </AlertProvider>
-      </PersistQueryClientProvider>
-    </ThemeProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <ThemeProvider>
+        <PersistQueryClientProvider
+          client={queryClient}
+          persistOptions={{
+            persister: mmkvPersister,
+            maxAge: PERSISTENCE_MAX_AGE,
+            dehydrateOptions: {
+              shouldDehydrateQuery: (query: Query) =>
+                query.state.status === "success" && query.meta?.persist !== false,
+            },
+          }}
+        >
+          <AlertProvider>
+            <OfflineBanner />
+            <AppRatingPrompt visible={visible} onRate={rate} onDismiss={dismiss} />
+            <ThemeEffects />
+            <OTAUpdateEffects />
+            {showSplash && (
+              <AnimatedSplashScreen
+                isReady={allReady}
+                onComplete={() => setShowSplash(false)}
+              />
+            )}
+            {!showSplash && securityStatus === "blocked" && (
+              <BlockingScreen
+                reasons={securityReasons}
+                devModeBlocked={devModeBlocked}
+                onOverride={handleRecheck}
+              />
+            )}
+            {!showSplash && securityStatus === "passed" && (
+              <ErrorBoundary>
+                <AppStack token={token} />
+              </ErrorBoundary>
+            )}
+          </AlertProvider>
+        </PersistQueryClientProvider>
+      </ThemeProvider>
+    </GestureHandlerRootView>
   );
 }
 
