@@ -3,7 +3,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
 import { Href, useRouter } from "expo-router";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Pressable,
@@ -319,13 +319,7 @@ export default function OverviewScreen() {
 
   const s = useMemo(() => buildStyles(colors), [colors]);
 
-  const hasInitialLoad = useRef(false);
-
-  const handleActivityEndReached = useCallback(() => {
-    if (!hasInitialLoad.current) {
-      hasInitialLoad.current = true;
-      return;
-    }
+  const handleLoadMore = useCallback(() => {
     if (hasNextPage && !isFetchingNextPage) {
       fetchNextPage();
     }
@@ -479,7 +473,8 @@ export default function OverviewScreen() {
               events={events}
               isLoading={activityLoading}
               isLoadingMore={isFetchingNextPage}
-              onEndReached={handleActivityEndReached}
+              hasMore={hasNextPage}
+              onLoadMore={handleLoadMore}
             />
           </View>
         </FadeInView>

@@ -16,13 +16,11 @@
  */
 
 import { Octicons } from "@expo/vector-icons";
-import { FlashList } from "@shopify/flash-list";
 import * as Haptics from "expo-haptics";
 import { type Href, useRouter } from "expo-router";
 import { useMemo, useState } from "react";
 import {
   ActivityIndicator,
-  Dimensions,
   Pressable,
   StyleSheet,
   Text,
@@ -45,7 +43,8 @@ interface ActivityFeedProps {
   events: GitHubEvent[];
   isLoading?: boolean;
   isLoadingMore?: boolean;
-  onEndReached?: () => void;
+  hasMore?: boolean;
+  onLoadMore?: () => void;
 }
 
 interface GroupedEvent {
@@ -172,14 +171,12 @@ function groupEvents(
   return grouped;
 }
 
-const { height: SCREEN_HEIGHT } = Dimensions.get("window");
-const ACTIVITY_FEED_HEIGHT = Math.round(SCREEN_HEIGHT * 0.45);
-
 export function ActivityFeed({
   events,
   isLoading = false,
   isLoadingMore = false,
-  onEndReached,
+  hasMore = false,
+  onLoadMore,
 }: ActivityFeedProps) {
   const { colors } = useTheme();
   const s = useMemo(() => buildStyles(colors), [colors]);
@@ -237,12 +234,12 @@ export function ActivityFeed({
     );
   }
 
-  const renderItem = ({ item: group }: { item: GroupedEvent }) => {
+  const renderGroup = (group: GroupedEvent) => {
     const isExpanded = expandedGroups.has(group.id);
     const isGroup = group.type === "group";
 
     return (
-      <View>
+      <View key={group.id}>
         <Pressable
           style={({ pressed }) => [s.item, pressed && s.itemPressed]}
           onPress={() => {
@@ -344,28 +341,22 @@ export function ActivityFeed({
     );
   };
 
-  const ListFooter = isLoadingMore ? (
-    <View style={s.loadMoreContainer}>
-      <ActivityIndicator size="small" color={colors.accent} />
-    </View>
-  ) : null;
-
   return (
     <View style={s.container}>
       <Text style={s.sectionTitle}>Recent Activity</Text>
-      <FlashList
-        data={groupedEvents}
-        renderItem={renderItem}
-        keyExtractor={(item) => item.id}
-        style={{ height: ACTIVITY_FEED_HEIGHT }}
-        contentContainerStyle={s.listContent}
-        ListFooterComponent={ListFooter}
-        onEndReached={onEndReached}
-        onEndReachedThreshold={0.5}
-        removeClippedSubviews
-        drawDistance={100}
-        nestedScrollEnabled
-      />
+      {groupedEvents.map(renderGroup)}
+      {isLoadingMore ? (
+        <View style={s.loadMoreContainer}>
+          <ActivityIndicator size="small" color={colors.accent} />
+        </View>
+      ) : hasMore && onLoadMore ? (
+        <Pressable
+          style={({ pressed }) => [s.loadMoreButton, pressed && s.itemPressed]}
+          onPress={onLoadMore}
+        >
+          <Text style={s.loadMoreText}>Load more</Text>
+        </Pressable>
+      ) : null}
     </View>
   );
 }
@@ -488,14 +479,26 @@ function buildStyles(colors: ColorTokens) {
       flexShrink: 0,
     },
 
-    listContent: {
-      paddingBottom: Spacing.sm,
-    },
-
     loadMoreContainer: {
       alignItems: "center",
       justifyContent: "center",
       paddingVertical: Spacing.md,
+    },
+
+    loadMoreButton: {
+      alignItems: "center",
+      justifyContent: "center",
+      paddingVertical: Spacing.md,
+      marginTop: Spacing.xs,
+      borderRadius: Radius.sm,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+
+    loadMoreText: {
+      fontFamily: FontFamily.medium,
+      fontSize: FontSize.label,
+      color: colors.accent,
     },
 
     emptyText: {
