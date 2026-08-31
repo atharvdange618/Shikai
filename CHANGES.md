@@ -1,5 +1,68 @@
 # Changelog
 
+## v1.3.1
+
+### Features
+
+- **Notifications tab** - Notifications promoted from the profile menu to a top-level tab with an unread count badge. Swipe left on a notification to mark it read. Attention-worthy items (review requests, mentions, assignments) sort to the top. ([`d070d92`](https://github.com/atharvdange618/Shikai/commit/d070d92), [`ab99556`](https://github.com/atharvdange618/Shikai/commit/ab99556), [`ced9aec`](https://github.com/atharvdange618/Shikai/commit/ced9aec))
+- **PR detail expansion** - Pull request screens now show file diffs, check runs, requested reviewers, the commit list, and review comments inline. ([`490670a`](https://github.com/atharvdange618/Shikai/commit/490670a))
+- **Video playback in file viewer** - Repository files that are videos play in-app. ([`46966ad`](https://github.com/atharvdange618/Shikai/commit/46966ad))
+- **Topic search** - Search by topic and tap topic pills on a repo to run a new search. Repo cards render correctly in the Topics tab. ([`f3b4184`](https://github.com/atharvdange618/Shikai/commit/f3b4184), [`cf1c9e2`](https://github.com/atharvdange618/Shikai/commit/cf1c9e2))
+- **Recent searches** - Last searches saved to MMKV and shown on the search screen. ([`aaa4789`](https://github.com/atharvdange618/Shikai/commit/aaa4789))
+- **Rate limit in Settings** - Settings shows the tracked GitHub rate limit and adds a manual clear-cache button. ([`3c2130b`](https://github.com/atharvdange618/Shikai/commit/3c2130b))
+- **OTA restart prompt** - The app asks before restarting on an OTA update instead of auto-reloading. ([`c7641fb`](https://github.com/atharvdange618/Shikai/commit/c7641fb))
+- **Scoped error boundaries** - Error boundaries wrap the file viewer and PR/issue detail screens so one failing screen no longer crashes the app. ([`ac6c916`](https://github.com/atharvdange618/Shikai/commit/ac6c916))
+- **Retention nudges** - Goal-gradient progress bar on the streak display, a prompt to finish an incomplete profile, and a nudge on the first bookmark. ([`62cb23b`](https://github.com/atharvdange618/Shikai/commit/62cb23b), [`5a617c5`](https://github.com/atharvdange618/Shikai/commit/5a617c5), [`5429026`](https://github.com/atharvdange618/Shikai/commit/5429026))
+- **App rating prompt** - Prompts for a store rating after five launches. ([`ebf3e4f`](https://github.com/atharvdange618/Shikai/commit/ebf3e4f))
+- **Haptics** - Haptic feedback on pull-to-refresh, tab switch, and bookmark. ([`6281efd`](https://github.com/atharvdange618/Shikai/commit/6281efd))
+- **Reduced motion** - Respects the system reduced-motion preference. ([`cd844b8`](https://github.com/atharvdange618/Shikai/commit/cd844b8))
+- **Keyboard handling** - `KeyboardAvoidingView` added to screens with text inputs. ([`8a41355`](https://github.com/atharvdange618/Shikai/commit/8a41355))
+- **Staggered loading** - Loading sections on the overview fade in with a stagger. ([`999b62c`](https://github.com/atharvdange618/Shikai/commit/999b62c))
+- **PAT prompt card** - Overview shows a card explaining the value of adding a Personal Access Token. ([`3282ed2`](https://github.com/atharvdange618/Shikai/commit/3282ed2))
+- **Offline polish** - Search degradation messaging, a contribution timestamp, and a brighter offline banner. ([`5c566d4`](https://github.com/atharvdange618/Shikai/commit/5c566d4))
+
+### Bug Fixes
+
+- **Recent activity pagination** - The overview's recent activity list pages past 10 records with a Load more button, and touch scrolling inside it works. ([`45ac2fd`](https://github.com/atharvdange618/Shikai/commit/45ac2fd), [`b33e707`](https://github.com/atharvdange618/Shikai/commit/b33e707))
+- **Rate limit enforcement** - The tracked rate limit actually stops requests once reached. ([`12b0d42`](https://github.com/atharvdange618/Shikai/commit/12b0d42))
+- **Auth state** - `validateToken` no longer mutates shared auth state. ([`661a7c5`](https://github.com/atharvdange618/Shikai/commit/661a7c5))
+- **Duplicate OAuth exchange** - Removed a duplicate OAuth code exchange in the root layout. ([`378b6b0`](https://github.com/atharvdange618/Shikai/commit/378b6b0))
+- **Search persistence** - Search queries excluded from disk persistence. ([`4110849`](https://github.com/atharvdange618/Shikai/commit/4110849))
+- **Onboarding flag** - `clearAllMMKV` no longer wipes the onboarding-complete flag. ([`0fd2e98`](https://github.com/atharvdange618/Shikai/commit/0fd2e98))
+- **Account switch cleanup** - Watchlist and recent searches cleared on account switch. ([`c4ee986`](https://github.com/atharvdange618/Shikai/commit/c4ee986))
+- **UI fixes** - Owner name hidden on RepoCard in the repos tab, repo link added to issue detail, owner shown in repo cards, larger hitSlop on small controls, tab bar and card contrast improved, better empty states for pinned repos and the contribution graph. ([`dc0731d`](https://github.com/atharvdange618/Shikai/commit/dc0731d), [`5a649c2`](https://github.com/atharvdange618/Shikai/commit/5a649c2), [`fc84edd`](https://github.com/atharvdange618/Shikai/commit/fc84edd), [`7094fa7`](https://github.com/atharvdange618/Shikai/commit/7094fa7), [`10c8b12`](https://github.com/atharvdange618/Shikai/commit/10c8b12))
+- **Play Store badge** - Fixed the badge image link in the README. ([`e7dc982`](https://github.com/atharvdange618/Shikai/commit/e7dc982))
+- **versionCode duplication** - Removed the remote `appVersionSource` to stop versionCode duplication in Android builds. ([`a05d4e6`](https://github.com/atharvdange618/Shikai/commit/a05d4e6), [`c69275b`](https://github.com/atharvdange618/Shikai/commit/c69275b))
+
+### Security
+
+- **Keystore password** - Stopped hardcoding the release keystore password. ([`7e0e039`](https://github.com/atharvdange618/Shikai/commit/7e0e039))
+- **Security gate** - Token restore and the OAuth exchange run only after the device security check passes. ([`afb8678`](https://github.com/atharvdange618/Shikai/commit/afb8678))
+
+### Refactoring
+
+- **Shared axios client** - PAT auth folded into the shared axios client. ([`9bab0a8`](https://github.com/atharvdange618/Shikai/commit/9bab0a8))
+- **Zustand persist** - Watchlist and recent searches backed by zustand persist. ([`4a8f529`](https://github.com/atharvdange618/Shikai/commit/4a8f529))
+- **Helper cleanup** - Simplified date formatting helpers and collapsed repeated try/catch in secure-storage. ([`0eec00f`](https://github.com/atharvdange618/Shikai/commit/0eec00f), [`8f91848`](https://github.com/atharvdange618/Shikai/commit/8f91848))
+- **Lint** - Cleared all pre-existing lint warnings. ([`34640be`](https://github.com/atharvdange618/Shikai/commit/34640be))
+
+### Build
+
+- **EAS config** - `cli.appVersionSource` set to local in `eas.json`; gradle.properties config plugin for EAS builds; the single gradle.properties patch inlined. ([`74333b0`](https://github.com/atharvdange618/Shikai/commit/74333b0), [`c69275b`](https://github.com/atharvdange618/Shikai/commit/c69275b), [`deed059`](https://github.com/atharvdange618/Shikai/commit/deed059))
+- **Fail loudly** - `post-prebuild.js` fails loudly instead of silently degrading the build. ([`248ff4b`](https://github.com/atharvdange618/Shikai/commit/248ff4b))
+- **Deps** - Removed a duplicate `expo-video` entry. ([`5ee4b14`](https://github.com/atharvdange618/Shikai/commit/5ee4b14))
+
+### Docs
+
+- **AGENTS.md** - Replaced the global instructions boilerplate with a project-specific guide and added new rules. ([`2632044`](https://github.com/atharvdange618/Shikai/commit/2632044), [`0a26581`](https://github.com/atharvdange618/Shikai/commit/0a26581))
+- **Play Store link** - Added to the README and privacy policy. ([`a1f4413`](https://github.com/atharvdange618/Shikai/commit/a1f4413))
+
+### Removed
+
+- **Onboarding screens** - The first-run carousel added earlier in this cycle was removed before release. ([`28ccd0a`](https://github.com/atharvdange618/Shikai/commit/28ccd0a), [`2a59a88`](https://github.com/atharvdange618/Shikai/commit/2a59a88))
+
+---
+
 ## v1.3.0
 
 ### Features
