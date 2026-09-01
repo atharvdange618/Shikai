@@ -1,8 +1,14 @@
 import { useTheme } from "@/constants/theme";
 import { githubAxios } from "@/lib/axios";
 import * as Clipboard from "expo-clipboard";
-import { useCallback, useEffect, useState } from "react";
-import { StyleSheet, View, type StyleProp, type ViewStyle } from "react-native";
+import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  Animated,
+  StyleSheet,
+  View,
+  type StyleProp,
+  type ViewStyle,
+} from "react-native";
 import type { WebViewMessageEvent } from "react-native-webview";
 import RNWebView from "react-native-webview";
 
@@ -460,6 +466,7 @@ export function MarkdownRenderer({
   const { colors, isDark } = useTheme();
   const [html, setHtml] = useState<string | null>(null);
   const [height, setHeight] = useState(300);
+  const opacity = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     let cancelled = false;
@@ -501,18 +508,36 @@ export function MarkdownRenderer({
     };
   }, [markdown, isDark, context]);
 
-  const onMessage = useCallback((event: WebViewMessageEvent) => {
-    try {
-      const data = JSON.parse(event.nativeEvent.data);
-      if (data.type === "height" && data.height > 0) {
-        setHeight(data.height);
-      } else if (data.type === "copy" && typeof data.text === "string") {
-        Clipboard.setStringAsync(data.text).catch(() => {});
+  // Hide the WebView until its content has painted and reported a height. A new
+  // html string means a reload, so drop back to hidden and wait for that one.
+  useEffect(() => {
+    opacity.setValue(0);
+  }, [html, opacity]);
+
+  const reveal = useCallback(() => {
+    Animated.timing(opacity, {
+      toValue: 1,
+      duration: 120,
+      useNativeDriver: true,
+    }).start();
+  }, [opacity]);
+
+  const onMessage = useCallback(
+    (event: WebViewMessageEvent) => {
+      try {
+        const data = JSON.parse(event.nativeEvent.data);
+        if (data.type === "height" && data.height > 0) {
+          setHeight(data.height);
+          reveal();
+        } else if (data.type === "copy" && typeof data.text === "string") {
+          Clipboard.setStringAsync(data.text).catch(() => {});
+        }
+      } catch {
+        // ignore parse errors
       }
-    } catch {
-      // ignore parse errors
-    }
-  }, []);
+    },
+    [reveal],
+  );
 
   if (!html) {
     return (
@@ -535,18 +560,21 @@ export function MarkdownRenderer({
   }
 
   return (
-    <WebView
-      source={{ html }}
-      style={[s.webview, { height }, style]}
-      scrollEnabled={false}
-      showsVerticalScrollIndicator={false}
-      showsHorizontalScrollIndicator={false}
-      onMessage={onMessage}
-      originWhitelist={["*"]}
-      allowUniversalAccessFromFileURLs
-      javaScriptEnabled
-      textEncodingUsage="utf-8"
-    />
+    <Animated.View style={[{ opacity, backgroundColor: colors.surface }, style]}>
+      <WebView
+        source={{ html }}
+        style={[s.webview, { height }]}
+        scrollEnabled={false}
+        showsVerticalScrollIndicator={false}
+        showsHorizontalScrollIndicator={false}
+        onMessage={onMessage}
+        onLoadEnd={reveal}
+        originWhitelist={["*"]}
+        allowUniversalAccessFromFileURLs
+        javaScriptEnabled
+        textEncodingUsage="utf-8"
+      />
+    </Animated.View>
   );
 }
 
@@ -565,5 +593,6 @@ const s = StyleSheet.create({
   },
   webview: {
     flex: 0,
+    backgroundColor: "transparent",
   },
 });
