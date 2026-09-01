@@ -29,18 +29,25 @@ const APP_VERSION = Constants.expoConfig?.version ?? "1.0.0";
 const FEATURES = [
   { icon: "repo" as const, text: "Browse repos, files, and branches" },
   { icon: "graph" as const, text: "Contribution graphs and streaks" },
-  { icon: "bell" as const, text: "Notifications with attention filtering" },
+  {
+    icon: "bell" as const,
+    text: "Notifications tab with unread badge and swipe to mark read",
+  },
   {
     icon: "people" as const,
     text: "Following activity feed from followed users",
   },
-  { icon: "issue-opened" as const, text: "Issue and PR detail screens" },
+  {
+    icon: "issue-opened" as const,
+    text: "Issue and PR detail, with diffs, checks, reviewers, and commits",
+  },
   { icon: "history" as const, text: "Commit history per branch" },
   { icon: "markdown" as const, text: "In-app README and markdown preview" },
   {
     icon: "search" as const,
-    text: "Global search across repos, users, issues",
+    text: "Global search across repos, users, issues, and topics",
   },
+  { icon: "clock" as const, text: "Recent searches saved for quick access" },
   { icon: "bookmark" as const, text: "Saved repos with Stars and Watchlist" },
   {
     icon: "paintbrush" as const,
@@ -53,10 +60,14 @@ const FEATURES = [
     icon: "device-mobile" as const,
     text: "Overview screen widget with contribution streak",
   },
-  { icon: "sync" as const, text: "OTA updates for seamless app refresh" },
+  { icon: "sync" as const, text: "OTA updates with a restart prompt" },
   {
     icon: "file" as const,
-    text: "SVG and PDF rendering in file viewer",
+    text: "SVG, PDF, and video rendering in file viewer",
+  },
+  {
+    icon: "pulse" as const,
+    text: "Haptic feedback and reduced-motion support",
   },
   {
     icon: "lock" as const,

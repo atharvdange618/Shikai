@@ -55,13 +55,13 @@ Take a look at Shikai before you install: **[View Screenshots on Google Drive](h
 
 ### Core
 
-| Feature                | Description                                                                              |
-| ---------------------- | ---------------------------------------------------------------------------------------- |
-| **Overview Dashboard** | Pinned repos, contribution graph with streaks, live activity feed, and following preview |
-| **Repository Browser** | File trees, syntax highlighting, commit history, issues, PRs, and branch selector        |
-| **Global Search**      | Fuzzy search across repos, users, and issues with debounced input and eager pagination   |
-| **User Profiles**      | View any GitHub user's profile with avatar, bio, stats, and top repositories             |
-| **Android Widget**     | Home screen widget showing contribution streak with longest streak and recent activity   |
+| Feature                | Description                                                                                                                          |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| **Overview Dashboard** | Pinned repos, contribution graph with streaks, live activity feed, and following preview                                             |
+| **Repository Browser** | File trees, syntax highlighting, commit history, issues, PR detail with diffs, checks, reviewers, and commits, and a branch selector |
+| **Global Search**      | Fuzzy search across repos, users, issues, and topics with debounced input, recent searches, and eager pagination                     |
+| **User Profiles**      | View any GitHub user's profile with avatar, bio, stats, and top repositories                                                         |
+| **Android Widget**     | Home screen widget showing contribution streak with longest streak and recent activity                                               |
 
 ### Personal Access Token
 
@@ -72,17 +72,19 @@ Optional PAT support unlocks features beyond the GitHub App token:
 | **Notifications**  | `notifications`         |
 | **Following Feed** | `notifications`, `repo` |
 
+With a token set, Notifications becomes a top-level tab with an unread count badge. Swipe a notification left to mark it read; review requests, mentions, and assignments sort to the top.
+
 Tokens are validated, stored securely in `expo-secure-store`, and used only for direct GitHub API calls.
 
 ### Themes
 
-Choose from 5 palettes, each with unique contribution graph colors:
+Choose from 5 palettes, each with unique contribution graph colours:
 
 |      Light       |       Dark       |  Tokyo Night  |   Dracula    | Atom One Dark  |
 | :--------------: | :--------------: | :-----------: | :----------: | :------------: |
 | Clean and bright | Easy on the eyes | Neon-inspired | Rich purples | Warm and muted |
 
-Pick your favorite from Profile > Settings > Theme. Selection persists across app restarts.
+Pick your favourite from Profile > Settings > Theme. Selection persists across app restarts.
 
 ### Offline Support
 
@@ -90,11 +92,12 @@ Network state detection with MMKV-backed disk persistence. The app works offline
 
 ### Additional Features
 
-- **OTA Updates** - Silent over-the-air updates via expo-updates. App checks and applies updates transparently on launch.
-- **File Viewer** - SVG and PDF rendering alongside markdown files. Syntax-highlighted code blocks with copy buttons.
+- **OTA Updates** - Over-the-air updates via expo-updates. The app checks on launch and asks before restarting to apply an update.
+- **File Viewer** - SVG, PDF, and video rendering alongside markdown files. Syntax-highlighted code blocks with copy buttons.
 - **Keyboard Shortcuts** - Cmd/Ctrl + 1-4 for tabs, Cmd/Ctrl + F for search, arrow keys for navigation
-- **Version Check** - Dismissible update banner when a new release is available
-- **Error Recovery** - ErrorBoundary wrapping root and tabs layouts with a custom 404 screen
+- **Play Store Updates** - Native in-app update prompt when a new release is on the Play Store
+- **Haptics** - Feedback on pull-to-refresh, tab switch, and bookmark. Respects the system reduced-motion setting.
+- **Error Recovery** - Error boundaries around the root, tabs, file viewer, and PR/issue screens, with a custom 404 screen
 - **Saved Repos** - Bookmark any repo. Stars and Watchlist combined in one screen with search and filter
 - **Markdown Preview** - README and markdown files rendered inline with syntax-highlighted code blocks
 
