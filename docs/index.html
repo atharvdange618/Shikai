@@ -98,7 +98,7 @@
             <img src="assets/icon.png" alt="Shikai" width="40" height="40">
             <h1>Privacy Policy</h1>
         </div>
-        <p class="updated">Last updated: July 1, 2026</p>
+        <p class="updated">Last updated: September 1, 2026</p>
 
         <h2>Overview</h2>
         <p>Shikai is a read-only GitHub companion app. This privacy policy explains how we handle your data.</p>
@@ -118,17 +118,27 @@
             <li><strong>User Profiles:</strong> Basic profile information (avatar, bio, stats) may be cached.</li>
         </ul>
 
+        <h3>Crash and Performance Data</h3>
+        <ul>
+            <li><strong>What:</strong> When the app crashes or hits an error, Shikai sends a diagnostic report to Sentry. The report contains the error and stack trace, the device model, the OS version, the app version, and a short trail of the in-app actions that led up to it. It also samples a fraction of sessions for screen-load and network timing.</li>
+            <li><strong>What it does not contain:</strong> No name, email, GitHub username, or account id. Your GitHub OAuth token and Personal Access Token are stripped from every report before it leaves the device. No repository contents. No session recording.</li>
+            <li><strong>Why:</strong> Play Console's built-in crash reporting is aggregated, partial, and cannot tell which over-the-air update a device is running. Sentry provides the per-crash detail, the trail of actions, and the update version needed to actually fix issues.</li>
+            <li><strong>Where:</strong> Sentry (Functional Software, Inc.), on servers in the European Union.</li>
+            <li><strong>Turning it off:</strong> There is no in-app toggle. Reporting is disabled entirely in development builds and is only active in released builds.</li>
+        </ul>
+
         <h2>Data Usage</h2>
         <ul>
             <li><strong>API Communication:</strong> Your OAuth token is sent directly from your device to GitHub's API. It passes through a secure Cloudflare Worker proxy only during the initial authentication exchange.</li>
             <li><strong>No Server Storage:</strong> Shikai does not store your tokens or personal data on any external servers.</li>
-            <li><strong>No Analytics:</strong> Shikai does not collect analytics, crash reports, or usage data.</li>
+            <li><strong>Crash Reporting:</strong> Anonymous crash and performance data is sent to Sentry as described above. It is not used for advertising or profiling.</li>
         </ul>
 
         <h2>Data Sharing</h2>
         <ul>
             <li><strong>GitHub API:</strong> Your data is shared with GitHub only as part of normal API requests you initiate.</li>
-            <li><strong>No Third Parties:</strong> We do not share your data with any third parties.</li>
+            <li><strong>Sentry:</strong> Anonymous crash and performance diagnostics only, as described under Crash and Performance Data.</li>
+            <li><strong>No One Else:</strong> We do not share your data with any other third parties, and we do not sell it.</li>
         </ul>
 
         <h2>Data Security</h2>

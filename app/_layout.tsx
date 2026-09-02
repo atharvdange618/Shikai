@@ -39,6 +39,11 @@ import { useOnlineManager } from "@/lib/use-online-manager";
 import { useOTAUpdates } from "@/lib/use-ota-updates";
 import { useAuthStore } from "@/stores/auth.store";
 import { runSecurityChecks } from "shikai-security";
+import * as Sentry from "@sentry/react-native";
+
+import { initSentry } from "@/lib/sentry";
+
+initSentry();
 
 SplashScreen.preventAutoHideAsync();
 
@@ -87,7 +92,7 @@ function OTAUpdateEffects() {
   return null;
 }
 
-export default function RootLayout() {
+export default Sentry.wrap(function RootLayout() {
   const token = useAuthStore((s) => s.token);
   const setToken = useAuthStore((s) => s.setToken);
   const setUser = useAuthStore((s) => s.setUser);
@@ -252,7 +257,7 @@ export default function RootLayout() {
       </ThemeProvider>
     </GestureHandlerRootView>
   );
-}
+});
 
 function AppStack({ token }: { token: string | null }) {
   const theme = useTheme();

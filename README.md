@@ -131,7 +131,8 @@ Shikai takes security seriously:
 - **Secure token exchange** - OAuth tokens are exchanged via a Cloudflare Worker proxy and never leave your device
 - **On-device encryption** - Tokens stored with `expo-secure-store` (Keychain/Keystore)
 - **Root/debugger detection** - Blocks usage on compromised environments
-- **No data transmission** - PATs are used only for direct GitHub API calls, never sent elsewhere
+- **Token safety** - PATs and OAuth tokens are used only for direct GitHub API calls, and are stripped from crash reports before they are sent
+- **Crash reporting** - Released builds send anonymous crash and performance diagnostics to Sentry (EU). No PII, no repository contents, no session recording. Off in development. See the [privacy policy](privacy-policy.md).
 - **Cache hygiene** - MMKV cache cleared on sign-in and sign-out
 
 Developer mode is blocked by default on release builds. Developers can override this after accepting a risk warning.
@@ -149,14 +150,15 @@ Want early access to new features?
 
 ## Built With
 
-| Layer         | Technologies                               |
-| ------------- | ------------------------------------------ |
-| **Framework** | React Native, Expo, TypeScript             |
-| **State**     | React Query, Zustand, MMKV                 |
-| **UI**        | Reanimated, FlashList                      |
-| **APIs**      | GitHub REST & GraphQL, GitHub OAuth (PKCE) |
-| **Updates**   | expo-updates (OTA), EAS Build              |
-| **Infra**     | Cloudflare Workers                         |
+| Layer          | Technologies                               |
+| -------------- | ------------------------------------------ |
+| **Framework**  | React Native, Expo, TypeScript             |
+| **State**      | React Query, Zustand, MMKV                 |
+| **UI**         | Reanimated, FlashList                      |
+| **APIs**       | GitHub REST & GraphQL, GitHub OAuth (PKCE) |
+| **Updates**    | expo-updates (OTA), EAS Build              |
+| **Infra**      | Cloudflare Workers                         |
+| **Monitoring** | Sentry (crash and performance reporting)   |
 
 ---
 

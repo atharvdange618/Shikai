@@ -68,6 +68,15 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     "./plugins/withAndroidPackaging",
     "./plugins/withGradleProperties",
     ["react-native-android-widget", widgetConfig],
+    [
+      "@sentry/react-native/expo",
+      {
+        // EU region: the merc-with-a-mouth org lives on de.sentry.io.
+        url: "https://de.sentry.io/",
+        organization: "merc-with-a-mouth",
+        project: "shikai",
+      },
+    ],
   ],
   experiments: {
     typedRoutes: true,

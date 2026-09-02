@@ -71,7 +71,7 @@ const FEATURES = [
   },
   {
     icon: "lock" as const,
-    text: "Read-only \u00B7 No data leaves your device",
+    text: "Read-only · Your GitHub data stays on your device",
   },
 ];
 
@@ -151,7 +151,9 @@ export default function AboutScreen() {
         <View style={s.divider} />
         <Text style={s.bodyText}>
           Built by a developer who wanted a better way to check GitHub on the
-          go. Read-only by design, your data never leaves your device.
+          go. Read-only by design. Your GitHub data stays on your device; only
+          anonymous crash and performance diagnostics are sent, with your tokens
+          stripped out. See the privacy policy for details.
         </Text>
       </View>
 

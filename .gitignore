@@ -64,3 +64,7 @@ play-store-checklist.md
 GITHUB-RELEASE.md
 releases/
 close-testing-email.txt
+
+# Sentry: project-scoped MCP config the wizard drops for local editors
+.mcp.json
+.vscode/mcp.json

@@ -1,6 +1,6 @@
 # Privacy Policy - Shikai
 
-**Last updated:** July 1, 2026
+**Last updated:** September 1, 2026
 
 ## Overview
 
@@ -16,20 +16,29 @@ Shikai collects minimal data necessary to provide its services:
 - **Personal Access Token (Optional):** If you choose to enable notifications, you may provide a GitHub Personal Access Token. This is stored locally on your device only.
 
 ### Cached Data
-    
+
 - **Repository Data:** Repos, contributions, and activity are cached locally using MMKV for offline access.
 - **User Profiles:** Basic profile information (avatar, bio, stats) may be cached.
+
+### Crash and Performance Data
+
+- **What:** When the app crashes or hits an error, Shikai sends a diagnostic report to Sentry. The report contains the error and stack trace, the device model, the OS version, the app version, and a short trail of the in-app actions that led up to it. It also samples a fraction of sessions for screen-load and network timing.
+- **What it does not contain:** No name, email, GitHub username, or account id. Your GitHub OAuth token and Personal Access Token are stripped from every report before it leaves the device. No repository contents. No session recording.
+- **Why:** Play Console's built-in crash reporting is aggregated, partial, and cannot tell which over-the-air update a device is running. Sentry provides the per-crash detail, the trail of actions, and the update version needed to actually fix issues.
+- **Where:** Sentry (Functional Software, Inc.), on servers in the European Union.
+- **Turning it off:** There is no in-app toggle. Reporting is disabled entirely in development builds and is only active in released builds.
 
 ## Data Usage
 
 - **API Communication:** Your OAuth token is sent directly from your device to GitHub's API. It passes through a secure Cloudflare Worker proxy only during the initial authentication exchange.
 - **No Server Storage:** Shikai does not store your tokens or personal data on any external servers.
-- **No Analytics:** Shikai does not collect analytics, crash reports, or usage data.
+- **Crash Reporting:** Anonymous crash and performance data is sent to Sentry as described above. It is not used for advertising or profiling.
 
 ## Data Sharing
 
 - **GitHub API:** Your data is shared with GitHub only as part of normal API requests you initiate.
-- **No Third Parties:** We do not share your data with any third parties.
+- **Sentry:** Anonymous crash and performance diagnostics only, as described under Crash and Performance Data.
+- **No One Else:** We do not share your data with any other third parties, and we do not sell it.
 
 ## Data Security
 

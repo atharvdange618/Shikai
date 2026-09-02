@@ -1,5 +1,15 @@
 # Changelog
 
+## Unreleased
+
+### Features
+
+- **Crash and performance reporting** - Released builds now send anonymous crash reports and sampled performance data to Sentry. No PII, no repository contents, no session replay; GitHub tokens are stripped from every report before it is sent. Disabled in development. Privacy policy, README, and the Play data-safety checklist updated to match.
+
+### Notes
+
+- After an `eas update`, run `npm run sentry:sourcemaps` so OTA stack traces stay readable. Native build source maps upload automatically through the Sentry Expo plugin.
+
 ## v1.3.1
 
 ### Features
