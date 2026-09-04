@@ -1,5 +1,7 @@
 import { githubAxios } from "@/lib/axios";
 import type {
+  BlameRange,
+  BlameResponse,
   CommitCountResponse,
   ContributionCalendar,
   ContributionGraphResponse,
@@ -223,5 +225,67 @@ export async function fetchRepoIssuesPRStats(
     closedIssues: r?.closedIssues.totalCount ?? 0,
     openPullRequests: r?.openPullRequests.totalCount ?? 0,
     mergedPullRequests: r?.mergedPullRequests.totalCount ?? 0,
+  };
+}
+
+// blame lives on Commit, not Blob, despite how it reads ("blame this file") —
+// resolve `ref` to its tip commit, then blame `path` from there. The blob
+// text comes along in the same request via an aliased `object(expression)`.
+const BLAME_QUERY = `
+  query Blame($owner: String!, $name: String!, $ref: String!, $expression: String!, $path: String!) {
+    repository(owner: $owner, name: $name) {
+      object(expression: $ref) {
+        ... on Commit {
+          blame(path: $path) {
+            ranges {
+              startingLine
+              endingLine
+              age
+              commit {
+                oid
+                messageHeadline
+                committedDate
+                author {
+                  name
+                }
+              }
+            }
+          }
+        }
+      }
+      blob: object(expression: $expression) {
+        ... on Blob {
+          text
+          isBinary
+        }
+      }
+    }
+  }
+`;
+
+export interface BlameData {
+  ranges: BlameRange[];
+  text: string | null;
+  isBinary: boolean;
+}
+
+export async function fetchBlame(
+  owner: string,
+  repo: string,
+  ref: string,
+  path: string,
+): Promise<BlameData> {
+  const response = await graphql<BlameResponse["data"]>(BLAME_QUERY, {
+    owner,
+    name: repo,
+    ref,
+    expression: `${ref}:${path}`,
+    path,
+  });
+
+  return {
+    ranges: response.repository?.object?.blame?.ranges ?? [],
+    text: response.repository?.blob?.text ?? null,
+    isBinary: response.repository?.blob?.isBinary ?? false,
   };
 }

@@ -32,7 +32,7 @@ import {
   useTheme,
   type ColorTokens,
 } from "@/constants/theme";
-import { useFileContent } from "@/hooks/useRepoDetails";
+import { useFileContent, useRepo } from "@/hooks/useRepoDetails";
 import { decodeRepoId, getLanguage, isImageFile, isVideoFile } from "@/lib/utils";
 
 interface LoadingProgressProps {
@@ -148,6 +148,7 @@ function FileViewerScreenContent() {
   const { width: screenWidth } = useWindowDimensions();
 
   const [owner, repoName] = decodeRepoId(repoId ?? "");
+  const { data: repo } = useRepo(owner, repoName);
   const [imageLoading, setImageLoading] = useState(true);
   const [imageError, setImageError] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -182,35 +183,67 @@ function FileViewerScreenContent() {
     );
   }, [fileName]);
 
+  const canBlame = !isImage && !isVideo && !isPdf;
+
   useEffect(() => {
     if (fileName) {
       try {
         navigation.setOptions({
           title: fileName,
           headerRight: () => (
-            <Pressable
-              onPress={() =>
-                router.push({
-                  pathname: "/(app)/repo/[repoId]/commits",
-                  params: {
-                    repoId: repoId ?? "",
-                    path: path ?? "",
-                    fileName,
-                  },
-                })
-              }
-              hitSlop={8}
-              style={{ paddingHorizontal: Spacing.sm }}
-            >
-              <Octicons name="history" size={20} color={colors.accent} />
-            </Pressable>
+            <View style={{ flexDirection: "row", alignItems: "center" }}>
+              {canBlame && (
+                <Pressable
+                  onPress={() =>
+                    router.push({
+                      pathname: "/(app)/repo/[repoId]/blame",
+                      params: {
+                        repoId: repoId ?? "",
+                        path: path ?? "",
+                        ref: repo?.default_branch ?? "HEAD",
+                        fileName,
+                      },
+                    })
+                  }
+                  hitSlop={8}
+                  style={{ paddingHorizontal: Spacing.sm }}
+                >
+                  <Octicons name="feed-person" size={20} color={colors.accent} />
+                </Pressable>
+              )}
+              <Pressable
+                onPress={() =>
+                  router.push({
+                    pathname: "/(app)/repo/[repoId]/commits",
+                    params: {
+                      repoId: repoId ?? "",
+                      path: path ?? "",
+                      fileName,
+                    },
+                  })
+                }
+                hitSlop={8}
+                style={{ paddingHorizontal: Spacing.sm }}
+              >
+                <Octicons name="history" size={20} color={colors.accent} />
+              </Pressable>
+            </View>
           ),
         });
       } catch {
         /* navigator not ready yet */
       }
     }
-  }, [navigation, router, fileName, repoId, path, colors.accent]);
+  }, [
+    navigation,
+    router,
+    fileName,
+    repoId,
+    path,
+    colors.accent,
+    canBlame,
+    repo?.default_branch,
+  ]);
 
   useEffect(() => {
     setImageLoading(true);

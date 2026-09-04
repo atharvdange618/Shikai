@@ -141,3 +141,33 @@ export interface RepoCountResponse {
     } | null;
   };
 }
+
+export interface BlameRange {
+  startingLine: number;
+  endingLine: number;
+  age: number;
+  commit: {
+    oid: string;
+    messageHeadline: string;
+    committedDate: string;
+    author: {
+      name: string | null;
+    } | null;
+  };
+}
+
+export interface BlameResponse {
+  data: {
+    repository: {
+      object: {
+        blame: {
+          ranges: BlameRange[];
+        };
+      } | null;
+      blob: {
+        text: string | null;
+        isBinary: boolean;
+      } | null;
+    } | null;
+  };
+}
