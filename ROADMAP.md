@@ -20,6 +20,9 @@ This document tracks the feature backlog and development progress for Shikai.
 | Utility Extraction                | Extracted duplicated utility functions into shared modules.                                                                                     | Done   |
 | Scroll Indicator                  | Bouncing chevron on repo details hints at README below the fold. Fades out after scrolling, reappears at top.                                   | Done   |
 | Responsive Overview               | Overview screen adapts across mobile sizes. Pinned repos and activity feed scale with screen width.                                             | Done   |
+| "Your work" dashboard             | Overview sub-screen listing open items that need you: review requests, assignments, authored issues/PRs, mentions. Four `searchIssues` queries with `@me`, collapsible sections, pull-to-refresh. Shared `IssueResultCard` pulled out of the search screen. (Backlog 3.2) | Done   |
+| Gist viewer                       | List any user's gists and a detail screen that renders each file through `MarkdownRenderer`. Reached from a Gists row on your own profile and on searched-user profiles. (Backlog 4.2)                                                                  | Done   |
+| Full user repo list               | "See all" link on a profile's Top Repositories opens a full paginated list of that user's public repos using the standard `RepoCard`.                                                                                                                 | Done   |
 
 ---
 
@@ -78,8 +81,8 @@ Already shipped and not repeated below: the PR diff view with file-level review 
 checks, reviewers, and a commits list; `markNotificationAsRead` / `markAllNotificationsAsRead`
 (the only write calls, and the whole write exception).
 
-**Suggested order:** 1.1 → 1.2 → 1.3 → 3.1 → (3.2, 3.3 in parallel) → 2.1 → 2.2 →
-(4.1, 4.2 for breadth) → fold in 5.x opportunistically.
+**Suggested order:** 1.1 → 1.2 → 1.3 → 3.1 → 3.3 → 2.1 → 2.2 → 4.1 → fold in 5.x
+opportunistically. (3.2 and 4.2 shipped, see Completed.)
 
 ### Phase 1 - Reuse the diff renderer
 
@@ -165,16 +168,6 @@ The app only registers `shikai://` today. Nothing catches `github.com` links.
 - **Verify:** on device, tap a github.com link in Gmail, confirm Shikai is in the chooser and
   lands right; an unmatched URL opens the browser. Add route cases as those screens land.
 
-#### 3.2 "Your work" dashboard · size S-M · no deps
-
-- **Route:** `app/(app)/(tabs)/overview/mine.tsx`, mirror `feed.tsx`. Reach it from a button
-  next to "Following".
-- **API:** `searchIssues` already exists. Four queries against the logged-in login:
-  `is:open is:pr review-requested:@me`, `is:open assignee:@me`, `is:open author:@me`,
-  `is:open mentions:@me`.
-- **UI:** four collapsible sections, short lists, tap → issue/PR detail. Reuse the issue/PR
-  row styling.
-
 #### 3.3 In-app check annotations · size M · no deps
 
 `ChecksSection` currently does `Linking.openURL(check.url)`.
@@ -198,14 +191,6 @@ category { name emoji } comments { totalCount } } }`. Detail: body plus
   screens; body and comments via `MarkdownRenderer`, "Answered" badge, one level of replies.
 - **Entry:** repo detail row, shown only when `repo.has_discussions`.
 
-#### 4.2 Gist viewer · size S-M · no deps
-
-- **API:** `GET /gists`, `GET /users/{u}/gists`, `GET /gists/{id}`.
-- **Routes:** `user/[username]/gists.tsx` and `gist/[id].tsx`, plus a "Gists" row on your own
-  profile.
-- **UI:** list is description plus file count plus updated; detail renders each file through
-  `MarkdownRenderer` (```lang fence for code, direct for `.md`).
-
 ### Phase 5 - PR detail polish
 
 | #   | Item                          | Size | Note                                                                                                                                                   |
@@ -218,8 +203,7 @@ category { name emoji } comments { totalCount } } }`. Detail: body plus
 ### What each phase needs
 
 - **New REST functions:** `fetchCommit`, `fetchComparison`, `fetchReleases`, `fetchCheckRun`
-  plus annotations, `fetchGists` / `fetchUserGists` / `fetchGist`, `fetchIssueTimeline`, plus a
-  `path` arg on `fetchCommits`.
+  plus annotations, `fetchIssueTimeline`, plus a `path` arg on `fetchCommits`.
 - **New GraphQL queries:** blame ranges, discussions list plus detail.
 - **Config:** Android `intentFilters` for github.com, optional SEND share target.
 
