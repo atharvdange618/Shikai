@@ -96,6 +96,11 @@ export interface GitHubCommit {
   committer: GitHubUserSummary | null;
 }
 
+export interface GitHubCommitDetail extends GitHubCommit {
+  stats: { additions: number; deletions: number; total: number };
+  files: GitHubPullRequestFile[];
+}
+
 export interface GitHubContributor {
   id: number;
   login: string;

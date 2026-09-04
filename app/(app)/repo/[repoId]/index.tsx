@@ -348,6 +348,15 @@ export default function RepoDetailsScreen() {
             copiedHash={copiedHash}
             colors={colors}
             onCopyHash={handleCopyHash}
+            onPress={
+              lastCommit
+                ? () =>
+                    router.push({
+                      pathname: "/(app)/repo/[repoId]/commit/[sha]",
+                      params: { repoId, sha: lastCommit.sha },
+                    })
+                : undefined
+            }
           />
         </Animated.View>
 

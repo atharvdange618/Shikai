@@ -5,6 +5,7 @@ import type {
   GitHubCombinedStatus,
   GitHubComment,
   GitHubCommit,
+  GitHubCommitDetail,
   GitHubContent,
   GitHubContributor,
   GitHubEvent,
@@ -219,6 +220,17 @@ export async function fetchCommits(
     commits: data,
     pagination: parseLinkHeader(headers["link"]),
   };
+}
+
+export async function fetchCommit(
+  owner: string,
+  repo: string,
+  sha: string,
+): Promise<GitHubCommitDetail> {
+  const { data } = await githubAxios.get<GitHubCommitDetail>(
+    `/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/commits/${encodeURIComponent(sha)}`,
+  );
+  return data;
 }
 
 export interface GitHubSearchResult<T> {

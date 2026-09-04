@@ -17,6 +17,7 @@ interface CommitSpotlightProps {
   copiedHash: boolean;
   colors: ColorTokens;
   onCopyHash: () => void;
+  onPress?: () => void;
 }
 
 export function CommitSpotlight({
@@ -25,13 +26,20 @@ export function CommitSpotlight({
   copiedHash,
   colors,
   onCopyHash,
+  onPress,
 }: CommitSpotlightProps) {
   const s = buildStyles(colors);
 
   if (!commit && !isLoading) return null;
 
+  const canPress = Boolean(onPress && commit);
+
   return (
-    <View style={s.commitSpotlightCard}>
+    <Pressable
+      style={s.commitSpotlightCard}
+      onPress={canPress ? onPress : undefined}
+      disabled={!canPress}
+    >
       {isLoading ? (
         <View style={s.commitSpotlightContent}>
           <View style={[s.skeleton, { width: "80%", height: 15 }]} />
@@ -59,7 +67,7 @@ export function CommitSpotlight({
           </View>
         </View>
       )}
-    </View>
+    </Pressable>
   );
 }
 

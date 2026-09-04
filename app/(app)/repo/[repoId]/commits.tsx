@@ -4,7 +4,7 @@ import { FlashList } from "@shopify/flash-list";
 import { useQueryClient } from "@tanstack/react-query";
 import * as Clipboard from "expo-clipboard";
 import { Image } from "expo-image";
-import { useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
 
 import {
@@ -79,9 +79,14 @@ export default function CommitsScreen() {
 
   const renderItem = useCallback(
     ({ item }: { item: GitHubCommit }) => (
-      <CommitItem commit={item} colors={colors} shadows={shadows} />
+      <CommitItem
+        commit={item}
+        colors={colors}
+        shadows={shadows}
+        repoId={repoId ?? ""}
+      />
     ),
-    [colors, shadows],
+    [colors, shadows, repoId],
   );
 
   const s = useMemo(() => buildStyles(colors), [colors]);
@@ -149,11 +154,14 @@ const CommitItem = memo(function CommitItem({
   commit,
   colors,
   shadows,
+  repoId,
 }: {
   commit: GitHubCommit;
   colors: ColorTokens;
   shadows: object;
+  repoId: string;
 }) {
+  const router = useRouter();
   const [copied, setCopied] = useState(false);
 
   const handleCopy = useCallback(async () => {
@@ -161,6 +169,13 @@ const CommitItem = memo(function CommitItem({
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   }, [commit.sha]);
+
+  const handlePress = useCallback(() => {
+    router.push({
+      pathname: "/(app)/repo/[repoId]/commit/[sha]",
+      params: { repoId, sha: commit.sha },
+    });
+  }, [router, repoId, commit.sha]);
 
   const subject = commit.commit.message.split("\n")[0];
   const authorName = commit.commit.author.name;
@@ -170,7 +185,10 @@ const CommitItem = memo(function CommitItem({
   const s = useMemo(() => buildStyles(colors), [colors]);
 
   return (
-    <View style={[s.item, shadows]}>
+    <Pressable
+      style={({ pressed }) => [s.item, shadows, pressed && s.itemPressed]}
+      onPress={handlePress}
+    >
       <View style={s.avatarWrap}>
         {avatarUrl ? (
           <Image
@@ -211,7 +229,7 @@ const CommitItem = memo(function CommitItem({
           {copied ? "Copied" : commit.sha.slice(0, 7)}
         </Text>
       </Pressable>
-    </View>
+    </Pressable>
   );
 });
 
@@ -237,6 +255,10 @@ function buildStyles(colors: ColorTokens) {
       borderWidth: 1,
       borderColor: colors.border,
       padding: Spacing.md,
+    },
+
+    itemPressed: {
+      opacity: 0.6,
     },
 
     avatarWrap: {
