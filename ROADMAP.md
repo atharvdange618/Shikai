@@ -23,6 +23,8 @@ This document tracks the feature backlog and development progress for Shikai.
 | "Your work" dashboard             | Overview sub-screen listing open items that need you: review requests, assignments, authored issues/PRs, mentions. Four `searchIssues` queries with `@me`, collapsible sections, pull-to-refresh. Shared `IssueResultCard` pulled out of the search screen. (Backlog 3.2) | Done   |
 | Gist viewer                       | List any user's gists and a detail screen that renders each file through `MarkdownRenderer`. Reached from a Gists row on your own profile and on searched-user profiles. (Backlog 4.2)                                                                  | Done   |
 | Full user repo list               | "See all" link on a profile's Top Repositories opens a full paginated list of that user's public repos using the standard `RepoCard`.                                                                                                                 | Done   |
+| Commit detail screen              | Tapping a commit (commits list, PR commits section, repo-detail spotlight) opens a screen with the message, author, SHA, and full diff. `FilesChangedSection` extracted to `components/repo/DiffFileList.tsx`. (Backlog 1.1)                             | Done   |
+| Compare two refs                  | `repo/[repoId]/compare.tsx` shows commits and file diffs between a base and head ref. Opened from a compare button on each branch row in the commits screen. `CommitsSection` extracted to `components/repo/DiffCommitList.tsx`. (Backlog 1.2)          | Done   |
 
 ---
 
@@ -81,36 +83,11 @@ Already shipped and not repeated below: the PR diff view with file-level review 
 checks, reviewers, and a commits list; `markNotificationAsRead` / `markAllNotificationsAsRead`
 (the only write calls, and the whole write exception).
 
-**Suggested order:** 1.1 → 1.2 → 1.3 → 3.1 → 3.3 → 2.1 → 2.2 → 4.1 → fold in 5.x
-opportunistically. (3.2 and 4.2 shipped, see Completed.)
+**Suggested order:** 1.3 → 3.1 → 3.3 → 2.1 → 2.2 → 4.1 → fold in 5.x opportunistically.
+(1.1, 1.2, 3.2, 4.2 shipped, see Completed. `DiffFileList` and `DiffCommitList` now exist
+in `components/repo/`.)
 
 ### Phase 1 - Reuse the diff renderer
-
-#### 1.1 Commit detail screen · size M · unblocks 1.2, 2.1, 2.2, 3.1, 5.4
-
-Tapping a commit anywhere (commits list, PR commits section, `CommitSpotlight`) only copies
-the SHA today. There is no screen for a single commit's diff.
-
-- **Route:** `app/(app)/repo/[repoId]/commit/[sha].tsx`
-- **API:** `fetchCommit(owner, repo, sha)` → `GET /repos/{o}/{r}/commits/{sha}`. Returns the
-  commit plus `files[]` with `patch`, same shape as `fetchPullRequestFiles`.
-- **Hook:** `hooks/useCommitDetail.ts`, mirror `usePullRequestDetail`.
-- **Refactor first:** pull `FilesChangedSection`, `getFileStatusDisplay`, `groupThreadsByPath`,
-  `ThreadComment` out of `app/(app)/repo/[repoId]/pr/[number].tsx` into
-  `components/repo/DiffFileList.tsx`. One component, two callers. Same for `CommitsSection`.
-- **Wire nav:** `CommitItem` in `commits.tsx`, `CommitRow` in the PR `CommitsSection`, and
-  `CommitSpotlight` push to the new route.
-- **Verify:** open a commit from the list, diff renders, SHA copy still works, back works.
-  `expo lint`, then test on device before commit.
-
-#### 1.2 Compare two refs · size M · depends on 1.1
-
-- **Route:** `app/(app)/repo/[repoId]/compare.tsx` with `base` and `head` params.
-- **API:** `fetchComparison(owner, repo, base, head)` → `GET /repos/{o}/{r}/compare/{base}...{head}`.
-  Returns `commits[]` and `files[]`, both shapes already rendered.
-- **UI:** `DiffFileList` plus the extracted commits list.
-- **Entry points:** a "Compare" action in `BranchSelector`; the "changes since previous tag"
-  link from releases.
 
 #### 1.3 Releases tab · size M · soft depends on 1.2
 
@@ -198,12 +175,13 @@ category { name emoji } comments { totalCount } } }`. Detail: body plus
 | 5.1 | Line-anchored review comments | S-M  | Use `comment.diff_hunk` and `comment.line` (already in the API response) to show the hunk above each thread instead of bucketing by file path          |
 | 5.2 | Reactions row                 | S    | `reactions` counts are already on issues/PRs/comments; render a small emoji-count strip                                                                |
 | 5.3 | Issue/PR timeline events      | M    | `GET /repos/{o}/{r}/issues/{n}/timeline`: labels, cross-refs, closed/reopened, force-pushes, linked PRs. Merge into the comment stream by `created_at` |
-| 5.4 | Per-commit diff inside a PR   | XS   | `CommitRow` → push to commit detail, free once 1.1 lands                                                                                               |
+| ~~5.4~~ | ~~Per-commit diff inside a PR~~ | XS | Done. `DiffCommitList` rows push to the commit detail screen, in the PR and compare screens both.                                                    |
 
 ### What each phase needs
 
-- **New REST functions:** `fetchCommit`, `fetchComparison`, `fetchReleases`, `fetchCheckRun`
-  plus annotations, `fetchIssueTimeline`, plus a `path` arg on `fetchCommits`.
+- **New REST functions:** `fetchReleases`, `fetchCheckRun` plus annotations,
+  `fetchIssueTimeline`, plus a `path` arg on `fetchCommits`. (`fetchCommit`, `fetchComparison`
+  done.)
 - **New GraphQL queries:** blame ranges, discussions list plus detail.
 - **Config:** Android `intentFilters` for github.com, optional SEND share target.
 
