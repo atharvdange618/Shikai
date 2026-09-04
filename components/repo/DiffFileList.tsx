@@ -6,48 +6,10 @@ import {
   Radius,
   Spacing,
 } from "@/constants/theme";
-import { relativeTime } from "@/lib/utils";
-import type {
-  GitHubPullRequestFile,
-  GitHubReviewComment,
-} from "@/types/github.types";
+import type { GitHubPullRequestFile } from "@/types/github.types";
 import { Octicons } from "@expo/vector-icons";
-import { Image } from "expo-image";
 import { useMemo, useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
-
-interface ReviewThread {
-  root: GitHubReviewComment;
-  replies: GitHubReviewComment[];
-}
-
-function groupThreadsByPath(
-  comments: GitHubReviewComment[],
-): Map<string, ReviewThread[]> {
-  const byPath = new Map<string, GitHubReviewComment[]>();
-  for (const comment of comments) {
-    const list = byPath.get(comment.path) ?? [];
-    list.push(comment);
-    byPath.set(comment.path, list);
-  }
-
-  const result = new Map<string, ReviewThread[]>();
-  for (const [path, list] of byPath) {
-    const roots = list
-      .filter((c) => !c.in_reply_to_id)
-      .sort((a, b) => a.created_at.localeCompare(b.created_at));
-    result.set(
-      path,
-      roots.map((root) => ({
-        root,
-        replies: list
-          .filter((c) => c.in_reply_to_id === root.id)
-          .sort((a, b) => a.created_at.localeCompare(b.created_at)),
-      })),
-    );
-  }
-  return result;
-}
 
 function getFileStatusDisplay(
   status: GitHubPullRequestFile["status"],
@@ -67,28 +29,20 @@ function getFileStatusDisplay(
 
 /**
  * Collapsible "N files changed" card that renders each file's unified diff
- * through MarkdownRenderer. Review threads are optional: pull requests pass
- * them, commit and compare views leave them empty.
+ * through MarkdownRenderer.
  */
 export function DiffFileList({
   files,
-  reviewComments = [],
   colors,
   repoContext,
 }: {
   files: GitHubPullRequestFile[];
-  reviewComments?: GitHubReviewComment[];
   colors: ColorTokens;
   repoContext: string;
 }) {
   const s = useMemo(() => buildStyles(colors), [colors]);
   const [sectionExpanded, setSectionExpanded] = useState(false);
   const [expandedFiles, setExpandedFiles] = useState<Set<string>>(new Set());
-
-  const threadsByPath = useMemo(
-    () => groupThreadsByPath(reviewComments),
-    [reviewComments],
-  );
 
   const totalAdditions = files.reduce((sum, f) => sum + f.additions, 0);
   const totalDeletions = files.reduce((sum, f) => sum + f.deletions, 0);
@@ -132,7 +86,6 @@ export function DiffFileList({
         files.map((file) => {
           const isExpanded = expandedFiles.has(file.filename);
           const display = getFileStatusDisplay(file.status, colors);
-          const threads = threadsByPath.get(file.filename) ?? [];
 
           return (
             <View key={file.filename}>
@@ -151,12 +104,6 @@ export function DiffFileList({
                   <Text style={{ color: colors.success }}>+{file.additions}</Text>{" "}
                   <Text style={{ color: colors.danger }}>-{file.deletions}</Text>
                 </Text>
-                {threads.length > 0 && (
-                  <View style={s.commentBadge}>
-                    <Octicons name="comment" size={10} color={colors.textMuted} />
-                    <Text style={s.commentBadgeText}>{threads.length}</Text>
-                  </View>
-                )}
               </Pressable>
 
               {isExpanded && (
@@ -173,54 +120,11 @@ export function DiffFileList({
                         : "Binary file or diff too large to display."}
                     </Text>
                   )}
-
-                  {threads.map((thread) => (
-                    <View key={thread.root.id} style={s.threadCard}>
-                      <ThreadComment comment={thread.root} colors={colors} s={s} />
-                      {thread.replies.map((reply) => (
-                        <View key={reply.id} style={s.threadReply}>
-                          <ThreadComment comment={reply} colors={colors} s={s} />
-                        </View>
-                      ))}
-                    </View>
-                  ))}
                 </View>
               )}
             </View>
           );
         })}
-    </View>
-  );
-}
-
-function ThreadComment({
-  comment,
-  colors,
-  s,
-}: {
-  comment: GitHubReviewComment;
-  colors: ColorTokens;
-  s: ReturnType<typeof buildStyles>;
-}) {
-  return (
-    <View style={s.threadCommentRow}>
-      <Image
-        source={{ uri: comment.user.avatar_url }}
-        style={s.threadAvatar}
-        contentFit="cover"
-        transition={100}
-      />
-      <View style={{ flex: 1, gap: 2 }}>
-        <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
-          <Text style={[s.rowText, { color: colors.textPrimary }]}>
-            {comment.user.login}
-          </Text>
-          <Text style={s.commitMeta}>{relativeTime(comment.created_at)}</Text>
-        </View>
-        <Text style={[s.threadBody, { color: colors.textSecondary }]}>
-          {comment.body}
-        </Text>
-      </View>
     </View>
   );
 }
@@ -260,28 +164,9 @@ function buildStyles(colors: ColorTokens) {
       fontFamily: FontFamily.regular,
       fontSize: FontSize.caption,
     },
-    commitMeta: {
-      fontFamily: FontFamily.regular,
-      fontSize: 11,
-      color: colors.textMuted,
-    },
     diffStat: {
       fontFamily: FontFamily.mono,
       fontSize: 11,
-    },
-    commentBadge: {
-      flexDirection: "row",
-      alignItems: "center",
-      gap: 3,
-      backgroundColor: colors.surfaceSecondary,
-      paddingHorizontal: 6,
-      paddingVertical: 2,
-      borderRadius: Radius.full,
-    },
-    commentBadgeText: {
-      fontFamily: FontFamily.medium,
-      fontSize: 10,
-      color: colors.textMuted,
     },
     diffWrapper: {
       padding: Spacing.sm,
@@ -295,35 +180,6 @@ function buildStyles(colors: ColorTokens) {
       color: colors.textMuted,
       fontStyle: "italic",
       padding: Spacing.sm,
-    },
-    threadCard: {
-      borderWidth: StyleSheet.hairlineWidth,
-      borderColor: colors.border,
-      borderRadius: Radius.md,
-      padding: Spacing.sm,
-      gap: Spacing.sm,
-      backgroundColor: colors.background,
-    },
-    threadReply: {
-      marginLeft: Spacing.md,
-      paddingLeft: Spacing.sm,
-      borderLeftWidth: 2,
-      borderLeftColor: colors.border,
-    },
-    threadCommentRow: {
-      flexDirection: "row",
-      gap: Spacing.sm,
-    },
-    threadAvatar: {
-      width: 20,
-      height: 20,
-      borderRadius: 10,
-      marginTop: 2,
-    },
-    threadBody: {
-      fontFamily: FontFamily.regular,
-      fontSize: FontSize.caption,
-      lineHeight: FontSize.caption * 1.4,
     },
   });
 }

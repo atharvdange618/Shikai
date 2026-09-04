@@ -1,6 +1,7 @@
 import { ErrorBoundary } from "@/components";
 import { DiffCommitList } from "@/components/repo/DiffCommitList";
 import { DiffFileList } from "@/components/repo/DiffFileList";
+import { ReviewThreadList } from "@/components/repo/ReviewThreadList";
 import { MarkdownRenderer } from "@/components/shared/MarkdownRenderer";
 import {
   type ColorTokens,
@@ -243,6 +244,13 @@ function PullRequestDetailScreenContent() {
       {files.length > 0 && (
         <DiffFileList
           files={files}
+          colors={colors}
+          repoContext={`${owner}/${repoName}`}
+        />
+      )}
+
+      {reviewComments.length > 0 && (
+        <ReviewThreadList
           reviewComments={reviewComments}
           colors={colors}
           repoContext={`${owner}/${repoName}`}

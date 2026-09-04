@@ -164,7 +164,7 @@ gap, not wired here). `ponytail: first 10 replies only, add a load-more if threa
 
 | #   | Item                          | Size | Note                                                                                                                                                   |
 | --- | ----------------------------- | ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| 5.1 | Line-anchored review comments | S-M  | Use `comment.diff_hunk` and `comment.line` (already in the API response) to show the hunk above each thread instead of bucketing by file path          |
+| ~~5.1~~ | ~~Line-anchored review comments~~ | S-M | Done. `components/repo/ReviewThreadList.tsx` renders review threads as a flat, chronological list on the PR detail screen; each thread shows its `diff_hunk` (as a diff codeblock) and `path:line` above the comment, so no more expanding the file diff to find context. Replaced the old per-file thread bucketing in `DiffFileList`, which is now a plain diff browser again. |
 | 5.2 | Reactions row                 | S    | `reactions` counts are already on issues/PRs/comments; render a small emoji-count strip                                                                |
 | 5.3 | Issue/PR timeline events      | M    | `GET /repos/{o}/{r}/issues/{n}/timeline`: labels, cross-refs, closed/reopened, force-pushes, linked PRs. Merge into the comment stream by `created_at` |
 | ~~5.4~~ | ~~Per-commit diff inside a PR~~ | XS | Done. `DiffCommitList` rows push to the commit detail screen, in the PR and compare screens both.                                                    |
