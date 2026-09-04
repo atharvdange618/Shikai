@@ -440,6 +440,28 @@ export interface GitHubCheckRun {
   completed_at: string | null;
 }
 
+export interface GitHubCheckRunDetail extends GitHubCheckRun {
+  details_url: string | null;
+  output: {
+    title: string | null;
+    summary: string | null;
+    text: string | null;
+    annotations_count: number;
+  };
+}
+
+export type GitHubCheckAnnotationLevel = "notice" | "warning" | "failure";
+
+export interface GitHubCheckAnnotation {
+  path: string;
+  start_line: number;
+  end_line: number;
+  annotation_level: GitHubCheckAnnotationLevel;
+  title: string | null;
+  message: string;
+  raw_details: string | null;
+}
+
 export type GitHubCombinedStatusState = "pending" | "success" | "failure" | "error";
 
 export interface GitHubCombinedStatus {

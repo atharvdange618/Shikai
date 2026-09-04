@@ -33,7 +33,7 @@ import type {
 } from "@/types/github.types";
 import { Octicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
-import { useLocalSearchParams, useNavigation } from "expo-router";
+import { router, useLocalSearchParams, useNavigation } from "expo-router";
 import { useEffect, useMemo } from "react";
 import {
   ActivityIndicator,
@@ -197,7 +197,9 @@ function PullRequestDetailScreenContent() {
         </View>
       )}
 
-      {checks.length > 0 && <ChecksSection checks={checks} colors={colors} />}
+      {checks.length > 0 && (
+        <ChecksSection checks={checks} colors={colors} repoId={repoId} />
+      )}
 
       <ReviewersSection
         reviews={reviews}
@@ -311,9 +313,11 @@ function getCheckDisplay(
 function ChecksSection({
   checks,
   colors,
+  repoId,
 }: {
   checks: CheckSummaryItem[];
   colors: ColorTokens;
+  repoId: string;
 }) {
   const s = useMemo(() => sectionStyles(colors), [colors]);
   const failing = checks.filter((c) => c.conclusion === "failure").length;
@@ -340,8 +344,17 @@ function ChecksSection({
           <Pressable
             key={check.key}
             style={({ pressed }) => [s.row, pressed && s.rowPressed]}
-            onPress={() => check.url && Linking.openURL(check.url)}
-            disabled={!check.url}
+            onPress={() => {
+              if (check.runId) {
+                router.push({
+                  pathname: "/(app)/repo/[repoId]/checks/[runId]",
+                  params: { repoId, runId: String(check.runId) },
+                });
+              } else if (check.url) {
+                Linking.openURL(check.url);
+              }
+            }}
+            disabled={!check.runId && !check.url}
           >
             <Octicons name={display.icon} size={14} color={display.color} />
             <Text
@@ -350,6 +363,9 @@ function ChecksSection({
             >
               {check.name}
             </Text>
+            {check.runId ? (
+              <Octicons name="chevron-right" size={14} color={colors.textMuted} />
+            ) : null}
           </Pressable>
         );
       })}

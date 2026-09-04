@@ -113,6 +113,9 @@ export interface CheckSummaryItem {
   name: string;
   conclusion: GitHubCheckConclusion | "pending" | "error";
   url: string | null;
+  // Set for GitHub Actions check-runs, which have an in-app detail screen.
+  // Undefined for legacy commit statuses (external CI), which only link out.
+  runId?: number;
 }
 
 // Merges GitHub Actions check-runs with legacy commit statuses (Vercel,
@@ -133,6 +136,7 @@ export function useChecks(owner: string, repo: string, ref: string) {
           name: run.name,
           conclusion: run.status === "completed" ? run.conclusion : "pending",
           url: run.html_url,
+          runId: run.id,
         }));
 
         const fromStatuses: CheckSummaryItem[] = combinedStatus.statuses.map(

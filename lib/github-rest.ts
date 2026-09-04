@@ -1,7 +1,9 @@
 import { githubAxios } from "@/lib/axios";
 import type {
   GitHubBranch,
+  GitHubCheckAnnotation,
   GitHubCheckRun,
+  GitHubCheckRunDetail,
   GitHubCombinedStatus,
   GitHubComment,
   GitHubCommit,
@@ -723,6 +725,30 @@ export async function fetchCheckRuns(
     { params: { per_page: 100 } },
   );
   return data.check_runs;
+}
+
+export async function fetchCheckRun(
+  owner: string,
+  repo: string,
+  runId: number,
+): Promise<GitHubCheckRunDetail> {
+  const { data } = await githubAxios.get<GitHubCheckRunDetail>(
+    `/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/check-runs/${runId}`,
+  );
+  return data;
+}
+
+// ponytail: annotations only, add job-log tail if people ask
+export async function fetchCheckRunAnnotations(
+  owner: string,
+  repo: string,
+  runId: number,
+): Promise<GitHubCheckAnnotation[]> {
+  const { data } = await githubAxios.get<GitHubCheckAnnotation[]>(
+    `/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/check-runs/${runId}/annotations`,
+    { params: { per_page: 100 } },
+  );
+  return data;
 }
 
 export async function fetchCombinedStatus(
