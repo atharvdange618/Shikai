@@ -17,7 +17,8 @@ import { ListItemSeparator } from "@/components/shared/ListItemSeparator";
 import { useReceivedEvents } from "@/hooks/useReceivedEvents";
 import { getEventDisplay } from "@/lib/github-utils";
 import { queryKeys } from "@/lib/query-client";
-import { compactTimeAgo, parseGitHubUrl } from "@/lib/utils";
+import { parseGitHubUrl } from "@/lib/github-url";
+import { compactTimeAgo } from "@/lib/utils";
 import type { GitHubEvent } from "@/types/github.types";
 
 import {

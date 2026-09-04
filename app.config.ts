@@ -42,6 +42,17 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     predictiveBackGestureEnabled: false,
     package: "com.atharvdange618.Shikai",
     versionCode: 4,
+    // No autoVerify: Shikai just shows up in the chooser for github.com links.
+    intentFilters: [
+      {
+        action: "VIEW",
+        category: ["BROWSABLE", "DEFAULT"],
+        data: [
+          { scheme: "https", host: "github.com" },
+          { scheme: "https", host: "www.github.com" },
+        ],
+      },
+    ],
   },
   web: {
     output: "static",
@@ -50,6 +61,10 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   plugins: [
     "expo-router",
     "expo-secure-store",
+    // Puts Shikai in the Android share sheet for text/URL shares. This is the
+    // path that actually works: github.com verified app links send taps
+    // straight to the GitHub app, but a shared link comes through here.
+    "expo-share-intent",
     [
       "expo-splash-screen",
       {

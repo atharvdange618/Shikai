@@ -162,16 +162,3 @@ export function getLanguage(filename: string): string {
       return "text";
   }
 }
-
-export function parseGitHubUrl(url: string): string | null {
-  const match = url.match(
-    /github\.com\/([^/]+)\/([^/]+)(?:\/(issues|pull)\/(\d+))?/,
-  );
-  if (!match) return null;
-  const [, owner, repo, type, number] = match;
-  const repoId = encodeRepoId(owner, repo);
-  if (type === "issues" && number)
-    return `/(app)/repo/${repoId}/issue/${number}`;
-  if (type === "pull" && number) return `/(app)/repo/${repoId}/pr/${number}`;
-  return `/(app)/repo/${repoId}`;
-}

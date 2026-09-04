@@ -14,6 +14,7 @@ import { useFonts } from "expo-font";
 import { Stack, useRouter } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import * as SystemUI from "expo-system-ui";
+import { ShareIntentProvider } from "expo-share-intent";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { StatusBar } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -29,6 +30,7 @@ import { AppRatingPrompt } from "@/components/AppRatingPrompt";
 import { OfflineBanner } from "@/components/OfflineBanner";
 import { ThemeProvider, useTheme } from "@/contexts/ThemeContext";
 import { useAppRatingPrompt } from "@/hooks/useAppRatingPrompt";
+import { useDeepLinks } from "@/hooks/useDeepLinks";
 import { useInAppUpdates } from "@/hooks/useInAppUpdates";
 import { setAuthReady } from "@/lib/axios";
 import { fetchAuthenticatedUser } from "@/lib/github-rest";
@@ -217,44 +219,51 @@ export default Sentry.wrap(function RootLayout() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <ThemeProvider>
-        <PersistQueryClientProvider
-          client={queryClient}
-          persistOptions={{
-            persister: mmkvPersister,
-            maxAge: PERSISTENCE_MAX_AGE,
-            dehydrateOptions: {
-              shouldDehydrateQuery: (query: Query) =>
-                query.state.status === "success" && query.meta?.persist !== false,
-            },
-          }}
-        >
-          <AlertProvider>
-            <OfflineBanner />
-            <AppRatingPrompt visible={visible} onRate={rate} onDismiss={dismiss} />
-            <ThemeEffects />
-            <OTAUpdateEffects />
-            {showSplash && (
-              <AnimatedSplashScreen
-                isReady={allReady}
-                onComplete={() => setShowSplash(false)}
+      <ShareIntentProvider options={{ resetOnBackground: true }}>
+        <ThemeProvider>
+          <PersistQueryClientProvider
+            client={queryClient}
+            persistOptions={{
+              persister: mmkvPersister,
+              maxAge: PERSISTENCE_MAX_AGE,
+              dehydrateOptions: {
+                shouldDehydrateQuery: (query: Query) =>
+                  query.state.status === "success" &&
+                  query.meta?.persist !== false,
+              },
+            }}
+          >
+            <AlertProvider>
+              <OfflineBanner />
+              <AppRatingPrompt
+                visible={visible}
+                onRate={rate}
+                onDismiss={dismiss}
               />
-            )}
-            {!showSplash && securityStatus === "blocked" && (
-              <BlockingScreen
-                reasons={securityReasons}
-                devModeBlocked={devModeBlocked}
-                onOverride={handleRecheck}
-              />
-            )}
-            {!showSplash && securityStatus === "passed" && (
-              <ErrorBoundary>
-                <AppStack token={token} />
-              </ErrorBoundary>
-            )}
-          </AlertProvider>
-        </PersistQueryClientProvider>
-      </ThemeProvider>
+              <ThemeEffects />
+              <OTAUpdateEffects />
+              {showSplash && (
+                <AnimatedSplashScreen
+                  isReady={allReady}
+                  onComplete={() => setShowSplash(false)}
+                />
+              )}
+              {!showSplash && securityStatus === "blocked" && (
+                <BlockingScreen
+                  reasons={securityReasons}
+                  devModeBlocked={devModeBlocked}
+                  onOverride={handleRecheck}
+                />
+              )}
+              {!showSplash && securityStatus === "passed" && (
+                <ErrorBoundary>
+                  <AppStack token={token} />
+                </ErrorBoundary>
+              )}
+            </AlertProvider>
+          </PersistQueryClientProvider>
+        </ThemeProvider>
+      </ShareIntentProvider>
     </GestureHandlerRootView>
   );
 });
@@ -264,6 +273,8 @@ function AppStack({ token }: { token: string | null }) {
   const router = useRouter();
   const prevTokenRef = useRef(token);
   const mountedRef = useRef(false);
+
+  useDeepLinks(Boolean(token));
 
   useEffect(() => {
     if (!mountedRef.current) {

@@ -36,7 +36,8 @@ import {
   useTheme,
 } from "@/constants/theme";
 import { type EventDisplay, getEventDisplay } from "@/lib/github-utils";
-import { format24HourTime, parseGitHubUrl } from "@/lib/utils";
+import { parseGitHubUrl } from "@/lib/github-url";
+import { format24HourTime } from "@/lib/utils";
 import type { GitHubEvent } from "@/types/github.types";
 
 interface ActivityFeedProps {
