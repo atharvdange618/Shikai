@@ -25,6 +25,7 @@ This document tracks the feature backlog and development progress for Shikai.
 | Full user repo list               | "See all" link on a profile's Top Repositories opens a full paginated list of that user's public repos using the standard `RepoCard`.                                                                                                                 | Done   |
 | Commit detail screen              | Tapping a commit (commits list, PR commits section, repo-detail spotlight) opens a screen with the message, author, SHA, and full diff. `FilesChangedSection` extracted to `components/repo/DiffFileList.tsx`. (Backlog 1.1)                             | Done   |
 | Compare two refs                  | `repo/[repoId]/compare.tsx` shows commits and file diffs between a base and head ref. Opened from a compare button on each branch row in the commits screen. `CommitsSection` extracted to `components/repo/DiffCommitList.tsx`. (Backlog 1.2)          | Done   |
+| Releases tab                      | A "Releases" row on repo detail (shown when the repo has releases) opens a list, and each opens a detail screen: notes via `MarkdownRenderer`, author, "compare to previous tag", asset rows with size and download count plus source-code zip/tar.gz, each with a Share / Copy link / Download menu. (Backlog 1.3)                                                                    | Done   |
 
 ---
 
@@ -83,20 +84,9 @@ Already shipped and not repeated below: the PR diff view with file-level review 
 checks, reviewers, and a commits list; `markNotificationAsRead` / `markAllNotificationsAsRead`
 (the only write calls, and the whole write exception).
 
-**Suggested order:** 1.3 → 3.1 → 3.3 → 2.1 → 2.2 → 4.1 → fold in 5.x opportunistically.
-(1.1, 1.2, 3.2, 4.2 shipped, see Completed. `DiffFileList` and `DiffCommitList` now exist
-in `components/repo/`.)
-
-### Phase 1 - Reuse the diff renderer
-
-#### 1.3 Releases tab · size M · soft depends on 1.2
-
-- **Route:** `app/(app)/repo/[repoId]/releases.tsx`, detail inline or `release/[tag].tsx`.
-- **API:** `fetchReleases(owner, repo, page)` → `GET /repos/{o}/{r}/releases`.
-- **UI:** tag, name, date, prerelease pill; body via `MarkdownRenderer`; asset rows (name,
-  size, download count, tap opens URL); "Compare to previous tag" → `compare.tsx`.
-- **Entry:** a "Releases" row on repo detail next to Commits / Issues / PRs / Files. Show only
-  when the repo has releases.
+**Suggested order:** 3.1 → 3.3 → 2.1 → 2.2 → 4.1 → fold in 5.x opportunistically.
+(Phase 1, plus 3.2 and 4.2, shipped, see Completed. `DiffFileList` and `DiffCommitList`
+now exist in `components/repo/`.)
 
 ### Phase 2 - Code reading
 
@@ -179,9 +169,8 @@ category { name emoji } comments { totalCount } } }`. Detail: body plus
 
 ### What each phase needs
 
-- **New REST functions:** `fetchReleases`, `fetchCheckRun` plus annotations,
-  `fetchIssueTimeline`, plus a `path` arg on `fetchCommits`. (`fetchCommit`, `fetchComparison`
-  done.)
+- **New REST functions:** `fetchCheckRun` plus annotations, `fetchIssueTimeline`, plus a
+  `path` arg on `fetchCommits`. (`fetchCommit`, `fetchComparison`, `fetchReleases` done.)
 - **New GraphQL queries:** blame ranges, discussions list plus detail.
 - **Config:** Android `intentFilters` for github.com, optional SEND share target.
 
