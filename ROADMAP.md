@@ -166,14 +166,14 @@ gap, not wired here). `ponytail: first 10 replies only, add a load-more if threa
 | --- | ----------------------------- | ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | ~~5.1~~ | ~~Line-anchored review comments~~ | S-M | Done. `components/repo/ReviewThreadList.tsx` renders review threads as a flat, chronological list on the PR detail screen; each thread shows its `diff_hunk` (as a diff codeblock) and `path:line` above the comment, so no more expanding the file diff to find context. Replaced the old per-file thread bucketing in `DiffFileList`, which is now a plain diff browser again. |
 | 5.2 | Reactions row                 | S    | `reactions` counts are already on issues/PRs/comments; render a small emoji-count strip                                                                |
-| 5.3 | Issue/PR timeline events      | M    | `GET /repos/{o}/{r}/issues/{n}/timeline`: labels, cross-refs, closed/reopened, force-pushes, linked PRs. Merge into the comment stream by `created_at` |
+| ~~5.3~~ | ~~Issue/PR timeline events~~ | M | Done. `fetchIssueTimeline` (`lib/github-rest.ts`) + `useIssueTimeline` (`hooks/useIssueDetail.ts`). `lib/timeline.ts` merges it with the existing comments fetch into one chronological list, keeping only the event types it renders (labels, closed/reopened/merged, force-pushes, cross-referenced) and dropping the rest (reviews, mentions, project moves, ...) since those already show elsewhere or aren't useful here. `components/repo/TimelineEventRow.tsx` renders each as a compact icon+sentence row; cross-referenced rows open the linked issue/PR in-app if it's the same repo, external browser otherwise. Wired into both the issue and PR detail screens. |
 | ~~5.4~~ | ~~Per-commit diff inside a PR~~ | XS | Done. `DiffCommitList` rows push to the commit detail screen, in the PR and compare screens both.                                                    |
 
 ### What each phase needs
 
-- **New REST functions:** `fetchIssueTimeline`.
-  (`fetchCommit`, `fetchComparison`, `fetchReleases`, `fetchCheckRun` plus annotations, and
-  the `path` arg on `fetchCommits`, done.)
+- **New REST functions:** none remaining.
+  (`fetchCommit`, `fetchComparison`, `fetchReleases`, `fetchCheckRun` plus annotations,
+  `fetchIssueTimeline`, and the `path` arg on `fetchCommits`, done.)
 - **New GraphQL queries:** none remaining. (Blame and discussions done.)
 - **Config:** github.com `intentFilters` and the `expo-share-intent` SEND target are done.
 

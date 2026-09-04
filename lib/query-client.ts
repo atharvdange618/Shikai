@@ -85,6 +85,8 @@ export const queryKeys = {
     ["repo", owner, repo, "issue", number] as const,
   issueComments: (owner: string, repo: string, number: number) =>
     ["repo", owner, repo, "issue", number, "comments"] as const,
+  issueTimeline: (owner: string, repo: string, number: number) =>
+    ["repo", owner, repo, "issue", number, "timeline"] as const,
   repoDiscussions: (owner: string, repo: string) =>
     ["repo", owner, repo, "discussions"] as const,
   discussionDetail: (owner: string, repo: string, number: number) =>

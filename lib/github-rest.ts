@@ -26,6 +26,7 @@ import type {
   GitHubReview,
   GitHubReviewComment,
   GitHubSocialAccount,
+  GitHubTimelineEvent,
   GitHubTree,
   GitHubUser,
   RepoListParams,
@@ -562,6 +563,18 @@ export async function fetchIssue(
 ): Promise<GitHubIssue> {
   const { data } = await githubAxios.get<GitHubIssue>(
     `/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/issues/${issueNumber}`,
+  );
+  return data;
+}
+
+export async function fetchIssueTimeline(
+  owner: string,
+  repo: string,
+  issueNumber: number,
+): Promise<GitHubTimelineEvent[]> {
+  const { data } = await githubAxios.get<GitHubTimelineEvent[]>(
+    `/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/issues/${issueNumber}/timeline`,
+    { params: { per_page: 100 } },
   );
   return data;
 }

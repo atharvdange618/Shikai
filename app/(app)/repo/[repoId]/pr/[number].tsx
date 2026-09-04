@@ -2,6 +2,7 @@ import { ErrorBoundary } from "@/components";
 import { DiffCommitList } from "@/components/repo/DiffCommitList";
 import { DiffFileList } from "@/components/repo/DiffFileList";
 import { ReviewThreadList } from "@/components/repo/ReviewThreadList";
+import { TimelineEventRow } from "@/components/repo/TimelineEventRow";
 import { MarkdownRenderer } from "@/components/shared/MarkdownRenderer";
 import {
   type ColorTokens,
@@ -23,10 +24,10 @@ import {
   usePullRequestReviews,
   useRequestedReviewers,
 } from "@/hooks/usePullRequestDetail";
-import { useIssueComments } from "@/hooks/useIssueDetail";
+import { useIssueComments, useIssueTimeline } from "@/hooks/useIssueDetail";
+import { mergeCommentsWithTimeline } from "@/lib/timeline";
 import { decodeRepoId, relativeTime } from "@/lib/utils";
 import type {
-  GitHubComment,
   GitHubLabel,
   GitHubReview,
   GitHubReviewState,
@@ -71,7 +72,19 @@ function PullRequestDetailScreenContent() {
     isError,
   } = usePullRequestDetail(owner, repoName, prNumber);
   const { data: commentsData } = useIssueComments(owner, repoName, prNumber);
-  const comments = commentsData?.comments ?? [];
+  const comments = useMemo(
+    () => commentsData?.comments ?? [],
+    [commentsData],
+  );
+  const { data: timelineEvents = [] } = useIssueTimeline(
+    owner,
+    repoName,
+    prNumber,
+  );
+  const timeline = useMemo(
+    () => mergeCommentsWithTimeline(comments, timelineEvents),
+    [comments, timelineEvents],
+  );
 
   const { data: reviewCommentsData } = usePullRequestReviewComments(
     owner,
@@ -257,39 +270,48 @@ function PullRequestDetailScreenContent() {
         />
       )}
 
-      {comments.length > 0 && (
+      {timeline.length > 0 && (
         <View style={[s.separator, { backgroundColor: colors.border }]} />
       )}
 
-      {comments.map((comment: GitHubComment, _index: number) => (
-        <View key={comment.id}>
-          <View
-            style={[
-              s.commentCard,
-              {
-                backgroundColor: colors.surface,
-                borderColor: colors.border,
-              },
-            ]}
-          >
-            <View style={s.commentHeader}>
-              <Image
-                source={{ uri: comment.user.avatar_url }}
-                style={s.commentAvatar}
-                contentFit="cover"
-                transition={100}
-              />
-              <Text style={[s.commentAuthor, { color: colors.textPrimary }]}>
-                {comment.user.login}
-              </Text>
-              <Text style={[s.commentTime, { color: colors.textMuted }]}>
-                {relativeTime(comment.created_at)}
-              </Text>
+      {timeline.map((item, index) =>
+        item.kind === "comment" ? (
+          <View key={`comment-${item.comment.id}`}>
+            <View
+              style={[
+                s.commentCard,
+                {
+                  backgroundColor: colors.surface,
+                  borderColor: colors.border,
+                },
+              ]}
+            >
+              <View style={s.commentHeader}>
+                <Image
+                  source={{ uri: item.comment.user.avatar_url }}
+                  style={s.commentAvatar}
+                  contentFit="cover"
+                  transition={100}
+                />
+                <Text style={[s.commentAuthor, { color: colors.textPrimary }]}>
+                  {item.comment.user.login}
+                </Text>
+                <Text style={[s.commentTime, { color: colors.textMuted }]}>
+                  {relativeTime(item.comment.created_at)}
+                </Text>
+              </View>
+              <MarkdownRenderer markdown={item.comment.body} />
             </View>
-            <MarkdownRenderer markdown={comment.body} />
           </View>
-        </View>
-      ))}
+        ) : (
+          <TimelineEventRow
+            key={`event-${item.created_at}-${index}`}
+            event={item.event}
+            colors={colors}
+            currentRepoFullName={`${owner}/${repoName}`}
+          />
+        ),
+      )}
 
       <View style={{ height: Spacing.xxl + 60 + Spacing.lg }} />
     </ScrollView>

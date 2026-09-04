@@ -354,6 +354,60 @@ export interface GitHubComment {
   updated_at: string;
 }
 
+// The timeline API returns every event type GitHub has ever added (reviews,
+// mentions, project moves, ...). We only render a known subset (labels,
+// cross-refs, closed/reopened/merged, force-pushes) and fall through anything
+// else via GitHubTimelineUnknownEvent.
+export interface GitHubTimelineActor {
+  login: string;
+  avatar_url: string;
+}
+
+export interface GitHubTimelineLabelEvent {
+  event: "labeled" | "unlabeled";
+  created_at: string;
+  actor: GitHubTimelineActor | null;
+  label: { name: string; color: string };
+}
+
+export interface GitHubTimelineStateEvent {
+  event: "closed" | "reopened" | "merged";
+  created_at: string;
+  actor: GitHubTimelineActor | null;
+}
+
+export interface GitHubTimelineForcePushEvent {
+  event: "head_ref_force_pushed" | "base_ref_force_pushed";
+  created_at: string;
+  actor: GitHubTimelineActor | null;
+}
+
+export interface GitHubTimelineCrossReferencedEvent {
+  event: "cross-referenced";
+  created_at: string;
+  actor: GitHubTimelineActor | null;
+  source: {
+    issue: {
+      number: number;
+      title: string;
+      html_url: string;
+      pull_request?: unknown;
+      repository: { full_name: string };
+    };
+  };
+}
+
+export interface GitHubTimelineUnknownEvent {
+  event: string;
+}
+
+export type GitHubTimelineEvent =
+  | GitHubTimelineLabelEvent
+  | GitHubTimelineStateEvent
+  | GitHubTimelineForcePushEvent
+  | GitHubTimelineCrossReferencedEvent
+  | GitHubTimelineUnknownEvent;
+
 export interface GitHubReviewComment {
   id: number;
   body: string;

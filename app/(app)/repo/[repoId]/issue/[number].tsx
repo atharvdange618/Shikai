@@ -1,4 +1,5 @@
 import { ErrorBoundary } from "@/components";
+import { TimelineEventRow } from "@/components/repo/TimelineEventRow";
 import { MarkdownRenderer } from "@/components/shared/MarkdownRenderer";
 import {
   FontFamily,
@@ -9,13 +10,18 @@ import {
   Spacing,
   useTheme,
 } from "@/constants/theme";
-import { useIssueComments, useIssueDetail } from "@/hooks/useIssueDetail";
+import {
+  useIssueComments,
+  useIssueDetail,
+  useIssueTimeline,
+} from "@/hooks/useIssueDetail";
+import { mergeCommentsWithTimeline } from "@/lib/timeline";
 import { decodeRepoId, encodeRepoId, relativeTime } from "@/lib/utils";
-import type { GitHubComment, GitHubLabel } from "@/types/github.types";
+import type { GitHubLabel } from "@/types/github.types";
 import { Octicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import {
   ActivityIndicator,
   Pressable,
@@ -51,7 +57,19 @@ function IssueDetailScreenContent() {
     isError,
   } = useIssueDetail(owner, repoName, issueNumber);
   const { data: commentsData } = useIssueComments(owner, repoName, issueNumber);
-  const comments = commentsData?.comments ?? [];
+  const comments = useMemo(
+    () => commentsData?.comments ?? [],
+    [commentsData],
+  );
+  const { data: timelineEvents = [] } = useIssueTimeline(
+    owner,
+    repoName,
+    issueNumber,
+  );
+  const timeline = useMemo(
+    () => mergeCommentsWithTimeline(comments, timelineEvents),
+    [comments, timelineEvents],
+  );
 
   const isOpen = issue?.state === "open";
   const stateColor = isOpen ? colors.success : colors.textMuted;
@@ -162,39 +180,48 @@ function IssueDetailScreenContent() {
         </View>
       )}
 
-      {comments.length > 0 && (
+      {timeline.length > 0 && (
         <View style={[s.separator, { backgroundColor: colors.border }]} />
       )}
 
-      {comments.map((comment: GitHubComment, _index: number) => (
-        <View key={comment.id}>
-          <View
-            style={[
-              s.commentCard,
-              {
-                backgroundColor: colors.surface,
-                borderColor: colors.border,
-              },
-            ]}
-          >
-            <View style={s.commentHeader}>
-              <Image
-                source={{ uri: comment.user.avatar_url }}
-                style={s.commentAvatar}
-                contentFit="cover"
-                transition={100}
-              />
-              <Text style={[s.commentAuthor, { color: colors.textPrimary }]}>
-                {comment.user.login}
-              </Text>
-              <Text style={[s.commentTime, { color: colors.textMuted }]}>
-                {relativeTime(comment.created_at)}
-              </Text>
+      {timeline.map((item, index) =>
+        item.kind === "comment" ? (
+          <View key={`comment-${item.comment.id}`}>
+            <View
+              style={[
+                s.commentCard,
+                {
+                  backgroundColor: colors.surface,
+                  borderColor: colors.border,
+                },
+              ]}
+            >
+              <View style={s.commentHeader}>
+                <Image
+                  source={{ uri: item.comment.user.avatar_url }}
+                  style={s.commentAvatar}
+                  contentFit="cover"
+                  transition={100}
+                />
+                <Text style={[s.commentAuthor, { color: colors.textPrimary }]}>
+                  {item.comment.user.login}
+                </Text>
+                <Text style={[s.commentTime, { color: colors.textMuted }]}>
+                  {relativeTime(item.comment.created_at)}
+                </Text>
+              </View>
+              <MarkdownRenderer markdown={item.comment.body} />
             </View>
-            <MarkdownRenderer markdown={comment.body} />
           </View>
-        </View>
-      ))}
+        ) : (
+          <TimelineEventRow
+            key={`event-${item.created_at}-${index}`}
+            event={item.event}
+            colors={colors}
+            currentRepoFullName={`${owner}/${repoName}`}
+          />
+        ),
+      )}
 
       <View style={{ height: Spacing.xxl + 60 + Spacing.lg }} />
     </ScrollView>
