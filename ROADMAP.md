@@ -27,6 +27,7 @@ This document tracks the feature backlog and development progress for Shikai.
 | Compare two refs                  | `repo/[repoId]/compare.tsx` shows commits and file diffs between a base and head ref. Opened from a compare button on each branch row in the commits screen. `CommitsSection` extracted to `components/repo/DiffCommitList.tsx`. (Backlog 1.2)          | Done   |
 | Releases tab                      | A "Releases" row on repo detail (shown when the repo has releases) opens a list, and each opens a detail screen: notes via `MarkdownRenderer`, author, "compare to previous tag", asset rows with size and download count plus source-code zip/tar.gz, each with a Share / Copy link / Download menu. (Backlog 1.3)                                                                    | Done   |
 | GitHub URL router                 | `lib/github-url.ts` maps a github.com web URL to an in-app route (repo, PR, issue, commit, compare, releases, blob, tree, user). `useDeepLinks` in `app/_layout.tsx` runs it for links opened into the app and, via `expo-share-intent`, for links shared from the Android share sheet. Unmatched URLs fall back to the browser. Android `intentFilters` for github.com added (no `autoVerify`). (Backlog 3.1) | Done   |
+| In-app check annotations          | Tapping a GitHub Actions check in the PR checks list opens `repo/[repoId]/checks/[runId].tsx`: status line, the run's `output` summary via `MarkdownRenderer`, and annotation cards (level icon, `path:line`, title, message, raw details). `fetchCheckRun` and `fetchCheckRunAnnotations` added to `lib/github-rest.ts`; annotations fetch only when `annotations_count > 0`. External CI statuses still link out. Full job logs still open on GitHub. (Backlog 3.3) | Done   |
 
 ---
 
@@ -85,8 +86,8 @@ Already shipped and not repeated below: the PR diff view with file-level review 
 checks, reviewers, and a commits list; `markNotificationAsRead` / `markAllNotificationsAsRead`
 (the only write calls, and the whole write exception).
 
-**Suggested order:** 3.3 → 2.1 → 2.2 → 4.1 → fold in 5.x opportunistically.
-(Phase 1, plus 3.1, 3.2 and 4.2, shipped, see Completed. `DiffFileList` and `DiffCommitList`
+**Suggested order:** 2.1 → 2.2 → 4.1 → fold in 5.x opportunistically.
+(Phase 1, plus 3.1, 3.2, 3.3 and 4.2, shipped, see Completed. `DiffFileList` and `DiffCommitList`
 now exist in `components/repo/`. `parseGitHubUrl` lives in `lib/github-url.ts`; add route
 cases there as new screens land.)
 
@@ -124,17 +125,18 @@ now (the file viewer reads the default branch); `tree` lands on the tree root.
 Not done: `#L10-L20` scroll target, `tree` path drill-down. Add route cases to
 `parseGitHubUrl` as new screens land.
 
-#### 3.3 In-app check annotations · size M · no deps
+#### 3.3 In-app check annotations · shipped
 
-`ChecksSection` currently does `Linking.openURL(check.url)`.
+See Completed. `app/(app)/repo/[repoId]/checks/[runId].tsx` renders the run's `output`
+summary via `MarkdownRenderer` and the annotation list (path, line range, level, title,
+message, raw details). `fetchCheckRun` and `fetchCheckRunAnnotations` live in
+`lib/github-rest.ts`; `useCheckRun` / `useCheckRunAnnotations` in `hooks/useCheckRun.ts`,
+with the annotations query gated on `output.annotations_count > 0`. `CheckSummaryItem` now
+carries `runId` so `ChecksSection` routes Actions check-runs into the screen while legacy
+external-CI statuses keep `Linking.openURL`.
 
-- **Route:** `app/(app)/repo/[repoId]/checks/[runId].tsx`.
-- **API:** `fetchCheckRun` (`GET /repos/{o}/{r}/check-runs/{id}`) plus annotations
-  (`/annotations`). Render the run's summary markdown and the annotations (path, line, message,
-  level).
-- **Skip for now:** full step logs. That endpoint returns a redirect to a zip, much heavier.
-  Annotations plus summary cover most "why is it red" cases. Mark it
-  `ponytail: annotations only, add job-log tail if people ask`.
+Not done: full job-step logs (that endpoint redirects to a zip). "Open full logs on GitHub"
+covers it. `ponytail: annotations only, add job-log tail if people ask`.
 
 ### Phase 4 - Content types
 
@@ -158,8 +160,8 @@ category { name emoji } comments { totalCount } } }`. Detail: body plus
 
 ### What each phase needs
 
-- **New REST functions:** `fetchCheckRun` plus annotations, `fetchIssueTimeline`, plus a
-  `path` arg on `fetchCommits`. (`fetchCommit`, `fetchComparison`, `fetchReleases` done.)
+- **New REST functions:** `fetchIssueTimeline`, plus a `path` arg on `fetchCommits`.
+  (`fetchCommit`, `fetchComparison`, `fetchReleases`, `fetchCheckRun` plus annotations done.)
 - **New GraphQL queries:** blame ranges, discussions list plus detail.
 - **Config:** github.com `intentFilters` and the `expo-share-intent` SEND target are done.
 
