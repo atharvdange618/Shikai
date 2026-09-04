@@ -29,6 +29,7 @@ This document tracks the feature backlog and development progress for Shikai.
 | GitHub URL router                 | `lib/github-url.ts` maps a github.com web URL to an in-app route (repo, PR, issue, commit, compare, releases, blob, tree, user). `useDeepLinks` in `app/_layout.tsx` runs it for links opened into the app and, via `expo-share-intent`, for links shared from the Android share sheet. Unmatched URLs fall back to the browser. Android `intentFilters` for github.com added (no `autoVerify`). (Backlog 3.1) | Done   |
 | In-app check annotations          | Tapping a GitHub Actions check in the PR checks list opens `repo/[repoId]/checks/[runId].tsx`: status line, the run's `output` summary via `MarkdownRenderer`, and annotation cards (level icon, `path:line`, title, message, raw details). `fetchCheckRun` and `fetchCheckRunAnnotations` added to `lib/github-rest.ts`; annotations fetch only when `annotations_count > 0`. External CI statuses still link out. Full job logs still open on GitHub. (Backlog 3.3) | Done   |
 | File history                      | A "history" button in the file viewer header opens `commits.tsx` with a `path` param. In that mode the branch selector is hidden, the header title is the filename, and the list shows only commits that touched the file. `fetchCommits` / `useCommits` / `queryKeys.repoCommits` gained an optional `path` arg. Each row still opens commit detail. (Backlog 2.1) | Done   |
+| Blame                             | A second file-viewer header button (hidden for images/video/PDF) opens `repo/[repoId]/blame.tsx`: a `FlashList` of lines with a left gutter showing short SHA and relative date on each range's first line, alternating tint per range, tap → commit detail. `fetchBlame` in `lib/github-graphql.ts` resolves the ref's tip commit and reads `blame(path)` off it (GitHub's schema puts `blame` on `Commit`, not `Blob`), plus the blob text in the same request via an aliased `object(expression)`. Plain text, no syntax highlighting. (Backlog 2.2) | Done   |
 
 ---
 
@@ -87,8 +88,8 @@ Already shipped and not repeated below: the PR diff view with file-level review 
 checks, reviewers, and a commits list; `markNotificationAsRead` / `markAllNotificationsAsRead`
 (the only write calls, and the whole write exception).
 
-**Suggested order:** 2.2 → 4.1 → fold in 5.x opportunistically.
-(Phase 1, plus 2.1, 3.1, 3.2, 3.3 and 4.2, shipped, see Completed. `DiffFileList` and
+**Suggested order:** 4.1 → fold in 5.x opportunistically.
+(Phase 1, plus 2.1, 2.2, 3.1, 3.2, 3.3 and 4.2, shipped, see Completed. `DiffFileList` and
 `DiffCommitList` now exist in `components/repo/`. `parseGitHubUrl` lives in `lib/github-url.ts`;
 add route cases there as new screens land.)
 
@@ -101,15 +102,20 @@ See Completed. `fetchCommits` / `useCommits` / `queryKeys.repoCommits` take an o
 selector and sets the header title to the filename. Entry is a `history` header button in
 the file viewer. Rows open commit detail as before.
 
-#### 2.2 Blame · size L · depends on 1.1
+#### 2.2 Blame · shipped
 
-- **API:** GraphQL only. `repository.object(expression: "{ref}:{path}") { ... on Blob { blame
-{ ranges { startingLine endingLine commit { oid message author { name } committedDate } } } } }`.
-  Add to `lib/github-graphql.ts`.
-- **Route:** `app/(app)/repo/[repoId]/blame.tsx` with `path` and `ref`.
-- **UI:** file lines with a left gutter showing short SHA plus relative date; tinted band per
-  range; tap a range → commit detail. The work is line rendering plus virtualization for big
-  files. Reuse the mono-font line approach from the file viewer.
+See Completed. Correction to the original sketch below: `blame` lives on `Commit`, not
+`Blob` — confirmed against GitHub's public GraphQL schema. `fetchBlame` resolves
+`repository.object(expression: ref) { ... on Commit { blame(path) { ranges { ... } } } }`,
+plus the blob text in the same request via an aliased `object(expression: "ref:path")`.
+`app/(app)/repo/[repoId]/blame.tsx`: `FlashList` of lines, left gutter with short SHA and
+relative date on each range's first line, alternating tint per range, tap → commit detail.
+Entry is a `feed-person` header button in the file viewer, hidden for images/video/PDF.
+
+Not done: syntax highlighting (plain mono text — the WebView-based `MarkdownRenderer` can't
+drive a native gutter, and a from-scratch tokenizer wasn't worth it here) and horizontal
+scroll for long lines (lines clip at the screen edge; the tap-through to commit detail is the
+way to read a full line for now). `ponytail: plain text and clipped lines, add if people ask`.
 
 ### Phase 3 - Triage and navigation
 
@@ -163,7 +169,7 @@ category { name emoji } comments { totalCount } } }`. Detail: body plus
 - **New REST functions:** `fetchIssueTimeline`.
   (`fetchCommit`, `fetchComparison`, `fetchReleases`, `fetchCheckRun` plus annotations, and
   the `path` arg on `fetchCommits`, done.)
-- **New GraphQL queries:** blame ranges, discussions list plus detail.
+- **New GraphQL queries:** discussions list plus detail. (Blame done.)
 - **Config:** github.com `intentFilters` and the `expo-share-intent` SEND target are done.
 
 ### Boundary note: writes
