@@ -26,6 +26,7 @@ This document tracks the feature backlog and development progress for Shikai.
 | Commit detail screen              | Tapping a commit (commits list, PR commits section, repo-detail spotlight) opens a screen with the message, author, SHA, and full diff. `FilesChangedSection` extracted to `components/repo/DiffFileList.tsx`. (Backlog 1.1)                             | Done   |
 | Compare two refs                  | `repo/[repoId]/compare.tsx` shows commits and file diffs between a base and head ref. Opened from a compare button on each branch row in the commits screen. `CommitsSection` extracted to `components/repo/DiffCommitList.tsx`. (Backlog 1.2)          | Done   |
 | Releases tab                      | A "Releases" row on repo detail (shown when the repo has releases) opens a list, and each opens a detail screen: notes via `MarkdownRenderer`, author, "compare to previous tag", asset rows with size and download count plus source-code zip/tar.gz, each with a Share / Copy link / Download menu. (Backlog 1.3)                                                                    | Done   |
+| GitHub URL router                 | `lib/github-url.ts` maps a github.com web URL to an in-app route (repo, PR, issue, commit, compare, releases, blob, tree, user). `useDeepLinks` in `app/_layout.tsx` runs it for links opened into the app and, via `expo-share-intent`, for links shared from the Android share sheet. Unmatched URLs fall back to the browser. Android `intentFilters` for github.com added (no `autoVerify`). (Backlog 3.1) | Done   |
 
 ---
 
@@ -84,9 +85,10 @@ Already shipped and not repeated below: the PR diff view with file-level review 
 checks, reviewers, and a commits list; `markNotificationAsRead` / `markAllNotificationsAsRead`
 (the only write calls, and the whole write exception).
 
-**Suggested order:** 3.1 → 3.3 → 2.1 → 2.2 → 4.1 → fold in 5.x opportunistically.
-(Phase 1, plus 3.2 and 4.2, shipped, see Completed. `DiffFileList` and `DiffCommitList`
-now exist in `components/repo/`.)
+**Suggested order:** 3.3 → 2.1 → 2.2 → 4.1 → fold in 5.x opportunistically.
+(Phase 1, plus 3.1, 3.2 and 4.2, shipped, see Completed. `DiffFileList` and `DiffCommitList`
+now exist in `components/repo/`. `parseGitHubUrl` lives in `lib/github-url.ts`; add route
+cases there as new screens land.)
 
 ### Phase 2 - Code reading
 
@@ -110,30 +112,17 @@ now exist in `components/repo/`.)
 
 ### Phase 3 - Triage and navigation
 
-#### 3.1 Universal GitHub URL router · size M · highest daily-use payoff
+#### 3.1 Universal GitHub URL router · shipped
 
-The app only registers `shikai://` today. Nothing catches `github.com` links.
+See Completed. `lib/github-url.ts` holds `parseGitHubUrl`; `hooks/useDeepLinks.ts` runs it
+for VIEW links and for share-sheet links via `expo-share-intent`. github.com verified app
+links send a plain tap to the GitHub app, so the share sheet is the reliable entry on
+Android; the unverified `github.com` VIEW filter only helps on older Android, when the user
+opts Shikai in, or when the GitHub app is absent. `blob` drops the ref and `#L` range for
+now (the file viewer reads the default branch); `tree` lands on the tree root.
 
-- **Config:** add Android `intentFilters` in `app.config.ts` for `https://github.com` and
-  `https://www.github.com`. Skip `autoVerify` at first; the app just shows in the chooser,
-  which is fine. Keep the `shikai` scheme.
-- **Parser:** `lib/github-url.ts`, pure function `parseGitHubUrl(url): Href | null`:
-  - `/{o}/{r}` → repo detail
-  - `/{o}/{r}/pull/{n}` (+ `/files`) → PR detail
-  - `/{o}/{r}/issues/{n}` → issue detail
-  - `/{o}/{r}/commit/{sha}` → commit detail (1.1)
-  - `/{o}/{r}/compare/{range}` → compare (1.2)
-  - `/{o}/{r}/releases`, `/releases/tag/{t}` → releases (1.3)
-  - `/{o}/{r}/blob/{ref}/{path}` with `#L10-L20` → file view scrolled to the range
-  - `/{o}/{r}/tree/{ref}/{path}` → file tree
-  - `/{user}` → user profile
-  - no match → `Linking.openURL`, fall back to the browser
-- **Root:** a `useDeepLinks` hook in `app/_layout.tsx` that runs the parser and `router.push`es,
-  else opens externally.
-- **Stretch:** register `android.intent.action.SEND` (text/plain) so links shared from other
-  apps land here too.
-- **Verify:** on device, tap a github.com link in Gmail, confirm Shikai is in the chooser and
-  lands right; an unmatched URL opens the browser. Add route cases as those screens land.
+Not done: `#L10-L20` scroll target, `tree` path drill-down. Add route cases to
+`parseGitHubUrl` as new screens land.
 
 #### 3.3 In-app check annotations · size M · no deps
 
@@ -172,7 +161,7 @@ category { name emoji } comments { totalCount } } }`. Detail: body plus
 - **New REST functions:** `fetchCheckRun` plus annotations, `fetchIssueTimeline`, plus a
   `path` arg on `fetchCommits`. (`fetchCommit`, `fetchComparison`, `fetchReleases` done.)
 - **New GraphQL queries:** blame ranges, discussions list plus detail.
-- **Config:** Android `intentFilters` for github.com, optional SEND share target.
+- **Config:** github.com `intentFilters` and the `expo-share-intent` SEND target are done.
 
 ### Boundary note: writes
 
