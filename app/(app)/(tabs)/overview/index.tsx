@@ -467,6 +467,28 @@ export default function OverviewScreen() {
           )}
         </FadeInView>
 
+        <FadeInView delay={250}>
+          <Pressable
+            style={({ pressed }) => [
+              s.myWorkRow,
+              { borderColor: colors.border, backgroundColor: colors.surface },
+              pressed && { opacity: 0.7 },
+            ]}
+            onPress={() => router.push("/(app)/(tabs)/overview/mine" as Href)}
+          >
+            <Octicons name="checklist" size={16} color={colors.accent} />
+            <View style={s.myWorkText}>
+              <Text style={[s.myWorkTitle, { color: colors.textPrimary }]}>
+                Your work
+              </Text>
+              <Text style={[s.myWorkSubtitle, { color: colors.textMuted }]}>
+                Review requests, assignments, and mentions
+              </Text>
+            </View>
+            <Octicons name="chevron-right" size={14} color={colors.textMuted} />
+          </Pressable>
+        </FadeInView>
+
         <FadeInView delay={300}>
           <View style={s.section}>
             <ActivityFeed
@@ -588,6 +610,31 @@ function buildStyles(colors: ColorTokens) {
       fontSize: FontSize.label,
       color: colors.textMuted,
       textAlign: "center",
+    },
+
+    myWorkRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: Spacing.md,
+      borderRadius: Radius.lg,
+      borderWidth: 1,
+      paddingVertical: Spacing.md,
+      paddingHorizontal: Spacing.lg,
+    },
+
+    myWorkText: {
+      flex: 1,
+      gap: 2,
+    },
+
+    myWorkTitle: {
+      fontFamily: FontFamily.semiBold,
+      fontSize: FontSize.label,
+    },
+
+    myWorkSubtitle: {
+      fontFamily: FontFamily.regular,
+      fontSize: FontSize.caption,
     },
 
     patPrompt: {

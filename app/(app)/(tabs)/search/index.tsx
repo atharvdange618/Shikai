@@ -16,6 +16,7 @@ import {
 import { FlashList } from "@shopify/flash-list";
 
 import { RepoCard } from "@/components/repo/RepoCard";
+import { IssueResultCard } from "@/components/shared/IssueResultCard";
 import { KeyboardAvoid } from "@/components/shared/KeyboardAvoid";
 import { ListItemSeparator } from "@/components/shared/ListItemSeparator";
 import { useDebounce } from "@/hooks/useDebounce";
@@ -169,51 +170,9 @@ export default function SearchScreen() {
 
   const renderIssueItem = useCallback(
     ({ item }: { item: GitHubIssue }) => (
-      <Pressable
-        style={({ pressed }) => [s.issueCard, pressed && { opacity: 0.7 }]}
-        onPress={() => {
-          const repoMatch = item.repository_url?.match(
-            /\/repos\/([^/]+)\/([^/]+)$/,
-          );
-          if (repoMatch) {
-            const [, owner, repo] = repoMatch;
-            const repoId = encodeRepoId(owner, repo);
-            router.push({
-              pathname: "/(app)/repo/[repoId]/issue/[number]",
-              params: { repoId, number: String(item.number) },
-            });
-          }
-        }}
-      >
-        <View style={s.issueHeader}>
-          <Octicons
-            name={item.pull_request ? "git-pull-request" : "issue-opened"}
-            size={14}
-            color={item.pull_request ? colors.merged : colors.success}
-          />
-          <Text style={s.issueTitle} numberOfLines={1}>
-            {item.title}
-          </Text>
-        </View>
-        <Text style={s.issueMeta} numberOfLines={1}>
-          #{item.number}
-          {item.user && ` by ${item.user.login}`}
-          {item.state && ` \u00b7 ${item.state}`}
-        </Text>
-        {item.repository_url &&
-          (() => {
-            const repoMatch = item.repository_url.match(
-              /\/repos\/([^/]+\/[^/]+)$/,
-            );
-            return repoMatch ? (
-              <Text style={s.issueRepo} numberOfLines={1}>
-                {repoMatch[1]}
-              </Text>
-            ) : null;
-          })()}
-      </Pressable>
+      <IssueResultCard issue={item} colors={colors} />
     ),
-    [colors, s, router],
+    [colors],
   );
 
   const renderItem = useCallback(
@@ -581,40 +540,5 @@ function buildStyles(colors: ColorTokens) {
       color: colors.textMuted,
     },
 
-    issueCard: {
-      backgroundColor: colors.surface,
-      borderRadius: Radius.lg,
-      borderWidth: 1,
-      borderColor: colors.border,
-      padding: Spacing.md,
-      gap: Spacing.xs,
-    },
-
-    issueHeader: {
-      flexDirection: "row",
-      alignItems: "center",
-      gap: Spacing.sm,
-    },
-
-    issueTitle: {
-      flex: 1,
-      fontFamily: FontFamily.semiBold,
-      fontSize: FontSize.body,
-      color: colors.textPrimary,
-    },
-
-    issueMeta: {
-      fontFamily: FontFamily.regular,
-      fontSize: FontSize.caption,
-      color: colors.textMuted,
-      marginLeft: 22,
-    },
-
-    issueRepo: {
-      fontFamily: FontFamily.medium,
-      fontSize: FontSize.caption,
-      color: colors.textSecondary,
-      marginLeft: 22,
-    },
   });
 }

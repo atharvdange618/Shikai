@@ -32,6 +32,21 @@ export default function OverviewLayout() {
           headerShadowVisible: false,
         }}
       />
+      <Stack.Screen
+        name="mine"
+        options={{
+          headerShown: true,
+          title: "Your work",
+          headerStyle: { backgroundColor: colors.background },
+          headerTitleStyle: {
+            fontFamily: FontFamily.semiBold,
+            fontSize: FontSize.title,
+            color: colors.textPrimary,
+          },
+          headerTintColor: colors.accent,
+          headerShadowVisible: false,
+        }}
+      />
     </Stack>
   );
 }
