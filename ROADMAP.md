@@ -28,6 +28,7 @@ This document tracks the feature backlog and development progress for Shikai.
 | Releases tab                      | A "Releases" row on repo detail (shown when the repo has releases) opens a list, and each opens a detail screen: notes via `MarkdownRenderer`, author, "compare to previous tag", asset rows with size and download count plus source-code zip/tar.gz, each with a Share / Copy link / Download menu. (Backlog 1.3)                                                                    | Done   |
 | GitHub URL router                 | `lib/github-url.ts` maps a github.com web URL to an in-app route (repo, PR, issue, commit, compare, releases, blob, tree, user). `useDeepLinks` in `app/_layout.tsx` runs it for links opened into the app and, via `expo-share-intent`, for links shared from the Android share sheet. Unmatched URLs fall back to the browser. Android `intentFilters` for github.com added (no `autoVerify`). (Backlog 3.1) | Done   |
 | In-app check annotations          | Tapping a GitHub Actions check in the PR checks list opens `repo/[repoId]/checks/[runId].tsx`: status line, the run's `output` summary via `MarkdownRenderer`, and annotation cards (level icon, `path:line`, title, message, raw details). `fetchCheckRun` and `fetchCheckRunAnnotations` added to `lib/github-rest.ts`; annotations fetch only when `annotations_count > 0`. External CI statuses still link out. Full job logs still open on GitHub. (Backlog 3.3) | Done   |
+| File history                      | A "history" button in the file viewer header opens `commits.tsx` with a `path` param. In that mode the branch selector is hidden, the header title is the filename, and the list shows only commits that touched the file. `fetchCommits` / `useCommits` / `queryKeys.repoCommits` gained an optional `path` arg. Each row still opens commit detail. (Backlog 2.1) | Done   |
 
 ---
 
@@ -86,20 +87,19 @@ Already shipped and not repeated below: the PR diff view with file-level review 
 checks, reviewers, and a commits list; `markNotificationAsRead` / `markAllNotificationsAsRead`
 (the only write calls, and the whole write exception).
 
-**Suggested order:** 2.1 → 2.2 → 4.1 → fold in 5.x opportunistically.
-(Phase 1, plus 3.1, 3.2, 3.3 and 4.2, shipped, see Completed. `DiffFileList` and `DiffCommitList`
-now exist in `components/repo/`. `parseGitHubUrl` lives in `lib/github-url.ts`; add route
-cases there as new screens land.)
+**Suggested order:** 2.2 → 4.1 → fold in 5.x opportunistically.
+(Phase 1, plus 2.1, 3.1, 3.2, 3.3 and 4.2, shipped, see Completed. `DiffFileList` and
+`DiffCommitList` now exist in `components/repo/`. `parseGitHubUrl` lives in `lib/github-url.ts`;
+add route cases there as new screens land.)
 
 ### Phase 2 - Code reading
 
-#### 2.1 File history · size S · depends on 1.1
+#### 2.1 File history · shipped
 
-- **API:** add an optional `path` arg to `fetchCommits` (it already forwards params).
-  `GET /repos/{o}/{r}/commits?path={path}&sha={branch}`.
-- **Route:** reuse `commits.tsx`. When it gets a `path` param, set the title to the filename
-  and pass `path` through. Each row → commit detail.
-- **Entry:** a header button on `app/(app)/repo/[repoId]/file.tsx`.
+See Completed. `fetchCommits` / `useCommits` / `queryKeys.repoCommits` take an optional
+`path`. `commits.tsx` reads `path` + `fileName` params: in that mode it hides the branch
+selector and sets the header title to the filename. Entry is a `history` header button in
+the file viewer. Rows open commit detail as before.
 
 #### 2.2 Blame · size L · depends on 1.1
 
@@ -160,8 +160,9 @@ category { name emoji } comments { totalCount } } }`. Detail: body plus
 
 ### What each phase needs
 
-- **New REST functions:** `fetchIssueTimeline`, plus a `path` arg on `fetchCommits`.
-  (`fetchCommit`, `fetchComparison`, `fetchReleases`, `fetchCheckRun` plus annotations done.)
+- **New REST functions:** `fetchIssueTimeline`.
+  (`fetchCommit`, `fetchComparison`, `fetchReleases`, `fetchCheckRun` plus annotations, and
+  the `path` arg on `fetchCommits`, done.)
 - **New GraphQL queries:** blame ranges, discussions list plus detail.
 - **Config:** github.com `intentFilters` and the `expo-share-intent` SEND target are done.
 
