@@ -1,6 +1,6 @@
 # Shikai Roadmap
 
-> **Version:** 1.3.0 · **Last Updated:** July 07, 2026 · **Status:** Active Development
+> **Version:** 1.3.1 · **Last Updated:** September 04, 2026 · **Status:** Active Development
 
 This document tracks the feature backlog and development progress for Shikai.
 
@@ -69,8 +69,168 @@ This document tracks the feature backlog and development progress for Shikai.
 
 ## Backlog
 
-### Tier 3 - Large Features (3+ hours each)
+Read-only value additions, sequenced so each item unlocks the next. The through-line:
+Shikai already has a working diff renderer (`file.patch` in a ```diff fence handed to
+`MarkdownRenderer`with a repo`context`). Commit detail, compare, and release diffs all
+reuse it. No new diff engine.
 
-| #   | Feature                | Description                                                                                                                                                                                                               | Est. LOC |
-| --- | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- |
-| 12  | 3D GitHub Profile Card | Shareable 3D-styled GitHub profile cards for social proof and FOMO. Generate a visual card with avatar, stats, top repos, contribution graph. Share as image to social media. Inspired by Threads' card sharing mechanic. | ~350     |
+Already shipped and not repeated below: the PR diff view with file-level review threads,
+checks, reviewers, and a commits list; `markNotificationAsRead` / `markAllNotificationsAsRead`
+(the only write calls, and the whole write exception).
+
+**Suggested order:** 1.1 → 1.2 → 1.3 → 3.1 → (3.2, 3.3 in parallel) → 2.1 → 2.2 →
+(4.1, 4.2 for breadth) → fold in 5.x opportunistically.
+
+### Phase 1 - Reuse the diff renderer
+
+#### 1.1 Commit detail screen · size M · unblocks 1.2, 2.1, 2.2, 3.1, 5.4
+
+Tapping a commit anywhere (commits list, PR commits section, `CommitSpotlight`) only copies
+the SHA today. There is no screen for a single commit's diff.
+
+- **Route:** `app/(app)/repo/[repoId]/commit/[sha].tsx`
+- **API:** `fetchCommit(owner, repo, sha)` → `GET /repos/{o}/{r}/commits/{sha}`. Returns the
+  commit plus `files[]` with `patch`, same shape as `fetchPullRequestFiles`.
+- **Hook:** `hooks/useCommitDetail.ts`, mirror `usePullRequestDetail`.
+- **Refactor first:** pull `FilesChangedSection`, `getFileStatusDisplay`, `groupThreadsByPath`,
+  `ThreadComment` out of `app/(app)/repo/[repoId]/pr/[number].tsx` into
+  `components/repo/DiffFileList.tsx`. One component, two callers. Same for `CommitsSection`.
+- **Wire nav:** `CommitItem` in `commits.tsx`, `CommitRow` in the PR `CommitsSection`, and
+  `CommitSpotlight` push to the new route.
+- **Verify:** open a commit from the list, diff renders, SHA copy still works, back works.
+  `expo lint`, then test on device before commit.
+
+#### 1.2 Compare two refs · size M · depends on 1.1
+
+- **Route:** `app/(app)/repo/[repoId]/compare.tsx` with `base` and `head` params.
+- **API:** `fetchComparison(owner, repo, base, head)` → `GET /repos/{o}/{r}/compare/{base}...{head}`.
+  Returns `commits[]` and `files[]`, both shapes already rendered.
+- **UI:** `DiffFileList` plus the extracted commits list.
+- **Entry points:** a "Compare" action in `BranchSelector`; the "changes since previous tag"
+  link from releases.
+
+#### 1.3 Releases tab · size M · soft depends on 1.2
+
+- **Route:** `app/(app)/repo/[repoId]/releases.tsx`, detail inline or `release/[tag].tsx`.
+- **API:** `fetchReleases(owner, repo, page)` → `GET /repos/{o}/{r}/releases`.
+- **UI:** tag, name, date, prerelease pill; body via `MarkdownRenderer`; asset rows (name,
+  size, download count, tap opens URL); "Compare to previous tag" → `compare.tsx`.
+- **Entry:** a "Releases" row on repo detail next to Commits / Issues / PRs / Files. Show only
+  when the repo has releases.
+
+### Phase 2 - Code reading
+
+#### 2.1 File history · size S · depends on 1.1
+
+- **API:** add an optional `path` arg to `fetchCommits` (it already forwards params).
+  `GET /repos/{o}/{r}/commits?path={path}&sha={branch}`.
+- **Route:** reuse `commits.tsx`. When it gets a `path` param, set the title to the filename
+  and pass `path` through. Each row → commit detail.
+- **Entry:** a header button on `app/(app)/repo/[repoId]/file.tsx`.
+
+#### 2.2 Blame · size L · depends on 1.1
+
+- **API:** GraphQL only. `repository.object(expression: "{ref}:{path}") { ... on Blob { blame
+{ ranges { startingLine endingLine commit { oid message author { name } committedDate } } } } }`.
+  Add to `lib/github-graphql.ts`.
+- **Route:** `app/(app)/repo/[repoId]/blame.tsx` with `path` and `ref`.
+- **UI:** file lines with a left gutter showing short SHA plus relative date; tinted band per
+  range; tap a range → commit detail. The work is line rendering plus virtualization for big
+  files. Reuse the mono-font line approach from the file viewer.
+
+### Phase 3 - Triage and navigation
+
+#### 3.1 Universal GitHub URL router · size M · highest daily-use payoff
+
+The app only registers `shikai://` today. Nothing catches `github.com` links.
+
+- **Config:** add Android `intentFilters` in `app.config.ts` for `https://github.com` and
+  `https://www.github.com`. Skip `autoVerify` at first; the app just shows in the chooser,
+  which is fine. Keep the `shikai` scheme.
+- **Parser:** `lib/github-url.ts`, pure function `parseGitHubUrl(url): Href | null`:
+  - `/{o}/{r}` → repo detail
+  - `/{o}/{r}/pull/{n}` (+ `/files`) → PR detail
+  - `/{o}/{r}/issues/{n}` → issue detail
+  - `/{o}/{r}/commit/{sha}` → commit detail (1.1)
+  - `/{o}/{r}/compare/{range}` → compare (1.2)
+  - `/{o}/{r}/releases`, `/releases/tag/{t}` → releases (1.3)
+  - `/{o}/{r}/blob/{ref}/{path}` with `#L10-L20` → file view scrolled to the range
+  - `/{o}/{r}/tree/{ref}/{path}` → file tree
+  - `/{user}` → user profile
+  - no match → `Linking.openURL`, fall back to the browser
+- **Root:** a `useDeepLinks` hook in `app/_layout.tsx` that runs the parser and `router.push`es,
+  else opens externally.
+- **Stretch:** register `android.intent.action.SEND` (text/plain) so links shared from other
+  apps land here too.
+- **Verify:** on device, tap a github.com link in Gmail, confirm Shikai is in the chooser and
+  lands right; an unmatched URL opens the browser. Add route cases as those screens land.
+
+#### 3.2 "Your work" dashboard · size S-M · no deps
+
+- **Route:** `app/(app)/(tabs)/overview/mine.tsx`, mirror `feed.tsx`. Reach it from a button
+  next to "Following".
+- **API:** `searchIssues` already exists. Four queries against the logged-in login:
+  `is:open is:pr review-requested:@me`, `is:open assignee:@me`, `is:open author:@me`,
+  `is:open mentions:@me`.
+- **UI:** four collapsible sections, short lists, tap → issue/PR detail. Reuse the issue/PR
+  row styling.
+
+#### 3.3 In-app check annotations · size M · no deps
+
+`ChecksSection` currently does `Linking.openURL(check.url)`.
+
+- **Route:** `app/(app)/repo/[repoId]/checks/[runId].tsx`.
+- **API:** `fetchCheckRun` (`GET /repos/{o}/{r}/check-runs/{id}`) plus annotations
+  (`/annotations`). Render the run's summary markdown and the annotations (path, line, message,
+  level).
+- **Skip for now:** full step logs. That endpoint returns a redirect to a zip, much heavier.
+  Annotations plus summary cover most "why is it red" cases. Mark it
+  `ponytail: annotations only, add job-log tail if people ask`.
+
+### Phase 4 - Content types
+
+#### 4.1 Discussions viewer · size M-L · no deps
+
+- **API:** GraphQL. List: `repository.discussions(first, after) { nodes { number title author
+category { name emoji } comments { totalCount } } }`. Detail: body plus
+  `comments(first) { nodes { body author replies { nodes { body author } } } }` and `isAnswered`.
+- **Routes:** `discussions.tsx` and `discussion/[number].tsx`. Close copies of the issues
+  screens; body and comments via `MarkdownRenderer`, "Answered" badge, one level of replies.
+- **Entry:** repo detail row, shown only when `repo.has_discussions`.
+
+#### 4.2 Gist viewer · size S-M · no deps
+
+- **API:** `GET /gists`, `GET /users/{u}/gists`, `GET /gists/{id}`.
+- **Routes:** `user/[username]/gists.tsx` and `gist/[id].tsx`, plus a "Gists" row on your own
+  profile.
+- **UI:** list is description plus file count plus updated; detail renders each file through
+  `MarkdownRenderer` (```lang fence for code, direct for `.md`).
+
+### Phase 5 - PR detail polish
+
+| #   | Item                          | Size | Note                                                                                                                                                   |
+| --- | ----------------------------- | ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 5.1 | Line-anchored review comments | S-M  | Use `comment.diff_hunk` and `comment.line` (already in the API response) to show the hunk above each thread instead of bucketing by file path          |
+| 5.2 | Reactions row                 | S    | `reactions` counts are already on issues/PRs/comments; render a small emoji-count strip                                                                |
+| 5.3 | Issue/PR timeline events      | M    | `GET /repos/{o}/{r}/issues/{n}/timeline`: labels, cross-refs, closed/reopened, force-pushes, linked PRs. Merge into the comment stream by `created_at` |
+| 5.4 | Per-commit diff inside a PR   | XS   | `CommitRow` → push to commit detail, free once 1.1 lands                                                                                               |
+
+### What each phase needs
+
+- **New REST functions:** `fetchCommit`, `fetchComparison`, `fetchReleases`, `fetchCheckRun`
+  plus annotations, `fetchGists` / `fetchUserGists` / `fetchGist`, `fetchIssueTimeline`, plus a
+  `path` arg on `fetchCommits`.
+- **New GraphQL queries:** blame ranges, discussions list plus detail.
+- **Config:** Android `intentFilters` for github.com, optional SEND share target.
+
+### Boundary note: writes
+
+`markNotificationAsRead` and `markAllNotificationsAsRead` already exist and are the only write
+calls in the app. That is the narrow exception, already taken.
+
+- **Cheap add:** per-row swipe-to-mark-read in the notifications screen if it is not wired yet.
+- **Second write, undecided:** `DELETE /notifications/threads/{id}/subscription` for
+  "unsubscribe from this thread". Useful for triage but a new kind of write. Leaning toward
+  stopping at mark-read to keep the story clean.
+
+---
