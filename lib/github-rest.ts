@@ -18,6 +18,7 @@ import type {
   GitHubPullRequest,
   GitHubPullRequestFile,
   GitHubReadme,
+  GitHubRelease,
   GitHubRepo,
   GitHubRequestedReviewers,
   GitHubReview,
@@ -243,6 +244,39 @@ export async function fetchComparison(
   const range = `${encodeURIComponent(base)}...${encodeURIComponent(head)}`;
   const { data } = await githubAxios.get<GitHubComparison>(
     `/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/compare/${range}`,
+  );
+  return data;
+}
+
+export interface FetchReleasesResult {
+  releases: GitHubRelease[];
+  pagination: GitHubPagination;
+}
+
+export async function fetchReleases(
+  owner: string,
+  repo: string,
+  page: number,
+  per_page: number = 20,
+): Promise<FetchReleasesResult> {
+  const { data, headers } = await githubAxios.get<GitHubRelease[]>(
+    `/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/releases`,
+    { params: { page, per_page } },
+  );
+
+  return {
+    releases: data.filter((r) => !r.draft),
+    pagination: parseLinkHeader(headers["link"]),
+  };
+}
+
+export async function fetchReleaseByTag(
+  owner: string,
+  repo: string,
+  tag: string,
+): Promise<GitHubRelease> {
+  const { data } = await githubAxios.get<GitHubRelease>(
+    `/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/releases/tags/${encodeURIComponent(tag)}`,
   );
   return data;
 }

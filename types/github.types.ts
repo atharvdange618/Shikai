@@ -329,15 +329,19 @@ export interface GitHubRelease {
   name: string | null;
   body: string | null;
   html_url: string;
+  zipball_url: string | null;
+  tarball_url: string | null;
   draft: boolean;
   prerelease: boolean;
   created_at: string;
   published_at: string;
+  author: GitHubUserSummary | null;
   assets: {
     name: string;
     browser_download_url: string;
     content_type: string;
     size: number;
+    download_count: number;
   }[];
 }
 

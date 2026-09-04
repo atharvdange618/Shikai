@@ -10,6 +10,7 @@ import {
   type ColorTokens,
 } from "@/constants/theme";
 import { useRepoDetailsScreen } from "@/hooks/useRepoDetails";
+import { useReleases } from "@/hooks/useReleases";
 import { fetchIssues, fetchPullRequests } from "@/lib/github-rest";
 import { prefetchFileTree, prefetchRepoCommits } from "@/lib/prefetch";
 import { queryKeys } from "@/lib/query-client";
@@ -97,6 +98,8 @@ export default function RepoDetailsScreen() {
     error,
     refetch,
   } = useRepoDetailsScreen(owner, repoName);
+
+  const { releases } = useReleases(owner, repoName);
 
   useEffect(() => {
     if (repo?.name) {
@@ -207,6 +210,11 @@ export default function RepoDetailsScreen() {
       staleTime: 1000 * 60 * 2,
     });
   }, [owner, repoName, queryClient]);
+
+  const handleReleasesPress = useCallback(() => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    router.push(`/(app)/repo/${repoId}/releases`);
+  }, [router, repoId]);
 
   const handleOwnerPress = useCallback(() => {
     router.push({
@@ -319,6 +327,9 @@ export default function RepoDetailsScreen() {
             onIssuesPressIn={handleIssuesPressIn}
             onPRsPress={handlePRsPress}
             onPRsPressIn={handlePRsPressIn}
+            showReleases={releases.length > 0}
+            releaseCount={releases.length}
+            onReleasesPress={handleReleasesPress}
           />
         </Animated.View>
 

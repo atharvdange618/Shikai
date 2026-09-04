@@ -175,6 +175,36 @@ export default function RepoLayout() {
               : { backgroundColor: colors.background },
         }}
       />
+
+      <Stack.Screen
+        name="[repoId]/releases"
+        options={{
+          ...sharedHeaderOptions,
+          title: "Releases",
+          headerTransparent: Platform.OS === "ios",
+          headerBlurEffect:
+            Platform.OS === "ios" ? (isDark ? "dark" : "light") : undefined,
+          headerStyle:
+            Platform.OS === "ios"
+              ? undefined
+              : { backgroundColor: colors.background },
+        }}
+      />
+
+      <Stack.Screen
+        name="[repoId]/release/[tag]"
+        options={{
+          ...sharedHeaderOptions,
+          title: "",
+          headerTransparent: Platform.OS === "ios",
+          headerBlurEffect:
+            Platform.OS === "ios" ? (isDark ? "dark" : "light") : undefined,
+          headerStyle:
+            Platform.OS === "ios"
+              ? undefined
+              : { backgroundColor: colors.background },
+        }}
+      />
     </Stack>
   );
 }

@@ -103,6 +103,10 @@ export const queryKeys = {
     ["repo", owner, repo, "commit", sha] as const,
   comparison: (owner: string, repo: string, base: string, head: string) =>
     ["repo", owner, repo, "compare", base, head] as const,
+  repoReleases: (owner: string, repo: string) =>
+    ["repo", owner, repo, "releases"] as const,
+  repoRelease: (owner: string, repo: string, tag: string) =>
+    ["repo", owner, repo, "release", tag] as const,
   recentActivity: () => ["recentActivity"] as const,
   socialAccounts: () => ["socialAccounts"] as const,
   repoCount: () => ["repoCount"] as const,
