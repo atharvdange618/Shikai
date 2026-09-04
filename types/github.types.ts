@@ -46,6 +46,7 @@ export interface GitHubRepo {
 
   default_branch: string;
   size: number;
+  has_discussions: boolean;
 
   created_at: string;
   updated_at: string;

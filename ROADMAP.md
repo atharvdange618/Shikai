@@ -30,6 +30,7 @@ This document tracks the feature backlog and development progress for Shikai.
 | In-app check annotations          | Tapping a GitHub Actions check in the PR checks list opens `repo/[repoId]/checks/[runId].tsx`: status line, the run's `output` summary via `MarkdownRenderer`, and annotation cards (level icon, `path:line`, title, message, raw details). `fetchCheckRun` and `fetchCheckRunAnnotations` added to `lib/github-rest.ts`; annotations fetch only when `annotations_count > 0`. External CI statuses still link out. Full job logs still open on GitHub. (Backlog 3.3) | Done   |
 | File history                      | A "history" button in the file viewer header opens `commits.tsx` with a `path` param. In that mode the branch selector is hidden, the header title is the filename, and the list shows only commits that touched the file. `fetchCommits` / `useCommits` / `queryKeys.repoCommits` gained an optional `path` arg. Each row still opens commit detail. (Backlog 2.1) | Done   |
 | Blame                             | A second file-viewer header button (hidden for images/video/PDF) opens `repo/[repoId]/blame.tsx`: a `FlashList` of lines with a left gutter showing short SHA and relative date on each range's first line, alternating tint per range, tap → commit detail. `fetchBlame` in `lib/github-graphql.ts` resolves the ref's tip commit and reads `blame(path)` off it (GitHub's schema puts `blame` on `Commit`, not `Blob`), plus the blob text in the same request via an aliased `object(expression)`. Plain text, no syntax highlighting. (Backlog 2.2) | Done   |
+| Discussions viewer                | A "Discussions" row on repo detail, shown only when `repo.has_discussions`, opens `discussions.tsx` (cursor-paginated list) and `discussion/[number].tsx`: category emoji/name pill, "Answered" badge, body and comments via `MarkdownRenderer`, one level of replies indented under each comment. `fetchDiscussions` / `fetchDiscussion` added to `lib/github-graphql.ts`; `useDiscussions` / `useDiscussionDetail` in `hooks/useDiscussions.ts`. (Backlog 4.1) | Done   |
 
 ---
 
@@ -88,8 +89,8 @@ Already shipped and not repeated below: the PR diff view with file-level review 
 checks, reviewers, and a commits list; `markNotificationAsRead` / `markAllNotificationsAsRead`
 (the only write calls, and the whole write exception).
 
-**Suggested order:** 4.1 → fold in 5.x opportunistically.
-(Phase 1, plus 2.1, 2.2, 3.1, 3.2, 3.3 and 4.2, shipped, see Completed. `DiffFileList` and
+**Suggested order:** fold in 5.x opportunistically.
+(Phase 1, plus 2.1, 2.2, 3.1, 3.2, 3.3, 4.1 and 4.2, shipped, see Completed. `DiffFileList` and
 `DiffCommitList` now exist in `components/repo/`. `parseGitHubUrl` lives in `lib/github-url.ts`;
 add route cases there as new screens land.)
 
@@ -146,14 +147,18 @@ covers it. `ponytail: annotations only, add job-log tail if people ask`.
 
 ### Phase 4 - Content types
 
-#### 4.1 Discussions viewer · size M-L · no deps
+#### 4.1 Discussions viewer · shipped
 
-- **API:** GraphQL. List: `repository.discussions(first, after) { nodes { number title author
-category { name emoji } comments { totalCount } } }`. Detail: body plus
-  `comments(first) { nodes { body author replies { nodes { body author } } } }` and `isAnswered`.
-- **Routes:** `discussions.tsx` and `discussion/[number].tsx`. Close copies of the issues
-  screens; body and comments via `MarkdownRenderer`, "Answered" badge, one level of replies.
-- **Entry:** repo detail row, shown only when `repo.has_discussions`.
+See Completed. `fetchDiscussions` (cursor-paginated via `useInfiniteQuery`) and `fetchDiscussion`
+live in `lib/github-graphql.ts`; `useDiscussions` / `useDiscussionDetail` in
+`hooks/useDiscussions.ts`. `discussions.tsx` and `discussion/[number].tsx` are close copies of
+the issues screens: category emoji/name pill, "Answered" badge, body and comments via
+`MarkdownRenderer`, one level of replies rendered indented under each comment. Entry is a
+"Discussions" row in `RepoActivity`, shown only when `repo.has_discussions` (added to
+`GitHubRepo`).
+
+Not done: replies beyond the first 10 per comment (mirrors GitHub's own "show more replies"
+gap, not wired here). `ponytail: first 10 replies only, add a load-more if threads run long`.
 
 ### Phase 5 - PR detail polish
 
@@ -169,7 +174,7 @@ category { name emoji } comments { totalCount } } }`. Detail: body plus
 - **New REST functions:** `fetchIssueTimeline`.
   (`fetchCommit`, `fetchComparison`, `fetchReleases`, `fetchCheckRun` plus annotations, and
   the `path` arg on `fetchCommits`, done.)
-- **New GraphQL queries:** discussions list plus detail. (Blame done.)
+- **New GraphQL queries:** none remaining. (Blame and discussions done.)
 - **Config:** github.com `intentFilters` and the `expo-share-intent` SEND target are done.
 
 ### Boundary note: writes

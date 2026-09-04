@@ -5,6 +5,10 @@ import type {
   CommitCountResponse,
   ContributionCalendar,
   ContributionGraphResponse,
+  DiscussionDetail,
+  DiscussionDetailResponse,
+  DiscussionListNode,
+  DiscussionsListResponse,
   PinnedRepoNode,
   PinnedReposResponse,
   RecentActivityResponse,
@@ -288,4 +292,118 @@ export async function fetchBlame(
     text: response.repository?.blob?.text ?? null,
     isBinary: response.repository?.blob?.isBinary ?? false,
   };
+}
+
+const DISCUSSIONS_QUERY = `
+  query Discussions($owner: String!, $name: String!, $after: String) {
+    repository(owner: $owner, name: $name) {
+      discussions(first: 15, after: $after, orderBy: {field: UPDATED_AT, direction: DESC}) {
+        pageInfo {
+          hasNextPage
+          endCursor
+        }
+        nodes {
+          id
+          number
+          title
+          isAnswered
+          createdAt
+          author {
+            login
+            avatarUrl
+          }
+          category {
+            name
+            emoji
+          }
+          comments {
+            totalCount
+          }
+        }
+      }
+    }
+  }
+`;
+
+export interface DiscussionsPage {
+  discussions: DiscussionListNode[];
+  pageInfo: { hasNextPage: boolean; endCursor: string | null };
+}
+
+export async function fetchDiscussions(
+  owner: string,
+  repo: string,
+  after?: string | null,
+): Promise<DiscussionsPage> {
+  const response = await graphql<DiscussionsListResponse["data"]>(
+    DISCUSSIONS_QUERY,
+    { owner, name: repo, after: after ?? null },
+  );
+
+  const discussions = response.repository?.discussions;
+  return {
+    discussions: discussions?.nodes ?? [],
+    pageInfo: discussions?.pageInfo ?? { hasNextPage: false, endCursor: null },
+  };
+}
+
+const DISCUSSION_QUERY = `
+  query Discussion($owner: String!, $name: String!, $number: Int!) {
+    repository(owner: $owner, name: $name) {
+      discussion(number: $number) {
+        id
+        number
+        title
+        body
+        isAnswered
+        createdAt
+        author {
+          login
+          avatarUrl
+        }
+        category {
+          name
+          emoji
+        }
+        comments(first: 30) {
+          totalCount
+          nodes {
+            id
+            body
+            createdAt
+            isAnswer
+            author {
+              login
+              avatarUrl
+            }
+            replies(first: 10) {
+              totalCount
+              nodes {
+                id
+                body
+                createdAt
+                author {
+                  login
+                  avatarUrl
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+`;
+
+export async function fetchDiscussion(
+  owner: string,
+  repo: string,
+  number: number,
+): Promise<DiscussionDetail | null> {
+  const response = await graphql<DiscussionDetailResponse["data"]>(
+    DISCUSSION_QUERY,
+    { owner, name: repo, number },
+  );
+
+  return response.repository?.discussion ?? null;
 }

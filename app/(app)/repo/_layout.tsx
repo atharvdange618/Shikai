@@ -222,6 +222,36 @@ export default function RepoLayout() {
       />
 
       <Stack.Screen
+        name="[repoId]/discussions"
+        options={{
+          ...sharedHeaderOptions,
+          title: "Discussions",
+          headerTransparent: Platform.OS === "ios",
+          headerBlurEffect:
+            Platform.OS === "ios" ? (isDark ? "dark" : "light") : undefined,
+          headerStyle:
+            Platform.OS === "ios"
+              ? undefined
+              : { backgroundColor: colors.background },
+        }}
+      />
+
+      <Stack.Screen
+        name="[repoId]/discussion/[number]"
+        options={{
+          ...sharedHeaderOptions,
+          title: "",
+          headerTransparent: Platform.OS === "ios",
+          headerBlurEffect:
+            Platform.OS === "ios" ? (isDark ? "dark" : "light") : undefined,
+          headerStyle:
+            Platform.OS === "ios"
+              ? undefined
+              : { backgroundColor: colors.background },
+        }}
+      />
+
+      <Stack.Screen
         name="[repoId]/release/[tag]"
         options={{
           ...sharedHeaderOptions,

@@ -171,3 +171,82 @@ export interface BlameResponse {
     } | null;
   };
 }
+
+export interface DiscussionCategory {
+  name: string;
+  emoji: string;
+}
+
+export interface DiscussionAuthor {
+  login: string;
+  avatarUrl: string | null;
+}
+
+export interface DiscussionListNode {
+  id: string;
+  number: number;
+  title: string;
+  isAnswered: boolean;
+  createdAt: string;
+  author: DiscussionAuthor | null;
+  category: DiscussionCategory;
+  comments: {
+    totalCount: number;
+  };
+}
+
+export interface DiscussionsListResponse {
+  data: {
+    repository: {
+      discussions: {
+        pageInfo: {
+          hasNextPage: boolean;
+          endCursor: string | null;
+        };
+        nodes: DiscussionListNode[];
+      };
+    } | null;
+  };
+}
+
+export interface DiscussionReply {
+  id: string;
+  body: string;
+  createdAt: string;
+  author: DiscussionAuthor | null;
+}
+
+export interface DiscussionComment {
+  id: string;
+  body: string;
+  createdAt: string;
+  author: DiscussionAuthor | null;
+  isAnswer: boolean;
+  replies: {
+    totalCount: number;
+    nodes: DiscussionReply[];
+  };
+}
+
+export interface DiscussionDetail {
+  id: string;
+  number: number;
+  title: string;
+  body: string;
+  isAnswered: boolean;
+  createdAt: string;
+  author: DiscussionAuthor | null;
+  category: DiscussionCategory;
+  comments: {
+    totalCount: number;
+    nodes: DiscussionComment[];
+  };
+}
+
+export interface DiscussionDetailResponse {
+  data: {
+    repository: {
+      discussion: DiscussionDetail | null;
+    } | null;
+  };
+}

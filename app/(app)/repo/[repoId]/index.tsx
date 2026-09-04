@@ -216,6 +216,11 @@ export default function RepoDetailsScreen() {
     router.push(`/(app)/repo/${repoId}/releases`);
   }, [router, repoId]);
 
+  const handleDiscussionsPress = useCallback(() => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    router.push(`/(app)/repo/${repoId}/discussions`);
+  }, [router, repoId]);
+
   const handleOwnerPress = useCallback(() => {
     router.push({
       pathname: "/(app)/user/[username]",
@@ -330,6 +335,8 @@ export default function RepoDetailsScreen() {
             showReleases={releases.length > 0}
             releaseCount={releases.length}
             onReleasesPress={handleReleasesPress}
+            showDiscussions={repo?.has_discussions}
+            onDiscussionsPress={handleDiscussionsPress}
           />
         </Animated.View>
 

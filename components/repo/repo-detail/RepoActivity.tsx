@@ -21,6 +21,8 @@ interface RepoActivityProps {
   releaseCount?: number;
   onReleasesPress?: () => void;
   onReleasesPressIn?: () => void;
+  showDiscussions?: boolean;
+  onDiscussionsPress?: () => void;
 }
 
 export function RepoActivity({
@@ -36,6 +38,8 @@ export function RepoActivity({
   releaseCount = 0,
   onReleasesPress,
   onReleasesPressIn,
+  showDiscussions,
+  onDiscussionsPress,
 }: RepoActivityProps) {
   const s = buildStyles(colors);
 
@@ -120,6 +124,33 @@ export function RepoActivity({
                 <Octicons name="tag" size={14} color={colors.textMuted} />
                 <Text style={s.activityCount}>{releaseCount}</Text>
                 <Text style={s.activityLabel}>Releases</Text>
+                <Octicons
+                  name="chevron-right"
+                  size={12}
+                  color={colors.textMuted}
+                  style={{ marginLeft: "auto" }}
+                />
+              </Pressable>
+            </>
+          )}
+
+          {showDiscussions && (
+            <>
+              <View style={s.activityDivider} />
+
+              <Pressable
+                style={({ pressed }) => [
+                  s.activityRow,
+                  pressed && { opacity: 0.6 },
+                ]}
+                onPress={onDiscussionsPress}
+              >
+                <Octicons
+                  name="comment-discussion"
+                  size={14}
+                  color={colors.textMuted}
+                />
+                <Text style={s.activityLabel}>Discussions</Text>
                 <Octicons
                   name="chevron-right"
                   size={12}
