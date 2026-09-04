@@ -89,9 +89,9 @@ Already shipped and not repeated below: the PR diff view with file-level review 
 checks, reviewers, and a commits list; `markNotificationAsRead` / `markAllNotificationsAsRead`
 (the only write calls, and the whole write exception).
 
-**Suggested order:** fold in 5.x opportunistically.
-(Phase 1, plus 2.1, 2.2, 3.1, 3.2, 3.3, 4.1 and 4.2, shipped, see Completed. `DiffFileList` and
-`DiffCommitList` now exist in `components/repo/`. `parseGitHubUrl` lives in `lib/github-url.ts`;
+**Backlog is fully cleared.** All of Phase 1-5, see Completed, plus 5.1-5.4.
+(`DiffFileList` and `DiffCommitList` now exist in `components/repo/`. `parseGitHubUrl` lives in
+`lib/github-url.ts`;
 add route cases there as new screens land.)
 
 ### Phase 2 - Code reading
@@ -165,7 +165,7 @@ gap, not wired here). `ponytail: first 10 replies only, add a load-more if threa
 | #   | Item                          | Size | Note                                                                                                                                                   |
 | --- | ----------------------------- | ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | ~~5.1~~ | ~~Line-anchored review comments~~ | S-M | Done. `components/repo/ReviewThreadList.tsx` renders review threads as a flat, chronological list on the PR detail screen; each thread shows its `diff_hunk` (as a diff codeblock) and `path:line` above the comment, so no more expanding the file diff to find context. Replaced the old per-file thread bucketing in `DiffFileList`, which is now a plain diff browser again. |
-| 5.2 | Reactions row                 | S    | `reactions` counts are already on issues/PRs/comments; render a small emoji-count strip                                                                |
+| ~~5.2~~ | ~~Reactions row~~ | S | Done. `GitHubReactions` added to `GitHubIssue` and `GitHubComment` (the counts were already in the REST response, just untyped). `components/repo/ReactionsRow.tsx` renders a small emoji+count pill row, one pill per reaction type with a nonzero count. Shown under the issue body and under every regular comment on both the issue and PR detail screens. Not shown under the PR body itself: `GET /pulls/{number}` doesn't return `reactions` at all (only the Issues API does, despite a PR being an issue under the hood) — fetching it would mean a second full issue-object request just for a reactions count, so skipped. Review-comment threads and discussion comments don't get it either (out of scope for this pass). |
 | ~~5.3~~ | ~~Issue/PR timeline events~~ | M | Done. `fetchIssueTimeline` (`lib/github-rest.ts`) + `useIssueTimeline` (`hooks/useIssueDetail.ts`). `lib/timeline.ts` merges it with the existing comments fetch into one chronological list, keeping only the event types it renders (labels, closed/reopened/merged, force-pushes, cross-referenced) and dropping the rest (reviews, mentions, project moves, ...) since those already show elsewhere or aren't useful here. `components/repo/TimelineEventRow.tsx` renders each as a compact icon+sentence row; cross-referenced rows open the linked issue/PR in-app if it's the same repo, external browser otherwise. Wired into both the issue and PR detail screens. |
 | ~~5.4~~ | ~~Per-commit diff inside a PR~~ | XS | Done. `DiffCommitList` rows push to the commit detail screen, in the PR and compare screens both.                                                    |
 
@@ -182,7 +182,8 @@ gap, not wired here). `ponytail: first 10 replies only, add a load-more if threa
 `markNotificationAsRead` and `markAllNotificationsAsRead` already exist and are the only write
 calls in the app. That is the narrow exception, already taken.
 
-- **Cheap add:** per-row swipe-to-mark-read in the notifications screen if it is not wired yet.
+- **Cheap add:** per-row swipe-to-mark-read in the notifications screen. Already shipped
+  (commit `ced9aec`) — `Swipeable` with a right-side "Read" action on each unread row.
 - **Second write, undecided:** `DELETE /notifications/threads/{id}/subscription` for
   "unsubscribe from this thread". Useful for triage but a new kind of write. Leaning toward
   stopping at mark-read to keep the story clean.

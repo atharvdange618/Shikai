@@ -1,6 +1,7 @@
 import { ErrorBoundary } from "@/components";
 import { DiffCommitList } from "@/components/repo/DiffCommitList";
 import { DiffFileList } from "@/components/repo/DiffFileList";
+import { ReactionsRow } from "@/components/repo/ReactionsRow";
 import { ReviewThreadList } from "@/components/repo/ReviewThreadList";
 import { TimelineEventRow } from "@/components/repo/TimelineEventRow";
 import { MarkdownRenderer } from "@/components/shared/MarkdownRenderer";
@@ -301,6 +302,7 @@ function PullRequestDetailScreenContent() {
                 </Text>
               </View>
               <MarkdownRenderer markdown={item.comment.body} />
+              <ReactionsRow reactions={item.comment.reactions} colors={colors} />
             </View>
           </View>
         ) : (

@@ -284,6 +284,18 @@ export interface GitHubLabel {
   description: string | null;
 }
 
+export interface GitHubReactions {
+  total_count: number;
+  "+1": number;
+  "-1": number;
+  laugh: number;
+  hooray: number;
+  confused: number;
+  heart: number;
+  rocket: number;
+  eyes: number;
+}
+
 export interface GitHubIssue {
   id: number;
   number: number;
@@ -300,6 +312,7 @@ export interface GitHubIssue {
   updated_at: string;
   closed_at: string | null;
   pull_request?: { merged_at: string | null };
+  reactions: GitHubReactions;
 }
 
 export interface GitHubPullRequest {
@@ -352,6 +365,7 @@ export interface GitHubComment {
   user: GitHubUserSummary;
   created_at: string;
   updated_at: string;
+  reactions: GitHubReactions;
 }
 
 // The timeline API returns every event type GitHub has ever added (reviews,

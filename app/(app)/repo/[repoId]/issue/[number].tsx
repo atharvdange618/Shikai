@@ -1,4 +1,5 @@
 import { ErrorBoundary } from "@/components";
+import { ReactionsRow } from "@/components/repo/ReactionsRow";
 import { TimelineEventRow } from "@/components/repo/TimelineEventRow";
 import { MarkdownRenderer } from "@/components/shared/MarkdownRenderer";
 import {
@@ -177,6 +178,7 @@ function IssueDetailScreenContent() {
           ]}
         >
           <MarkdownRenderer markdown={issue.body} />
+          <ReactionsRow reactions={issue.reactions} colors={colors} />
         </View>
       )}
 
@@ -211,6 +213,7 @@ function IssueDetailScreenContent() {
                 </Text>
               </View>
               <MarkdownRenderer markdown={item.comment.body} />
+              <ReactionsRow reactions={item.comment.reactions} colors={colors} />
             </View>
           </View>
         ) : (
