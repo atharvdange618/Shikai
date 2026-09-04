@@ -256,7 +256,23 @@ export default function UserProfileScreen() {
         </View>
       ) : topRepos?.repos && topRepos.repos.length > 0 ? (
         <View style={s.section}>
-          <Text style={s.sectionTitle}>Top Repositories</Text>
+          <View style={s.sectionHeader}>
+            <Text style={s.sectionTitle}>Top Repositories</Text>
+            {username && (
+              <Pressable
+                onPress={() =>
+                  router.push({
+                    pathname: "/(app)/user/[username]/repos",
+                    params: { username },
+                  })
+                }
+                hitSlop={8}
+                style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
+              >
+                <Text style={s.seeAll}>See all</Text>
+              </Pressable>
+            )}
+          </View>
           {topRepos.repos.slice(0, 5).map((repo: GitHubRepo) => (
             <RepoRow
               key={repo.id}
@@ -268,6 +284,25 @@ export default function UserProfileScreen() {
           ))}
         </View>
       ) : null}
+
+      {!isLoading && user?.login && (
+        <Pressable
+          style={({ pressed }) => [
+            s.githubButton,
+            pressed && s.githubButtonPressed,
+          ]}
+          onPress={() =>
+            router.push({
+              pathname: "/(app)/user/[username]/gists",
+              params: { username: user.login },
+            })
+          }
+        >
+          <Octicons name="code" size={IconSize.md} color={colors.textSecondary} />
+          <Text style={s.githubButtonText}>Gists</Text>
+          <Octicons name="chevron-right" size={13} color={colors.textMuted} />
+        </Pressable>
+      )}
 
       {!isLoading && user?.html_url && (
         <Pressable
@@ -588,11 +623,24 @@ function buildStyles(colors: ColorTokens, shadows: object) {
       gap: Spacing.sm,
     },
 
+    sectionHeader: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      marginBottom: Spacing.xs,
+    },
+
     sectionTitle: {
       fontFamily: FontFamily.semiBold,
       fontSize: FontSize.title,
       color: colors.textPrimary,
       marginBottom: Spacing.xs,
+    },
+
+    seeAll: {
+      fontFamily: FontFamily.medium,
+      fontSize: FontSize.label,
+      color: colors.accent,
     },
 
     reposSkeleton: {

@@ -8,6 +8,7 @@ import type {
   GitHubContent,
   GitHubContributor,
   GitHubEvent,
+  GitHubGist,
   GitHubIssue,
   GitHubLanguages,
   GitHubNotification,
@@ -289,6 +290,28 @@ export async function searchIssues(
     totalCount: data.total_count,
     pagination: parseLinkHeader(headers["link"]),
   };
+}
+
+export async function fetchGists(
+  username: string,
+  isSelf: boolean,
+  page: number = 1,
+  per_page: number = 30,
+): Promise<{ gists: GitHubGist[]; pagination: GitHubPagination }> {
+  const path = isSelf
+    ? "/gists"
+    : `/users/${encodeURIComponent(username)}/gists`;
+  const { data, headers } = await githubAxios.get<GitHubGist[]>(path, {
+    params: { page, per_page },
+  });
+  return { gists: data, pagination: parseLinkHeader(headers["link"]) };
+}
+
+export async function fetchGist(id: string): Promise<GitHubGist> {
+  const { data } = await githubAxios.get<GitHubGist>(
+    `/gists/${encodeURIComponent(id)}`,
+  );
+  return data;
 }
 
 export async function fetchLastCommit(

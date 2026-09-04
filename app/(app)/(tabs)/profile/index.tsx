@@ -292,6 +292,30 @@ export default function ProfileScreen() {
         <Octicons name="chevron-right" size={13} color={colors.textMuted} />
       </Pressable>
 
+      {user?.login && (
+        <Pressable
+          style={({ pressed }) => [
+            s.savedButton,
+            pressed && s.savedButtonPressed,
+          ]}
+          onPress={() =>
+            router.push({
+              pathname: "/(app)/user/[username]/gists",
+              params: { username: user.login },
+            })
+          }
+          hitSlop={8}
+        >
+          <Octicons
+            name="code"
+            size={IconSize.md}
+            color={colors.textSecondary}
+          />
+          <Text style={s.savedButtonText}>Gists</Text>
+          <Octicons name="chevron-right" size={13} color={colors.textMuted} />
+        </Pressable>
+      )}
+
       {user?.created_at && (
         <Text style={s.memberSince}>
           Member since{" "}

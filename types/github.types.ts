@@ -462,3 +462,25 @@ export interface GitHubNotification {
   url: string;
   subscription_url: string;
 }
+
+export interface GitHubGistFile {
+  filename: string;
+  language: string | null;
+  type: string;
+  size: number;
+  raw_url: string;
+  truncated?: boolean;
+  content?: string;
+}
+
+export interface GitHubGist {
+  id: string;
+  description: string | null;
+  html_url: string;
+  public: boolean;
+  comments: number;
+  created_at: string;
+  updated_at: string;
+  owner: GitHubUserSummary;
+  files: Record<string, GitHubGistFile>;
+}

@@ -44,6 +44,8 @@ export const queryKeys = {
   userProfile: (username: string) => ["userProfile", username] as const,
   userProfileRepos: (username: string) =>
     ["userProfile", username, "repos"] as const,
+  userAllRepos: (username: string) =>
+    ["userProfile", username, "repos", "all"] as const,
   userProfileEvents: (username: string) =>
     ["userProfile", username, "events"] as const,
   repos: () => ["repos"] as const,
@@ -108,4 +110,6 @@ export const queryKeys = {
     ["search", "issues", query, sort, order] as const,
   notifications: () => ["notifications"] as const,
   receivedEvents: () => ["receivedEvents"] as const,
+  gists: (username: string) => ["gists", username] as const,
+  gist: (id: string) => ["gist", id] as const,
 } as const;

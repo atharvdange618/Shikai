@@ -1,24 +1,15 @@
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 
-import { fetchUserRepos } from "@/lib/github-rest";
+import { fetchGist, fetchGists } from "@/lib/github-rest";
 import { queryKeys } from "@/lib/query-client";
-
-export function useUserProfileRepos(username: string) {
-  return useQuery({
-    queryKey: queryKeys.userProfileRepos(username),
-    queryFn: () => fetchUserRepos(username),
-    enabled: Boolean(username),
-    staleTime: 1000 * 60 * 5,
-  });
-}
 
 const PER_PAGE = 30;
 
-export function useUserAllRepos(username: string) {
+export function useGists(username: string, isSelf: boolean) {
   const query = useInfiniteQuery({
-    queryKey: queryKeys.userAllRepos(username),
+    queryKey: queryKeys.gists(username),
     queryFn: ({ pageParam }) =>
-      fetchUserRepos(username, pageParam, PER_PAGE, "pushed"),
+      fetchGists(username, isSelf, pageParam, PER_PAGE),
     initialPageParam: 1,
     getNextPageParam: (lastPage) => lastPage.pagination.next ?? undefined,
     enabled: Boolean(username),
@@ -26,7 +17,7 @@ export function useUserAllRepos(username: string) {
   });
 
   return {
-    repos: query.data?.pages.flatMap((p) => p.repos) ?? [],
+    gists: query.data?.pages.flatMap((p) => p.gists) ?? [],
     fetchNextPage: query.fetchNextPage,
     hasNextPage: query.hasNextPage,
     isFetchingNextPage: query.isFetchingNextPage,
@@ -34,4 +25,13 @@ export function useUserAllRepos(username: string) {
     isError: query.isError,
     refetch: query.refetch,
   };
+}
+
+export function useGist(id: string) {
+  return useQuery({
+    queryKey: queryKeys.gist(id),
+    queryFn: () => fetchGist(id),
+    enabled: Boolean(id),
+    staleTime: 1000 * 60 * 5,
+  });
 }
