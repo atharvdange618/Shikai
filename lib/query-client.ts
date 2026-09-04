@@ -56,8 +56,8 @@ export const queryKeys = {
   repo: (owner: string, repo: string) => ["repo", owner, repo] as const,
   repoLanguages: (owner: string, repo: string) =>
     ["repo", owner, repo, "langs"] as const,
-  repoCommits: (owner: string, repo: string, branch?: string) =>
-    ["repo", owner, repo, "commits", branch] as const,
+  repoCommits: (owner: string, repo: string, branch?: string, path?: string) =>
+    ["repo", owner, repo, "commits", branch, path] as const,
   repoLastCommit: (owner: string, repo: string) =>
     ["repo", owner, repo, "lastCommit"] as const,
   repoContributors: (owner: string, repo: string) =>

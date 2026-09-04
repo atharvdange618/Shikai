@@ -214,10 +214,11 @@ export async function fetchCommits(
   page: number,
   per_page: number = 10,
   branch?: string,
+  path?: string,
 ): Promise<FetchCommitsResult> {
   const { data, headers } = await githubAxios.get<GitHubCommit[]>(
     `/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/commits`,
-    { params: { page, per_page, sha: branch } },
+    { params: { page, per_page, sha: branch, path } },
   );
 
   return {

@@ -1,7 +1,7 @@
 import { Octicons } from "@expo/vector-icons";
 import * as Clipboard from "expo-clipboard";
 import * as Haptics from "expo-haptics";
-import { useLocalSearchParams, useNavigation } from "expo-router";
+import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { VideoView, useVideoPlayer } from "expo-video";
 import {
@@ -143,6 +143,7 @@ function FileViewerScreenContent() {
     fileName: string;
   }>();
   const navigation = useNavigation();
+  const router = useRouter();
   const { colors } = useTheme();
   const { width: screenWidth } = useWindowDimensions();
 
@@ -186,12 +187,30 @@ function FileViewerScreenContent() {
       try {
         navigation.setOptions({
           title: fileName,
+          headerRight: () => (
+            <Pressable
+              onPress={() =>
+                router.push({
+                  pathname: "/(app)/repo/[repoId]/commits",
+                  params: {
+                    repoId: repoId ?? "",
+                    path: path ?? "",
+                    fileName,
+                  },
+                })
+              }
+              hitSlop={8}
+              style={{ paddingHorizontal: Spacing.sm }}
+            >
+              <Octicons name="history" size={20} color={colors.accent} />
+            </Pressable>
+          ),
         });
       } catch {
         /* navigator not ready yet */
       }
     }
-  }, [navigation, fileName]);
+  }, [navigation, router, fileName, repoId, path, colors.accent]);
 
   useEffect(() => {
     setImageLoading(true);

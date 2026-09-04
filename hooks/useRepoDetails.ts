@@ -91,12 +91,17 @@ export function useLastCommit(owner: string, repo: string) {
   );
 }
 
-export function useCommits(owner: string, repo: string, branch?: string) {
+export function useCommits(
+  owner: string,
+  repo: string,
+  branch?: string,
+  path?: string,
+) {
   const query = useInfiniteQuery({
-    queryKey: queryKeys.repoCommits(owner, repo, branch),
+    queryKey: queryKeys.repoCommits(owner, repo, branch, path),
 
     queryFn: ({ pageParam }) =>
-      fetchCommits(owner, repo, pageParam, PER_PAGE, branch),
+      fetchCommits(owner, repo, pageParam, PER_PAGE, branch, path),
 
     initialPageParam: 1,
     getNextPageParam: (lastPage) => lastPage.pagination.next ?? undefined,

@@ -4,7 +4,7 @@ import { FlashList } from "@shopify/flash-list";
 import { useQueryClient } from "@tanstack/react-query";
 import * as Clipboard from "expo-clipboard";
 import { Image } from "expo-image";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
 
 import {
@@ -37,8 +37,14 @@ import { decodeRepoId, relativeTime } from "@/lib/utils";
 const keyExtractor = (item: GitHubCommit) => item.sha;
 
 export default function CommitsScreen() {
-  const { repoId } = useLocalSearchParams<{ repoId: string }>();
+  const { repoId, path, fileName } = useLocalSearchParams<{
+    repoId: string;
+    path?: string;
+    fileName?: string;
+  }>();
+  const isFileHistory = Boolean(path);
   const router = useRouter();
+  const navigation = useNavigation();
   const queryClient = useQueryClient();
   const { colors, isDark } = useTheme();
   const shadows = useMemo(() => (isDark ? {} : Shadows.light.sm), [isDark]);
@@ -58,6 +64,13 @@ export default function CommitsScreen() {
     }
   }, [repo?.default_branch, selectedBranch]);
 
+  useEffect(() => {
+    if (!isFileHistory) return;
+    try {
+      navigation.setOptions({ title: fileName ?? "History" });
+    } catch {}
+  }, [navigation, isFileHistory, fileName]);
+
   const {
     commits,
     fetchNextPage,
@@ -66,7 +79,7 @@ export default function CommitsScreen() {
     isLoading,
     isError,
     refetch,
-  } = useCommits(owner, repoName, selectedBranch);
+  } = useCommits(owner, repoName, selectedBranch, path);
 
   const [refreshing, setRefreshing] = useState(false);
 
@@ -116,20 +129,22 @@ export default function CommitsScreen() {
 
   return (
     <View style={s.container}>
-      <BranchSelector
-        branches={branches ?? []}
-        selectedBranch={selectedBranch}
-        onBranchChange={(branch) => {
-          setSelectedBranch(branch);
-        }}
-        isLoading={branchesLoading}
-        onCompare={(head) =>
-          router.push({
-            pathname: "/(app)/repo/[repoId]/compare",
-            params: { repoId: repoId ?? "", base: selectedBranch, head },
-          })
-        }
-      />
+      {!isFileHistory && (
+        <BranchSelector
+          branches={branches ?? []}
+          selectedBranch={selectedBranch}
+          onBranchChange={(branch) => {
+            setSelectedBranch(branch);
+          }}
+          isLoading={branchesLoading}
+          onCompare={(head) =>
+            router.push({
+              pathname: "/(app)/repo/[repoId]/compare",
+              params: { repoId: repoId ?? "", base: selectedBranch, head },
+            })
+          }
+        />
+      )}
       <FlashList
         data={commits}
         renderItem={renderItem}
