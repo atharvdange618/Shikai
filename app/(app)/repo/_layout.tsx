@@ -160,6 +160,21 @@ export default function RepoLayout() {
               : { backgroundColor: colors.background },
         }}
       />
+
+      <Stack.Screen
+        name="[repoId]/compare"
+        options={{
+          ...sharedHeaderOptions,
+          title: "Compare",
+          headerTransparent: Platform.OS === "ios",
+          headerBlurEffect:
+            Platform.OS === "ios" ? (isDark ? "dark" : "light") : undefined,
+          headerStyle:
+            Platform.OS === "ios"
+              ? undefined
+              : { backgroundColor: colors.background },
+        }}
+      />
     </Stack>
   );
 }

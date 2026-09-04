@@ -27,6 +27,9 @@ interface BranchSelectorProps {
   selectedBranch: string;
   onBranchChange: (branch: string) => void;
   isLoading?: boolean;
+  // When set, each non-selected branch gets a compare button that fires
+  // with that branch as the head (base is the current selection).
+  onCompare?: (headBranch: string) => void;
 }
 
 export function BranchSelector({
@@ -34,6 +37,7 @@ export function BranchSelector({
   selectedBranch,
   onBranchChange,
   isLoading,
+  onCompare,
 }: BranchSelectorProps) {
   const { colors, isDark } = useTheme();
   const s = useMemo(
@@ -110,12 +114,30 @@ export function BranchSelector({
                   >
                     {branch.name}
                   </Text>
-                  {active && (
+                  {active ? (
                     <Octicons
                       name="check"
                       size={IconSize.xs}
                       color={colors.accent}
                     />
+                  ) : (
+                    onCompare && (
+                      <Pressable
+                        onPress={() => {
+                          onCompare(branch.name);
+                          setOpen(false);
+                        }}
+                        hitSlop={8}
+                        accessibilityRole="button"
+                        accessibilityLabel={`Compare ${selectedBranch} with ${branch.name}`}
+                      >
+                        <Octicons
+                          name="git-compare"
+                          size={IconSize.xs}
+                          color={colors.textMuted}
+                        />
+                      </Pressable>
+                    )
                   )}
                 </Pressable>
               );

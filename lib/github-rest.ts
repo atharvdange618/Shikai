@@ -6,6 +6,7 @@ import type {
   GitHubComment,
   GitHubCommit,
   GitHubCommitDetail,
+  GitHubComparison,
   GitHubContent,
   GitHubContributor,
   GitHubEvent,
@@ -229,6 +230,19 @@ export async function fetchCommit(
 ): Promise<GitHubCommitDetail> {
   const { data } = await githubAxios.get<GitHubCommitDetail>(
     `/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/commits/${encodeURIComponent(sha)}`,
+  );
+  return data;
+}
+
+export async function fetchComparison(
+  owner: string,
+  repo: string,
+  base: string,
+  head: string,
+): Promise<GitHubComparison> {
+  const range = `${encodeURIComponent(base)}...${encodeURIComponent(head)}`;
+  const { data } = await githubAxios.get<GitHubComparison>(
+    `/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/compare/${range}`,
   );
   return data;
 }

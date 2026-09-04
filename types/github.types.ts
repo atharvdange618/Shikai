@@ -404,6 +404,16 @@ export interface GitHubPullRequestFile {
   patch?: string;
 }
 
+export interface GitHubComparison {
+  status: "diverged" | "ahead" | "behind" | "identical";
+  ahead_by: number;
+  behind_by: number;
+  total_commits: number;
+  html_url: string;
+  commits: GitHubCommit[];
+  files: GitHubPullRequestFile[];
+}
+
 export type GitHubCheckStatus = "queued" | "in_progress" | "completed";
 
 export type GitHubCheckConclusion =

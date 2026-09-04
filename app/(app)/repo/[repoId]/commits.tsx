@@ -38,6 +38,7 @@ const keyExtractor = (item: GitHubCommit) => item.sha;
 
 export default function CommitsScreen() {
   const { repoId } = useLocalSearchParams<{ repoId: string }>();
+  const router = useRouter();
   const queryClient = useQueryClient();
   const { colors, isDark } = useTheme();
   const shadows = useMemo(() => (isDark ? {} : Shadows.light.sm), [isDark]);
@@ -122,6 +123,12 @@ export default function CommitsScreen() {
           setSelectedBranch(branch);
         }}
         isLoading={branchesLoading}
+        onCompare={(head) =>
+          router.push({
+            pathname: "/(app)/repo/[repoId]/compare",
+            params: { repoId: repoId ?? "", base: selectedBranch, head },
+          })
+        }
       />
       <FlashList
         data={commits}
