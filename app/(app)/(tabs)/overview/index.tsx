@@ -6,6 +6,7 @@ import { Href, useRouter } from "expo-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
+  Linking,
   Pressable,
   RefreshControl,
   ScrollView,
@@ -339,24 +340,42 @@ export default function OverviewScreen() {
                 "..."}
             </Text>
           </View>
-          <Pressable
-            onPress={() => router.push("/(app)/(tabs)/profile" as Href)}
-            onPressIn={handleAvatarPressIn}
-            hitSlop={8}
-          >
-            {user?.avatar_url || storeUser?.avatar_url ? (
-              <Image
-                source={{ uri: user?.avatar_url || storeUser?.avatar_url }}
-                style={s.avatar}
-                contentFit="cover"
-                transition={200}
+          <View style={s.headerActions}>
+            <Pressable
+              style={({ pressed }) => [
+                s.githubButton,
+                pressed && { opacity: 0.6 },
+              ]}
+              onPress={() =>
+                Linking.openURL("https://github.com/atharvdange618/shikai")
+              }
+              hitSlop={8}
+            >
+              <Octicons
+                name="mark-github"
+                size={20}
+                color={colors.textSecondary}
               />
-            ) : (
-              <View style={[s.avatar, s.avatarFallback]}>
-                <Octicons name="person" size={20} color={colors.textMuted} />
-              </View>
-            )}
-          </Pressable>
+            </Pressable>
+            <Pressable
+              onPress={() => router.push("/(app)/(tabs)/profile" as Href)}
+              onPressIn={handleAvatarPressIn}
+              hitSlop={8}
+            >
+              {user?.avatar_url || storeUser?.avatar_url ? (
+                <Image
+                  source={{ uri: user?.avatar_url || storeUser?.avatar_url }}
+                  style={s.avatar}
+                  contentFit="cover"
+                  transition={200}
+                />
+              ) : (
+                <View style={[s.avatar, s.avatarFallback]}>
+                  <Octicons name="person" size={20} color={colors.textMuted} />
+                </View>
+              )}
+            </Pressable>
+          </View>
         </View>
       </View>
 
@@ -523,6 +542,19 @@ function buildStyles(colors: ColorTokens) {
       flexDirection: "row",
       alignItems: "center",
       justifyContent: "space-between",
+    },
+
+    headerActions: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: Spacing.md,
+    },
+
+    githubButton: {
+      width: 32,
+      height: 32,
+      alignItems: "center",
+      justifyContent: "center",
     },
 
     greeting: {
