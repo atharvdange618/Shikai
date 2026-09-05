@@ -1,5 +1,5 @@
 import { Octicons } from "@expo/vector-icons";
-import { useQueryClient } from "@tanstack/react-query";
+import { type InfiniteData, useQueryClient } from "@tanstack/react-query";
 import { Href, useRouter } from "expo-router";
 import { useCallback, useMemo, useRef, useState } from "react";
 import {
@@ -19,6 +19,7 @@ import { FlashList } from "@shopify/flash-list";
 import { ListItemSeparator } from "@/components/shared/ListItemSeparator";
 import { useNotifications } from "@/hooks/useNotifications";
 import {
+  type FetchNotificationsResult,
   markAllNotificationsAsRead,
   markNotificationAsRead,
 } from "@/lib/github-rest";
@@ -324,20 +325,45 @@ export default function NotificationsScreen() {
     [notifications],
   );
 
+  const notificationsQueryKey = useMemo(
+    () => [...queryKeys.notifications(), pat ? "pat" : "oauth"],
+    [pat],
+  );
+
+  // Marking read is instant in the UI: patch the cached pages directly so
+  // the read state, badge counts, and swipe-ability flip immediately,
+  // instead of waiting on a network round trip (or worse, GitHub's PATCH
+  // followed by a full refetch of every loaded page via invalidateQueries,
+  // which is what made this feel laggy with more than a page of history).
+  // The actual API call runs in the background; a failure falls back to a
+  // real refetch to resync.
   const markRead = useCallback(
-    async (notification: GitHubNotification) => {
-      await markNotificationAsRead(notification.id, pat);
-      queryClient.invalidateQueries({
-        queryKey: [...queryKeys.notifications(), pat ? "pat" : "oauth"],
+    (notification: GitHubNotification) => {
+      queryClient.setQueryData<InfiniteData<FetchNotificationsResult>>(
+        notificationsQueryKey,
+        (old) =>
+          old && {
+            ...old,
+            pages: old.pages.map((page) => ({
+              ...page,
+              notifications: page.notifications.map((n) =>
+                n.id === notification.id ? { ...n, unread: false } : n,
+              ),
+            })),
+          },
+      );
+
+      markNotificationAsRead(notification.id, pat).catch(() => {
+        queryClient.invalidateQueries({ queryKey: notificationsQueryKey });
       });
     },
-    [queryClient, pat],
+    [queryClient, notificationsQueryKey, pat],
   );
 
   const handleNotificationPress = useCallback(
-    async (notification: GitHubNotification) => {
+    (notification: GitHubNotification) => {
       if (notification.unread) {
-        await markRead(notification);
+        markRead(notification);
       }
 
       if (notification.subject.url) {
@@ -375,20 +401,32 @@ export default function NotificationsScreen() {
     [router, markRead],
   );
 
-  const handleMarkAllRead = useCallback(async () => {
-    await markAllNotificationsAsRead(pat);
-    queryClient.invalidateQueries({
-      queryKey: [...queryKeys.notifications(), pat ? "pat" : "oauth"],
+  const handleMarkAllRead = useCallback(() => {
+    queryClient.setQueryData<InfiniteData<FetchNotificationsResult>>(
+      notificationsQueryKey,
+      (old) =>
+        old && {
+          ...old,
+          pages: old.pages.map((page) => ({
+            ...page,
+            notifications: page.notifications.map((n) => ({
+              ...n,
+              unread: false,
+            })),
+          })),
+        },
+    );
+
+    markAllNotificationsAsRead(pat).catch(() => {
+      queryClient.invalidateQueries({ queryKey: notificationsQueryKey });
     });
-  }, [queryClient, pat]);
+  }, [queryClient, notificationsQueryKey, pat]);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    await queryClient.invalidateQueries({
-      queryKey: [...queryKeys.notifications(), pat ? "pat" : "oauth"],
-    });
+    await queryClient.invalidateQueries({ queryKey: notificationsQueryKey });
     setRefreshing(false);
-  }, [queryClient, pat]);
+  }, [queryClient, notificationsQueryKey]);
 
   const keyExtractor = useCallback((item: GitHubNotification) => item.id, []);
 
