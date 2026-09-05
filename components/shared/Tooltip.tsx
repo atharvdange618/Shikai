@@ -76,7 +76,7 @@ interface TooltipProps {
 
 export function Tooltip({ content, children, align = "left" }: TooltipProps) {
   const { colors, isDark } = useTheme();
-  const shadows = isDark ? Shadows.dark.md : Shadows.light.md;
+  const shadows = isDark ? {} : Shadows.light.md;
   const idRef = useRef(`tooltip-${++nextId}`);
   const ctx = useContext(TooltipContext);
   const visible = ctx ? ctx.activeId === idRef.current : false;
@@ -174,7 +174,7 @@ export function InfoDot({
   align = "left",
 }: InfoDotProps) {
   const { colors, isDark } = useTheme();
-  const shadows = isDark ? Shadows.dark.md : Shadows.light.md;
+  const shadows = isDark ? {} : Shadows.light.md;
   const idRef = useRef(`infodot-${++nextId}`);
   const ctx = useContext(TooltipContext);
   const visible = ctx ? ctx.activeId === idRef.current : false;

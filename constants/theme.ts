@@ -131,19 +131,10 @@ export const Shadows = {
       elevation: 6,
     },
   },
-  dark: {
-    sm: {},
-    md: {},
-    lg: {},
-  },
 } as const;
 
 export const ZIndex = {
-  base: 0,
-  raised: 10,
-  overlay: 20,
   modal: 30,
-  toast: 40,
   tooltip: 50,
 } as const;
 
@@ -162,20 +153,6 @@ export const AvatarSize = {
   md: 48,
   lg: 72,
   xl: 96,
-} as const;
-
-export const Duration = {
-  instant: 100,
-  fast: 200,
-  normal: 300,
-  slow: 450,
-  crawl: 600,
-} as const;
-
-export const Easing = {
-  standard: "easeInOut",
-  decelerate: "easeOut",
-  accelerate: "easeIn",
 } as const;
 
 export const Layout = {
