@@ -1,6 +1,6 @@
 import { fetchIssues } from "@/lib/github-rest";
 import { queryKeys } from "@/lib/query-client";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useInfinitePagedQuery } from "@/hooks/useInfinitePagedQuery";
 
 const PER_PAGE = 15;
 
@@ -9,24 +9,16 @@ export function useIssues(
   repo: string,
   state: "open" | "closed" = "open",
 ) {
-  const query = useInfiniteQuery({
-    queryKey: queryKeys.repoIssues(owner, repo, state),
-    queryFn: ({ pageParam }) =>
-      fetchIssues(owner, repo, pageParam, PER_PAGE, state),
-    initialPageParam: 1,
-    getNextPageParam: (lastPage) => lastPage.pagination.next ?? undefined,
-    enabled: Boolean(owner && repo),
-    staleTime: 1000 * 60 * 2,
-  });
+  const { items: issues, ...rest } = useInfinitePagedQuery(
+    {
+      queryKey: queryKeys.repoIssues(owner, repo, state),
+      queryFn: ({ pageParam }) =>
+        fetchIssues(owner, repo, pageParam, PER_PAGE, state),
+      enabled: Boolean(owner && repo),
+      staleTime: 1000 * 60 * 2,
+    },
+    (data) => data?.pages.flatMap((p) => p.issues) ?? [],
+  );
 
-  return {
-    issues: query.data?.pages.flatMap((p) => p.issues) ?? [],
-    fetchNextPage: query.fetchNextPage,
-    hasNextPage: query.hasNextPage,
-    isFetchingNextPage: query.isFetchingNextPage,
-    isLoading: query.isLoading,
-    isError: query.isError,
-    error: query.error,
-    refetch: query.refetch,
-  };
+  return { issues, ...rest };
 }

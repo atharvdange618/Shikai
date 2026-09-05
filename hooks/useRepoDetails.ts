@@ -20,12 +20,9 @@ import {
   fetchRepo,
 } from "@/lib/github-rest";
 import { queryKeys } from "@/lib/query-client";
+import { useInfinitePagedQuery } from "@/hooks/useInfinitePagedQuery";
 import type { GitHubLanguages, LanguageShare } from "@/types/github.types";
-import {
-  queryOptions,
-  useInfiniteQuery,
-  useQuery,
-} from "@tanstack/react-query";
+import { queryOptions, useQuery } from "@tanstack/react-query";
 
 import languageColors from "@/constants/language-colors.json";
 
@@ -97,30 +94,19 @@ export function useCommits(
   branch?: string,
   path?: string,
 ) {
-  const query = useInfiniteQuery({
-    queryKey: queryKeys.repoCommits(owner, repo, branch, path),
+  const { items: commits, ...rest } = useInfinitePagedQuery(
+    {
+      queryKey: queryKeys.repoCommits(owner, repo, branch, path),
+      queryFn: ({ pageParam }) =>
+        fetchCommits(owner, repo, pageParam, PER_PAGE, branch, path),
+      enabled: Boolean(owner && repo),
+      staleTime: 1000 * 60 * 2,
+      meta: { persist: false },
+    },
+    (data) => data?.pages.flatMap((p) => p.commits) ?? [],
+  );
 
-    queryFn: ({ pageParam }) =>
-      fetchCommits(owner, repo, pageParam, PER_PAGE, branch, path),
-
-    initialPageParam: 1,
-    getNextPageParam: (lastPage) => lastPage.pagination.next ?? undefined,
-
-    enabled: Boolean(owner && repo),
-    staleTime: 1000 * 60 * 2,
-    meta: { persist: false },
-  });
-
-  return {
-    commits: query.data?.pages.flatMap((p) => p.commits) ?? [],
-    fetchNextPage: query.fetchNextPage,
-    hasNextPage: query.hasNextPage,
-    isFetchingNextPage: query.isFetchingNextPage,
-    isLoading: query.isLoading,
-    isError: query.isError,
-    error: query.error,
-    refetch: query.refetch,
-  };
+  return { commits, ...rest };
 }
 
 export function useContributors(owner: string, repo: string) {

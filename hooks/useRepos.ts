@@ -1,19 +1,9 @@
-/**
- * When there's a search query, use GitHub's search API (searches ALL repos,
- * case-insensitive). Otherwise, use the paginated /user/repos endpoint
- * with client-side language/type filtering.
- */
-
 import { useMemo } from "react";
 
-import { useSearchIndex } from "@/hooks/useSearchIndex";
-import { fetchRepos, searchRepos } from "@/lib/github-rest";
+import { useFilterableRepoList } from "@/hooks/useFilterableRepoList";
+import { fetchRepos } from "@/lib/github-rest";
 import { queryKeys } from "@/lib/query-client";
-import { useAuthStore } from "@/stores/auth.store";
 import type { GitHubRepo, RepoListParams } from "@/types/github.types";
-import { useInfiniteQuery } from "@tanstack/react-query";
-
-const PER_PAGE = 10;
 
 export interface RepoFilters {
   sort?: RepoListParams["sort"];
@@ -24,44 +14,7 @@ export interface RepoFilters {
 
 export function useRepos(filters: RepoFilters = {}) {
   const { sort = "pushed", type, language, search } = filters;
-  const trimmedSearch = search?.trim() ?? "";
-  const username = useAuthStore((s) => s.user?.login ?? "");
-
   const apiType = type === "forks" ? "all" : type;
-
-  const listQuery = useInfiniteQuery({
-    queryKey: [...queryKeys.repos(), { sort, type: apiType }] as const,
-
-    queryFn: ({ pageParam }) =>
-      fetchRepos({
-        page: pageParam,
-        per_page: PER_PAGE,
-        sort,
-        type: apiType,
-      }),
-
-    initialPageParam: 1,
-
-    getNextPageParam: (lastPage) => lastPage.pagination.next ?? undefined,
-
-    staleTime: 1000 * 60 * 5,
-
-    select: (data) => {
-      return data.pages.flatMap((page) => page.repos);
-    },
-
-    enabled: !trimmedSearch,
-  });
-
-  const searchQuery = useInfiniteQuery({
-    queryKey: queryKeys.searchRepos(`${trimmedSearch} user:${username}`),
-    queryFn: ({ pageParam }) =>
-      searchRepos(`${trimmedSearch} user:${username}`, pageParam, PER_PAGE),
-    initialPageParam: 1,
-    getNextPageParam: (lastPage) => lastPage.pagination.next ?? undefined,
-    staleTime: 1000 * 60 * 5,
-    enabled: !!trimmedSearch && !!username,
-  });
 
   const languageFilter = useMemo(() => {
     if (!language) return undefined;
@@ -81,36 +34,13 @@ export function useRepos(filters: RepoFilters = {}) {
       (!typeFilter || typeFilter(repo));
   }, [languageFilter, typeFilter]);
 
-  const isSearching = !!trimmedSearch;
-  const activeQuery = isSearching ? searchQuery : listQuery;
-
-  const listRepos = listQuery.data ?? [];
-  const searchReposData = searchQuery.data?.pages.flatMap((p) => p.repos) ?? [];
-  const allRepos = isSearching ? searchReposData : listRepos;
-
-  // When not searching, apply client-side language/type filter via useSearchIndex.
-  // When searching, the API already handled the query; just apply extra filters.
-  const clientFiltered = useSearchIndex(listRepos, "", combinedFilter);
-  const filteredRepos = isSearching
-    ? combinedFilter
-      ? allRepos.filter(combinedFilter)
-      : allRepos
-    : clientFiltered;
-
-  return {
-    repos: filteredRepos,
-    loadedCount: allRepos.length,
-
-    fetchNextPage: activeQuery.fetchNextPage,
-    hasNextPage: activeQuery.hasNextPage,
-    isFetchingNextPage: activeQuery.isFetchingNextPage,
-
-    isLoading: activeQuery.isLoading,
-    isError: activeQuery.isError,
-    error: activeQuery.error,
-    isFetching: activeQuery.isFetching,
-    refetch: activeQuery.refetch,
-  };
+  return useFilterableRepoList({
+    listQueryKey: [...queryKeys.repos(), { sort, type: apiType }] as const,
+    fetchList: (page, per_page) =>
+      fetchRepos({ page, per_page, sort, type: apiType }),
+    search,
+    filter: combinedFilter,
+  });
 }
 
 export function useRepoLanguageOptions(): string[] {

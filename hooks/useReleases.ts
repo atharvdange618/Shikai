@@ -1,34 +1,23 @@
 import { fetchReleaseByTag, fetchReleases } from "@/lib/github-rest";
 import { queryKeys } from "@/lib/query-client";
-import {
-  queryOptions,
-  useInfiniteQuery,
-  useQuery,
-} from "@tanstack/react-query";
+import { useInfinitePagedQuery } from "@/hooks/useInfinitePagedQuery";
+import { queryOptions, useQuery } from "@tanstack/react-query";
 
 const PER_PAGE = 20;
 
 export function useReleases(owner: string, repo: string) {
-  const query = useInfiniteQuery({
-    queryKey: queryKeys.repoReleases(owner, repo),
-    queryFn: ({ pageParam }) =>
-      fetchReleases(owner, repo, pageParam, PER_PAGE),
-    initialPageParam: 1,
-    getNextPageParam: (lastPage) => lastPage.pagination.next ?? undefined,
-    enabled: Boolean(owner && repo),
-    staleTime: 1000 * 60 * 5,
-  });
+  const { items: releases, ...rest } = useInfinitePagedQuery(
+    {
+      queryKey: queryKeys.repoReleases(owner, repo),
+      queryFn: ({ pageParam }) =>
+        fetchReleases(owner, repo, pageParam, PER_PAGE),
+      enabled: Boolean(owner && repo),
+      staleTime: 1000 * 60 * 5,
+    },
+    (data) => data?.pages.flatMap((p) => p.releases) ?? [],
+  );
 
-  return {
-    releases: query.data?.pages.flatMap((p) => p.releases) ?? [],
-    fetchNextPage: query.fetchNextPage,
-    hasNextPage: query.hasNextPage,
-    isFetchingNextPage: query.isFetchingNextPage,
-    isLoading: query.isLoading,
-    isError: query.isError,
-    error: query.error,
-    refetch: query.refetch,
-  };
+  return { releases, ...rest };
 }
 
 export function useRelease(owner: string, repo: string, tag: string) {
