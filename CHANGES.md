@@ -4,7 +4,24 @@
 
 ### Features
 
-- **Crash and performance reporting** - Released builds now send anonymous crash reports and sampled performance data to Sentry. No PII, no repository contents, no session replay; GitHub tokens are stripped from every report before it is sent. Disabled in development. Privacy policy, README, and the Play data-safety checklist updated to match.
+- **Crash and performance reporting** - Released builds now send anonymous crash reports and sampled performance data to Sentry. No PII, no repository contents, no session replay; GitHub tokens are stripped from every report before it is sent. Disabled in development. Privacy policy, README, and the Play data-safety checklist updated to match. ([`472bdaa`](https://github.com/atharvdange618/Shikai/commit/472bdaa))
+- **"Your work" dashboard** - Overview sub-screen listing open items that need you: review requests, assignments, authored issues/PRs, and mentions. ([`27c7664`](https://github.com/atharvdange618/Shikai/commit/27c7664))
+- **Gist viewer and full repo list** - Browse any user's gists with file contents rendered through `MarkdownRenderer`, and a "See all" link on a profile's Top Repositories opens the complete paginated repo list. ([`999ad95`](https://github.com/atharvdange618/Shikai/commit/999ad95))
+- **Commit detail screen** - Tapping a commit anywhere in the app (commits list, PR commits, repo spotlight) opens its message, author, SHA, and full diff. ([`361ca76`](https://github.com/atharvdange618/Shikai/commit/361ca76))
+- **Compare two refs** - Shows commits and file diffs between a base and head ref, opened from a compare button on each branch row in the commits screen. ([`abd153e`](https://github.com/atharvdange618/Shikai/commit/abd153e))
+- **Releases tab** - Lists a repo's releases; each opens release notes, a compare-to-previous-tag link, and downloadable assets with size and download count. ([`e0b1783`](https://github.com/atharvdange618/Shikai/commit/e0b1783))
+- **GitHub URL deep links** - Opening or sharing a github.com link routes straight to the matching in-app screen (repo, issue, PR, commit, compare, release, file, folder) instead of the browser. A shared folder link now also drills into and expands that folder in the file tree, and a shared file link with a `#L10` line number scrolls the file viewer to roughly that line. ([`d4521ca`](https://github.com/atharvdange618/Shikai/commit/d4521ca), [`bfd1a51`](https://github.com/atharvdange618/Shikai/commit/bfd1a51))
+- **In-app check annotations** - Tapping a GitHub Actions check run shows its output summary and annotation details in-app instead of linking out. ([`b9d6913`](https://github.com/atharvdange618/Shikai/commit/b9d6913))
+- **File history** - A history button in the file viewer shows only the commits that touched that file. ([`ca71081`](https://github.com/atharvdange618/Shikai/commit/ca71081))
+- **Blame** - Line-by-line blame view with commit SHA and date in the gutter, tap-through to commit detail. ([`6ba642d`](https://github.com/atharvdange618/Shikai/commit/6ba642d))
+- **Discussions viewer** - Browse a repo's Discussions list and read a thread's comments and replies. ([`acbb9d6`](https://github.com/atharvdange618/Shikai/commit/acbb9d6))
+- **Review comment diff context** - Each PR review comment thread now shows its diff hunk above the conversation instead of requiring the file diff to be expanded separately. ([`2b863a0`](https://github.com/atharvdange618/Shikai/commit/2b863a0))
+- **Timeline events** - Issue and PR screens merge label, state, and cross-reference events into the comment stream in chronological order. ([`d2feb68`](https://github.com/atharvdange618/Shikai/commit/d2feb68))
+- **Reactions** - Emoji reaction counts shown under issue bodies and comments on both issue and PR detail screens. ([`dc53f05`](https://github.com/atharvdange618/Shikai/commit/dc53f05))
+
+### Bug Fixes
+
+- **Notifications lag** - Marking a notification, or all of them, read now updates the list instantly instead of waiting on a full refetch of every loaded page. ([`35741ce`](https://github.com/atharvdange618/Shikai/commit/35741ce))
 
 ### Notes
 

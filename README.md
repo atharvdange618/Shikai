@@ -58,7 +58,7 @@ Take a look at Shikai before you install: **[View Screenshots on Google Drive](h
 | Feature                | Description                                                                                                                          |
 | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
 | **Overview Dashboard** | Pinned repos, contribution graph with streaks, live activity feed, and following preview                                             |
-| **Repository Browser** | File trees, syntax highlighting, commit history, issues, PR detail with diffs, checks, reviewers, and commits, and a branch selector |
+| **Repository Browser** | File trees with blame and per-file history, syntax highlighting, releases, discussions, compare-two-refs, PR detail with diffs, checks, reviewers, commits, and review comments with diff context, issue/PR timelines and reactions, and a branch selector |
 | **Global Search**      | Fuzzy search across repos, users, issues, and topics with debounced input, recent searches, and eager pagination                     |
 | **User Profiles**      | View any GitHub user's profile with avatar, bio, stats, and top repositories                                                         |
 | **Android Widget**     | Home screen widget showing contribution streak with longest streak and recent activity                                               |
@@ -100,6 +100,7 @@ Network state detection with MMKV-backed disk persistence. The app works offline
 - **Error Recovery** - Error boundaries around the root, tabs, file viewer, and PR/issue screens, with a custom 404 screen
 - **Saved Repos** - Bookmark any repo. Stars and Watchlist combined in one screen with search and filter
 - **Markdown Preview** - README and markdown files rendered inline with syntax-highlighted code blocks
+- **GitHub URL Deep Links** - Opening or sharing a github.com link routes straight into the matching in-app screen, including a shared folder link (drills into and expands that folder) or a file link with a `#L10` line number (scrolls to it)
 
 ---
 

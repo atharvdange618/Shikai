@@ -1,6 +1,6 @@
 # Shikai Roadmap
 
-> **Version:** 1.3.1 · **Last Updated:** September 04, 2026 · **Status:** Active Development
+> **Version:** 1.3.1 · **Last Updated:** September 05, 2026 · **Status:** Active Development
 
 This document tracks the feature backlog and development progress for Shikai.
 
@@ -26,7 +26,7 @@ This document tracks the feature backlog and development progress for Shikai.
 | Commit detail screen              | Tapping a commit (commits list, PR commits section, repo-detail spotlight) opens a screen with the message, author, SHA, and full diff. `FilesChangedSection` extracted to `components/repo/DiffFileList.tsx`. (Backlog 1.1)                             | Done   |
 | Compare two refs                  | `repo/[repoId]/compare.tsx` shows commits and file diffs between a base and head ref. Opened from a compare button on each branch row in the commits screen. `CommitsSection` extracted to `components/repo/DiffCommitList.tsx`. (Backlog 1.2)          | Done   |
 | Releases tab                      | A "Releases" row on repo detail (shown when the repo has releases) opens a list, and each opens a detail screen: notes via `MarkdownRenderer`, author, "compare to previous tag", asset rows with size and download count plus source-code zip/tar.gz, each with a Share / Copy link / Download menu. (Backlog 1.3)                                                                    | Done   |
-| GitHub URL router                 | `lib/github-url.ts` maps a github.com web URL to an in-app route (repo, PR, issue, commit, compare, releases, blob, tree, user). `useDeepLinks` in `app/_layout.tsx` runs it for links opened into the app and, via `expo-share-intent`, for links shared from the Android share sheet. Unmatched URLs fall back to the browser. Android `intentFilters` for github.com added (no `autoVerify`). (Backlog 3.1) | Done   |
+| GitHub URL router                 | `lib/github-url.ts` maps a github.com web URL to an in-app route (repo, PR, issue, commit, compare, releases, blob, tree, user). `useDeepLinks` in `app/_layout.tsx` runs it for links opened into the app and, via `expo-share-intent`, for links shared from the Android share sheet. Unmatched URLs fall back to the browser. Android `intentFilters` for github.com added (no `autoVerify`). `tree/{ref}/{path}` now drills into that folder (`files.tsx` expands every ancestor plus the target and scrolls it into view) and `blob/{ref}/{path}#L10` carries the line number through so the file viewer scrolls to its approximate position. (Backlog 3.1) | Done   |
 | In-app check annotations          | Tapping a GitHub Actions check in the PR checks list opens `repo/[repoId]/checks/[runId].tsx`: status line, the run's `output` summary via `MarkdownRenderer`, and annotation cards (level icon, `path:line`, title, message, raw details). `fetchCheckRun` and `fetchCheckRunAnnotations` added to `lib/github-rest.ts`; annotations fetch only when `annotations_count > 0`. External CI statuses still link out. Full job logs still open on GitHub. (Backlog 3.3) | Done   |
 | File history                      | A "history" button in the file viewer header opens `commits.tsx` with a `path` param. In that mode the branch selector is hidden, the header title is the filename, and the list shows only commits that touched the file. `fetchCommits` / `useCommits` / `queryKeys.repoCommits` gained an optional `path` arg. Each row still opens commit detail. (Backlog 2.1) | Done   |
 | Blame                             | A second file-viewer header button (hidden for images/video/PDF) opens `repo/[repoId]/blame.tsx`: a `FlashList` of lines with a left gutter showing short SHA and relative date on each range's first line, alternating tint per range, tap → commit detail. `fetchBlame` in `lib/github-graphql.ts` resolves the ref's tip commit and reads `blame(path)` off it (GitHub's schema puts `blame` on `Commit`, not `Blob`), plus the blob text in the same request via an aliased `object(expression)`. Plain text, no syntax highlighting. (Backlog 2.2) | Done   |
@@ -126,11 +126,18 @@ See Completed. `lib/github-url.ts` holds `parseGitHubUrl`; `hooks/useDeepLinks.t
 for VIEW links and for share-sheet links via `expo-share-intent`. github.com verified app
 links send a plain tap to the GitHub app, so the share sheet is the reliable entry on
 Android; the unverified `github.com` VIEW filter only helps on older Android, when the user
-opts Shikai in, or when the GitHub app is absent. `blob` drops the ref and `#L` range for
-now (the file viewer reads the default branch); `tree` lands on the tree root.
+opts Shikai in, or when the GitHub app is absent. `blob` and `tree` both drop the ref (the
+file viewer and file tree read the default branch).
 
-Not done: `#L10-L20` scroll target, `tree` path drill-down. Add route cases to
-`parseGitHubUrl` as new screens land.
+`tree/{ref}/{...path}` now passes the path to `files.tsx`, which expands every ancestor
+folder plus the target directory and scrolls the `FlashList` to it. `blob/{ref}/{...path}#L10`
+passes the starting line number as `line`; `file.tsx` scrolls the outer `ScrollView` to that
+line's proportional position once `MarkdownRenderer` reports its rendered height — an
+approximation, since the rendered HTML has no per-line anchors to measure exactly against.
+
+Not done: exact-pixel scroll / line highlight for `#L` (would need wrapping each line in the
+rendered HTML to measure and highlight it — real DOM surgery on GitHub's markdown output, not
+attempted here). `ponytail: proportional scroll only, add exact highlighting if people ask`.
 
 #### 3.3 In-app check annotations · shipped
 
