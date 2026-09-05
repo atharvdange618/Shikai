@@ -39,7 +39,13 @@ export function parseGitHubUrl(url: string): string | null {
   const trimmed = url?.trim();
   if (!trimmed || !GITHUB_HOST_RE.test(trimmed)) return null;
 
-  const path = trimmed.replace(GITHUB_HOST_RE, "").replace(/[?#].*$/, "");
+  const withoutHost = trimmed.replace(GITHUB_HOST_RE, "");
+  const hashIndex = withoutHost.indexOf("#");
+  const fragment = hashIndex === -1 ? "" : withoutHost.slice(hashIndex + 1);
+  const path = (hashIndex === -1 ? withoutHost : withoutHost.slice(0, hashIndex)).replace(
+    /\?.*$/,
+    "",
+  );
   const seg = path.split("/").filter(Boolean).map(safeDecode);
   if (seg.length === 0) return null;
   if (RESERVED_FIRST_SEGMENT.has(seg[0].toLowerCase())) return null;
@@ -79,19 +85,26 @@ export function parseGitHubUrl(url: string): string | null {
       }
       return `${repoBase}/releases`;
     }
-    case "tree":
-      // ponytail: the files screen has no path arg, so /tree/{ref}/{path} lands
-      // on the tree root. Add path drill-down when files.tsx takes a path param.
-      return `${repoBase}/files`;
+    case "tree": {
+      // /tree/{ref}/{...path}. The ref is dropped, same as blob below: the
+      // files screen reads the default branch.
+      const treePath = seg.slice(4).join("/");
+      if (!treePath) return `${repoBase}/files`;
+      return `${repoBase}/files?path=${encodeURIComponent(treePath)}`;
+    }
     case "blob": {
-      // /blob/{ref}/{...path}. The file viewer fetches from the default branch,
-      // so the ref and any #L line range are dropped for now.
+      // /blob/{ref}/{...path}#L10-L20. The file viewer fetches from the
+      // default branch, so the ref is dropped, but the line range survives
+      // as a `line` param (start line only — the viewer approximates a
+      // scroll position, not an exact highlight).
       const filePath = seg.slice(4).join("/");
       if (!filePath) return `${repoBase}/files`;
       const fileName = seg[seg.length - 1];
+      const lineMatch = fragment.match(/^L(\d+)/i);
+      const lineParam = lineMatch ? `&line=${lineMatch[1]}` : "";
       return `${repoBase}/file?path=${encodeURIComponent(
         filePath,
-      )}&fileName=${encodeURIComponent(fileName)}`;
+      )}&fileName=${encodeURIComponent(fileName)}${lineParam}`;
     }
     default:
       return null;

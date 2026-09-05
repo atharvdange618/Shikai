@@ -18,6 +18,7 @@ interface MarkdownRendererProps {
   markdown: string;
   style?: StyleProp<ViewStyle>;
   context?: string;
+  onHeightChange?: (height: number) => void;
 }
 
 function resolveImageUrls(html: string, context?: string): string {
@@ -462,6 +463,7 @@ export function MarkdownRenderer({
   markdown,
   style,
   context,
+  onHeightChange,
 }: MarkdownRendererProps) {
   const { colors, isDark } = useTheme();
   const [html, setHtml] = useState<string | null>(null);
@@ -528,6 +530,7 @@ export function MarkdownRenderer({
         const data = JSON.parse(event.nativeEvent.data);
         if (data.type === "height" && data.height > 0) {
           setHeight(data.height);
+          onHeightChange?.(data.height);
           reveal();
         } else if (data.type === "copy" && typeof data.text === "string") {
           Clipboard.setStringAsync(data.text).catch(() => {});
@@ -536,7 +539,7 @@ export function MarkdownRenderer({
         // ignore parse errors
       }
     },
-    [reveal],
+    [reveal, onHeightChange],
   );
 
   if (!html) {

@@ -137,10 +137,11 @@ export default function FileViewerScreen() {
 }
 
 function FileViewerScreenContent() {
-  const { repoId, path, fileName } = useLocalSearchParams<{
+  const { repoId, path, fileName, line } = useLocalSearchParams<{
     repoId: string;
     path: string;
     fileName: string;
+    line?: string;
   }>();
   const navigation = useNavigation();
   const router = useRouter();
@@ -264,6 +265,34 @@ function FileViewerScreenContent() {
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   }, [data?.content]);
+
+  const targetLine = line ? Number(line) : undefined;
+  const contentScrollRef = useRef<ScrollView>(null);
+  const hasScrolledToLineRef = useRef(false);
+
+  // A shared #L10 link only tells us the line number, not a pixel position,
+  // and the rendered HTML has no per-line anchors to measure. So this jumps
+  // to the line's proportional position in the WebView's reported total
+  // height rather than its exact one — close enough to land the target line
+  // on screen. Runs once per file open.
+  const handleMarkdownHeightChange = useCallback(
+    (height: number) => {
+      if (
+        hasScrolledToLineRef.current ||
+        !targetLine ||
+        targetLine < 1 ||
+        !data?.content
+      ) {
+        return;
+      }
+      const totalLines = data.content.split("\n").length;
+      const fraction = Math.min(Math.max((targetLine - 1) / totalLines, 0), 1);
+      const offsetY = Math.max(fraction * height - Spacing.xxl * 2, 0);
+      contentScrollRef.current?.scrollTo({ y: offsetY, animated: true });
+      hasScrolledToLineRef.current = true;
+    },
+    [targetLine, data?.content],
+  );
 
   const s = useMemo(() => buildStyles(colors), [colors]);
 
@@ -454,6 +483,7 @@ function FileViewerScreenContent() {
 
       {!isImage && !isVideo && !isPdf && (
         <ScrollView
+          ref={contentScrollRef}
           style={s.contentScroll}
           contentContainerStyle={s.markdownContent}
           showsVerticalScrollIndicator={false}
@@ -497,6 +527,7 @@ function FileViewerScreenContent() {
                     : `\`\`\`${fileName ? getLanguage(fileName) : ""}\n${data.content}\n\`\`\``
                 }
                 context={`${owner}/${repoName}`}
+                onHeightChange={handleMarkdownHeightChange}
               />
             </>
           )}

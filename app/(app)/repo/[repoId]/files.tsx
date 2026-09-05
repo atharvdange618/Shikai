@@ -1,5 +1,5 @@
 import { Octicons } from "@expo/vector-icons";
-import { FlashList } from "@shopify/flash-list";
+import { FlashList, type FlashListRef } from "@shopify/flash-list";
 import { useQueryClient } from "@tanstack/react-query";
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -147,7 +147,10 @@ const TreeItem = memo(function TreeItem({
 });
 
 export default function FileExplorerScreen() {
-  const { repoId } = useLocalSearchParams<{ repoId: string }>();
+  const { repoId, path: targetPath } = useLocalSearchParams<{
+    repoId: string;
+    path?: string;
+  }>();
   const router = useRouter();
   const navigation = useNavigation();
   const queryClient = useQueryClient();
@@ -158,6 +161,8 @@ export default function FileExplorerScreen() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedBranch, setSelectedBranch] = useState("");
   const commonFilesPrefetched = useRef(false);
+  const listRef = useRef<FlashListRef<FlatTreeItem>>(null);
+  const [pendingScrollPath, setPendingScrollPath] = useState(targetPath);
 
   const { data: repo } = useRepo(owner, repoName);
   const { data: branches, isLoading: branchesLoading } = useBranches(
@@ -276,6 +281,26 @@ export default function FileExplorerScreen() {
     return results;
   }, [tree, flattenedTree, searchQuery]);
 
+  // A shared /tree/{ref}/{path} link names a directory. Expand every
+  // ancestor folder plus the target itself so it's visible, then scroll to
+  // it once its row shows up in the flattened list.
+  useEffect(() => {
+    if (!pendingScrollPath || tree.length === 0) return;
+    const parts = pendingScrollPath.split("/");
+    const toExpand = parts.map((_, i) => parts.slice(0, i + 1).join("/"));
+    setExpandedPaths((prev) => new Set([...prev, ...toExpand]));
+  }, [pendingScrollPath, tree]);
+
+  useEffect(() => {
+    if (!pendingScrollPath) return;
+    const index = displayTree.findIndex(
+      (item) => item.node.path === pendingScrollPath,
+    );
+    if (index === -1) return;
+    listRef.current?.scrollToIndex({ index, animated: true, viewPosition: 0.3 });
+    setPendingScrollPath(undefined);
+  }, [pendingScrollPath, displayTree]);
+
   const renderItem = useCallback(
     ({ item }: { item: FlatTreeItem }) => (
       <TreeItem
@@ -327,6 +352,7 @@ export default function FileExplorerScreen() {
         </View>
       ) : (
         <FlashList
+          ref={listRef}
           data={displayTree}
           renderItem={renderItem}
           getItemType={getItemType}
