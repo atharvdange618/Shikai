@@ -27,47 +27,26 @@ import {
 const APP_VERSION = Constants.expoConfig?.version ?? "1.0.0";
 
 const FEATURES = [
-  { icon: "repo" as const, text: "Browse repos, files, and branches" },
+  {
+    icon: "repo" as const,
+    text: "Browse repos, files, branches, and commit history",
+  },
   { icon: "graph" as const, text: "Contribution graphs and streaks" },
-  {
-    icon: "bell" as const,
-    text: "Notifications tab with unread badge and swipe to mark read",
-  },
-  {
-    icon: "people" as const,
-    text: "Following activity feed from followed users",
-  },
   {
     icon: "issue-opened" as const,
     text: "Issue and PR detail, with diffs, checks, reviewers, and commits",
   },
-  { icon: "history" as const, text: "Commit history per branch" },
-  { icon: "markdown" as const, text: "In-app README and markdown preview" },
+  {
+    icon: "bell" as const,
+    text: "Notifications and following activity from users you follow",
+  },
   {
     icon: "search" as const,
     text: "Global search across repos, users, issues, and topics",
   },
-  { icon: "clock" as const, text: "Recent searches saved for quick access" },
-  { icon: "bookmark" as const, text: "Saved repos with Stars and Watchlist" },
   {
     icon: "paintbrush" as const,
-    text: "5 themes: Light, Dark, Tokyo Night, Dracula, Atom One",
-  },
-  { icon: "key" as const, text: "PAT support for notifications and following" },
-  { icon: "keyboard" as const, text: "Keyboard shortcuts for iPad/macOS" },
-  { icon: "signal" as const, text: "Offline support with disk caching" },
-  {
-    icon: "device-mobile" as const,
-    text: "Overview screen widget with contribution streak",
-  },
-  { icon: "sync" as const, text: "OTA updates with a restart prompt" },
-  {
-    icon: "file" as const,
-    text: "SVG, PDF, and video rendering in file viewer",
-  },
-  {
-    icon: "pulse" as const,
-    text: "Haptic feedback and reduced-motion support",
+    text: "5 themes and offline support with disk caching",
   },
   {
     icon: "lock" as const,
