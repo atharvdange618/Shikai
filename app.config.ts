@@ -23,7 +23,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
   name: "Shikai",
   slug: "shikai",
-  version: "1.3.1",
+  version: "1.4.0",
   orientation: "portrait",
   icon: "./assets/images/icon.png",
   scheme: "shikai",
@@ -41,7 +41,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     edgeToEdgeEnabled: true,
     predictiveBackGestureEnabled: false,
     package: "com.atharvdange618.Shikai",
-    versionCode: 4,
+    versionCode: 5,
     // No autoVerify: Shikai just shows up in the chooser for github.com links.
     intentFilters: [
       {

@@ -1,6 +1,6 @@
 # Shikai Roadmap
 
-> **Version:** 1.3.1 · **Last Updated:** September 05, 2026 · **Status:** Active Development
+> **Version:** 1.4.0 · **Last Updated:** September 06, 2026 · **Status:** Active Development
 
 This document tracks the feature backlog and development progress for Shikai.
 
