@@ -4,11 +4,11 @@
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
+    "jsx": "react-native",
     "paths": {
       "@/*": ["./*"],
       "shikai-security": ["./modules/shikai-security"]
     }
   },
-  "include": ["**/*.ts", "**/*.tsx", ".expo/types/**/*.ts", "expo-env.d.ts"],
-  "jsx": "react-native"
+  "include": ["**/*.ts", "**/*.tsx", ".expo/types/**/*.ts", "expo-env.d.ts"]
 }
