@@ -10,6 +10,7 @@ import {
   type ColorTokens,
 } from "@/constants/theme";
 import { useRepoDetailsScreen } from "@/hooks/useRepoDetails";
+import { useChecks } from "@/hooks/usePullRequestDetail";
 import { useReleases } from "@/hooks/useReleases";
 import { fetchIssues, fetchPullRequests } from "@/lib/github-rest";
 import { prefetchFileTree, prefetchRepoCommits } from "@/lib/prefetch";
@@ -100,6 +101,26 @@ export default function RepoDetailsScreen() {
   } = useRepoDetailsScreen(owner, repoName);
 
   const { releases } = useReleases(owner, repoName);
+
+  const { data: checks = [] } = useChecks(owner, repoName, lastCommit?.sha ?? "");
+
+  const checksState = useMemo(() => {
+    if (checks.length === 0) return null;
+    if (
+      checks.some(
+        (c) =>
+          c.conclusion === "failure" ||
+          c.conclusion === "error" ||
+          c.conclusion === "timed_out" ||
+          c.conclusion === "action_required",
+      )
+    )
+      return "failure" as const;
+    if (checks.some((c) => c.conclusion === "pending")) return "pending" as const;
+    if (checks.some((c) => c.conclusion === "success"))
+      return "success" as const;
+    return null;
+  }, [checks]);
 
   useEffect(() => {
     if (repo?.name) {
@@ -365,6 +386,7 @@ export default function RepoDetailsScreen() {
             isLoading={isLoading.core}
             copiedHash={copiedHash}
             colors={colors}
+            checksState={checksState}
             onCopyHash={handleCopyHash}
             onPress={
               lastCommit

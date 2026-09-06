@@ -1,3 +1,4 @@
+import { Octicons } from "@expo/vector-icons";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import {
@@ -11,6 +12,8 @@ import {
 import { relativeTime } from "@/lib/utils";
 import type { GitHubCommit } from "@/types/github.types";
 
+export type ChecksRollup = "success" | "failure" | "pending";
+
 interface CommitSpotlightProps {
   commit: GitHubCommit | undefined;
   isLoading: boolean;
@@ -18,6 +21,18 @@ interface CommitSpotlightProps {
   colors: ColorTokens;
   onCopyHash: () => void;
   onPress?: () => void;
+  checksState?: ChecksRollup | null;
+}
+
+function checksDisplay(state: ChecksRollup, colors: ColorTokens) {
+  switch (state) {
+    case "success":
+      return { icon: "check-circle-fill", color: colors.success } as const;
+    case "failure":
+      return { icon: "x-circle-fill", color: colors.danger } as const;
+    case "pending":
+      return { icon: "clock", color: colors.warning } as const;
+  }
 }
 
 export function CommitSpotlight({
@@ -27,6 +42,7 @@ export function CommitSpotlight({
   colors,
   onCopyHash,
   onPress,
+  checksState,
 }: CommitSpotlightProps) {
   const s = buildStyles(colors);
 
@@ -53,6 +69,13 @@ export function CommitSpotlight({
             {commit?.commit.message.split("\n")[0]}
           </Text>
           <View style={s.commitMetaRow}>
+            {checksState && (
+              <Octicons
+                name={checksDisplay(checksState, colors).icon}
+                size={13}
+                color={checksDisplay(checksState, colors).color}
+              />
+            )}
             <Text style={s.commitMeta} selectable>
               {commit?.commit.author.name} ·{" "}
               {relativeTime(commit?.commit.author.date ?? "")}
