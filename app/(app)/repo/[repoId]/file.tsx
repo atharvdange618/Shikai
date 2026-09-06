@@ -9,7 +9,6 @@ import {
   Animated,
   Easing,
   Image,
-  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -18,6 +17,7 @@ import {
   useWindowDimensions,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import Pdf from "react-native-pdf";
 import { WebView } from "react-native-webview";
 
 import { ErrorBoundary } from "@/components";
@@ -152,6 +152,8 @@ function FileViewerScreenContent() {
   const { data: repo } = useRepo(owner, repoName);
   const [imageLoading, setImageLoading] = useState(true);
   const [imageError, setImageError] = useState(false);
+  const [pdfError, setPdfError] = useState<string | null>(null);
+  const [pdfDataUri, setPdfDataUri] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
   const isImage = useMemo(
@@ -249,6 +251,8 @@ function FileViewerScreenContent() {
   useEffect(() => {
     setImageLoading(true);
     setImageError(false);
+    setPdfError(null);
+    setPdfDataUri(null);
   }, [path]);
 
   const { data, isLoading, isError, error } = useFileContent(
@@ -257,6 +261,48 @@ function FileViewerScreenContent() {
     path ?? "",
     true,
   );
+
+  const pdfDownloadUrl = isPdf ? (data?.meta.download_url ?? null) : null;
+
+  // react-native-pdf downloads a remote URL through react-native-blob-util,
+  // which chokes on GitHub's redirect. Fetch the bytes with RN's own stack
+  // (straight to GitHub, no third party) and hand the viewer a data URI.
+  useEffect(() => {
+    if (!pdfDownloadUrl) return;
+    let cancelled = false;
+    setPdfDataUri(null);
+    setPdfError(null);
+
+    (async () => {
+      try {
+        const res = await fetch(pdfDownloadUrl);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const blob = await res.blob();
+        const base64 = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            const result = String(reader.result);
+            const comma = result.indexOf(",");
+            resolve(comma === -1 ? result : result.slice(comma + 1));
+          };
+          reader.onerror = () =>
+            reject(reader.error ?? new Error("could not read PDF"));
+          reader.readAsDataURL(blob);
+        });
+        if (!cancelled) {
+          setPdfDataUri(`data:application/pdf;base64,${base64}`);
+        }
+      } catch (e) {
+        if (!cancelled) {
+          setPdfError(e instanceof Error ? e.message : String(e));
+        }
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [pdfDownloadUrl]);
 
   const handleCopy = useCallback(async () => {
     if (!data?.content) return;
@@ -459,23 +505,32 @@ function FileViewerScreenContent() {
             colors={colors}
           />
 
-          {isError && (
+          {(isError || pdfError) && (
             <View style={s.centered}>
               <Octicons name="alert" size={IconSize.lg} color={colors.danger} />
-              <Text style={s.errorText}>Failed to load file</Text>
-              <Text style={s.errorSubtext}>{(error as Error)?.message}</Text>
+              <Text style={s.errorText}>Failed to load PDF</Text>
+              <Text style={s.errorSubtext}>
+                {pdfError ?? (error as Error)?.message}
+              </Text>
             </View>
           )}
 
-          {showContent && data?.meta.download_url && (
-            <WebView
-              source={{
-                uri:
-                  Platform.OS === "ios"
-                    ? data.meta.download_url
-                    : `https://docs.google.com/gview?embedded=true&url=${encodeURIComponent(data.meta.download_url)}`,
+          {showContent && !isError && !pdfError && !pdfDataUri && (
+            <View style={s.centered}>
+              <ActivityIndicator size="large" color={colors.accent} />
+            </View>
+          )}
+
+          {pdfDataUri && !pdfError && (
+            <Pdf
+              source={{ uri: pdfDataUri }}
+              trustAllCerts={false}
+              style={{
+                flex: 1,
+                width: screenWidth,
+                backgroundColor: colors.background,
               }}
-              style={{ flex: 1, backgroundColor: colors.background }}
+              onError={(err) => setPdfError(String(err ?? "unknown error"))}
             />
           )}
         </View>
