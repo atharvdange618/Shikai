@@ -1,3 +1,5 @@
+// Public POST endpoint. Per-IP rate limiting is a Cloudflare dashboard rule,
+// not code here. See README.md.
 interface Env {
   GITHUB_CLIENT_SECRET: string;
   GITHUB_CLIENT_ID: string;
