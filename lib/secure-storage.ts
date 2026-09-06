@@ -13,12 +13,12 @@ export interface PendingAuth {
   timestamp: number;
 }
 
-function isValidToken(token: string | null): token is string {
+export function isValidToken(token: string | null): token is string {
   if (!token || token.length < 10 || token.length > 500) return false;
   return /^[\w\-\.]+$/.test(token);
 }
 
-function isValidPAT(pat: string | null): pat is string {
+export function isValidPAT(pat: string | null): pat is string {
   if (!pat || pat.length < 10 || pat.length > 500) return false;
   return pat.startsWith("ghp_") || pat.startsWith("github_pat_");
 }
