@@ -32,6 +32,10 @@
 - **Theme tokens** - Removed unused `Duration`, `Easing`, and dead `Shadows.dark` tokens and collapsed `ZIndex` to the tiers actually in use. ([`4a816ca`](https://github.com/atharvdange618/Shikai/commit/4a816ca))
 - **About screen** - Trimmed the feature list to headline items. ([`8795f9c`](https://github.com/atharvdange618/Shikai/commit/8795f9c))
 
+### Security
+
+- **axios** - Bumped to 1.20.0, clearing nine advisories (CVE-2026-67312 through 67320): prototype pollution via the request-config clone and several uncontrolled-resource-consumption paths. ([`2b76cb6`](https://github.com/atharvdange618/Shikai/commit/2b76cb6))
+
 ### Notes
 
 - After an `eas update`, run `npm run sentry:sourcemaps` so OTA stack traces stay readable. Native build source maps upload automatically through the Sentry Expo plugin.
