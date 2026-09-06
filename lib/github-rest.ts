@@ -481,7 +481,7 @@ export async function fetchUserEvents(
   per_page: number = 20,
 ): Promise<FetchEventsResult> {
   const { data, headers } = await githubAxios.get<GitHubEvent[]>(
-    `/users/${username}/events`,
+    `/users/${encodeURIComponent(username)}/events`,
     { params: { page, per_page } },
   );
 
@@ -638,9 +638,11 @@ export async function markNotificationAsRead(
   threadId: string,
   pat?: string | null,
 ): Promise<void> {
-  await githubAxios.patch(`/notifications/threads/${threadId}`, undefined, {
-    headers: patHeaders(pat),
-  });
+  await githubAxios.patch(
+    `/notifications/threads/${encodeURIComponent(threadId)}`,
+    undefined,
+    { headers: patHeaders(pat) },
+  );
 }
 
 export async function markAllNotificationsAsRead(
@@ -735,7 +737,7 @@ export async function fetchCheckRuns(
   ref: string,
 ): Promise<GitHubCheckRun[]> {
   const { data } = await githubAxios.get<{ check_runs: GitHubCheckRun[] }>(
-    `/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/commits/${ref}/check-runs`,
+    `/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/commits/${encodeURIComponent(ref)}/check-runs`,
     { params: { per_page: 100 } },
   );
   return data.check_runs;
@@ -771,7 +773,7 @@ export async function fetchCombinedStatus(
   ref: string,
 ): Promise<GitHubCombinedStatus> {
   const { data } = await githubAxios.get<GitHubCombinedStatus>(
-    `/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/commits/${ref}/status`,
+    `/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/commits/${encodeURIComponent(ref)}/status`,
   );
   return data;
 }
