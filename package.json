@@ -27,6 +27,7 @@
     "ios": "expo run:ios",
     "web": "expo start --web",
     "lint": "expo lint",
+    "test": "vitest run",
     "deploy": "npx expo export -p web && wrangler deploy",
     "preview": "npx expo export -p web && wrangler dev",
     "prebuild:clean": "npx expo prebuild --clean && node scripts/post-prebuild.js",
@@ -75,9 +76,11 @@
     "react-dom": "19.1.0",
     "react-native": "0.81.5",
     "react-native-android-widget": "^0.20.3",
+    "react-native-blob-util": "^0.24.10",
     "react-native-gesture-handler": "~2.28.0",
     "react-native-mmkv": "^4.3.2",
     "react-native-nitro-modules": "^0.35.10",
+    "react-native-pdf": "^7.0.5",
     "react-native-reanimated": "~4.1.1",
     "react-native-safe-area-context": "~5.6.0",
     "react-native-screens": "~4.16.0",
@@ -93,6 +96,7 @@
     "eslint-config-expo": "~10.0.0",
     "sharp": "^0.34.5",
     "typescript": "~5.9.2",
+    "vitest": "^3.2.7",
     "wrangler": "^4.88.0"
   },
   "overrides": {
