@@ -4,6 +4,7 @@ import * as Clipboard from "expo-clipboard";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Animated,
+  Linking,
   StyleSheet,
   View,
   type StyleProp,
@@ -331,7 +332,7 @@ function buildHtml(html: string, isDark: boolean): string {
     });
     postHeight();
 
-    fetch('https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js')
+    fetch('https://cdn.jsdelivr.net/npm/mermaid@11.17.2/dist/mermaid.min.js')
       .then(function(r) {
         return r.text();
       })
@@ -343,7 +344,7 @@ function buildHtml(html: string, isDark: boolean): string {
         mermaid.initialize({
           startOnLoad: false,
           theme: isDark ? 'dark' : 'default',
-          securityLevel: 'loose',
+          securityLevel: 'strict',
           fontFamily: 'ui-sans-serif, system-ui, -apple-system, sans-serif',
           fontSize: 14,
         });
@@ -524,6 +525,19 @@ export function MarkdownRenderer({
     }).start();
   }, [opacity]);
 
+  // GitHub's /markdown output is sanitized, but a tapped link would still
+  // navigate this WebView in place, with no browser chrome. Send http(s)
+  // links to the system browser and let everything else (about:blank, the
+  // data: document, the bridge) load.
+  const onShouldStartLoad = useCallback((request: { url: string }) => {
+    const { url } = request;
+    if (/^https?:\/\//i.test(url)) {
+      Linking.openURL(url).catch(() => {});
+      return false;
+    }
+    return true;
+  }, []);
+
   const onMessage = useCallback(
     (event: WebViewMessageEvent) => {
       try {
@@ -572,8 +586,8 @@ export function MarkdownRenderer({
         showsHorizontalScrollIndicator={false}
         onMessage={onMessage}
         onLoadEnd={reveal}
-        originWhitelist={["*"]}
-        allowUniversalAccessFromFileURLs
+        onShouldStartLoadWithRequest={onShouldStartLoad}
+        originWhitelist={["about:*", "data:*"]}
         javaScriptEnabled
         textEncodingUsage="utf-8"
       />
