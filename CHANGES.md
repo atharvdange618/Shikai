@@ -18,10 +18,19 @@
 - **Review comment diff context** - Each PR review comment thread now shows its diff hunk above the conversation instead of requiring the file diff to be expanded separately. ([`2b863a0`](https://github.com/atharvdange618/Shikai/commit/2b863a0))
 - **Timeline events** - Issue and PR screens merge label, state, and cross-reference events into the comment stream in chronological order. ([`d2feb68`](https://github.com/atharvdange618/Shikai/commit/d2feb68))
 - **Reactions** - Emoji reaction counts shown under issue bodies and comments on both issue and PR detail screens. ([`dc53f05`](https://github.com/atharvdange618/Shikai/commit/dc53f05))
+- **GitHub icon in the Overview header** - A one-tap link to the app's own repository sits next to the avatar on the Overview screen, so it no longer takes a trip through Profile > Settings > About to find it. ([`3c9c1d1`](https://github.com/atharvdange618/Shikai/commit/3c9c1d1))
 
 ### Bug Fixes
 
 - **Notifications lag** - Marking a notification, or all of them, read now updates the list instantly instead of waiting on a full refetch of every loaded page. ([`35741ce`](https://github.com/atharvdange618/Shikai/commit/35741ce))
+- **Markdown white flash** - PR and issue bodies and comments, the repo README, and the file viewer no longer flash white for a few frames when they open or when the theme is toggled. The WebView stays hidden until its content paints, then fades in. ([`f7944b0`](https://github.com/atharvdange618/Shikai/commit/f7944b0))
+- **Narrow-screen layout** - On smaller, low-density screens the contribution graph drew two month labels on top of each other ("AuSept") and the repo action bar clipped the "Commits" label. Month labels now sit on the column that starts each month, and the action bar keeps its button text inside the pill. ([`bf0c986`](https://github.com/atharvdange618/Shikai/commit/bf0c986))
+
+### Refactoring
+
+- **Paginated query hooks** - Nine hooks that each hand-rolled the same `useInfiniteQuery` boilerplate now share a `useInfinitePagedQuery` helper, and the list-plus-search logic behind `useRepos` and `useStarred` moved into a shared `useFilterableRepoList`. ([`93fc5b5`](https://github.com/atharvdange618/Shikai/commit/93fc5b5))
+- **Theme tokens** - Removed unused `Duration`, `Easing`, and dead `Shadows.dark` tokens and collapsed `ZIndex` to the tiers actually in use. ([`4a816ca`](https://github.com/atharvdange618/Shikai/commit/4a816ca))
+- **About screen** - Trimmed the feature list to headline items. ([`8795f9c`](https://github.com/atharvdange618/Shikai/commit/8795f9c))
 
 ### Notes
 
