@@ -137,7 +137,7 @@ function buildStyles(colors: ColorTokens) {
   return StyleSheet.create({
     actionRow: {
       flexDirection: "row",
-      gap: Spacing.sm,
+      gap: Spacing.xs,
     },
 
     actionButton: {
@@ -145,7 +145,7 @@ function buildStyles(colors: ColorTokens) {
       flexDirection: "row",
       alignItems: "center",
       justifyContent: "center",
-      gap: 6,
+      gap: 4,
       height: 44,
       borderRadius: Radius.md,
     },
@@ -175,6 +175,8 @@ function buildStyles(colors: ColorTokens) {
       fontFamily: FontFamily.semiBold,
       fontSize: FontSize.body,
       color: colors.textPrimary,
+      flexShrink: 1,
+      textAlign: "center",
     },
 
     actionButtonFilled: {
@@ -185,6 +187,8 @@ function buildStyles(colors: ColorTokens) {
       fontFamily: FontFamily.semiBold,
       fontSize: FontSize.body,
       color: colors.textOnAccent,
+      flexShrink: 1,
+      textAlign: "center",
     },
   });
 }

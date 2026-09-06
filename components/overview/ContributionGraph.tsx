@@ -121,19 +121,24 @@ export function ContributionGraph({
   weeks.forEach((week, weekIdx) => {
     const firstDay = week.contributionDays[0];
     if (!firstDay) return;
-    const month = new Date(firstDay.date).getMonth();
+    const weekStart = new Date(firstDay.date);
+    const month = weekStart.getMonth();
     if (month !== lastMonth) {
       lastMonth = month;
-      monthLabels.push({
-        label: new Date(firstDay.date).toLocaleString("default", {
-          month: "short",
-        }),
-        x: weekIdx * STEP,
-      });
+      // Only label a month at the column that holds its 1st-7th. A leading
+      // partial week (e.g. one day of Aug) would otherwise stack its label
+      // one STEP away from the next month's, rendering as "AuSept".
+      if (weekStart.getDate() <= 7) {
+        monthLabels.push({
+          label: weekStart.toLocaleString("default", { month: "short" }),
+          x: weekIdx * STEP,
+        });
+      }
     }
   });
 
-  const svgWidth = weeks.length * STEP;
+  // Extra room so the trailing month label isn't clipped by the SVG edge.
+  const svgWidth = weeks.length * STEP + 24;
 
   return (
     <View
