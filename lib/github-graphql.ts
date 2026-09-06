@@ -29,7 +29,14 @@ async function graphql<T>(
     errors?: { message: string }[];
   }>(GRAPHQL_ENDPOINT, { query, variables });
 
-  if (Array.isArray(data.errors) && data.errors.length > 0) {
+  // A partial response (e.g. a repo with Discussions disabled) still carries
+  // usable `data` alongside `errors`. Only throw when there's nothing to use;
+  // callers already null-check the fields they read.
+  if (
+    Array.isArray(data.errors) &&
+    data.errors.length > 0 &&
+    data.data == null
+  ) {
     const messages = data.errors.map((e) => e.message).join(", ");
     throw new Error(`GraphQL error: ${messages}`);
   }
