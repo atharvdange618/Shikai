@@ -4,12 +4,13 @@ import * as Crypto from "expo-crypto";
 import { Image } from "expo-image";
 import * as Linking from "expo-linking";
 import * as WebBrowser from "expo-web-browser";
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Pressable,
   StyleSheet,
   Text,
+  TextInput,
   View,
 } from "react-native";
 import Animated, {
@@ -33,7 +34,9 @@ import { githubAxios } from "@/lib/axios";
 import {
   fetchAuthenticatedUser,
   fetchUserInstallations,
+  validateToken,
 } from "@/lib/github-rest";
+import type { GitHubUser } from "@/types/github.types";
 import { clearAllMMKV } from "@/lib/mmkv";
 import { prefetchOverview } from "@/lib/prefetch";
 import { queryClient, queryKeys } from "@/lib/query-client";
@@ -70,6 +73,11 @@ export default function SignInScreen() {
   const error = useSignInStore((s) => s.error);
   const needsInstall = useSignInStore((s) => s.needsInstall);
 
+  const [showTokenInput, setShowTokenInput] = useState(false);
+  const [tokenInput, setTokenInput] = useState("");
+  const [tokenLoading, setTokenLoading] = useState(false);
+  const [tokenError, setTokenError] = useState<string | null>(null);
+
   useEffect(() => {
     return () => {
       useSignInStore.getState().reset();
@@ -77,6 +85,56 @@ export default function SignInScreen() {
   }, []);
 
   const redirectUri = makeRedirectUri({ scheme: "shikai" });
+
+  // Shared tail for every sign-in path: persist the token, restore any stored
+  // PAT, seed the caches, and refresh the widget.
+  const finalizeSession = useCallback(
+    async (accessToken: string, user: GitHubUser) => {
+      await saveToken(accessToken);
+
+      const storedPAT = await getStoredPAT();
+      if (storedPAT) setPat(storedPAT);
+
+      setToken(accessToken);
+      setUser(user);
+
+      clearAllMMKV();
+      queryClient.clear();
+      queryClient.setQueryData(queryKeys.user(), user);
+      prefetchOverview(queryClient, user.login);
+      requestWidgetUpdate({
+        widgetName: "ContributionGraph",
+        renderWidget: async () => {
+          const { fetchContributionsForWidget } = await import(
+            "@/lib/widget-data"
+          );
+          const { ContributionWidget } = await import(
+            "@/widgets/ContributionWidget"
+          );
+          const data = await fetchContributionsForWidget();
+          if (data) {
+            return (
+              <ContributionWidget
+                totalContributions={data.totalContributions}
+                weeks={data.weeks}
+                currentStreak={data.currentStreak}
+                longestStreak={data.longestStreak}
+              />
+            );
+          }
+          return (
+            <ContributionWidget
+              totalContributions={0}
+              weeks={[]}
+              currentStreak={0}
+              longestStreak={0}
+            />
+          );
+        },
+      });
+    },
+    [setToken, setUser, setPat],
+  );
 
   const completeAuth = useCallback(
     async (code: string, codeVerifier: string) => {
@@ -136,51 +194,8 @@ export default function SignInScreen() {
           return;
         }
 
-        const [, user] = await Promise.all([
-          saveToken(accessToken),
-          fetchAuthenticatedUser(),
-        ]);
-
-        const storedPAT = await getStoredPAT();
-        if (storedPAT) setPat(storedPAT);
-
-        setToken(accessToken);
-        setUser(user);
-
-        clearAllMMKV();
-        queryClient.clear();
-        queryClient.setQueryData(queryKeys.user(), user);
-        prefetchOverview(queryClient, user.login);
-        requestWidgetUpdate({
-          widgetName: "ContributionGraph",
-          renderWidget: async () => {
-            const { fetchContributionsForWidget } = await import(
-              "@/lib/widget-data"
-            );
-            const { ContributionWidget } = await import(
-              "@/widgets/ContributionWidget"
-            );
-            const data = await fetchContributionsForWidget();
-            if (data) {
-              return (
-                <ContributionWidget
-                  totalContributions={data.totalContributions}
-                  weeks={data.weeks}
-                  currentStreak={data.currentStreak}
-                  longestStreak={data.longestStreak}
-                />
-              );
-            }
-            return (
-              <ContributionWidget
-                totalContributions={0}
-                weeks={[]}
-                currentStreak={0}
-                longestStreak={0}
-              />
-            );
-          },
-        });
+        const user = await fetchAuthenticatedUser();
+        await finalizeSession(accessToken, user);
 
         setLoading(false);
       } catch {
@@ -189,7 +204,7 @@ export default function SignInScreen() {
         await clearPendingAuth();
       }
     },
-    [redirectUri, setToken, setUser, setPat],
+    [redirectUri, finalizeSession],
   );
 
   useEffect(() => {
@@ -339,6 +354,31 @@ export default function SignInScreen() {
     }
   }, [redirectUri, setUser, setToken, setPat]);
 
+  // Self-contained sign-in for anyone who would rather paste a token than run
+  // the browser OAuth flow. A classic or fine-grained PAT with repo and
+  // read:user scopes covers every read path in the app.
+  const handleTokenSignIn = useCallback(async () => {
+    const trimmed = tokenInput.trim();
+    if (!trimmed.startsWith("ghp_") && !trimmed.startsWith("github_pat_")) {
+      setTokenError("Token must start with ghp_ or github_pat_");
+      return;
+    }
+
+    setTokenLoading(true);
+    setTokenError(null);
+
+    try {
+      const user = await validateToken(trimmed);
+      await finalizeSession(trimmed, user);
+      setTokenInput("");
+    } catch {
+      setTokenError(
+        "That token didn't work. Check it has the repo and read:user scopes.",
+      );
+      setTokenLoading(false);
+    }
+  }, [tokenInput, finalizeSession]);
+
   const s = useMemo(
     () => buildStyles(colors, isDark, shadows, insets.top, insets.bottom),
     [colors, isDark, shadows, insets.top, insets.bottom],
@@ -400,31 +440,84 @@ export default function SignInScreen() {
               )}
             </AnimatedPressable>
           </>
-        ) : (
-          <AnimatedPressable
-            style={[s.button, isLoading && s.buttonLoading, buttonStyle]}
-            onPress={handleSignIn}
-            onPressIn={handlePressIn}
-            onPressOut={handlePressOut}
-            disabled={isLoading}
-          >
-            {isLoading ? (
-              <ActivityIndicator color="#fff" size="small" />
-            ) : (
-              <>
-                <Octicons
-                  name="mark-github"
-                  size={18}
-                  color="#fff"
-                  style={s.buttonIcon}
-                />
-                <Text style={s.buttonText}>Sign in with GitHub</Text>
-              </>
+        ) : showTokenInput ? (
+          <>
+            <TextInput
+              style={s.tokenInput}
+              value={tokenInput}
+              onChangeText={(text) => {
+                setTokenInput(text);
+                setTokenError(null);
+              }}
+              placeholder="ghp_… or github_pat_…"
+              placeholderTextColor={colors.textMuted}
+              autoCapitalize="none"
+              autoCorrect={false}
+              secureTextEntry
+              editable={!tokenLoading}
+            />
+            <AnimatedPressable
+              style={[s.button, tokenLoading && s.buttonLoading, buttonStyle]}
+              onPress={handleTokenSignIn}
+              onPressIn={handlePressIn}
+              onPressOut={handlePressOut}
+              disabled={tokenLoading || !tokenInput.trim()}
+            >
+              {tokenLoading ? (
+                <ActivityIndicator color="#fff" size="small" />
+              ) : (
+                <Text style={s.buttonText}>Continue</Text>
+              )}
+            </AnimatedPressable>
+            <Pressable
+              onPress={() => {
+                setShowTokenInput(false);
+                setTokenInput("");
+                setTokenError(null);
+              }}
+              disabled={tokenLoading}
+            >
+              <Text style={s.secondaryLink}>Back to GitHub sign in</Text>
+            </Pressable>
+            {tokenError && (
+              <Animated.View entering={FadeInDown.duration(200)}>
+                <Text style={s.errorText}>{tokenError}</Text>
+              </Animated.View>
             )}
-          </AnimatedPressable>
+          </>
+        ) : (
+          <>
+            <AnimatedPressable
+              style={[s.button, isLoading && s.buttonLoading, buttonStyle]}
+              onPress={handleSignIn}
+              onPressIn={handlePressIn}
+              onPressOut={handlePressOut}
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <ActivityIndicator color="#fff" size="small" />
+              ) : (
+                <>
+                  <Octicons
+                    name="mark-github"
+                    size={18}
+                    color="#fff"
+                    style={s.buttonIcon}
+                  />
+                  <Text style={s.buttonText}>Sign in with GitHub</Text>
+                </>
+              )}
+            </AnimatedPressable>
+            <Pressable
+              onPress={() => setShowTokenInput(true)}
+              disabled={isLoading}
+            >
+              <Text style={s.secondaryLink}>Sign in with a token</Text>
+            </Pressable>
+          </>
         )}
 
-        {error && (
+        {error && !showTokenInput && (
           <Animated.View entering={FadeInDown.duration(200)}>
             <Text style={s.errorText}>{error}</Text>
           </Animated.View>
@@ -533,6 +626,27 @@ function buildStyles(
 
     buttonLoading: {
       opacity: 0.85,
+    },
+
+    tokenInput: {
+      width: "100%",
+      height: 54,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: Radius.md,
+      paddingHorizontal: Spacing.md,
+      fontFamily: FontFamily.regular,
+      fontSize: FontSize.body,
+      color: colors.textPrimary,
+      backgroundColor: colors.surfaceInset,
+    },
+
+    secondaryLink: {
+      fontFamily: FontFamily.medium,
+      fontSize: FontSize.caption,
+      color: colors.accent,
+      textAlign: "center",
+      paddingVertical: Spacing.sm,
     },
 
     buttonIcon: {
