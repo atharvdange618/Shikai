@@ -19,22 +19,38 @@
 - **Timeline events** - Issue and PR screens merge label, state, and cross-reference events into the comment stream in chronological order. ([`d2feb68`](https://github.com/atharvdange618/Shikai/commit/d2feb68))
 - **Reactions** - Emoji reaction counts shown under issue bodies and comments on both issue and PR detail screens. ([`dc53f05`](https://github.com/atharvdange618/Shikai/commit/dc53f05))
 - **GitHub icon in the Overview header** - A one-tap link to the app's own repository sits next to the avatar on the Overview screen, so it no longer takes a trip through Profile > Settings > About to find it. ([`3c9c1d1`](https://github.com/atharvdange618/Shikai/commit/3c9c1d1))
+- **CI and deploy status on the last-commit card** - `CommitSpotlight` shows a status dot (check, x, or clock) rolled up from the commit's check runs and legacy statuses across GitHub Actions, Vercel, Render, Pages, and other external CI. ([`339bbe3`](https://github.com/atharvdange618/Shikai/commit/339bbe3))
+- **Token sign-in** - A "Sign in with a token" option on the sign-in screen lets you paste a classic or fine-grained PAT with `repo` and `read:user` scopes to start a session without the browser OAuth flow, giving Play Store reviewers a self-contained login that never hits GitHub's device-verification or 2FA wall. ([`b31dd0e`](https://github.com/atharvdange618/Shikai/commit/b31dd0e))
+- **Inline PDF rendering** - The file viewer renders PDFs with `react-native-pdf` instead of routing private-repo download URLs through the Google Docs viewer. Bytes are fetched with RN's own fetch and passed to the viewer as a base64 data URI, since `react-native-blob-util` can't follow GitHub's raw-to-object-storage redirect. ([`b48ed55`](https://github.com/atharvdange618/Shikai/commit/b48ed55))
 
 ### Bug Fixes
 
 - **Notifications lag** - Marking a notification, or all of them, read now updates the list instantly instead of waiting on a full refetch of every loaded page. ([`35741ce`](https://github.com/atharvdange618/Shikai/commit/35741ce))
 - **Markdown white flash** - PR and issue bodies and comments, the repo README, and the file viewer no longer flash white for a few frames when they open or when the theme is toggled. The WebView stays hidden until its content paints, then fades in. ([`f7944b0`](https://github.com/atharvdange618/Shikai/commit/f7944b0))
 - **Narrow-screen layout** - On smaller, low-density screens the contribution graph drew two month labels on top of each other ("AuSept") and the repo action bar clipped the "Commits" label. Month labels now sit on the column that starts each month, and the action bar keeps its button text inside the pill. ([`bf0c986`](https://github.com/atharvdange618/Shikai/commit/bf0c986))
+- **GraphQL partial data** - Responses that carry usable data alongside errors (for example a repo with Discussions disabled) are no longer thrown away; only a null `data` field throws. ([`d1d1ec8`](https://github.com/atharvdange618/Shikai/commit/d1d1ec8))
 
 ### Refactoring
 
 - **Paginated query hooks** - Nine hooks that each hand-rolled the same `useInfiniteQuery` boilerplate now share a `useInfinitePagedQuery` helper, and the list-plus-search logic behind `useRepos` and `useStarred` moved into a shared `useFilterableRepoList`. ([`93fc5b5`](https://github.com/atharvdange618/Shikai/commit/93fc5b5))
 - **Theme tokens** - Removed unused `Duration`, `Easing`, and dead `Shadows.dark` tokens and collapsed `ZIndex` to the tiers actually in use. ([`4a816ca`](https://github.com/atharvdange618/Shikai/commit/4a816ca))
 - **About screen** - Trimmed the feature list to headline items. ([`8795f9c`](https://github.com/atharvdange618/Shikai/commit/8795f9c))
+- **GitHubApiError** - Dropped a redundant `message` field; `Error` already provides `message` and `super(message)` sets it. ([`e15450c`](https://github.com/atharvdange618/Shikai/commit/e15450c))
 
 ### Security
 
 - **axios** - Bumped to 1.20.0, clearing nine advisories (CVE-2026-67312 through 67320): prototype pollution via the request-config clone and several uncontrolled-resource-consumption paths. ([`2b76cb6`](https://github.com/atharvdange618/Shikai/commit/2b76cb6))
+- **Markdown webview hardening** - Mermaid diagrams run at `securityLevel: 'strict'` instead of `'loose'` and load from a pinned CDN version. Link taps are intercepted so http(s) URLs open in the system browser instead of navigating the webview in place; `allowUniversalAccessFromFileURLs` dropped and `originWhitelist` narrowed. ([`06d9ced`](https://github.com/atharvdange618/Shikai/commit/06d9ced))
+- **Path parameter encoding** - `username`, `threadId`, and `ref` were interpolated into request paths raw while every other call encoded its segments; brought in line. ([`2e295f0`](https://github.com/atharvdange618/Shikai/commit/2e295f0))
+
+### Testing
+
+- **Vitest set up** - First unit test suite in the project: config, a Node setup shim for the `__DEV__` global, and coverage for the GitHub URL parser, the `utils` formatters, the Sentry token scrubber, stored-credential validators, and the event-display mapper. ([`5c44323`](https://github.com/atharvdange618/Shikai/commit/5c44323), [`ce30ab2`](https://github.com/atharvdange618/Shikai/commit/ce30ab2))
+- **tsconfig fix for the test runner** - `jsx` sat at the top level of `tsconfig.json`, where `tsc` ignores it; esbuild caught it once the test runner started reading the file. ([`e76df35`](https://github.com/atharvdange618/Shikai/commit/e76df35))
+
+### Docs
+
+- **OAuth proxy rate-limit** - Documented the per-IP rate-limit rule to set in the Cloudflare dashboard for the public POST worker endpoint, plus a pointer comment in the worker itself. ([`bea0171`](https://github.com/atharvdange618/Shikai/commit/bea0171))
 
 ### Notes
 
