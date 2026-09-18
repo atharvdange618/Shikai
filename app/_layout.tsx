@@ -15,7 +15,14 @@ import { Stack, useRouter } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import * as SystemUI from "expo-system-ui";
 import { ShareIntentProvider } from "expo-share-intent";
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useReducer,
+  useRef,
+  useState,
+  type Dispatch,
+} from "react";
 import { StatusBar } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 
@@ -33,6 +40,7 @@ import { useAppRatingPrompt } from "@/hooks/useAppRatingPrompt";
 import { useDeepLinks } from "@/hooks/useDeepLinks";
 import { useInAppUpdates } from "@/hooks/useInAppUpdates";
 import { setAuthReady } from "@/lib/axios";
+import { bootReducer, initialBootState, type BootAction } from "@/lib/boot-flow";
 import { fetchAuthenticatedUser } from "@/lib/github-rest";
 import { PERSISTENCE_MAX_AGE, mmkvPersister } from "@/lib/persister";
 import { queryClient, setupFocusManager } from "@/lib/query-client";
@@ -96,21 +104,14 @@ function OTAUpdateEffects() {
 
 export default Sentry.wrap(function RootLayout() {
   const token = useAuthStore((s) => s.token);
-  const setToken = useAuthStore((s) => s.setToken);
   const setUser = useAuthStore((s) => s.setUser);
   const setPat = useAuthStore((s) => s.setPat);
   useOnlineManager();
   const { visible, rate, dismiss } = useAppRatingPrompt();
   useInAppUpdates();
 
-  const [bootComplete, setBootComplete] = useState(false);
+  const [state, dispatch] = useReducer(bootReducer, initialBootState);
   const [showSplash, setShowSplash] = useState(true);
-
-  const [securityStatus, setSecurityStatus] = useState<
-    "pending" | "passed" | "blocked"
-  >("pending");
-  const [securityReasons, setSecurityReasons] = useState<string[]>([]);
-  const [devModeBlocked, setDevModeBlocked] = useState(false);
 
   const [fontsLoaded, fontError] = useFonts({
     Inter_400Regular,
@@ -126,24 +127,23 @@ export default Sentry.wrap(function RootLayout() {
   // Security check runs first, independent of auth boot, so a blocked
   // device never gets its stored token restored or used.
   useEffect(() => {
-    if (fontsReady && securityStatus === "pending") {
-      runSecurityChecks().then((result) => {
-        if (result.isBlocked) {
-          setSecurityStatus("blocked");
-          setSecurityReasons(result.reasons);
-          setDevModeBlocked(result.devModeBlocked);
-        } else {
-          setSecurityStatus("passed");
-        }
-      });
-    }
-  }, [fontsReady, securityStatus]);
+    if (!fontsReady || state.phase !== "checkingSecurity") return;
 
-  const bootStartedRef = useRef(false);
+    runSecurityChecks().then((result) => {
+      if (result.isBlocked) {
+        dispatch({
+          type: "SECURITY_BLOCKED",
+          reasons: result.reasons,
+          devModeBlocked: result.devModeBlocked,
+        });
+      } else {
+        dispatch({ type: "SECURITY_PASSED" });
+      }
+    });
+  }, [fontsReady, state.phase]);
 
   useEffect(() => {
-    if (securityStatus !== "passed" || bootStartedRef.current) return;
-    bootStartedRef.current = true;
+    if (state.phase !== "restoringAuth") return;
 
     async function boot() {
       try {
@@ -164,7 +164,7 @@ export default Sentry.wrap(function RootLayout() {
       } catch {
         // No stored token - routing handles sending user to sign-in
       } finally {
-        setBootComplete(true);
+        dispatch({ type: "AUTH_RESTORE_COMPLETE" });
         setAuthReady(true);
       }
     }
@@ -172,49 +172,45 @@ export default Sentry.wrap(function RootLayout() {
     if (!useAuthStore.getState().token) {
       boot();
     } else {
-      setBootComplete(true);
+      dispatch({ type: "AUTH_RESTORE_COMPLETE" });
       setAuthReady(true);
     }
-  }, [securityStatus, setToken, setUser, setPat]);
+  }, [state.phase, setPat, setUser]);
 
-  // A blocked device never runs boot(), so it doesn't wait on bootComplete.
-  const authPhaseComplete =
-    securityStatus === "blocked" ||
-    (securityStatus === "passed" && bootComplete);
+  const bootPhaseComplete = state.phase === "blocked" || state.phase === "ready";
 
   useEffect(() => {
-    if (fontsReady && securityStatus !== "pending" && authPhaseComplete) {
+    if (fontsReady && bootPhaseComplete) {
       SplashScreen.hideAsync();
     }
-  }, [fontsReady, securityStatus, authPhaseComplete]);
+  }, [fontsReady, bootPhaseComplete]);
 
-  const appReady = fontsReady && authPhaseComplete;
+  const appReady = fontsReady && bootPhaseComplete;
 
   const handleRecheck = useCallback(async () => {
     const result = await runSecurityChecks();
     if (result.isBlocked) {
-      setSecurityReasons(result.reasons);
-      setSecurityStatus("blocked");
-      setDevModeBlocked(result.devModeBlocked);
+      dispatch({
+        type: "SECURITY_BLOCKED",
+        reasons: result.reasons,
+        devModeBlocked: result.devModeBlocked,
+      });
     } else {
-      setSecurityStatus("passed");
+      dispatch({ type: "SECURITY_PASSED" });
     }
   }, []);
 
-  const recheckRef = useRef(handleRecheck);
-  recheckRef.current = handleRecheck;
-
   useEffect(() => {
-    if (securityStatus !== "blocked") return;
+    if (state.phase !== "blocked") return;
 
     const interval = setInterval(() => {
-      recheckRef.current();
+      handleRecheck();
     }, 10000);
 
     return () => clearInterval(interval);
-  }, [securityStatus]);
+  }, [state.phase, handleRecheck]);
 
-  const securityReady = securityStatus !== "pending";
+  const securityReady = state.phase !== "checkingSecurity";
   const allReady = appReady && securityReady;
 
   return (
@@ -248,16 +244,20 @@ export default Sentry.wrap(function RootLayout() {
                   onComplete={() => setShowSplash(false)}
                 />
               )}
-              {!showSplash && securityStatus === "blocked" && (
+              {!showSplash && state.phase === "blocked" && (
                 <BlockingScreen
-                  reasons={securityReasons}
-                  devModeBlocked={devModeBlocked}
+                  reasons={state.reasons}
+                  devModeBlocked={state.devModeBlocked}
                   onOverride={handleRecheck}
                 />
               )}
-              {!showSplash && securityStatus === "passed" && (
+              {!showSplash && state.phase === "ready" && (
                 <ErrorBoundary>
-                  <AppStack token={token} />
+                  <AppStack
+                    token={token}
+                    lastRoutedToken={state.lastRoutedToken}
+                    dispatch={dispatch}
+                  />
                 </ErrorBoundary>
               )}
             </AlertProvider>
@@ -268,32 +268,28 @@ export default Sentry.wrap(function RootLayout() {
   );
 });
 
-function AppStack({ token }: { token: string | null }) {
+function AppStack({
+  token,
+  lastRoutedToken,
+  dispatch,
+}: {
+  token: string | null;
+  lastRoutedToken: string | null | undefined;
+  dispatch: Dispatch<BootAction>;
+}) {
   const theme = useTheme();
   const router = useRouter();
-  const prevTokenRef = useRef(token);
-  const mountedRef = useRef(false);
 
   useDeepLinks(Boolean(token));
 
   useEffect(() => {
-    if (!mountedRef.current) {
-      mountedRef.current = true;
-      prevTokenRef.current = token;
+    dispatch({ type: "TOKEN_CHANGED", token });
+  }, [token, dispatch]);
 
-      router.replace(token ? "/(app)/(tabs)/overview" : "/sign-in");
-      return;
-    }
-
-    const prevToken = prevTokenRef.current;
-    prevTokenRef.current = token;
-
-    if (token && !prevToken) {
-      router.replace("/(app)/(tabs)/overview");
-    } else if (!token && prevToken) {
-      router.replace("/sign-in");
-    }
-  }, [token, router]);
+  useEffect(() => {
+    if (lastRoutedToken === undefined) return;
+    router.replace(lastRoutedToken ? "/(app)/(tabs)/overview" : "/sign-in");
+  }, [lastRoutedToken, router]);
 
   return (
     <Stack
