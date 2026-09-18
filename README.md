@@ -111,6 +111,8 @@ Network state detection with MMKV-backed disk persistence. The app works offline
 3. Your dashboard loads instantly
 4. Optionally, add a PAT in Profile > Settings > Notifications & Following for notifications and activity feed
 
+No browser handy, or GitHub's device verification getting in the way? Use **Sign in with a token** instead: paste a classic or fine-grained PAT with `repo` and `read:user` scopes to start a session directly.
+
 ---
 
 ## Keyboard Shortcuts
