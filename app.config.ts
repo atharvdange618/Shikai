@@ -41,7 +41,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     edgeToEdgeEnabled: true,
     predictiveBackGestureEnabled: false,
     package: "com.atharvdange618.Shikai",
-    versionCode: 5,
+    versionCode: 6,
     // No autoVerify: Shikai just shows up in the chooser for github.com links.
     intentFilters: [
       {
