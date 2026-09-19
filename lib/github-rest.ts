@@ -754,7 +754,6 @@ export async function fetchCheckRun(
   return data;
 }
 
-// ponytail: annotations only, add job-log tail if people ask
 export async function fetchCheckRunAnnotations(
   owner: string,
   repo: string,
@@ -763,6 +762,29 @@ export async function fetchCheckRunAnnotations(
   const { data } = await githubAxios.get<GitHubCheckAnnotation[]>(
     `/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/check-runs/${runId}/annotations`,
     { params: { per_page: 100 } },
+  );
+  return data;
+}
+
+// The Checks API doesn't give a workflow job id directly, but an
+// Actions-backed check run's details_url points at its job page
+// (.../actions/runs/{runId}/job/{jobId}). Non-Actions checks (external CI)
+// have a details_url that won't match, so callers fall back to "open on
+// GitHub" for those.
+export function parseActionsJobId(detailsUrl: string | null): number | null {
+  if (!detailsUrl) return null;
+  const match = detailsUrl.match(/\/actions\/runs\/\d+\/jobs?\/(\d+)/);
+  return match ? Number(match[1]) : null;
+}
+
+export async function fetchCheckRunJobLog(
+  owner: string,
+  repo: string,
+  jobId: number,
+): Promise<string> {
+  const { data } = await githubAxios.get<string>(
+    `/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/actions/jobs/${jobId}/logs`,
+    { responseType: "text" },
   );
   return data;
 }

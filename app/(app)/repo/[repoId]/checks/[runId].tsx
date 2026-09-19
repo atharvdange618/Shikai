@@ -10,7 +10,12 @@ import {
   Spacing,
   useTheme,
 } from "@/constants/theme";
-import { useCheckRun, useCheckRunAnnotations } from "@/hooks/useCheckRun";
+import {
+  useCheckRun,
+  useCheckRunAnnotations,
+  useCheckRunJobLog,
+} from "@/hooks/useCheckRun";
+import { parseActionsJobId } from "@/lib/github-rest";
 import { decodeRepoId, relativeTime } from "@/lib/utils";
 import type {
   GitHubCheckAnnotationLevel,
@@ -18,7 +23,7 @@ import type {
 } from "@/types/github.types";
 import { Octicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useNavigation } from "expo-router";
-import { useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Linking,
@@ -55,6 +60,24 @@ function CheckRunScreenContent() {
     id,
     (run?.output.annotations_count ?? 0) > 0,
   );
+
+  const jobId = parseActionsJobId(run?.details_url ?? null);
+  const [logExpanded, setLogExpanded] = useState(false);
+  const {
+    data: jobLog,
+    isLoading: isLogLoading,
+    isError: isLogError,
+  } = useCheckRunJobLog(owner, repoName, jobId, logExpanded);
+
+  const logTail = useMemo(() => {
+    if (!jobLog) return null;
+    return jobLog
+      .replace(/\u001b\[[0-9;]*m/g, "")
+      .trimEnd()
+      .split("\n")
+      .slice(-100)
+      .join("\n");
+  }, [jobLog]);
 
   useEffect(() => {
     try {
@@ -166,6 +189,53 @@ function CheckRunScreenContent() {
               </View>
             );
           })}
+        </View>
+      )}
+
+      {jobId !== null && (
+        <View style={s.jobLogSection}>
+          <Pressable
+            onPress={() => setLogExpanded((v) => !v)}
+            style={({ pressed }) => [
+              s.jobLogHeader,
+              { opacity: pressed ? 0.7 : 1 },
+            ]}
+          >
+            <Octicons
+              name={logExpanded ? "chevron-down" : "chevron-right"}
+              size={13}
+              color={colors.textSecondary}
+            />
+            <Text style={[s.sectionTitle, { color: colors.textPrimary }]}>
+              Job log
+            </Text>
+          </Pressable>
+
+          {logExpanded && (
+            <View
+              style={[
+                s.jobLogBox,
+                { backgroundColor: colors.surface, borderColor: colors.border },
+              ]}
+            >
+              {isLogLoading ? (
+                <ActivityIndicator size="small" color={colors.accent} />
+              ) : isLogError || !logTail ? (
+                <Text
+                  style={[s.annotationMessage, { color: colors.textMuted }]}
+                >
+                  Log not available. Open on GitHub instead.
+                </Text>
+              ) : (
+                <Text
+                  style={[s.jobLogText, { color: colors.textSecondary }]}
+                  selectable
+                >
+                  {logTail}
+                </Text>
+              )}
+            </View>
+          )}
         </View>
       )}
 
@@ -304,6 +374,24 @@ const s = StyleSheet.create({
     lineHeight: FontSize.caption * 1.5,
   },
   annotationRaw: {
+    fontFamily: FontFamily.mono,
+    fontSize: 10,
+    lineHeight: 15,
+  },
+  jobLogSection: {
+    gap: Spacing.sm,
+  },
+  jobLogHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.xs,
+  },
+  jobLogBox: {
+    borderWidth: StyleSheet.hairlineWidth,
+    borderRadius: Radius.lg,
+    padding: Spacing.md,
+  },
+  jobLogText: {
     fontFamily: FontFamily.mono,
     fontSize: 10,
     lineHeight: 15,

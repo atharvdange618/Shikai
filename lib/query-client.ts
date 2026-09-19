@@ -109,6 +109,8 @@ export const queryKeys = {
     ["repo", owner, repo, "check-run", runId] as const,
   checkRunAnnotations: (owner: string, repo: string, runId: number) =>
     ["repo", owner, repo, "check-run", runId, "annotations"] as const,
+  checkRunJobLog: (owner: string, repo: string, jobId: number) =>
+    ["repo", owner, repo, "check-run", "job-log", jobId] as const,
   blame: (owner: string, repo: string, ref: string, path: string) =>
     ["repo", owner, repo, "blame", ref, path] as const,
   commitDetail: (owner: string, repo: string, sha: string) =>
