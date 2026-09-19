@@ -8,6 +8,7 @@ import {
   type ColorTokens,
 } from "@/constants/theme";
 import { useBlame } from "@/hooks/useBlame";
+import { tokenColor, tokenizeLine, type Token } from "@/lib/blame-highlight";
 import { decodeRepoId, relativeTime } from "@/lib/utils";
 import type { BlameRange } from "@/types/github-graphql.types";
 import { Octicons } from "@expo/vector-icons";
@@ -29,6 +30,7 @@ export default function BlameScreen() {
 interface BlameLine {
   lineNumber: number;
   text: string;
+  tokens: Token[];
   range: BlameRange;
   isRangeStart: boolean;
   tint: 0 | 1;
@@ -66,7 +68,14 @@ function buildLines(text: string, ranges: BlameRange[]): BlameLine[] {
       tint = tint === 0 ? 1 : 0;
       lastOid = range.commit.oid;
     }
-    result.push({ lineNumber, text: lineText, range, isRangeStart, tint });
+    result.push({
+      lineNumber,
+      text: lineText,
+      tokens: tokenizeLine(lineText),
+      range,
+      isRangeStart,
+      tint,
+    });
   });
 
   return result;
@@ -80,7 +89,7 @@ function BlameScreenContent() {
     fileName?: string;
   }>();
   const navigation = useNavigation();
-  const { colors } = useTheme();
+  const { colors, isDark } = useTheme();
 
   const [owner, repoName] = decodeRepoId(repoId ?? "");
   const {
@@ -147,7 +156,13 @@ function BlameScreenContent() {
       data={lines}
       keyExtractor={(item) => String(item.lineNumber)}
       renderItem={({ item }) => (
-        <BlameLineRow line={item} colors={colors} s={s} repoId={repoId ?? ""} />
+        <BlameLineRow
+          line={item}
+          colors={colors}
+          isDark={isDark}
+          s={s}
+          repoId={repoId ?? ""}
+        />
       )}
       drawDistance={400}
       style={{ backgroundColor: colors.background }}
@@ -158,11 +173,13 @@ function BlameScreenContent() {
 const BlameLineRow = memo(function BlameLineRow({
   line,
   colors,
+  isDark,
   s,
   repoId,
 }: {
   line: BlameLine;
   colors: ColorTokens;
+  isDark: boolean;
   s: ReturnType<typeof buildStyles>;
   repoId: string;
 }) {
@@ -199,7 +216,18 @@ const BlameLineRow = memo(function BlameLineRow({
         {line.lineNumber}
       </Text>
       <Text style={[s.code, { color: colors.textPrimary }]} numberOfLines={1}>
-        {line.text.length > 0 ? line.text : " "}
+        {line.text.length > 0
+          ? line.tokens.map((token, i) => {
+              const color = tokenColor(token.kind, isDark);
+              return color ? (
+                <Text key={i} style={{ color }}>
+                  {token.text}
+                </Text>
+              ) : (
+                token.text
+              );
+            })
+          : " "}
       </Text>
     </Pressable>
   );
