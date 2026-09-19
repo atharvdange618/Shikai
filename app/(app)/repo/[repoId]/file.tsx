@@ -316,11 +316,19 @@ function FileViewerScreenContent() {
   const contentScrollRef = useRef<ScrollView>(null);
   const hasScrolledToLineRef = useRef(false);
 
-  // A shared #L10 link only tells us the line number, not a pixel position,
-  // and the rendered HTML has no per-line anchors to measure. So this jumps
-  // to the line's proportional position in the WebView's reported total
-  // height rather than its exact one — close enough to land the target line
-  // on screen. Runs once per file open.
+  // Exact position: the WebView locates the target line via the Range API
+  // against the rendered code block and reports its real pixel offset.
+  const handleLineOffset = useCallback((y: number) => {
+    if (hasScrolledToLineRef.current) return;
+    const offsetY = Math.max(y - Spacing.xxl * 2, 0);
+    contentScrollRef.current?.scrollTo({ y: offsetY, animated: true });
+    hasScrolledToLineRef.current = true;
+  }, []);
+
+  // Fallback for markdown files: there's no single code block to locate a
+  // source line inside (the rendered prose doesn't map 1:1 to source lines),
+  // so this jumps to the line's proportional position in the WebView's total
+  // height instead. Only fires if the exact lookup above didn't already.
   const handleMarkdownHeightChange = useCallback(
     (height: number) => {
       if (
@@ -583,6 +591,8 @@ function FileViewerScreenContent() {
                 }
                 context={`${owner}/${repoName}`}
                 onHeightChange={handleMarkdownHeightChange}
+                targetLine={targetLine}
+                onLineOffset={handleLineOffset}
               />
             </>
           )}
