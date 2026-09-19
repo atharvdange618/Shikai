@@ -1,6 +1,17 @@
-import { fetchDiscussion, fetchDiscussions } from "@/lib/github-graphql";
+import {
+  fetchDiscussion,
+  fetchDiscussions,
+  fetchMoreDiscussionReplies,
+} from "@/lib/github-graphql";
 import { queryKeys } from "@/lib/query-client";
-import { queryOptions, useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import type { DiscussionDetail } from "@/types/github-graphql.types";
+import {
+  queryOptions,
+  useInfiniteQuery,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 
 export function useDiscussions(owner: string, repo: string) {
   const query = useInfiniteQuery({
@@ -40,4 +51,43 @@ export function useDiscussionDetail(
       meta: { persist: false },
     }),
   );
+}
+
+export function useLoadMoreReplies(owner: string, repo: string, number: number) {
+  const queryClient = useQueryClient();
+  const queryKey = queryKeys.discussionDetail(owner, repo, number);
+
+  return useMutation({
+    mutationFn: ({
+      commentId,
+      after,
+    }: {
+      commentId: string;
+      after: string | null;
+    }) => fetchMoreDiscussionReplies(commentId, after),
+    onSuccess: (result, { commentId }) => {
+      if (!result) return;
+      queryClient.setQueryData<DiscussionDetail | null>(queryKey, (old) => {
+        if (!old) return old;
+        return {
+          ...old,
+          comments: {
+            ...old.comments,
+            nodes: old.comments.nodes.map((comment) =>
+              comment.id === commentId
+                ? {
+                    ...comment,
+                    replies: {
+                      ...comment.replies,
+                      pageInfo: result.replies.pageInfo,
+                      nodes: [...comment.replies.nodes, ...result.replies.nodes],
+                    },
+                  }
+                : comment,
+            ),
+          },
+        };
+      });
+    },
+  });
 }

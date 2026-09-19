@@ -9,13 +9,13 @@ import {
   Spacing,
   useTheme,
 } from "@/constants/theme";
-import { useDiscussionDetail } from "@/hooks/useDiscussions";
+import { useDiscussionDetail, useLoadMoreReplies } from "@/hooks/useDiscussions";
 import { decodeRepoId, encodeRepoId, relativeTime } from "@/lib/utils";
 import type { DiscussionComment } from "@/types/github-graphql.types";
 import { Octicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Pressable,
@@ -50,6 +50,16 @@ function DiscussionDetailScreenContent() {
     isLoading,
     isError,
   } = useDiscussionDetail(owner, repoName, discussionNumber);
+  const loadMoreReplies = useLoadMoreReplies(owner, repoName, discussionNumber);
+  const [loadingReplyFor, setLoadingReplyFor] = useState<string | null>(null);
+
+  const handleLoadMoreReplies = (commentId: string, after: string | null) => {
+    setLoadingReplyFor(commentId);
+    loadMoreReplies.mutate(
+      { commentId, after },
+      { onSettled: () => setLoadingReplyFor(null) },
+    );
+  };
 
   useEffect(() => {
     try {
@@ -242,6 +252,36 @@ function DiscussionDetailScreenContent() {
               <MarkdownRenderer markdown={reply.body} context={markdownContext} />
             </View>
           ))}
+
+          {comment.replies.pageInfo.hasNextPage && (
+            <Pressable
+              onPress={() =>
+                handleLoadMoreReplies(
+                  comment.id,
+                  comment.replies.pageInfo.endCursor,
+                )
+              }
+              disabled={loadingReplyFor === comment.id}
+              style={({ pressed }) => [
+                s.loadMoreReplies,
+                { opacity: pressed ? 0.6 : 1 },
+              ]}
+            >
+              {loadingReplyFor === comment.id ? (
+                <ActivityIndicator size="small" color={colors.accent} />
+              ) : (
+                <Text style={[s.loadMoreRepliesText, { color: colors.accent }]}>
+                  Show{" "}
+                  {comment.replies.totalCount - comment.replies.nodes.length}{" "}
+                  more{" "}
+                  {comment.replies.totalCount - comment.replies.nodes.length ===
+                  1
+                    ? "reply"
+                    : "replies"}
+                </Text>
+              )}
+            </Pressable>
+          )}
         </View>
       ))}
 
@@ -366,6 +406,14 @@ const s = StyleSheet.create({
     padding: Spacing.md,
     gap: Spacing.md,
     marginLeft: Spacing.lg,
+  },
+  loadMoreReplies: {
+    marginLeft: Spacing.lg,
+    paddingVertical: Spacing.xs,
+  },
+  loadMoreRepliesText: {
+    fontFamily: FontFamily.medium,
+    fontSize: FontSize.label,
   },
   commentHeader: {
     flexDirection: "row",

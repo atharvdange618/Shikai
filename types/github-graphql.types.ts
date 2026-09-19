@@ -224,7 +224,25 @@ export interface DiscussionComment {
   isAnswer: boolean;
   replies: {
     totalCount: number;
+    pageInfo: {
+      hasNextPage: boolean;
+      endCursor: string | null;
+    };
     nodes: DiscussionReply[];
+  };
+}
+
+export interface MoreDiscussionRepliesResponse {
+  data: {
+    node: {
+      replies: {
+        pageInfo: {
+          hasNextPage: boolean;
+          endCursor: string | null;
+        };
+        nodes: DiscussionReply[];
+      };
+    } | null;
   };
 }
 

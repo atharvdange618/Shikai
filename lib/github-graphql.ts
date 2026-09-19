@@ -9,6 +9,7 @@ import type {
   DiscussionDetailResponse,
   DiscussionListNode,
   DiscussionsListResponse,
+  MoreDiscussionRepliesResponse,
   PinnedRepoNode,
   PinnedReposResponse,
   RecentActivityResponse,
@@ -385,6 +386,10 @@ const DISCUSSION_QUERY = `
             }
             replies(first: 10) {
               totalCount
+              pageInfo {
+                hasNextPage
+                endCursor
+              }
               nodes {
                 id
                 body
@@ -413,4 +418,40 @@ export async function fetchDiscussion(
   );
 
   return response.repository?.discussion ?? null;
+}
+
+const MORE_DISCUSSION_REPLIES_QUERY = `
+  query MoreDiscussionReplies($commentId: ID!, $after: String) {
+    node(id: $commentId) {
+      ... on DiscussionComment {
+        replies(first: 10, after: $after) {
+          pageInfo {
+            hasNextPage
+            endCursor
+          }
+          nodes {
+            id
+            body
+            createdAt
+            author {
+              login
+              avatarUrl
+            }
+          }
+        }
+      }
+    }
+  }
+`;
+
+export async function fetchMoreDiscussionReplies(
+  commentId: string,
+  after: string | null,
+): Promise<MoreDiscussionRepliesResponse["data"]["node"]> {
+  const response = await graphql<MoreDiscussionRepliesResponse["data"]>(
+    MORE_DISCUSSION_REPLIES_QUERY,
+    { commentId, after },
+  );
+
+  return response.node;
 }
