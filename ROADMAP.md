@@ -113,10 +113,14 @@ plus the blob text in the same request via an aliased `object(expression: "ref:p
 relative date on each range's first line, alternating tint per range, tap → commit detail.
 Entry is a `feed-person` header button in the file viewer, hidden for images/video/PDF.
 
-Not done: syntax highlighting (plain mono text — the WebView-based `MarkdownRenderer` can't
-drive a native gutter, and a from-scratch tokenizer wasn't worth it here) and horizontal
-scroll for long lines (lines clip at the screen edge; the tap-through to commit detail is the
-way to read a full line for now). `ponytail: plain text and clipped lines, add if people ask`.
+Syntax coloring added: `lib/blame-highlight.ts` is a single language-agnostic regex
+tokenizer (comments/strings/numbers/keywords) shared across languages instead of a
+per-language grammar, reusing `MarkdownRenderer`'s color values so the two screens match.
+Approximate by design — no cross-line block comments/strings. `ponytail: regex
+approximation across languages, add per-language grammars if people ask`.
+
+Not done: horizontal scroll for long lines (lines clip at the screen edge; the tap-through
+to commit detail is the way to read a full line for now).
 
 ### Phase 3 - Triage and navigation
 
@@ -135,9 +139,14 @@ passes the starting line number as `line`; `file.tsx` scrolls the outer `ScrollV
 line's proportional position once `MarkdownRenderer` reports its rendered height — an
 approximation, since the rendered HTML has no per-line anchors to measure exactly against.
 
-Not done: exact-pixel scroll / line highlight for `#L` (would need wrapping each line in the
-rendered HTML to measure and highlight it — real DOM surgery on GitHub's markdown output, not
-attempted here). `ponytail: proportional scroll only, add exact highlighting if people ask`.
+Exact-pixel `#L` scroll added: no DOM surgery needed after all. `MarkdownRenderer`'s WebView
+walks the code block's text nodes counting newlines and reads the target line's real position
+via `Range.getBoundingClientRect()`, then reports it to `file.tsx` via `onLineOffset`. Only
+works when the file is rendered as a single fenced code block (i.e. not a `.md` file, where
+source lines don't map 1:1 onto the rendered prose); the original proportional-height scroll
+stays as the fallback for that case.
+
+Not done: line highlight (the target line scrolls into view but isn't visually marked).
 
 #### 3.3 In-app check annotations · shipped
 
@@ -149,8 +158,12 @@ with the annotations query gated on `output.annotations_count > 0`. `CheckSummar
 carries `runId` so `ChecksSection` routes Actions check-runs into the screen while legacy
 external-CI statuses keep `Linking.openURL`.
 
-Not done: full job-step logs (that endpoint redirects to a zip). "Open full logs on GitHub"
-covers it. `ponytail: annotations only, add job-log tail if people ask`.
+Job-log tail added: `parseActionsJobId` reads the job id out of `details_url` (Actions-backed
+checks only; external CI still falls back to "Open full logs on GitHub"), and
+`fetchCheckRunJobLog` hits `/actions/jobs/{jobId}/logs` — a single job's log is plain text,
+not the zip that the whole-run logs endpoint returns. A collapsible "Job log" section shows
+the last 100 lines with ANSI color codes stripped, expand-to-fetch so it doesn't pull a
+potentially large log on every check view.
 
 ### Phase 4 - Content types
 
@@ -164,8 +177,10 @@ the issues screens: category emoji/name pill, "Answered" badge, body and comment
 "Discussions" row in `RepoActivity`, shown only when `repo.has_discussions` (added to
 `GitHubRepo`).
 
-Not done: replies beyond the first 10 per comment (mirrors GitHub's own "show more replies"
-gap, not wired here). `ponytail: first 10 replies only, add a load-more if threads run long`.
+Load-more replies added: `replies.pageInfo` in the GraphQL query plus `fetchMoreDiscussionReplies`
+(queries the comment directly via GraphQL's `node(id:)`) and `useLoadMoreReplies`, which merges
+the next page into the cached discussion via `setQueryData`. A "Show N more replies" row appears
+under a comment whenever `pageInfo.hasNextPage` is true.
 
 ### Phase 5 - PR detail polish
 
