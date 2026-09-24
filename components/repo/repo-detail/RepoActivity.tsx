@@ -7,6 +7,7 @@ import {
   Spacing,
   type ColorTokens,
 } from "@/constants/theme";
+import type { RunDisplay } from "@/lib/run-display";
 
 interface RepoActivityProps {
   openIssues: number;
@@ -23,6 +24,8 @@ interface RepoActivityProps {
   onReleasesPressIn?: () => void;
   showDiscussions?: boolean;
   onDiscussionsPress?: () => void;
+  latestRunStatus?: RunDisplay;
+  onActionsPress?: () => void;
 }
 
 export function RepoActivity({
@@ -40,6 +43,8 @@ export function RepoActivity({
   onReleasesPressIn,
   showDiscussions,
   onDiscussionsPress,
+  latestRunStatus,
+  onActionsPress,
 }: RepoActivityProps) {
   const s = buildStyles(colors);
 
@@ -124,6 +129,34 @@ export function RepoActivity({
                 <Octicons name="tag" size={14} color={colors.textMuted} />
                 <Text style={s.activityCount}>{releaseCount}</Text>
                 <Text style={s.activityLabel}>Releases</Text>
+                <Octicons
+                  name="chevron-right"
+                  size={12}
+                  color={colors.textMuted}
+                  style={{ marginLeft: "auto" }}
+                />
+              </Pressable>
+            </>
+          )}
+
+          {latestRunStatus && (
+            <>
+              <View style={s.activityDivider} />
+
+              <Pressable
+                style={({ pressed }) => [
+                  s.activityRow,
+                  pressed && { opacity: 0.6 },
+                ]}
+                onPress={onActionsPress}
+                accessibilityLabel={`Actions, latest run ${latestRunStatus.label}`}
+              >
+                <Octicons
+                  name={latestRunStatus.icon}
+                  size={14}
+                  color={latestRunStatus.color}
+                />
+                <Text style={s.activityLabel}>Actions</Text>
                 <Octicons
                   name="chevron-right"
                   size={12}

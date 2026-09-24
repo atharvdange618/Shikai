@@ -519,6 +519,46 @@ export interface GitHubCheckRunDetail extends GitHubCheckRun {
   };
 }
 
+export type GitHubWorkflowRunStatus =
+  | GitHubCheckStatus
+  | "waiting"
+  | "requested"
+  | "pending"
+  | "action_required";
+
+export type GitHubWorkflowRunConclusion =
+  | GitHubCheckConclusion
+  | "stale"
+  | "startup_failure";
+
+export interface GitHubWorkflowRun {
+  id: number;
+  name: string | null;
+  display_title: string;
+  run_number: number;
+  event: string;
+  status: GitHubWorkflowRunStatus;
+  conclusion: GitHubWorkflowRunConclusion;
+  head_branch: string | null;
+  head_sha: string;
+  html_url: string;
+  created_at: string;
+  updated_at: string;
+  run_started_at: string | null;
+  actor: { login: string; avatar_url: string } | null;
+}
+
+export interface GitHubWorkflowJob {
+  id: number;
+  name: string;
+  status: GitHubWorkflowRunStatus;
+  conclusion: GitHubWorkflowRunConclusion;
+  started_at: string;
+  completed_at: string | null;
+  html_url: string | null;
+  check_run_url: string;
+}
+
 export type GitHubCheckAnnotationLevel = "notice" | "warning" | "failure";
 
 export interface GitHubCheckAnnotation {

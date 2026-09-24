@@ -85,6 +85,14 @@ export function parseGitHubUrl(url: string): string | null {
       }
       return `${repoBase}/releases`;
     }
+    case "actions": {
+      // /actions/runs/{id}, optionally /job/{jobId} after it: the run screen
+      // lists that job. Anything else under /actions opens the runs list.
+      const runId = a === "runs" ? seg[4] : undefined;
+      return runId && /^\d+$/.test(runId)
+        ? `${repoBase}/run/${runId}`
+        : `${repoBase}/actions`;
+    }
     case "tree": {
       // /tree/{ref}/{...path}. The ref is dropped, same as blob below: the
       // files screen reads the default branch.

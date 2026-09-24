@@ -11,8 +11,10 @@ import {
 } from "@/constants/theme";
 import { useRepoDetailsScreen } from "@/hooks/useRepoDetails";
 import { useChecks } from "@/hooks/usePullRequestDetail";
+import { useWorkflowRuns } from "@/hooks/useActions";
 import { useReleases } from "@/hooks/useReleases";
 import { fetchIssues, fetchPullRequests } from "@/lib/github-rest";
+import { getRunDisplay } from "@/lib/run-display";
 import { prefetchFileTree, prefetchRepoCommits } from "@/lib/prefetch";
 import { queryKeys } from "@/lib/query-client";
 import { decodeRepoId, encodeRepoId, formatCount } from "@/lib/utils";
@@ -101,6 +103,8 @@ export default function RepoDetailsScreen() {
   } = useRepoDetailsScreen(owner, repoName);
 
   const { releases } = useReleases(owner, repoName);
+  const { runs } = useWorkflowRuns(owner, repoName);
+  const latestRun = runs[0];
 
   const { data: checks = [] } = useChecks(owner, repoName, lastCommit?.sha ?? "");
 
@@ -237,6 +241,11 @@ export default function RepoDetailsScreen() {
     router.push(`/(app)/repo/${repoId}/releases`);
   }, [router, repoId]);
 
+  const handleActionsPress = useCallback(() => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    router.push(`/(app)/repo/${repoId}/actions`);
+  }, [router, repoId]);
+
   const handleDiscussionsPress = useCallback(() => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     router.push(`/(app)/repo/${repoId}/discussions`);
@@ -358,6 +367,12 @@ export default function RepoDetailsScreen() {
             onReleasesPress={handleReleasesPress}
             showDiscussions={repo?.has_discussions}
             onDiscussionsPress={handleDiscussionsPress}
+            latestRunStatus={
+              latestRun
+                ? getRunDisplay(latestRun.status, latestRun.conclusion, colors)
+                : undefined
+            }
+            onActionsPress={handleActionsPress}
           />
         </Animated.View>
 

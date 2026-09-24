@@ -29,6 +29,8 @@ import type {
   GitHubTimelineEvent,
   GitHubTree,
   GitHubUser,
+  GitHubWorkflowJob,
+  GitHubWorkflowRun,
   RepoListParams,
 } from "@/types/github.types";
 
@@ -787,6 +789,60 @@ export async function fetchCheckRunJobLog(
     { responseType: "text" },
   );
   return data;
+}
+
+export interface FetchWorkflowRunsResult {
+  runs: GitHubWorkflowRun[];
+  pagination: GitHubPagination;
+}
+
+export async function fetchWorkflowRuns(
+  owner: string,
+  repo: string,
+  page: number,
+  per_page: number = 20,
+): Promise<FetchWorkflowRunsResult> {
+  const { data, headers } = await githubAxios.get<{
+    workflow_runs: GitHubWorkflowRun[];
+  }>(
+    `/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/actions/runs`,
+    { params: { page, per_page } },
+  );
+  return {
+    runs: data.workflow_runs,
+    pagination: parseLinkHeader(headers["link"]),
+  };
+}
+
+export async function fetchWorkflowRun(
+  owner: string,
+  repo: string,
+  runId: number,
+): Promise<GitHubWorkflowRun> {
+  const { data } = await githubAxios.get<GitHubWorkflowRun>(
+    `/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/actions/runs/${runId}`,
+  );
+  return data;
+}
+
+// Jobs of the run's latest attempt. 100 covers all but huge matrix builds.
+export async function fetchWorkflowRunJobs(
+  owner: string,
+  repo: string,
+  runId: number,
+): Promise<GitHubWorkflowJob[]> {
+  const { data } = await githubAxios.get<{ jobs: GitHubWorkflowJob[] }>(
+    `/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/actions/runs/${runId}/jobs`,
+    { params: { per_page: 100 } },
+  );
+  return data.jobs;
+}
+
+// A job's check_run_url ends in /check-runs/{id}; that id opens the existing
+// check-run screen, which already shows the job's log tail.
+export function parseCheckRunId(checkRunUrl: string | null): number | null {
+  const match = checkRunUrl?.match(/\/check-runs\/(\d+)$/);
+  return match ? Number(match[1]) : null;
 }
 
 export async function fetchCombinedStatus(

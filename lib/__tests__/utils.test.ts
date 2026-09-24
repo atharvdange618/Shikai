@@ -7,6 +7,7 @@ import {
   format24HourTime,
   formatBytes,
   formatCount,
+  formatDuration,
   getLanguage,
   isImageFile,
   isVideoFile,
@@ -101,5 +102,19 @@ describe("getLanguage", () => {
   it("falls back to text for anything else", () => {
     expect(getLanguage("Makefile")).toBe("text");
     expect(getLanguage("data.parquet")).toBe("text");
+  });
+});
+
+describe("formatDuration", () => {
+  const start = "2026-01-01T00:00:00Z";
+
+  it("formats seconds, minutes and hours", () => {
+    expect(formatDuration(start, "2026-01-01T00:00:45Z")).toBe("45s");
+    expect(formatDuration(start, "2026-01-01T00:03:12Z")).toBe("3m 12s");
+    expect(formatDuration(start, "2026-01-01T01:05:30Z")).toBe("1h 5m");
+  });
+
+  it("never goes negative on clock skew", () => {
+    expect(formatDuration(start, "2025-12-31T23:59:50Z")).toBe("0s");
   });
 });

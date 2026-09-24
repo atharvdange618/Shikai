@@ -192,6 +192,36 @@ export default function RepoLayout() {
       />
 
       <Stack.Screen
+        name="[repoId]/actions"
+        options={{
+          ...sharedHeaderOptions,
+          title: "Actions",
+          headerTransparent: Platform.OS === "ios",
+          headerBlurEffect:
+            Platform.OS === "ios" ? (isDark ? "dark" : "light") : undefined,
+          headerStyle:
+            Platform.OS === "ios"
+              ? undefined
+              : { backgroundColor: colors.background },
+        }}
+      />
+
+      <Stack.Screen
+        name="[repoId]/run/[runId]"
+        options={{
+          ...sharedHeaderOptions,
+          title: "",
+          headerTransparent: Platform.OS === "ios",
+          headerBlurEffect:
+            Platform.OS === "ios" ? (isDark ? "dark" : "light") : undefined,
+          headerStyle:
+            Platform.OS === "ios"
+              ? undefined
+              : { backgroundColor: colors.background },
+        }}
+      />
+
+      <Stack.Screen
         name="[repoId]/compare"
         options={{
           ...sharedHeaderOptions,

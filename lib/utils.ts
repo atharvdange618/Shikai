@@ -30,6 +30,19 @@ export function relativeTime(dateStr: string): string {
   return timeAgo(dateStr, false);
 }
 
+// Elapsed time between two ISO dates as "45s", "3m 12s" or "1h 5m".
+// Null end means still running, measured to now.
+export function formatDuration(start: string, end: string | null): string {
+  const endMs = end ? new Date(end).getTime() : Date.now();
+  const total = Math.max(0, Math.round((endMs - new Date(start).getTime()) / 1000));
+  const h = Math.floor(total / 3600);
+  const m = Math.floor((total % 3600) / 60);
+  const sec = total % 60;
+  if (h > 0) return `${h}h ${m}m`;
+  if (m > 0) return `${m}m ${sec}s`;
+  return `${sec}s`;
+}
+
 export function formatCount(n: number): string {
   if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}m`;
   if (n >= 1_000) return `${(n / 1_000).toFixed(1)}k`;

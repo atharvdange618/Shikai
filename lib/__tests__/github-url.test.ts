@@ -68,6 +68,22 @@ describe("parseGitHubUrl", () => {
     ).toBe(`${base}/release/v1.2.3`);
   });
 
+  it("routes actions runs, with job links landing on their run", () => {
+    const base = "/(app)/repo/facebook~~react";
+    expect(parseGitHubUrl("https://github.com/facebook/react/actions")).toBe(
+      `${base}/actions`,
+    );
+    expect(
+      parseGitHubUrl("https://github.com/facebook/react/actions/runs/123"),
+    ).toBe(`${base}/run/123`);
+    expect(
+      parseGitHubUrl("https://github.com/facebook/react/actions/runs/123/job/456"),
+    ).toBe(`${base}/run/123`);
+    expect(
+      parseGitHubUrl("https://github.com/facebook/react/actions/workflows/ci.yml"),
+    ).toBe(`${base}/actions`);
+  });
+
   it("keeps the path for tree and blob, plus a blob line anchor", () => {
     const base = "/(app)/repo/facebook~~react";
     expect(

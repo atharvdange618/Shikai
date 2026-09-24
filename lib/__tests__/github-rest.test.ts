@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { parseActionsJobId } from "@/lib/github-rest";
+import { parseActionsJobId, parseCheckRunId } from "@/lib/github-rest";
 
 describe("parseActionsJobId", () => {
   it("extracts the job id from an Actions details_url", () => {
@@ -25,5 +25,20 @@ describe("parseActionsJobId", () => {
 
   it("returns null for null input", () => {
     expect(parseActionsJobId(null)).toBeNull();
+  });
+});
+
+describe("parseCheckRunId", () => {
+  it("extracts the id from a job's check_run_url", () => {
+    expect(
+      parseCheckRunId(
+        "https://api.github.com/repos/facebook/react/check-runs/789",
+      ),
+    ).toBe(789);
+  });
+
+  it("returns null for an unrelated url or null", () => {
+    expect(parseCheckRunId("https://api.github.com/repos/a/b/actions/jobs/1")).toBeNull();
+    expect(parseCheckRunId(null)).toBeNull();
   });
 });

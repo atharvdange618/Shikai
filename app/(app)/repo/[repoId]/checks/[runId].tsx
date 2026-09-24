@@ -16,11 +16,9 @@ import {
   useCheckRunJobLog,
 } from "@/hooks/useCheckRun";
 import { parseActionsJobId } from "@/lib/github-rest";
+import { getRunDisplay } from "@/lib/run-display";
 import { decodeRepoId, relativeTime } from "@/lib/utils";
-import type {
-  GitHubCheckAnnotationLevel,
-  GitHubCheckRunDetail,
-} from "@/types/github.types";
+import type { GitHubCheckAnnotationLevel } from "@/types/github.types";
 import { Octicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useNavigation } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
@@ -104,7 +102,7 @@ function CheckRunScreenContent() {
     );
   }
 
-  const status = getRunDisplay(run, colors);
+  const status = getRunDisplay(run.status, run.conclusion, colors);
   const summaryText = [run.output.title, run.output.summary, run.output.text]
     .filter((part): part is string => Boolean(part && part.trim()))
     .join("\n\n");
@@ -258,29 +256,6 @@ function CheckRunScreenContent() {
       <View style={{ height: Spacing.xxl + 60 + Spacing.lg }} />
     </ScrollView>
   );
-}
-
-function getRunDisplay(
-  run: GitHubCheckRunDetail,
-  colors: ColorTokens,
-): { icon: React.ComponentProps<typeof Octicons>["name"]; color: string; label: string } {
-  if (run.status !== "completed") {
-    return { icon: "clock", color: colors.warning, label: "In progress" };
-  }
-  switch (run.conclusion) {
-    case "success":
-      return { icon: "check-circle-fill", color: colors.success, label: "Passed" };
-    case "failure":
-    case "timed_out":
-    case "action_required":
-      return { icon: "x-circle-fill", color: colors.danger, label: "Failed" };
-    case "cancelled":
-    case "skipped":
-    case "neutral":
-      return { icon: "skip", color: colors.textMuted, label: "Skipped" };
-    default:
-      return { icon: "dot-fill", color: colors.textMuted, label: "Completed" };
-  }
 }
 
 function getLevelDisplay(
