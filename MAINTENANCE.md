@@ -47,7 +47,8 @@ Google Play requires updates to target a recent Android API level and usually ra
 `runtimeVersion` uses the `appVersion` policy: an `eas update` goes to every installed build with the same `version`.
 
 - **JS-only change:** an OTA update is fine. Run `npm run sentry:sourcemaps` afterwards so stack traces stay readable.
-- **Anything native** (new native package, Expo SDK upgrade, config plugin change, `app.config.ts` change): bump `version` and ship a new store build. Pushing native-dependent JS over OTA to an older binary crashes it on launch.
+- **Anything that changes what's inside the binary** (a new or upgraded native package, an Expo SDK upgrade, a config plugin or `app.config.ts` change that adds native code, permissions, or manifest entries): bump `version` and ship a new store build. Pushing JS that needs native code an older binary lacks crashes it. Build-only settings such as signing or ABI splits don't count.
+- **Bump `version` the moment a native dependency lands, not at release time.** An OTA reaches every binary with that version, including APKs attached to a GitHub release. The v1.4.0 GitHub APKs were built before `react-native-pdf` was added but still say 1.4.0, which is why 1.4.x could never take an OTA.
 
 ## Other deployments
 
