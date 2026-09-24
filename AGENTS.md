@@ -19,11 +19,11 @@ expo run:android
 # Regenerate native Android folder (gradle patches come from plugins/)
 npx expo prebuild --clean
 
-# Build release APK (after prebuild)
+# Build release APKs for GitHub releases (after prebuild)
 cd android && gradlew.bat assembleRelease
 
-# Build release AAB (Play Store)
-cd android && gradlew.bat bundleRelease
+# Build release AAB (Play Store builds go through EAS, not local Gradle)
+eas build --platform android --profile production
 
 # Web deploy (static export → Cloudflare Workers)
 npx expo export -p web && wrangler deploy

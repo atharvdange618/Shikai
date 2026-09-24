@@ -31,16 +31,23 @@ Google Play requires updates to target a recent Android API level and usually ra
 
 1. Bump `version` in `package.json` and `app.config.ts`, and bump `android.versionCode` in `app.config.ts`. Play rejects a versionCode it has seen before.
 2. Update `CHANGES.md`.
-3. Build and sign locally:
+3. **Play Store:** build on EAS. First check that the `production` environment has the full variable set (`eas env:list --environment production`). `preview` and `production` don't share variables.
+
+   ```bash
+   eas build --platform android --profile production
+   ```
+
+   EAS signs with its own stored credentials. The signing and ABI-split plugins skip themselves there.
+4. **GitHub release APKs:** build locally, then attach the three APKs from `android/app/build/outputs/apk/release/` to the release.
 
    ```bash
    export SHIKAI_KEYSTORE_PASSWORD=...   # Gradle reads it at build time
    export SENTRY_AUTH_TOKEN=...          # plain gradlew doesn't read .env
    npx expo prebuild --clean
-   cd android && ./gradlew.bat bundleRelease
+   cd android && ./gradlew.bat assembleRelease
    ```
 
-   For EAS builds, check first that both `preview` and `production` have the full variable set (`eas env:list --environment <name>`). The two environments don't share variables.
+   Local builds embed no update channel, and Expo's update server rejects requests without one. GitHub APK users never get OTA updates, so they update by installing each release's APK over the old one.
 
 ### OTA updates vs a new build
 
@@ -48,7 +55,7 @@ Google Play requires updates to target a recent Android API level and usually ra
 
 - **JS-only change:** an OTA update is fine. Run `npm run sentry:sourcemaps` afterwards so stack traces stay readable.
 - **Anything that changes what's inside the binary** (a new or upgraded native package, an Expo SDK upgrade, a config plugin or `app.config.ts` change that adds native code, permissions, or manifest entries): bump `version` and ship a new store build. Pushing JS that needs native code an older binary lacks crashes it. Build-only settings such as signing or ABI splits don't count.
-- **Bump `version` the moment a native dependency lands, not at release time.** An OTA reaches every binary with that version, including APKs attached to a GitHub release. The v1.4.0 GitHub APKs were built before `react-native-pdf` was added but still say 1.4.0, which is why 1.4.x could never take an OTA.
+- **Bump `version` the moment a native dependency lands, not at release time.** An OTA reaches every EAS build with that version on the channel, on any Play track. The Sep 6 EAS build of 1.4.0 (versionCode 5) predates `react-native-pdf` but still says 1.4.0, so an OTA of later JS would crash it. That's why v1.5.0 shipped as a store build.
 
 ## Other deployments
 
