@@ -1,5 +1,31 @@
 # Changelog
 
+## Unreleased
+
+### Features
+
+- **Actions tab** - A repo's workflow runs, reached from an Actions row on the repo screen that shows the latest run's status. Each run lists its jobs with durations, and tapping a job opens its check run with the log tail. github.com `/actions` and `/actions/runs/{id}` links open these screens too. ([`8251fd6`](https://github.com/atharvdange618/Shikai/commit/8251fd6))
+- **Job log tail** - Check runs backed by GitHub Actions show the last 100 lines of the job log in a collapsible section, fetched on first expand. Checks from external CI still link out. ([`d96507d`](https://github.com/atharvdange618/Shikai/commit/d96507d))
+- **More discussion replies** - Replies under a discussion comment were capped at 10. A "Show N more replies" row now loads the rest. ([`a385232`](https://github.com/atharvdange618/Shikai/commit/a385232))
+- **Blame highlighting** - Blame lines get syntax colors for comments, strings, numbers, and keywords, in the same colors as the file viewer. ([`f2a08ed`](https://github.com/atharvdange618/Shikai/commit/f2a08ed))
+- **Exact line on `#L` links** - A shared file link with a line number now scrolls to that exact line instead of an estimate. Markdown files keep the estimate, since their source lines don't map onto rendered text. ([`d65cc4a`](https://github.com/atharvdange618/Shikai/commit/d65cc4a))
+
+### Refactoring
+
+- **Boot flow** - The chain of effects and refs that ran the security check and auth restore in `app/_layout.tsx` is now one reducer in `lib/boot-flow.ts`, with explicit phases and unit tests. That chain had caused two regressions. ([`6ef14fb`](https://github.com/atharvdange618/Shikai/commit/6ef14fb), [`46a80d8`](https://github.com/atharvdange618/Shikai/commit/46a80d8))
+- **Run status mapping** - Check runs, workflow runs, and jobs share one status mapping in `lib/run-display.ts`. Queued and cancelled checks now get their own labels. ([`8251fd6`](https://github.com/atharvdange618/Shikai/commit/8251fd6))
+
+### Build
+
+- **Config plugins replace `post-prebuild.js`** - Release signing and ABI splits moved into config plugins, so `npx expo prebuild --clean` is the whole setup and a changed Expo template fails the prebuild. Gradle reads `SHIKAI_KEYSTORE_PASSWORD` at build time, so the password no longer lands in `gradle.properties`. Both plugins skip on EAS. ([`19a0ec6`](https://github.com/atharvdange618/Shikai/commit/19a0ec6))
+- **CI** - A GitHub Actions workflow runs lint, typecheck, and tests on every push to `main` and on pull requests. ([`315b13f`](https://github.com/atharvdange618/Shikai/commit/315b13f))
+
+### Docs
+
+- **Maintenance runbook** - `MAINTENANCE.md` covers the monthly checks, Expo SDK upgrade steps, the yearly Play target API check, release steps, and when a change can ship over OTA. ([`6debf23`](https://github.com/atharvdange618/Shikai/commit/6debf23))
+- **README** - Documents token sign-in, lists the Actions tab, and adds a CI badge. ([`b19f850`](https://github.com/atharvdange618/Shikai/commit/b19f850), [`5e78530`](https://github.com/atharvdange618/Shikai/commit/5e78530))
+- **AGENTS.md** - Corrected stale file names and added a key files table. ([`6b8206f`](https://github.com/atharvdange618/Shikai/commit/6b8206f))
+
 ## v1.4.0
 
 ### Features
