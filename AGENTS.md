@@ -16,8 +16,8 @@ expo start
 # Android dev build
 expo run:android
 
-# Regenerate native Android folder + re-apply custom gradle patches
-npx expo prebuild --clean && node scripts/post-prebuild.js
+# Regenerate native Android folder (gradle patches come from plugins/)
+npx expo prebuild --clean
 
 # Build release APK (after prebuild)
 cd android && gradlew.bat assembleRelease
@@ -85,7 +85,7 @@ Tests live in `lib/__tests__/`. Run `expo lint` and `npx vitest run` before cons
 | `widget-task-handler.tsx` | Native task entry point for the Android home screen widget. |
 | `widgets/ContributionWidget.tsx` | Widget UI: the contribution graph. |
 | `hooks/` | One React Query hook per GitHub resource (repos, issues, PRs, etc.). |
-| `scripts/post-prebuild.js` | Re-applies gradle patches (ABI splits, R8, resource shrinking) after `expo prebuild --clean`. |
+| `plugins/` | Local config plugins that patch the generated gradle files on every prebuild: R8, resource shrinking, ABIs (`withGradleProperties`), META-INF exclusion and ABI splits (`withAndroidPackaging`), release signing (`withReleaseSigning`). |
 | `app.config.ts` | Expo app config: new architecture, React Compiler, typed routes. |
 | `contexts/ThemeContext.tsx` | Theme provider; exposes `useTheme()`. |
 | `constants/themes.ts` | Theme color definitions. |
@@ -105,8 +105,9 @@ Tests live in `lib/__tests__/`. Run `expo lint` and `npx vitest run` before cons
 
 ## Build Gotchas
 
-- After `expo prebuild --clean`, you **must** run `node scripts/post-prebuild.js` to re-apply ABI splits, R8 minification, resource shrinking, and META-INF exclusion patches to `android/app/build.gradle` and `android/gradle.properties`.
-- Release builds (`assembleRelease`/`bundleRelease`) need the keystore password set as `SHIKAI_KEYSTORE_PASSWORD` in your shell before running `post-prebuild.js` — it's never hardcoded in the script. Without it, the script skips patching `KEYSTORE_PASSWORD` and warns; the Gradle build then fails at signing.
+- Custom gradle changes belong in a config plugin under `plugins/`, never in hand edits to `android/`, which prebuild regenerates. A plugin that can't find its anchor in Expo's template throws during prebuild; update the plugin's regex after an SDK upgrade.
+- Local release builds (`assembleRelease`/`bundleRelease`) sign with `keystore/release.keystore` (gitignored) and read the password from `SHIKAI_KEYSTORE_PASSWORD` at Gradle time, so it must be set in the shell running Gradle. Without it, the build fails at signing validation. The password is never written to disk.
+- `withReleaseSigning` and the ABI splits skip when `EAS_BUILD` is set: EAS signs with its own credentials and expects a single APK.
 - `react-native` is pinned to `0.81.5` via `overrides` in package.json - do not upgrade without testing.
 - `.env` contains `EXPO_PUBLIC_*` variables (GitHub client ID, OAuth proxy URL). These are baked in at build time.
 - `dist/` is the web build output (Cloudflare Workers serves from there).

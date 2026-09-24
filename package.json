@@ -30,7 +30,7 @@
     "test": "vitest run",
     "deploy": "npx expo export -p web && wrangler deploy",
     "preview": "npx expo export -p web && wrangler dev",
-    "prebuild:clean": "npx expo prebuild --clean && node scripts/post-prebuild.js",
+    "prebuild:clean": "npx expo prebuild --clean",
     "android:assemble": "cd android && gradlew.bat assembleRelease",
     "android:bundle": "cd android && gradlew.bat bundleRelease",
     "sentry:sourcemaps": "expo export --platform android --source-maps --output-dir dist && sentry-expo-upload-sourcemaps dist"

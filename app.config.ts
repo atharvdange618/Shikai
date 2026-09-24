@@ -82,6 +82,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     "expo-updates",
     "./plugins/withAndroidPackaging",
     "./plugins/withGradleProperties",
+    "./plugins/withReleaseSigning",
     ["react-native-android-widget", widgetConfig],
     [
       "@sentry/react-native/expo",
