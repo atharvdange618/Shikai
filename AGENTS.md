@@ -105,6 +105,8 @@ Tests live in `lib/__tests__/`. Run `expo lint` and `npx vitest run` before cons
 
 ## Build Gotchas
 
+See `MAINTENANCE.md` for the upgrade schedule, the release steps, and the OTA vs new build rule.
+
 - Custom gradle changes belong in a config plugin under `plugins/`, never in hand edits to `android/`, which prebuild regenerates. A plugin that can't find its anchor in Expo's template throws during prebuild; update the plugin's regex after an SDK upgrade.
 - Local release builds (`assembleRelease`/`bundleRelease`) sign with `keystore/release.keystore` (gitignored) and read the password from `SHIKAI_KEYSTORE_PASSWORD` at Gradle time, so it must be set in the shell running Gradle. Without it, the build fails at signing validation. The password is never written to disk.
 - `withReleaseSigning` and the ABI splits skip when `EAS_BUILD` is set: EAS signs with its own credentials and expects a single APK.
