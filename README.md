@@ -99,6 +99,7 @@ Network state detection with MMKV-backed disk persistence. The app works offline
 - **Play Store Updates** - Native in-app update prompt when a new release is on the Play Store
 - **Haptics** - Feedback on pull-to-refresh, tab switch, and bookmark. Respects the system reduced-motion setting.
 - **Error Recovery** - Error boundaries around the root, tabs, file viewer, and PR/issue screens, with a custom 404 screen
+- **Repository Access** - The Repos tab tells you when Shikai can only see some of your repos, and Settings links to GitHub's page for choosing which ones it can read
 - **Saved Repos** - Bookmark any repo. Stars and Watchlist combined in one screen with search and filter
 - **Markdown Preview** - README and markdown files rendered inline with syntax-highlighted code blocks
 - **GitHub URL Deep Links** - Opening or sharing a github.com link routes straight into the matching in-app screen, including a shared folder link (drills into and expands that folder) or a file link with a `#L10` line number (scrolls to it)

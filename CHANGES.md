@@ -1,5 +1,13 @@
 # Changelog
 
+## v1.5.0 OTA update (October 3, 2026)
+
+Shipped over the air to Play Store installs on 1.5.0. GitHub release APKs don't receive OTA updates, so they get this in the next release.
+
+### Features
+
+- **Repository access** - Shikai is a GitHub App, so it only sees the repos its installation covers. If you picked "Only select repositories", or only installed it on an org, private repos went missing with no way to fix it from the app. The Repos tab now shows a hint when your own installation is missing or limited, and Settings has a "Manage repository access" row that opens GitHub's installation page. Pull to refresh clears the hint after you change access. ([`a62a1e8`](https://github.com/atharvdange618/Shikai/commit/a62a1e8))
+
 ## v1.5.0
 
 ### Features

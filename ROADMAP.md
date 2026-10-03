@@ -1,6 +1,6 @@
 # Shikai Roadmap
 
-> **Version:** 1.5.0 · **Last Updated:** September 24, 2026 · **Status:** Active Development
+> **Version:** 1.5.0 · **Last Updated:** October 3, 2026 · **Status:** Active Development
 
 This document tracks the feature backlog and development progress for Shikai.
 
@@ -31,6 +31,7 @@ This document tracks the feature backlog and development progress for Shikai.
 | File history                      | A "history" button in the file viewer header opens `commits.tsx` with a `path` param. In that mode the branch selector is hidden, the header title is the filename, and the list shows only commits that touched the file. `fetchCommits` / `useCommits` / `queryKeys.repoCommits` gained an optional `path` arg. Each row still opens commit detail. (Backlog 2.1) | Done   |
 | Blame                             | A second file-viewer header button (hidden for images/video/PDF) opens `repo/[repoId]/blame.tsx`: a `FlashList` of lines with a left gutter showing short SHA and relative date on each range's first line, alternating tint per range, tap → commit detail. `fetchBlame` in `lib/github-graphql.ts` resolves the ref's tip commit and reads `blame(path)` off it (GitHub's schema puts `blame` on `Commit`, not `Blob`), plus the blob text in the same request via an aliased `object(expression)`. Plain text, no syntax highlighting. (Backlog 2.2) | Done   |
 | Discussions viewer                | A "Discussions" row on repo detail, shown only when `repo.has_discussions`, opens `discussions.tsx` (cursor-paginated list) and `discussion/[number].tsx`: category emoji/name pill, "Answered" badge, body and comments via `MarkdownRenderer`, one level of replies indented under each comment. `fetchDiscussions` / `fetchDiscussion` added to `lib/github-graphql.ts`; `useDiscussions` / `useDiscussionDetail` in `hooks/useDiscussions.ts`. (Backlog 4.1) | Done   |
+| Repository access hint            | `useInstallations` reads the user's GitHub App installations. When their own installation is missing or set to selected repos, the Repos tab shows a "Manage access" hint, and Settings has a "Manage repository access" row; both open GitHub's installation page. Pull to refresh refetches installations. Shipped by OTA on 1.5.0. | Done   |
 
 ---
 
