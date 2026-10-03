@@ -1,5 +1,16 @@
 # Changelog
 
+## v1.5.0 OTA update 2 (October 3, 2026)
+
+Shipped over the air to Play Store installs on 1.5.0. GitHub release APKs get this in the next release.
+
+### Fixes
+
+- **Repo access for org collaborators** - Sign-in only checked that some installation existed. If an org you belong to had Shikai, you were never asked to install it on your own account, and your private repos stayed hidden. Sign-in now looks for an installation on your own account and asks you to set up repo access when it's missing, with a "Skip for now" option for people who only need the org's repos. "Manage repository access" now opens Shikai's install page, since GitHub's installed apps list is empty until you install. ([#18](https://github.com/atharvdange618/Shikai/issues/18), [`5b9b00c`](https://github.com/atharvdange618/Shikai/commit/5b9b00c))
+- **Blank screen after GitHub sign-in** - expo-router treated the OAuth redirect as a route to a blank screen and showed it on top of sign-in. Any result that didn't sign you in, like the install prompt or an error, was hidden behind it. The redirect no longer navigates. ([`affd949`](https://github.com/atharvdange618/Shikai/commit/affd949))
+- **Stale repo access hint** - After changing repo access on GitHub, the Repos tab kept the old hint for up to 30 minutes. It now refetches when you return to the app. ([`e75a2fd`](https://github.com/atharvdange618/Shikai/commit/e75a2fd))
+- **Markdown links** - Relative links to other files in a README or `.md` file showed a blank page, and `#section` links did nothing. In-repo links now open in the file viewer, other links open in the browser, and `#section` links scroll to the heading. ([#19](https://github.com/atharvdange618/Shikai/issues/19), [`ea13be7`](https://github.com/atharvdange618/Shikai/commit/ea13be7))
+
 ## v1.5.0 OTA update (October 3, 2026)
 
 Shipped over the air to Play Store installs on 1.5.0. GitHub release APKs don't receive OTA updates, so they get this in the next release.

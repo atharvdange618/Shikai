@@ -64,6 +64,7 @@ Tests live in `lib/__tests__/`. Run `expo lint` and `npx vitest run` before cons
 | File | What it does |
 |---|---|
 | `app/_layout.tsx` | Root layout. Drives the boot-flow reducer and restores auth tokens on boot. |
+| `app/+native-intent.tsx` | Stops expo-router from navigating on the OAuth redirect (`shikai://?code=...`), which would push the blank index route over sign-in. `app/sign-in.tsx` reads the code through its own `Linking` listener. |
 | `lib/boot-flow.ts` | Boot state reducer: `checkingSecurity` → `restoringAuth` → `ready`, or `blocked`. |
 | `lib/axios.ts` | Configured axios instance: base URL, auth interceptor, rate-limit tracking. |
 | `lib/github-rest.ts` | All GitHub REST API functions, plus `fetchWithPAT()` for PAT-based calls. |
