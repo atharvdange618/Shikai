@@ -325,6 +325,14 @@ function FileViewerScreenContent() {
     hasScrolledToLineRef.current = true;
   }, []);
 
+  const rendererY = useRef(0);
+  const handleAnchorOffset = useCallback((y: number) => {
+    contentScrollRef.current?.scrollTo({
+      y: Math.max(rendererY.current + y - Spacing.md, 0),
+      animated: true,
+    });
+  }, []);
+
   // Fallback for markdown files: there's no single code block to locate a
   // source line inside (the rendered prose doesn't map 1:1 to source lines),
   // so this jumps to the line's proportional position in the WebView's total
@@ -583,17 +591,25 @@ function FileViewerScreenContent() {
                   />
                 </Pressable>
               </View>
-              <MarkdownRenderer
-                markdown={
-                  isMarkdown
-                    ? data.content
-                    : `\`\`\`${fileName ? getLanguage(fileName) : ""}\n${data.content}\n\`\`\``
-                }
-                context={`${owner}/${repoName}`}
-                onHeightChange={handleMarkdownHeightChange}
-                targetLine={targetLine}
-                onLineOffset={handleLineOffset}
-              />
+              <View
+                onLayout={(e) => {
+                  rendererY.current = e.nativeEvent.layout.y;
+                }}
+              >
+                <MarkdownRenderer
+                  markdown={
+                    isMarkdown
+                      ? data.content
+                      : `\`\`\`${fileName ? getLanguage(fileName) : ""}\n${data.content}\n\`\`\``
+                  }
+                  context={`${owner}/${repoName}`}
+                  filePath={isMarkdown ? path : undefined}
+                  onHeightChange={handleMarkdownHeightChange}
+                  targetLine={targetLine}
+                  onLineOffset={handleLineOffset}
+                  onAnchorOffset={handleAnchorOffset}
+                />
+              </View>
             </>
           )}
         </ScrollView>

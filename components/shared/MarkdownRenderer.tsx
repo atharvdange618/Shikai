@@ -1,6 +1,9 @@
 import { useTheme } from "@/constants/theme";
 import { githubAxios } from "@/lib/axios";
+import { parseGitHubUrl } from "@/lib/github-url";
+import { resolveMarkdownLink } from "@/lib/markdown-links";
 import * as Clipboard from "expo-clipboard";
+import { useRouter, type Href } from "expo-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Animated,
@@ -22,6 +25,15 @@ interface MarkdownRendererProps {
   onHeightChange?: (height: number) => void;
   targetLine?: number;
   onLineOffset?: (y: number) => void;
+  /**
+   * Repo path of the file being shown (README.md, docs/GUIDE.md). Renders in
+   * document mode, which gives headings the ids that #links point at, and
+   * resolves relative links from this file's folder. Leave unset for issue,
+   * PR and comment bodies, which need gfm mode's #123 and @mention linking.
+   */
+  filePath?: string;
+  /** A #link was tapped; y is the target's offset from the WebView's top. */
+  onAnchorOffset?: (y: number) => void;
 }
 
 function resolveImageUrls(html: string, context?: string): string {
@@ -493,6 +505,30 @@ function buildHtml(html: string, isDark: boolean, targetLine?: number): string {
     }
   }
 
+  // The WebView doesn't scroll (the native ScrollView around it does) and has
+  // no base URL, so default link handling either does nothing or navigates to
+  // a blank page. Hand every tap to React Native instead: #fragments as the
+  // target's offset, everything else as the raw href.
+  document.addEventListener('click', function(e) {
+    var a = e.target.closest && e.target.closest('a[href]');
+    if (!a || !window.ReactNativeWebView) return;
+    e.preventDefault();
+    var href = a.getAttribute('href');
+    if (href.charAt(0) === '#') {
+      var id = href.slice(1);
+      try { id = decodeURIComponent(id); } catch (err) {}
+      var target = document.getElementById('user-content-' + id) || document.getElementById(id);
+      if (!target) return;
+      var block = target.closest('.markdown-heading') || target;
+      window.ReactNativeWebView.postMessage(JSON.stringify({
+        type: 'anchor',
+        y: block.getBoundingClientRect().top + window.scrollY
+      }));
+      return;
+    }
+    window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'link', href: href }));
+  });
+
   document.addEventListener('DOMContentLoaded', function() {
     init();
     postLineOffset();
@@ -512,8 +548,11 @@ export function MarkdownRenderer({
   onHeightChange,
   targetLine,
   onLineOffset,
+  filePath,
+  onAnchorOffset,
 }: MarkdownRendererProps) {
   const { colors, isDark } = useTheme();
+  const router = useRouter();
   const [html, setHtml] = useState<string | null>(null);
   const [height, setHeight] = useState(300);
   const opacity = useRef(new Animated.Value(0)).current;
@@ -527,7 +566,7 @@ export function MarkdownRenderer({
           "/markdown",
           {
             text: markdown,
-            mode: "gfm",
+            mode: filePath ? "markdown" : "gfm",
             ...(context ? { context } : {}),
           },
           {
@@ -556,7 +595,7 @@ export function MarkdownRenderer({
     return () => {
       cancelled = true;
     };
-  }, [markdown, isDark, context, targetLine]);
+  }, [markdown, isDark, context, targetLine, filePath]);
 
   // Hide the WebView until its content has painted and reported a height. A new
   // html string means a reload, so drop back to hidden and wait for that one.
@@ -595,6 +634,14 @@ export function MarkdownRenderer({
           reveal();
         } else if (data.type === "lineOffset" && typeof data.y === "number") {
           onLineOffset?.(data.y);
+        } else if (data.type === "anchor" && typeof data.y === "number") {
+          onAnchorOffset?.(data.y);
+        } else if (data.type === "link" && typeof data.href === "string") {
+          const url = resolveMarkdownLink(data.href, context, filePath);
+          if (!url) return;
+          const route = parseGitHubUrl(url);
+          if (route) router.push(route as Href);
+          else Linking.openURL(url).catch(() => {});
         } else if (data.type === "copy" && typeof data.text === "string") {
           Clipboard.setStringAsync(data.text).catch(() => {});
         }
@@ -602,7 +649,15 @@ export function MarkdownRenderer({
         // ignore parse errors
       }
     },
-    [reveal, onHeightChange, onLineOffset],
+    [
+      reveal,
+      onHeightChange,
+      onLineOffset,
+      onAnchorOffset,
+      context,
+      filePath,
+      router,
+    ],
   );
 
   if (!html) {

@@ -268,6 +268,15 @@ export default function RepoDetailsScreen() {
   const chevronTranslateY = useSharedValue(0);
   const hasScrolledPast = useRef(false);
 
+  const scrollRef = useRef<ScrollView>(null);
+  const readmeY = useRef(0);
+  const handleReadmeAnchor = useCallback((y: number) => {
+    scrollRef.current?.scrollTo({
+      y: Math.max(readmeY.current + y - Spacing.md, 0),
+      animated: true,
+    });
+  }, []);
+
   useEffect(() => {
     chevronTranslateY.value = withDelay(
       600,
@@ -317,6 +326,7 @@ export default function RepoDetailsScreen() {
   return (
     <View style={{ flex: 1 }}>
       <ScrollView
+        ref={scrollRef}
         style={s.scroll}
         contentContainerStyle={s.content}
         showsVerticalScrollIndicator={false}
@@ -441,10 +451,15 @@ export default function RepoDetailsScreen() {
           <Animated.View
             entering={FadeInDown.duration(400).delay(ANIM_DELAYS.readme)}
             style={s.readmeSection}
+            onLayout={(e) => {
+              readmeY.current = e.nativeEvent.layout.y;
+            }}
           >
             <MarkdownRenderer
               markdown={readme}
               context={`${owner}/${repoName}`}
+              filePath="README.md"
+              onAnchorOffset={handleReadmeAnchor}
             />
           </Animated.View>
         )}
