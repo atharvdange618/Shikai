@@ -42,7 +42,9 @@ Google Play requires updates to target a recent Android API level and usually ra
 
    ```bash
    export SHIKAI_KEYSTORE_PASSWORD=...   # Gradle reads it at build time
-   export SENTRY_AUTH_TOKEN=...          # plain gradlew doesn't read .env
+   # The token lives in .env.local. The Expo CLI reads it, but the Sentry
+   # upload task runs from Gradle and only sees the shell.
+   export SENTRY_AUTH_TOKEN=$(sed -n 's/^SENTRY_AUTH_TOKEN=//p' .env.local | tr -d '\r"')
    npx expo prebuild --clean
    cd android && ./gradlew.bat assembleRelease
    ```
