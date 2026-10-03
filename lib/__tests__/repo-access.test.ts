@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  hasOwnInstallation,
   hasPartialRepoAccess,
   type GitHubInstallation,
 } from "@/lib/github-rest";
@@ -38,5 +39,25 @@ describe("hasPartialRepoAccess", () => {
     expect(hasPartialRepoAccess([install("OctoCat", "all")], "octocat")).toBe(
       false,
     );
+  });
+});
+
+describe("hasOwnInstallation", () => {
+  it("is true when the user's own account has the app installed", () => {
+    expect(
+      hasOwnInstallation([install("octocat", "selected")], "octocat"),
+    ).toBe(true);
+  });
+
+  // /user/installations also lists installs on accounts the user collaborates
+  // with, so a non-empty list doesn't mean the user installed the app.
+  it("is false when the only install belongs to another account", () => {
+    expect(hasOwnInstallation([install("someone-else", "all")], "octocat")).toBe(
+      false,
+    );
+  });
+
+  it("is false with no installations", () => {
+    expect(hasOwnInstallation([], "octocat")).toBe(false);
   });
 });

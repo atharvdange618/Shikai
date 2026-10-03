@@ -107,7 +107,27 @@ export async function fetchUserInstallations(): Promise<GitHubInstallation[]> {
   return data.installations;
 }
 
-export const MANAGE_REPO_ACCESS_URL = "https://github.com/settings/installations";
+// Installs the app when the account has none, or offers Configure when it does.
+// settings/installations only lists existing installs, a dead end for new users.
+export const MANAGE_REPO_ACCESS_URL = `https://github.com/apps/${process.env.EXPO_PUBLIC_GITHUB_APP_SLUG}/installations/new`;
+
+function findOwnInstallation(
+  installations: GitHubInstallation[],
+  login: string,
+): GitHubInstallation | undefined {
+  return installations.find(
+    (i) => i.account.login.toLowerCase() === login.toLowerCase(),
+  );
+}
+
+// /user/installations also returns installs on accounts the user collaborates
+// with, so a non-empty list doesn't mean the user's own repos are covered.
+export function hasOwnInstallation(
+  installations: GitHubInstallation[],
+  login: string,
+): boolean {
+  return findOwnInstallation(installations, login) !== undefined;
+}
 
 // The app only sees repos its installation covers. True when the user's own
 // account has no installation (only orgs) or was installed on select repos.
@@ -115,10 +135,7 @@ export function hasPartialRepoAccess(
   installations: GitHubInstallation[],
   login: string,
 ): boolean {
-  const own = installations.find(
-    (i) => i.account.login.toLowerCase() === login.toLowerCase(),
-  );
-  return own?.repository_selection !== "all";
+  return findOwnInstallation(installations, login)?.repository_selection !== "all";
 }
 
 export async function validateToken(token: string): Promise<GitHubUser> {

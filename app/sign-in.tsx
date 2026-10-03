@@ -34,6 +34,7 @@ import { githubAxios } from "@/lib/axios";
 import {
   fetchAuthenticatedUser,
   fetchUserInstallations,
+  hasOwnInstallation,
   validateToken,
 } from "@/lib/github-rest";
 import type { GitHubUser } from "@/types/github.types";
@@ -185,16 +186,18 @@ export default function SignInScreen() {
         githubAxios.defaults.headers.common["Authorization"] =
           `Bearer ${accessToken}`;
 
-        const installations = await fetchUserInstallations();
+        const [installations, user] = await Promise.all([
+          fetchUserInstallations(),
+          fetchAuthenticatedUser(),
+        ]);
 
-        if (installations.length === 0) {
+        if (!hasOwnInstallation(installations, user.login)) {
           setPendingToken(accessToken);
           setLoading(false);
           setNeedsInstall(true);
           return;
         }
 
-        const user = await fetchAuthenticatedUser();
         await finalizeSession(accessToken, user);
 
         setLoading(false);
@@ -354,6 +357,37 @@ export default function SignInScreen() {
     }
   }, [redirectUri, setUser, setToken, setPat]);
 
+  // For users who only need repos from accounts that already have the app,
+  // like an org. Settings and the Repos tab still link to the install page.
+  const handleSkipInstall = useCallback(async () => {
+    const {
+      setLoading,
+      setError,
+      setNeedsInstall,
+      setPendingToken,
+      pendingToken,
+      pendingTokenExpiry,
+    } = useSignInStore.getState();
+
+    setPendingToken(null);
+    setNeedsInstall(false);
+    if (
+      !pendingToken ||
+      (pendingTokenExpiry && Date.now() > pendingTokenExpiry)
+    ) {
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const user = await fetchAuthenticatedUser();
+      await finalizeSession(pendingToken, user);
+    } catch {
+      setError("Something went wrong. Check your connection and try again.");
+    }
+    setLoading(false);
+  }, [finalizeSession]);
+
   // Self-contained sign-in for anyone who would rather paste a token than run
   // the browser OAuth flow. A classic or fine-grained PAT with repo and
   // read:user scopes covers every read path in the app.
@@ -439,6 +473,9 @@ export default function SignInScreen() {
                 <Text style={s.buttonText}>Set up repo access</Text>
               )}
             </AnimatedPressable>
+            <Pressable onPress={handleSkipInstall} disabled={isLoading}>
+              <Text style={s.secondaryLink}>Skip for now</Text>
+            </Pressable>
           </>
         ) : showTokenInput ? (
           <>
