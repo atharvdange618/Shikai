@@ -22,8 +22,15 @@ import { FirstBookmarkNudge } from "@/components/FirstBookmarkNudge";
 import { KeyboardAvoid } from "@/components/shared/KeyboardAvoid";
 import { SearchBar } from "@/components/shared/SearchBar";
 import { useFirstBookmarkNudge } from "@/hooks/useFirstBookmarkNudge";
+import { useInstallations } from "@/hooks/useInstallations";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { useRepos } from "@/hooks/useRepos";
+import { useUsername } from "@/hooks/useUser";
+import {
+  hasPartialRepoAccess,
+  MANAGE_REPO_ACCESS_URL,
+} from "@/lib/github-rest";
+import * as Linking from "expo-linking";
 import { prefetchRepoDetails, prefetchRoute } from "@/lib/prefetch";
 import { queryKeys } from "@/lib/query-client";
 import { encodeRepoId } from "@/lib/utils";
@@ -86,6 +93,13 @@ export default function ReposScreen() {
     isError,
   } = useRepos({ search: debouncedSearch, sort, type });
 
+  const username = useUsername();
+  const { data: installations } = useInstallations();
+  const partialAccess =
+    !!installations &&
+    !!username &&
+    hasPartialRepoAccess(installations, username);
+
   const [refreshing, setRefreshing] = useState(false);
 
   const handleRepoPress = useCallback(
@@ -123,7 +137,10 @@ export default function ReposScreen() {
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    await queryClient.invalidateQueries({ queryKey: queryKeys.repos() });
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: queryKeys.repos() }),
+      queryClient.invalidateQueries({ queryKey: queryKeys.installations() }),
+    ]);
     setRefreshing(false);
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
   }, [queryClient]);
@@ -249,6 +266,15 @@ export default function ReposScreen() {
           onSortChange={setSort}
           onTypeChange={setType}
         />
+        {partialAccess && (
+          <Text
+            style={s.accessHint}
+            onPress={() => Linking.openURL(MANAGE_REPO_ACCESS_URL)}
+          >
+            Shikai can only see some of your repos.{" "}
+            <Text style={s.accessHintLink}>Manage access</Text>
+          </Text>
+        )}
       </View>
 
       <FirstBookmarkNudge visible={nudgeVisible} onDismiss={dismissNudge} />
@@ -305,6 +331,17 @@ function buildStyles(colors: ColorTokens) {
       paddingTop: Spacing.md,
       paddingBottom: Spacing.md,
       gap: Spacing.md,
+    },
+
+    accessHint: {
+      fontFamily: FontFamily.regular,
+      fontSize: FontSize.label,
+      color: colors.textMuted,
+    },
+
+    accessHintLink: {
+      fontFamily: FontFamily.medium,
+      color: colors.accent,
     },
 
     separator: {

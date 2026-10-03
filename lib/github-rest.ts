@@ -87,6 +87,7 @@ export interface GitHubInstallation {
   app_id: number;
   target_id: number;
   target_type: "User" | "Organization";
+  repository_selection: "all" | "selected";
   permissions: Record<string, string>;
   events: string[];
   created_at: string;
@@ -104,6 +105,20 @@ export async function fetchUserInstallations(): Promise<GitHubInstallation[]> {
     installations: GitHubInstallation[];
   }>("/user/installations");
   return data.installations;
+}
+
+export const MANAGE_REPO_ACCESS_URL = "https://github.com/settings/installations";
+
+// The app only sees repos its installation covers. True when the user's own
+// account has no installation (only orgs) or was installed on select repos.
+export function hasPartialRepoAccess(
+  installations: GitHubInstallation[],
+  login: string,
+): boolean {
+  const own = installations.find(
+    (i) => i.account.login.toLowerCase() === login.toLowerCase(),
+  );
+  return own?.repository_selection !== "all";
 }
 
 export async function validateToken(token: string): Promise<GitHubUser> {

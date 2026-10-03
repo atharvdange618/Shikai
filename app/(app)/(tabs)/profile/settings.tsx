@@ -15,7 +15,7 @@ import {
 import { useAlert } from "@/components";
 import { KeyboardAvoid } from "@/components/shared/KeyboardAvoid";
 import { rateLimit } from "@/lib/axios";
-import { validatePAT } from "@/lib/github-rest";
+import { MANAGE_REPO_ACCESS_URL, validatePAT } from "@/lib/github-rest";
 import { clearAllMMKV } from "@/lib/mmkv";
 import { deletePAT, deleteToken, savePAT } from "@/lib/secure-storage";
 import { format24HourTime } from "@/lib/utils";
@@ -342,6 +342,26 @@ export default function SettingsScreen() {
 
       <View style={s.section}>
         <Text style={s.sectionTitle}>Account</Text>
+        <View style={s.card}>
+          <Pressable
+            style={({ pressed }) => [s.menuRow, pressed && s.menuRowPressed]}
+            onPress={() => Linking.openURL(MANAGE_REPO_ACCESS_URL)}
+          >
+            <Octicons
+              name="repo"
+              size={IconSize.md}
+              color={colors.textSecondary}
+            />
+            <View style={s.rateLimitInfo}>
+              <Text style={s.menuText}>Manage repository access</Text>
+              <Text style={s.rateLimitDetail}>
+                Missing private repos? Choose which ones Shikai can see on
+                GitHub.
+              </Text>
+            </View>
+            <Octicons name="link-external" size={13} color={colors.textMuted} />
+          </Pressable>
+        </View>
         <View style={s.dangerCard}>
           <Pressable
             style={({ pressed }) => [
