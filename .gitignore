@@ -71,3 +71,6 @@ close-testing-email.txt
 
 # Subagent-driven-development scratch workspace (ledgers, briefs, review packages)
 .superpowers/
+
+# graphify knowledge graph output
+graphify-out/
