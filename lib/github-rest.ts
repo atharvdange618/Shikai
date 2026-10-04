@@ -513,10 +513,13 @@ export async function fetchUserEvents(
   username: string,
   page: number,
   per_page: number = 20,
+  pat?: string | null,
 ): Promise<FetchEventsResult> {
+  // GitHub App user tokens never get private events from this endpoint, even
+  // with the Events permission granted. A classic PAT with repo scope does.
   const { data, headers } = await githubAxios.get<GitHubEvent[]>(
     `/users/${encodeURIComponent(username)}/events`,
-    { params: { page, per_page } },
+    { params: { page, per_page }, headers: patHeaders(pat) },
   );
 
   return {

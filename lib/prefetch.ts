@@ -20,6 +20,7 @@ import {
   fetchUserEvents,
 } from "@/lib/github-rest";
 import { queryKeys } from "@/lib/query-client";
+import { useAuthStore } from "@/stores/auth.store";
 import type { GitHubRepo, GitHubTreeItem } from "@/types/github.types";
 
 export function prefetchRoute(href: string) {
@@ -197,9 +198,11 @@ export function prefetchOverview(queryClient: QueryClient, username?: string) {
     staleTime: 1000 * 60 * 15,
   });
   if (username) {
+    const { pat } = useAuthStore.getState();
     queryClient.prefetchInfiniteQuery({
-      queryKey: queryKeys.events(username),
-      queryFn: ({ pageParam }) => fetchUserEvents(username, pageParam, 20),
+      queryKey: [...queryKeys.events(username), pat ? "pat" : "oauth"],
+      queryFn: ({ pageParam }) =>
+        fetchUserEvents(username, pageParam, 20, pat),
       initialPageParam: 1,
       getNextPageParam: (lastPage) => lastPage.pagination.next ?? undefined,
       pages: 1,

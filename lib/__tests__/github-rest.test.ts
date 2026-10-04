@@ -1,6 +1,13 @@
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { parseActionsJobId, parseCheckRunId } from "@/lib/github-rest";
+const { get } = vi.hoisted(() => ({ get: vi.fn() }));
+vi.mock("@/lib/axios", () => ({ githubAxios: { get } }));
+
+import {
+  fetchUserEvents,
+  parseActionsJobId,
+  parseCheckRunId,
+} from "@/lib/github-rest";
 
 describe("parseActionsJobId", () => {
   it("extracts the job id from an Actions details_url", () => {
@@ -40,5 +47,25 @@ describe("parseCheckRunId", () => {
   it("returns null for an unrelated url or null", () => {
     expect(parseCheckRunId("https://api.github.com/repos/a/b/actions/jobs/1")).toBeNull();
     expect(parseCheckRunId(null)).toBeNull();
+  });
+});
+
+describe("fetchUserEvents", () => {
+  beforeEach(() => {
+    get.mockReset();
+    get.mockResolvedValue({ data: [], headers: {} });
+  });
+
+  it("sends the PAT so private events come back", async () => {
+    await fetchUserEvents("octocat", 1, 20, "ghp_abc");
+    expect(get).toHaveBeenCalledWith("/users/octocat/events", {
+      params: { page: 1, per_page: 20 },
+      headers: { Authorization: "Bearer ghp_abc" },
+    });
+  });
+
+  it("leaves auth to the session token when there is no PAT", async () => {
+    await fetchUserEvents("octocat", 1, 20, null);
+    expect(get.mock.calls[0][1].headers).toBeUndefined();
   });
 });
