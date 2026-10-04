@@ -1,5 +1,13 @@
 # Changelog
 
+## v1.5.0 OTA update 3 (October 4, 2026)
+
+Shipped over the air to Play Store installs on 1.5.0. GitHub release APKs get this in the next release.
+
+### Fixes
+
+- **Private repos missing from Recent Activity** - GitHub never returns private events to the token Shikai gets at sign-in, even with the Events permission granted. Recent Activity now uses your saved personal access token when you have one, so pushes and other events in your private repos show up. Without a PAT it still shows public activity only. ([`9fa36f7`](https://github.com/atharvdange618/Shikai/commit/9fa36f7))
+
 ## v1.5.0 OTA update 2 (October 3, 2026)
 
 Shipped over the air to Play Store installs on 1.5.0. GitHub release APKs get this in the next release.
