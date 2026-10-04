@@ -47,7 +47,7 @@ Tests live in `lib/__tests__/`. Run `expo lint` and `npx vitest run` before cons
 
 **State**: Zustand stores in `stores/` (auth, signin, watchlist, recent-searches). Server state via React Query (`lib/query-client.ts`) with MMKV-backed disk persistence (`lib/persister.ts`). `lib/mmkv.ts` creates the MMKV instance.
 
-**API layer**: `lib/axios.ts` is the configured axios instance (base URL, auth interceptor, rate limit tracking). `lib/github-rest.ts` has all GitHub REST functions. `lib/github-graphql.ts` has GraphQL queries. PAT-based calls use native `fetch` via `fetchWithPAT()` in `github-rest.ts` (not axios).
+**API layer**: `lib/axios.ts` is the configured axios instance (base URL, auth interceptor, rate limit tracking). `lib/github-rest.ts` has all GitHub REST functions. `lib/github-graphql.ts` has GraphQL queries. PAT-based calls go through the same axios instance with `patHeaders(pat)` in `github-rest.ts`: the request interceptor leaves an explicit `Authorization` header alone, and the response interceptor only calls `clearAuth()` on a 401 when the rejected token was the session's, so a bad PAT never signs the user out.
 
 **Native module**: `modules/shikai-security/` is a local Expo module (Kotlin) for root/debugger detection. Import as `import { runSecurityChecks } from "shikai-security"` (path alias in tsconfig). The security check runs at app boot and blocks on compromised devices.
 
@@ -67,7 +67,7 @@ Tests live in `lib/__tests__/`. Run `expo lint` and `npx vitest run` before cons
 | `app/+native-intent.tsx` | Stops expo-router from navigating on the OAuth redirect (`shikai://?code=...`), which would push the blank index route over sign-in. `app/sign-in.tsx` reads the code through its own `Linking` listener. |
 | `lib/boot-flow.ts` | Boot state reducer: `checkingSecurity` → `restoringAuth` → `ready`, or `blocked`. |
 | `lib/axios.ts` | Configured axios instance: base URL, auth interceptor, rate-limit tracking. |
-| `lib/github-rest.ts` | All GitHub REST API functions, plus `fetchWithPAT()` for PAT-based calls. |
+| `lib/github-rest.ts` | All GitHub REST API functions, plus `patHeaders()` for PAT-based calls. |
 | `lib/github-graphql.ts` | GitHub GraphQL queries. |
 | `lib/secure-storage.ts` | Token storage wrapper over `expo-secure-store`. |
 | `lib/mmkv.ts` | MMKV instance and `clearAllMMKV()`. |

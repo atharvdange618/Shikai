@@ -111,7 +111,7 @@ Three ideas drove the design:
 └──────┬───────────┘                         │   persist)      │
        │                                     └────────┬────────┘
        │                                              │
-       │ Axios Request / fetchWithPAT                 │
+       │ Axios Request (OAuth token or PAT)           │
        ▼                                              │
 ┌──────────────────┐                                  │
 │  GitHub REST/    │                                  │
@@ -153,7 +153,7 @@ I wanted users to read actual code files on their phones. The file explorer has 
 
 Shikai started with Personal Access Token auth. It worked, but asking users to generate a PAT was a bad onboarding experience. I replaced it with GitHub OAuth using PKCE. The token exchange happens on a Cloudflare Worker that acts as an OAuth proxy, keeping the client secret off the device. You need the proxy because GitHub requires `client_secret` in the token exchange, and you cannot ship that on a mobile app. Tokens go into expo-secure-store.
 
-Notifications are the exception: GitHub's notifications API does not work with OAuth tokens. It requires a PAT with the `notifications` scope. So PATs are still supported as an optional layer for notifications and the following feed. PAT-based endpoints use native `fetch` instead of the axios instance because the axios request interceptor always attaches the OAuth token from Zustand. Using `fetchWithPAT` with native fetch avoids that conflict.
+Notifications are the exception: GitHub's notifications API does not work with OAuth tokens. It requires a PAT with the `notifications` scope. So PATs are still supported as an optional layer for notifications and the following feed. PAT-based endpoints use the same axios instance and pass the PAT as an explicit `Authorization` header. The request interceptor only attaches the OAuth token from Zustand when no header is set, so the PAT wins. The response interceptor checks which token got rejected before it signs anyone out, so a revoked PAT fails its own request without ending the OAuth session.
 
 On 401, the axios response interceptor calls `clearAuth()` to auto-logout. This prevents users from seeing broken screens when their token expires or gets revoked. On sign-in and sign-out, MMKV is cleared to prevent stale data from a previous account leaking to the current one.
 
