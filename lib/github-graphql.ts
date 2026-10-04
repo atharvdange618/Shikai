@@ -12,8 +12,6 @@ import type {
   MoreDiscussionRepliesResponse,
   PinnedRepoNode,
   PinnedReposResponse,
-  RecentActivityResponse,
-  RecentRepoNode,
   RepoCountResponse,
   RepoIssuesPRStats,
   RepoIssuesPRStatsResponse,
@@ -148,58 +146,6 @@ export async function fetchCommitCount(
 
   return (
     response.repository?.defaultBranchRef?.target?.history?.totalCount ?? null
-  );
-}
-
-const RECENT_ACTIVITY_QUERY = `
-  query RecentActivity {
-    viewer {
-      login
-      repositories(first: 20, orderBy: {field: PUSHED_AT, direction: DESC}) {
-        nodes {
-          id
-          name
-          url
-          description
-          isPrivate
-          defaultBranchRef {
-            name
-            target {
-              ... on Commit {
-                history(first: 1) {
-                  totalCount
-                  edges {
-                    node {
-                      committedDate
-                      messageHeadline
-                      url
-                      author {
-                        name
-                        user {
-                          login
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-`;
-
-export async function fetchRecentActivity(): Promise<RecentRepoNode[]> {
-  const response = await graphql<RecentActivityResponse["data"]>(
-    RECENT_ACTIVITY_QUERY,
-  );
-
-  return response.viewer.repositories.nodes.filter(
-    (repo) =>
-      repo.defaultBranchRef &&
-      repo.defaultBranchRef.target.history.edges.length > 0,
   );
 }
 

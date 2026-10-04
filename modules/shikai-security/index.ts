@@ -32,13 +32,3 @@ export async function setDevModeOverride(
     return false;
   }
 }
-
-export async function getDevModeOverride(): Promise<boolean> {
-  try {
-    const result = await ShikaiSecurityModule.getDevModeOverride();
-    return result.enabled;
-  } catch (e) {
-    console.error("Failed to get dev mode override:", e);
-    return false;
-  }
-}

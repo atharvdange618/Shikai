@@ -15,7 +15,3 @@ export function useUser() {
 export function useUsername(): string | undefined {
   return useQuery(userQueryOptions).data?.login;
 }
-
-export function useUserAvatarUrl(): string | undefined {
-  return useQuery(userQueryOptions).data?.avatar_url;
-}
