@@ -1,5 +1,14 @@
 # Changelog
 
+## v1.5.1
+
+Includes the three 1.5.0 OTA updates below, so GitHub release APK users get those fixes too.
+
+### Dependencies
+
+- **Expo SDK 54 patches** - `expo` 54.0.37, `expo-constants` 18.0.14 and `expo-updates` 29.0.20, the versions SDK 54 expects. `expo` and `expo-updates` ship native code, so this needs a store build. ([`86391e0`](https://github.com/atharvdange618/Shikai/commit/86391e0))
+- **Security patches** - `npm audit fix` without `--force` cuts production advisories from 29 (8 high) to 21 (2 high). The rest need the next Expo SDK upgrade. ([`86391e0`](https://github.com/atharvdange618/Shikai/commit/86391e0))
+
 ## v1.5.0 OTA update 3 (October 4, 2026)
 
 Shipped over the air to Play Store installs on 1.5.0. GitHub release APKs get this in the next release.
