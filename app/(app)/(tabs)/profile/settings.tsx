@@ -15,6 +15,8 @@ import {
 import { useAlert } from "@/components";
 import { KeyboardAvoid } from "@/components/shared/KeyboardAvoid";
 import { rateLimit } from "@/lib/axios";
+import { enableAlerts } from "@/lib/background-notifications";
+import { rewindMarkerForTesting } from "@/lib/notification-poller";
 import { MANAGE_REPO_ACCESS_URL, validatePAT } from "@/lib/github-rest";
 import { clearAllMMKV } from "@/lib/mmkv";
 import { deletePAT, deleteToken, savePAT } from "@/lib/secure-storage";
@@ -119,6 +121,26 @@ export default function SettingsScreen() {
       ],
     });
   }, [alert, setPat, queryClient]);
+
+  // Dev-only harness until the real toggle lands: registers the task and
+  // rewinds the marker a week so there is something to alert on. It can't run
+  // the task itself: expo-background-task skips runs while the app is in the
+  // foreground (triggerTaskWorkerForTestingAsync included), so force a run
+  // with adb after backgrounding the app.
+  const handleTestAlerts = useCallback(async () => {
+    const status = await enableAlerts();
+    if (status !== "enabled") {
+      alert.show({ variant: "danger", title: "Alerts", message: status });
+      return;
+    }
+    rewindMarkerForTesting(7);
+    alert.show({
+      variant: "success",
+      title: "Alerts armed",
+      message:
+        "Background the app, then force the job with adb: cmd jobscheduler run -f com.atharvdange618.Shikai <job id>",
+    });
+  }, [alert]);
 
   const handleClearCache = useCallback(() => {
     clearAllMMKV();
@@ -278,6 +300,24 @@ export default function SettingsScreen() {
                 )}
               </Pressable>
             </View>
+          )}
+
+          {__DEV__ && pat && (
+            <Pressable
+              style={({ pressed }) => [
+                s.menuRow,
+                s.rateLimitDivider,
+                pressed && s.menuRowPressed,
+              ]}
+              onPress={handleTestAlerts}
+            >
+              <Octicons
+                name="bell"
+                size={IconSize.md}
+                color={colors.textSecondary}
+              />
+              <Text style={s.menuText}>Test notification alerts (dev)</Text>
+            </Pressable>
           )}
         </View>
       </View>
