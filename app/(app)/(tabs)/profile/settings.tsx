@@ -25,7 +25,8 @@ import {
 } from "@/lib/background-notifications";
 import { MANAGE_REPO_ACCESS_URL, validatePAT } from "@/lib/github-rest";
 import { clearAllMMKV } from "@/lib/mmkv";
-import { deletePAT, deleteToken, savePAT } from "@/lib/secure-storage";
+import { deletePAT, savePAT } from "@/lib/secure-storage";
+import { signOut } from "@/lib/sign-out";
 import { format24HourTime } from "@/lib/utils";
 
 import {
@@ -208,12 +209,7 @@ export default function SettingsScreen() {
         {
           text: "Sign out",
           style: "destructive",
-          onPress: async () => {
-            await deleteToken();
-            useAuthStore.getState().clearAuth();
-            queryClient.clear();
-            clearAllMMKV();
-          },
+          onPress: () => signOut(queryClient),
         },
       ],
     });

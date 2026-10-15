@@ -8,6 +8,10 @@
 
 - **Notification alerts** - Turn on Notification alerts in Settings (needs a personal access token) and Shikai checks GitHub about every 15 minutes in the background. It alerts you to review requests, mentions and assignments, up to 3 at a time plus an "N more" summary, and tapping one opens the PR, issue or commit. Android decides the exact timing, so alerts can arrive late when the phone is saving battery. Alerts turn off on sign-out, when you remove the token, or when GitHub rejects it. Needs the 1.6.0 store build. ([`640a3fe`](https://github.com/atharvdange618/Shikai/commit/640a3fe), [`d00477d`](https://github.com/atharvdange618/Shikai/commit/d00477d), [`dfcde54`](https://github.com/atharvdange618/Shikai/commit/dfcde54), [`8686de3`](https://github.com/atharvdange618/Shikai/commit/8686de3), [`c8872d6`](https://github.com/atharvdange618/Shikai/commit/c8872d6), [`dea68ac`](https://github.com/atharvdange618/Shikai/commit/dea68ac))
 
+### Fixes
+
+- **Token kept after sign-out** - Signing out left your personal access token on the device, and the next account to sign in on that phone picked it up, along with your notifications. Signing out now deletes it.
+
 ### Changes
 
 - **Commit notifications** - Tapping a commit notification in the Notifications tab now opens the commit, not the repo. ([`dea68ac`](https://github.com/atharvdange618/Shikai/commit/dea68ac))
