@@ -121,7 +121,7 @@ See `notes/MAINTENANCE.md` for the upgrade schedule, the release steps, and the 
 - `dist/` is the web build output (Cloudflare Workers serves from there).
 - `wrangler.jsonc` configures the web deployment; `oauth-proxy/wrangler.toml` is separate.
 - After editing `lib/background-notifications.ts`, press `r` in Metro for a full reload. The module runs side effects when it loads (`defineTask`, the notification handler, the auth subscription), so Fast Refresh keeps the old copy and new exports come back `undefined`.
-- `expo-background-task` skips runs while the app is in the foreground, including `triggerTaskWorkerForTestingAsync()`. To test the alerts task, background the app and force the job: `adb shell cmd jobscheduler run -f com.atharvdange618.Shikai <id>`, where `<id>` is the number after the slash in `adb shell dumpsys jobscheduler | grep "JOB #.*com.atharvdange618.Shikai"`. WorkManager gives the job a new ID after each run.
+- `expo-background-task` skips runs while the app is in the foreground, including `triggerTaskWorkerForTestingAsync()`. To test the alerts task, background the app and force the job: `adb shell cmd jobscheduler run -f com.atharvdange618.Shikai <id>`, where `<id>` is the Job Id on the `EXPO_BACKGROUND_WORKER` row of `adb shell am broadcast -a androidx.work.diagnostics.REQUEST_DIAGNOSTICS -p com.atharvdange618.Shikai && adb logcat -d -s WM-DiagnosticsWrkr`. Don't take it from `dumpsys jobscheduler`: `react-native-android-widget` keeps a `WORK_MANAGER_HACK` job there that never runs, so a grep for the package finds a job even when alerts are off. WorkManager gives the job a new ID after each run, and no `ENQUEUED` row means the task is not registered.
 
 ## Token & Auth Flow
 
