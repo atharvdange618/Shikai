@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Features
+
+- **Repo insights** - A new Insights row on every repo opens commit activity for the past year, the top contributors with lines added and removed, and a punch card of the days and hours people commit. Big repos can take a few seconds the first time while GitHub builds the stats. github.com `/pulse` and `/graphs` links shared into Shikai open it too. ([`1351ff5`](https://github.com/atharvdange618/Shikai/commit/1351ff5), [`01fcbb2`](https://github.com/atharvdange618/Shikai/commit/01fcbb2), [`2d6bef0`](https://github.com/atharvdange618/Shikai/commit/2d6bef0))
+
 ## v1.5.1
 
 Includes the three 1.5.0 OTA updates below, so GitHub release APK users get those fixes too.

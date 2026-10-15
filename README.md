@@ -65,7 +65,7 @@ Take a look at Shikai before you install: **[View Screenshots on Google Drive](h
 | Feature                | Description                                                                                                                          |
 | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
 | **Overview Dashboard** | Pinned repos, contribution graph with streaks, live activity feed, and following preview                                             |
-| **Repository Browser** | File trees with blame and per-file history, syntax highlighting, releases, discussions, compare-two-refs, Actions workflow runs with job logs, PR detail with diffs, checks, reviewers, commits, and review comments with diff context, issue/PR timelines and reactions, and a branch selector |
+| **Repository Browser** | File trees with blame and per-file history, syntax highlighting, releases, discussions, repo insights (commit activity, top contributors, punch card), compare-two-refs, Actions workflow runs with job logs, PR detail with diffs, checks, reviewers, commits, and review comments with diff context, issue/PR timelines and reactions, and a branch selector |
 | **Global Search**      | Fuzzy search across repos, users, issues, and topics with debounced input, recent searches, and eager pagination                     |
 | **User Profiles**      | View any GitHub user's profile with avatar, bio, stats, and top repositories                                                         |
 | **Android Widget**     | Home screen widget showing contribution streak with longest streak and recent activity                                               |
