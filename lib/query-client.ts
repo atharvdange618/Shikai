@@ -21,18 +21,43 @@ export function setupFocusManager(): void {
   });
 }
 
+export function defaultRetry(failureCount: number, error: Error): boolean {
+  if (error instanceof GitHubApiError) {
+    if (error.status === 401 || error.status === 404) return false;
+    if (error.status === 403 && isRateLimited()) return false;
+  }
+  return failureCount < 2;
+}
+
+// /stats endpoints answer 202 while GitHub builds the stats (see getStats in
+// github-rest.ts). Give that job about 15s (5 tries, 3s apart) before the
+// screen falls back to "still computing"; every other error keeps the default.
+const STATS_PENDING_RETRIES = 5;
+const STATS_PENDING_DELAY_MS = 3000;
+
+export function isStatsPending(error: Error): boolean {
+  return error instanceof GitHubApiError && error.status === 202;
+}
+
+export function statsRetry(failureCount: number, error: Error): boolean {
+  return isStatsPending(error)
+    ? failureCount < STATS_PENDING_RETRIES
+    : defaultRetry(failureCount, error);
+}
+
+export function statsRetryDelay(failureCount: number, error: Error): number {
+  // Fallback matches TanStack Query's default exponential backoff.
+  return isStatsPending(error)
+    ? STATS_PENDING_DELAY_MS
+    : Math.min(1000 * 2 ** failureCount, 30_000);
+}
+
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 1000 * 60 * 5,
       gcTime: 1000 * 60 * 60,
-      retry: (failureCount, error) => {
-        if (error instanceof GitHubApiError) {
-          if (error.status === 401 || error.status === 404) return false;
-          if (error.status === 403 && isRateLimited()) return false;
-        }
-        return failureCount < 2;
-      },
+      retry: defaultRetry,
       refetchOnWindowFocus: true,
       refetchOnReconnect: true,
     },
@@ -127,6 +152,12 @@ export const queryKeys = {
     ["repo", owner, repo, "releases"] as const,
   repoRelease: (owner: string, repo: string, tag: string) =>
     ["repo", owner, repo, "release", tag] as const,
+  repoCommitActivity: (owner: string, repo: string) =>
+    ["repo", owner, repo, "stats", "commitActivity"] as const,
+  repoContributorStats: (owner: string, repo: string) =>
+    ["repo", owner, repo, "stats", "contributors"] as const,
+  repoPunchCard: (owner: string, repo: string) =>
+    ["repo", owner, repo, "stats", "punchCard"] as const,
   socialAccounts: () => ["socialAccounts"] as const,
   installations: () => ["installations"] as const,
   repoCount: () => ["repoCount"] as const,

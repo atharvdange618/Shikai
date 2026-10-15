@@ -1,4 +1,4 @@
-import { githubAxios } from "@/lib/axios";
+import { GitHubApiError, githubAxios } from "@/lib/axios";
 import type {
   GitHubBranch,
   GitHubCheckAnnotation,
@@ -7,10 +7,12 @@ import type {
   GitHubCombinedStatus,
   GitHubComment,
   GitHubCommit,
+  GitHubCommitActivityWeek,
   GitHubCommitDetail,
   GitHubComparison,
   GitHubContent,
   GitHubContributor,
+  GitHubContributorStats,
   GitHubEvent,
   GitHubGist,
   GitHubIssue,
@@ -19,6 +21,7 @@ import type {
   GitHubPagination,
   GitHubPullRequest,
   GitHubPullRequestFile,
+  GitHubPunchCardEntry,
   GitHubReadme,
   GitHubRelease,
   GitHubRepo,
@@ -432,6 +435,46 @@ export async function fetchContributors(
     { params: { per_page: 20 } },
   );
   return data;
+}
+
+// GitHub caches /stats per default-branch SHA. On a cache miss it answers 202
+// with an empty body and builds the stats in the background. axios treats any
+// 2xx as success, so throw on 202 to make React Query retry instead of caching
+// the empty body. 204 means the repo has no commits: a real empty result.
+async function getStats<T>(
+  owner: string,
+  repo: string,
+  stat: "commit_activity" | "contributors" | "punch_card",
+): Promise<T[]> {
+  const { data, status } = await githubAxios.get<T[]>(
+    `/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/stats/${stat}`,
+  );
+  if (status === 202) {
+    throw new GitHubApiError(202, "GitHub is still computing these stats");
+  }
+  if (status === 204) return [];
+  return data;
+}
+
+export function fetchCommitActivity(
+  owner: string,
+  repo: string,
+): Promise<GitHubCommitActivityWeek[]> {
+  return getStats(owner, repo, "commit_activity");
+}
+
+export function fetchContributorStats(
+  owner: string,
+  repo: string,
+): Promise<GitHubContributorStats[]> {
+  return getStats(owner, repo, "contributors");
+}
+
+export function fetchPunchCard(
+  owner: string,
+  repo: string,
+): Promise<GitHubPunchCardEntry[]> {
+  return getStats(owner, repo, "punch_card");
 }
 
 export async function fetchFileTree(

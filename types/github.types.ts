@@ -110,6 +110,26 @@ export interface GitHubContributor {
   contributions: number;
 }
 
+/** One week from /stats/commit_activity. `days` runs Sunday to Saturday. */
+export interface GitHubCommitActivityWeek {
+  days: number[];
+  total: number;
+  /** Week start, Unix seconds. */
+  week: number;
+}
+
+/** One contributor from /stats/contributors. */
+export interface GitHubContributorStats {
+  /** Null when the commit author has no GitHub account (or it was deleted). */
+  author: Pick<GitHubContributor, "id" | "login" | "avatar_url" | "html_url"> | null;
+  total: number;
+  /** w: week start (Unix seconds), a: additions, d: deletions, c: commits. */
+  weeks: { w: number; a: number; d: number; c: number }[];
+}
+
+/** [day 0-6 (Sunday first), hour 0-23, commits] from /stats/punch_card. */
+export type GitHubPunchCardEntry = [day: number, hour: number, commits: number];
+
 export interface GitHubTree {
   sha: string;
   url: string;

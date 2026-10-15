@@ -1,9 +1,22 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { get } = vi.hoisted(() => ({ get: vi.fn() }));
-vi.mock("@/lib/axios", () => ({ githubAxios: { get } }));
+const { get, GitHubApiError } = vi.hoisted(() => ({
+  get: vi.fn(),
+  GitHubApiError: class GitHubApiError extends Error {
+    constructor(
+      public status: number,
+      message: string,
+    ) {
+      super(message);
+    }
+  },
+}));
+vi.mock("@/lib/axios", () => ({ githubAxios: { get }, GitHubApiError }));
 
 import {
+  fetchCommitActivity,
+  fetchContributorStats,
+  fetchPunchCard,
   fetchUserEvents,
   parseActionsJobId,
   parseCheckRunId,
@@ -67,5 +80,41 @@ describe("fetchUserEvents", () => {
   it("leaves auth to the session token when there is no PAT", async () => {
     await fetchUserEvents("octocat", 1, 20, null);
     expect(get.mock.calls[0][1].headers).toBeUndefined();
+  });
+});
+
+describe("stats endpoints", () => {
+  beforeEach(() => get.mockReset());
+
+  const cases = [
+    ["fetchCommitActivity", fetchCommitActivity, "commit_activity"],
+    ["fetchContributorStats", fetchContributorStats, "contributors"],
+    ["fetchPunchCard", fetchPunchCard, "punch_card"],
+  ] as const;
+
+  describe.each(cases)("%s", (_name, fetcher, stat) => {
+    it("hits the matching /stats path", async () => {
+      get.mockResolvedValue({ status: 200, data: [] });
+      await fetcher("facebook", "react");
+      expect(get.mock.calls[0][0]).toBe(`/repos/facebook/react/stats/${stat}`);
+    });
+
+    it("returns the body on 200", async () => {
+      const body = [{ some: "row" }];
+      get.mockResolvedValue({ status: 200, data: body });
+      await expect(fetcher("facebook", "react")).resolves.toBe(body);
+    });
+
+    it("throws a 202 GitHubApiError while GitHub computes the stats", async () => {
+      get.mockResolvedValue({ status: 202, data: {} });
+      const error = await fetcher("facebook", "react").catch((e: unknown) => e);
+      expect(error).toBeInstanceOf(GitHubApiError);
+      expect((error as InstanceType<typeof GitHubApiError>).status).toBe(202);
+    });
+
+    it("returns an empty array on 204 (repo has no commits)", async () => {
+      get.mockResolvedValue({ status: 204, data: "" });
+      await expect(fetcher("facebook", "react")).resolves.toEqual([]);
+    });
   });
 });
