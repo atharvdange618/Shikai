@@ -33,6 +33,7 @@ This document tracks the feature backlog and development progress for Shikai.
 | Discussions viewer                | A "Discussions" row on repo detail, shown only when `repo.has_discussions`, opens `discussions.tsx` (cursor-paginated list) and `discussion/[number].tsx`: category emoji/name pill, "Answered" badge, body and comments via `MarkdownRenderer`, one level of replies indented under each comment. `fetchDiscussions` / `fetchDiscussion` added to `lib/github-graphql.ts`; `useDiscussions` / `useDiscussionDetail` in `hooks/useDiscussions.ts`. (Backlog 4.1) | Done   |
 | Repository access hint            | `useInstallations` reads the user's GitHub App installations. When their own installation is missing or set to selected repos, the Repos tab shows a "Manage access" hint, and Settings has a "Manage repository access" row; both open GitHub's installation page. Installations refetch whenever the app returns to the foreground (`staleTime: 0`). Sign-in asks for an install unless `hasOwnInstallation` finds one on the user's own account, since `/user/installations` also lists org installs; "Skip for now" signs in anyway. Shipped by OTA on 1.5.0. (#18) | Done   |
 | Repo insights                     | An "Insights" row on repo detail opens `repo/[repoId]/insights.tsx`: 52 weeks of commit activity as bars, the top 10 contributors with lines added and removed (hidden on 10,000+ commit repos, where GitHub reports zeros), and a 7x24 punch card in the contribution graph colors. Reads `/stats/commit_activity`, `/stats/contributors` and `/stats/punch_card`. GitHub answers 202 while it builds stats, so `getStats` in `lib/github-rest.ts` throws on 202 and `statsRetry` in `lib/query-client.ts` retries 5 times, 3s apart. `/stats/code_frequency` left out (422 on 10,000+ commit repos). github.com `/pulse` and `/graphs/*` links open it. | Done   |
+| Notification alerts               | Opt-in "Notification alerts" switch in Settings (needs a PAT). An `expo-background-task` (WorkManager) task in `lib/background-notifications.ts` polls `/notifications?participating=true` every 15 minutes or later, sending `If-None-Match` with the stored ETag so a quiet poll is a free 304 (GitHub omits `Last-Modified` when the list is empty). `lib/notification-poller.ts` keeps a marker in MMKV, seeded silently on the first run from GitHub's newest `updated_at`, and alerts on at most 3 threads plus an "N more" summary. Local notifications only, no push service. An auth store subscription turns alerts off on sign-out or PAT removal; a 401 on the PAT turns them off with a note in Settings. `hooks/useNotificationTaps.ts` opens the thread on tap, warm or cold start, via `parseGitHubApiUrl()`. Native packages, so it ships in the 1.6.0 store build. | Done   |
 
 ---
 
@@ -204,7 +205,9 @@ under a comment whenever `pageInfo.hasNextPage` is true.
 ### Boundary note: writes
 
 `markNotificationAsRead` and `markAllNotificationsAsRead` already exist and are the only write
-calls in the app. That is the narrow exception, already taken.
+calls in the app. That is the narrow exception, already taken. Tapping a notification alert
+also calls `markNotificationAsRead`, the same write as tapping the row in the tab, so it adds
+no new kind of write.
 
 - **Cheap add:** per-row swipe-to-mark-read in the notifications screen. Already shipped
   (commit `ced9aec`) — `Swipeable` with a right-side "Read" action on each unread row.

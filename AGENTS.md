@@ -59,6 +59,8 @@ Tests live in `lib/__tests__/`. Run `expo lint` and `npx vitest run` before cons
 
 **OTA updates**: `expo-updates`, handled in `lib/use-ota-updates.ts`.
 
+**Notification alerts**: opt-in from Settings, needs a PAT. `lib/background-notifications.ts` defines an `expo-background-task` (WorkManager) task, imported from `index.ts` so it exists when Android wakes the app with no UI. Every 15 minutes or later, it runs `pollNotifications()` from `lib/notification-poller.ts`: participating threads only, `If-None-Match` with the stored ETag so a quiet poll is a free 304, and a marker in MMKV so only threads updated since the last poll alert. It posts up to 3 local notifications plus an "N more" summary; there is no push service. A subscription to the auth store turns alerts off whenever the token or the PAT goes away. `hooks/useNotificationTaps.ts` routes a tapped alert through `parseGitHubApiUrl()` in `lib/github-url.ts`, from both warm and cold starts.
+
 ## Key Files
 
 | File | What it does |
@@ -75,6 +77,9 @@ Tests live in `lib/__tests__/`. Run `expo lint` and `npx vitest run` before cons
 | `lib/query-client.ts` | React Query client configuration. |
 | `lib/sentry.ts` | Sentry error tracking setup. |
 | `lib/use-ota-updates.ts` | `expo-updates` OTA check/apply hook. |
+| `lib/background-notifications.ts` | Background alerts task, `enableAlerts()`/`disableAlerts()`, and the auth store subscription that stops alerts on sign-out. |
+| `lib/notification-poller.ts` | One background poll: ETag request, marker, and which threads to alert on. No React or native imports, so Vitest covers it. |
+| `hooks/useNotificationTaps.ts` | Opens the thread behind a tapped alert, warm or cold start. |
 | `lib/widget-data.ts` | Fetches GitHub contribution data for the home screen widget. |
 | `lib/widget-refresh.tsx` | Widget theme/color sync; reads the persisted theme from MMKV directly. |
 | `stores/auth.store.ts` | Zustand auth state; `clearAuth()` called on 401. |
@@ -115,10 +120,12 @@ See `notes/MAINTENANCE.md` for the upgrade schedule, the release steps, and the 
 - `.env` contains `EXPO_PUBLIC_*` variables (GitHub client ID, OAuth proxy URL). These are baked in at build time.
 - `dist/` is the web build output (Cloudflare Workers serves from there).
 - `wrangler.jsonc` configures the web deployment; `oauth-proxy/wrangler.toml` is separate.
+- After editing `lib/background-notifications.ts`, press `r` in Metro for a full reload. The module runs side effects when it loads (`defineTask`, the notification handler, the auth subscription), so Fast Refresh keeps the old copy and new exports come back `undefined`.
+- `expo-background-task` skips runs while the app is in the foreground, including `triggerTaskWorkerForTestingAsync()`. To test the alerts task, background the app and force the job: `adb shell cmd jobscheduler run -f com.atharvdange618.Shikai <id>`, where `<id>` is the number after the slash in `adb shell dumpsys jobscheduler | grep "JOB #.*com.atharvdange618.Shikai"`. WorkManager gives the job a new ID after each run.
 
 ## Token & Auth Flow
 
-OAuth uses PKCE flow. Tokens are stored in `expo-secure-store` (Keychain/Keystore) via `lib/secure-storage.ts`. PATs (optional, for notifications) use the same storage. Auth state is managed in `stores/auth.store.ts`. On boot, `app/_layout.tsx` restores tokens from SecureStore and validates them. On 401, the axios interceptor calls `clearAuth()`.
+OAuth uses PKCE flow. Tokens are stored in `expo-secure-store` (Keychain/Keystore) via `lib/secure-storage.ts`. PATs (optional, for notifications and alerts) use the same storage. Sign-out deletes the OAuth token but keeps the PAT, and sign-in restores it. Auth state is managed in `stores/auth.store.ts`. On boot, `app/_layout.tsx` restores tokens from SecureStore and validates them. On 401, the axios interceptor calls `clearAuth()`.
 
 ## Caching
 

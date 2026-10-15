@@ -6,8 +6,15 @@
 
 - **Repo insights** - A new Insights row on every repo opens commit activity for the past year, the top contributors with lines added and removed, and a punch card of the days and hours people commit. Big repos can take a few seconds the first time while GitHub builds the stats. github.com `/pulse` and `/graphs` links shared into Shikai open it too. ([`1351ff5`](https://github.com/atharvdange618/Shikai/commit/1351ff5), [`01fcbb2`](https://github.com/atharvdange618/Shikai/commit/01fcbb2), [`2d6bef0`](https://github.com/atharvdange618/Shikai/commit/2d6bef0), [`22bde96`](https://github.com/atharvdange618/Shikai/commit/22bde96))
 
+- **Notification alerts** - Turn on Notification alerts in Settings (needs a personal access token) and Shikai checks GitHub about every 15 minutes in the background. It alerts you to review requests, mentions and assignments, up to 3 at a time plus an "N more" summary, and tapping one opens the PR, issue or commit. Android decides the exact timing, so alerts can arrive late when the phone is saving battery. Alerts turn off on sign-out, when you remove the token, or when GitHub rejects it. Needs the 1.6.0 store build. ([`640a3fe`](https://github.com/atharvdange618/Shikai/commit/640a3fe), [`d00477d`](https://github.com/atharvdange618/Shikai/commit/d00477d), [`dfcde54`](https://github.com/atharvdange618/Shikai/commit/dfcde54), [`8686de3`](https://github.com/atharvdange618/Shikai/commit/8686de3), [`c8872d6`](https://github.com/atharvdange618/Shikai/commit/c8872d6), [`dea68ac`](https://github.com/atharvdange618/Shikai/commit/dea68ac))
+
+### Changes
+
+- **Commit notifications** - Tapping a commit notification in the Notifications tab now opens the commit, not the repo. ([`dea68ac`](https://github.com/atharvdange618/Shikai/commit/dea68ac))
+
 ### Dependencies
 
+- **Background work and notifications** - `expo-background-task` 1.0.10, `expo-task-manager` 14.0.9 and `expo-notifications` 0.32.17, the versions Expo SDK 54 expects. These carry native code, so the version moves to 1.6.0 and this ships as a store build. ([`640a3fe`](https://github.com/atharvdange618/Shikai/commit/640a3fe))
 - **React Navigation 7.21** - `bottom-tabs` and `native-stack` 7.21.0, `native` 7.5.1, `elements` 2.9.45. Older `bottom-tabs` used a deprecated `navigate` call and logged a warning on every tab press. JS only, so this can ship as an OTA update. ([`661b019`](https://github.com/atharvdange618/Shikai/commit/661b019))
 
 ## v1.5.1

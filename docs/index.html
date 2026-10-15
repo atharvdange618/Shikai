@@ -98,7 +98,7 @@
             <img src="assets/icon.png" alt="Shikai" width="40" height="40">
             <h1>Privacy Policy</h1>
         </div>
-        <p class="updated">Last updated: September 1, 2026</p>
+        <p class="updated">Last updated: October 15, 2026</p>
 
         <h2>Overview</h2>
         <p>Shikai is a read-only GitHub companion app. This privacy policy explains how we handle your data.</p>
@@ -118,6 +118,14 @@
             <li><strong>User Profiles:</strong> Basic profile information (avatar, bio, stats) may be cached.</li>
         </ul>
 
+        <h3>Notification Alerts (Optional)</h3>
+        <ul>
+            <li><strong>What:</strong> When you turn on notification alerts in Settings, Shikai checks GitHub's notifications API in the background about every 15 minutes, using your Personal Access Token. It asks only for notifications that involve you directly, such as review requests, mentions and assignments.</li>
+            <li><strong>Stored on your device:</strong> The time of the newest notification Shikai has seen, and a cache tag GitHub sends so that a check with nothing new costs almost nothing. Nothing else is saved.</li>
+            <li><strong>Alerts:</strong> Shikai posts alerts itself, on your device. It does not use a push service, and no server sees your notifications.</li>
+            <li><strong>Permission:</strong> Shikai asks for permission to show notifications only when you turn alerts on.</li>
+        </ul>
+
         <h3>Crash and Performance Data</h3>
         <ul>
             <li><strong>What:</strong> When the app crashes or hits an error, Shikai sends a diagnostic report to Sentry. The report contains the error and stack trace, the device model, the OS version, the app version, and a short trail of the in-app actions that led up to it. It also samples a fraction of sessions for screen-load and network timing.</li>
@@ -130,6 +138,7 @@
         <h2>Data Usage</h2>
         <ul>
             <li><strong>API Communication:</strong> Your OAuth token is sent directly from your device to GitHub's API. It passes through a secure Cloudflare Worker proxy only during the initial authentication exchange.</li>
+            <li><strong>Background Checks:</strong> When notification alerts are on, your Personal Access Token is sent directly from your device to GitHub's API about every 15 minutes. Tapping an alert marks that notification as read on GitHub, the same as tapping it in the Notifications tab.</li>
             <li><strong>No Server Storage:</strong> Shikai does not store your tokens or personal data on any external servers.</li>
             <li><strong>Crash Reporting:</strong> Anonymous crash and performance data is sent to Sentry as described above. It is not used for advertising or profiling.</li>
         </ul>
@@ -153,6 +162,7 @@
             <li><strong>Sign Out:</strong> Signing out clears all locally cached data and tokens.</li>
             <li><strong>Uninstall:</strong> Uninstalling the app removes all local data.</li>
             <li><strong>PAT Removal:</strong> You can remove your Personal Access Token from Settings at any time.</li>
+            <li><strong>Notification Alerts:</strong> Turning alerts off, removing your Personal Access Token, or signing out stops the background checks and deletes the stored check state.</li>
         </ul>
 
         <h2>Children's Privacy</h2>

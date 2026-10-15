@@ -1,6 +1,6 @@
 # Privacy Policy - Shikai
 
-**Last updated:** September 1, 2026
+**Last updated:** October 15, 2026
 
 ## Overview
 
@@ -20,6 +20,13 @@ Shikai collects minimal data necessary to provide its services:
 - **Repository Data:** Repos, contributions, and activity are cached locally using MMKV for offline access.
 - **User Profiles:** Basic profile information (avatar, bio, stats) may be cached.
 
+### Notification Alerts (Optional)
+
+- **What:** When you turn on notification alerts in Settings, Shikai checks GitHub's notifications API in the background about every 15 minutes, using your Personal Access Token. It asks only for notifications that involve you directly, such as review requests, mentions and assignments.
+- **Stored on your device:** The time of the newest notification Shikai has seen, and a cache tag GitHub sends so that a check with nothing new costs almost nothing. Nothing else is saved.
+- **Alerts:** Shikai posts alerts itself, on your device. It does not use a push service, and no server sees your notifications.
+- **Permission:** Shikai asks for permission to show notifications only when you turn alerts on.
+
 ### Crash and Performance Data
 
 - **What:** When the app crashes or hits an error, Shikai sends a diagnostic report to Sentry. The report contains the error and stack trace, the device model, the OS version, the app version, and a short trail of the in-app actions that led up to it. It also samples a fraction of sessions for screen-load and network timing.
@@ -31,6 +38,7 @@ Shikai collects minimal data necessary to provide its services:
 ## Data Usage
 
 - **API Communication:** Your OAuth token is sent directly from your device to GitHub's API. It passes through a secure Cloudflare Worker proxy only during the initial authentication exchange.
+- **Background Checks:** When notification alerts are on, your Personal Access Token is sent directly from your device to GitHub's API about every 15 minutes. Tapping an alert marks that notification as read on GitHub, the same as tapping it in the Notifications tab.
 - **No Server Storage:** Shikai does not store your tokens or personal data on any external servers.
 - **Crash Reporting:** Anonymous crash and performance data is sent to Sentry as described above. It is not used for advertising or profiling.
 
@@ -51,6 +59,7 @@ Shikai collects minimal data necessary to provide its services:
 - **Sign Out:** Signing out clears all locally cached data and tokens.
 - **Uninstall:** Uninstalling the app removes all local data.
 - **PAT Removal:** You can remove your Personal Access Token from Settings at any time.
+- **Notification Alerts:** Turning alerts off, removing your Personal Access Token, or signing out stops the background checks and deletes the stored check state.
 
 ## Children's Privacy
 
