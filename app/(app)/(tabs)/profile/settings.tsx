@@ -7,6 +7,7 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
+  Switch,
   Text,
   TextInput,
   View,
@@ -15,8 +16,12 @@ import {
 import { useAlert } from "@/components";
 import { KeyboardAvoid } from "@/components/shared/KeyboardAvoid";
 import { rateLimit } from "@/lib/axios";
-import { enableAlerts } from "@/lib/background-notifications";
-import { rewindMarkerForTesting } from "@/lib/notification-poller";
+import {
+  areAlertsEnabled,
+  disableAlerts,
+  enableAlerts,
+  wasPatRejected,
+} from "@/lib/background-notifications";
 import { MANAGE_REPO_ACCESS_URL, validatePAT } from "@/lib/github-rest";
 import { clearAllMMKV } from "@/lib/mmkv";
 import { deletePAT, deleteToken, savePAT } from "@/lib/secure-storage";
@@ -122,25 +127,65 @@ export default function SettingsScreen() {
     });
   }, [alert, setPat, queryClient]);
 
-  // Dev-only harness until the real toggle lands: registers the task and
-  // rewinds the marker a week so there is something to alert on. It can't run
-  // the task itself: expo-background-task skips runs while the app is in the
-  // foreground (triggerTaskWorkerForTestingAsync included), so force a run
-  // with adb after backgrounding the app.
-  const handleTestAlerts = useCallback(async () => {
-    const status = await enableAlerts();
-    if (status !== "enabled") {
-      alert.show({ variant: "danger", title: "Alerts", message: status });
-      return;
-    }
-    rewindMarkerForTesting(7);
-    alert.show({
-      variant: "success",
-      title: "Alerts armed",
-      message:
-        "Background the app, then force the job with adb: cmd jobscheduler run -f com.atharvdange618.Shikai <job id>",
-    });
-  }, [alert]);
+  const [alertsOn, setAlertsOn] = useState(false);
+  const [alertsBusy, setAlertsBusy] = useState(false);
+  const [patRejected, setPatRejected] = useState(false);
+
+  // Read fresh on focus: the task can turn itself off in the background (PAT
+  // rejected), and the user can block notifications in system settings.
+  useFocusEffect(
+    useCallback(() => {
+      areAlertsEnabled().then(setAlertsOn).catch(() => setAlertsOn(false));
+      setPatRejected(wasPatRejected());
+    }, []),
+  );
+
+  const handleToggleAlerts = useCallback(
+    async (on: boolean) => {
+      setAlertsBusy(true);
+      try {
+        if (!on) {
+          await disableAlerts();
+          setAlertsOn(false);
+          return;
+        }
+        const result = await enableAlerts();
+        setAlertsOn(result === "enabled");
+        if (result === "enabled") {
+          setPatRejected(false);
+        } else if (result === "blocked") {
+          alert.show({
+            variant: "danger",
+            title: "Notifications are off for Shikai",
+            message: "Allow notifications in Android settings, then turn alerts on again.",
+            actions: [
+              { text: "Cancel", style: "cancel" },
+              { text: "Open settings", onPress: () => Linking.openSettings() },
+            ],
+          });
+        } else {
+          alert.show({
+            variant: "danger",
+            title: "Alerts not turned on",
+            message:
+              result === "denied"
+                ? "Shikai needs permission to show notifications."
+                : "Android isn't allowing background work for Shikai right now.",
+          });
+        }
+      } catch (error) {
+        console.error("[alerts] toggle failed", error);
+        alert.show({
+          variant: "danger",
+          title: "Something went wrong",
+          message: "Couldn't change notification alerts. Please try again.",
+        });
+      } finally {
+        setAlertsBusy(false);
+      }
+    },
+    [alert],
+  );
 
   const handleClearCache = useCallback(() => {
     clearAllMMKV();
@@ -302,22 +347,30 @@ export default function SettingsScreen() {
             </View>
           )}
 
-          {__DEV__ && pat && (
-            <Pressable
-              style={({ pressed }) => [
-                s.menuRow,
-                s.rateLimitDivider,
-                pressed && s.menuRowPressed,
-              ]}
-              onPress={handleTestAlerts}
-            >
+          {pat && (
+            <View style={[s.menuRow, s.rateLimitDivider]}>
               <Octicons
                 name="bell"
                 size={IconSize.md}
                 color={colors.textSecondary}
               />
-              <Text style={s.menuText}>Test notification alerts (dev)</Text>
-            </Pressable>
+              <View style={s.rateLimitInfo}>
+                <Text style={s.menuText}>Notification alerts</Text>
+                <Text style={s.rateLimitDetail}>
+                  {patRejected && !alertsOn
+                    ? "Turned off because GitHub rejected your token. Add a new token, then turn alerts on again."
+                    : "Checks about every 15 minutes for review requests, mentions and assignments. Android may delay checks to save battery."}
+                </Text>
+              </View>
+              <Switch
+                value={alertsOn}
+                onValueChange={handleToggleAlerts}
+                disabled={alertsBusy}
+                trackColor={{ false: colors.border, true: colors.accent }}
+                thumbColor={colors.surface}
+                accessibilityLabel="Notification alerts"
+              />
+            </View>
           )}
         </View>
       </View>

@@ -110,12 +110,6 @@ export async function pollNotifications(): Promise<PollResult> {
   return { kind: "checked", alerts, overflow };
 }
 
-/** Dev-only: move the marker back so the next poll has threads to alert on. */
-export function rewindMarkerForTesting(days: number): void {
-  mmkv.set(MARKER_KEY, new Date(Date.now() - days * 86_400_000).toISOString());
-  mmkv.remove(ETAG_KEY);
-}
-
 /** Forget the marker so turning alerts back on starts fresh, not with a backlog. */
 export function resetNotificationPoller(): void {
   mmkv.remove(MARKER_KEY);
