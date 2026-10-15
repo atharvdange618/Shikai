@@ -1,5 +1,7 @@
 # Shikai - App Plan & Reference Doc
 
+> **Archived.** This is the plan written before development started. It is no longer kept up to date. For the current state, see `AGENTS.md` and `notes/ROADMAP.md`.
+
 > A read-only GitHub dashboard mobile app built with Expo Router, TanStack Query, and Zustand.
 > This document is the single source of truth for all planning decisions made before development.
 

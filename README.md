@@ -143,7 +143,7 @@ Shikai takes security seriously:
 - **On-device encryption** - Tokens stored with `expo-secure-store` (Keychain/Keystore)
 - **Root/debugger detection** - Blocks usage on compromised environments
 - **Token safety** - PATs and OAuth tokens are used only for direct GitHub API calls, and are stripped from crash reports before they are sent
-- **Crash reporting** - Released builds send anonymous crash and performance diagnostics to Sentry (EU). No PII, no repository contents, no session recording. Off in development. See the [privacy policy](privacy-policy.md).
+- **Crash reporting** - Released builds send anonymous crash and performance diagnostics to Sentry (EU). No PII, no repository contents, no session recording. Off in development. See the [privacy policy](store/privacy-policy.md).
 - **Cache hygiene** - MMKV cache cleared on sign-in and sign-out
 
 Developer mode is blocked by default on release builds. Developers can override this after accepting a risk warning.
