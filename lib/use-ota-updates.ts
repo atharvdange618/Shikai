@@ -18,6 +18,8 @@ export function useOTAUpdates(): {
   const [updateReady, setUpdateReady] = useState(false);
 
   useEffect(() => {
+    // expo-updates throws in development and does nothing when disabled.
+    if (__DEV__ || !Updates.isEnabled) return;
     if (!isOnline || hasChecked.current) return;
 
     hasChecked.current = true;
