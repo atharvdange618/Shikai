@@ -53,7 +53,7 @@ Tests live in `lib/__tests__/`. Run `expo lint` and `npx vitest run` before cons
 
 **OAuth proxy**: `oauth-proxy/worker.ts` is a separate Cloudflare Worker that exchanges OAuth codes for tokens. Deployed independently from the main app.
 
-**Android home screen widget**: `react-native-android-widget` renders `widgets/ContributionWidget.tsx` (a GitHub contribution graph) via `widget-task-handler.tsx` at the project root, registered as a native task outside the RN tree. `lib/widget-data.ts` fetches contribution data and `lib/widget-refresh.tsx` handles theme/color sync (reads the persisted theme straight from MMKV since the widget has no access to React context).
+**Android home screen widget**: `react-native-android-widget` renders `widgets/ContributionWidget.tsx` (a GitHub contribution graph) via `widgets/widget-task-handler.tsx` (imported from `index.ts`), registered as a native task outside the RN tree. `lib/widget-data.ts` fetches contribution data and `lib/widget-refresh.tsx` handles theme/color sync (reads the persisted theme straight from MMKV since the widget has no access to React context).
 
 **Error tracking**: `@sentry/react-native`, configured in `lib/sentry.ts`. Release builds upload source maps via `npm run sentry:sourcemaps`.
 
@@ -83,7 +83,7 @@ Tests live in `lib/__tests__/`. Run `expo lint` and `npx vitest run` before cons
 | `stores/recent-searches.store.ts` | Recent search history. |
 | `modules/shikai-security/` | Local Expo module (Kotlin): root/debugger detection. |
 | `oauth-proxy/worker.ts` | Cloudflare Worker that exchanges OAuth codes for tokens. Deployed separately. |
-| `widget-task-handler.tsx` | Native task entry point for the Android home screen widget. |
+| `widgets/widget-task-handler.tsx` | Native task entry point for the Android home screen widget. |
 | `widgets/ContributionWidget.tsx` | Widget UI: the contribution graph. |
 | `hooks/` | One React Query hook per GitHub resource (repos, issues, PRs, etc.). |
 | `plugins/` | Local config plugins that patch the generated gradle files on every prebuild: R8, resource shrinking, ABIs (`withGradleProperties`), META-INF exclusion and ABI splits (`withAndroidPackaging`), release signing (`withReleaseSigning`). |

@@ -1,11 +1,11 @@
 import React from "react";
 
 import type { WidgetTaskHandlerProps } from "react-native-android-widget";
-import { themes, type ThemeName } from "./constants/themes";
-import { mmkv } from "./lib/mmkv";
-import { fetchContributionsForWidget } from "./lib/widget-data";
-import { colorsForTheme } from "./lib/widget-refresh";
-import { ContributionWidget } from "./widgets/ContributionWidget";
+import { themes, type ThemeName } from "@/constants/themes";
+import { mmkv } from "@/lib/mmkv";
+import { fetchContributionsForWidget } from "@/lib/widget-data";
+import { colorsForTheme } from "@/lib/widget-refresh";
+import { ContributionWidget } from "./ContributionWidget";
 
 const THEME_MMKV_KEY = "shikai-theme";
 
