@@ -26,6 +26,7 @@ interface RepoActivityProps {
   onDiscussionsPress?: () => void;
   latestRunStatus?: RunDisplay;
   onActionsPress?: () => void;
+  onInsightsPress: () => void;
 }
 
 export function RepoActivity({
@@ -45,6 +46,7 @@ export function RepoActivity({
   onDiscussionsPress,
   latestRunStatus,
   onActionsPress,
+  onInsightsPress,
 }: RepoActivityProps) {
   const s = buildStyles(colors);
 
@@ -193,6 +195,25 @@ export function RepoActivity({
               </Pressable>
             </>
           )}
+
+          <View style={s.activityDivider} />
+
+          <Pressable
+            style={({ pressed }) => [
+              s.activityRow,
+              pressed && { opacity: 0.6 },
+            ]}
+            onPress={onInsightsPress}
+          >
+            <Octicons name="graph" size={14} color={colors.textMuted} />
+            <Text style={s.activityLabel}>Insights</Text>
+            <Octicons
+              name="chevron-right"
+              size={12}
+              color={colors.textMuted}
+              style={{ marginLeft: "auto" }}
+            />
+          </Pressable>
         </>
       )}
     </View>
