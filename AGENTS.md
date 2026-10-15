@@ -41,6 +41,8 @@ Tests live in `lib/__tests__/`. Run `expo lint` and `npx vitest run` before cons
 
 ## Architecture
 
+Deeper docs: `notes/ARCHITECTURE.md` (data flow, token rules, background work) and `notes/DECISIONS.md` (why things are this way; read an entry before undoing it, and add one when you make a call a future reader would question).
+
 **Routing**: expo-router file-based routing in `app/`. Entry is `app/_layout.tsx` (root) → `app/(app)/_layout.tsx` → `app/(app)/(tabs)/` (bottom tabs: overview, repos, search, profile).
 
 **Boot flow**: `app/_layout.tsx` drives boot through a single reducer, `bootReducer` in `lib/boot-flow.ts` (phases: `checkingSecurity` → `restoringAuth` → `ready`, with a `blocked` phase for failed security checks). Add new boot states there, not as ad hoc effects in the layout.
