@@ -93,6 +93,10 @@ export function parseGitHubUrl(url: string): string | null {
         ? `${repoBase}/run/${runId}`
         : `${repoBase}/actions`;
     }
+    // GitHub's Insights tab: /pulse and every /graphs/* chart.
+    case "pulse":
+    case "graphs":
+      return `${repoBase}/insights`;
     case "tree": {
       // /tree/{ref}/{...path}. The ref is dropped, same as blob below: the
       // files screen reads the default branch.

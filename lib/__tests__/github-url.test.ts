@@ -96,6 +96,22 @@ describe("parseGitHubUrl", () => {
     ).toBe(`${base}/file?path=src%2Findex.ts&fileName=index.ts&line=10`);
   });
 
+  it("maps pulse and every graphs page to insights", () => {
+    const insights = "/(app)/repo/facebook~~react/insights";
+    expect(parseGitHubUrl("https://github.com/facebook/react/pulse")).toBe(
+      insights,
+    );
+    expect(
+      parseGitHubUrl("https://github.com/facebook/react/pulse/monthly"),
+    ).toBe(insights);
+    expect(
+      parseGitHubUrl("https://github.com/facebook/react/graphs/contributors"),
+    ).toBe(insights);
+    expect(
+      parseGitHubUrl("https://github.com/facebook/react/graphs/punch-card"),
+    ).toBe(insights);
+  });
+
   it("returns null for an incomplete compare range", () => {
     expect(
       parseGitHubUrl("https://github.com/facebook/react/compare/main"),
