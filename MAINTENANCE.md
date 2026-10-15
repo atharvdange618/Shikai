@@ -6,7 +6,7 @@ Shikai rarely breaks on its own. It breaks when a platform under it moves: Googl
 
 1. **Sentry:** look for new issues and for any endpoint with a jump in 4xx errors. A new 4xx on one GitHub endpoint usually means a deprecation.
 2. **Play Console:** check Android vitals (crash rate, ANR rate) and read new reviews.
-3. **Dependencies:** run `npx expo install --check`. It lists packages that have drifted from the versions this Expo SDK supports. Fix them with `npx expo install --fix`. Don't use `npm update` or Dependabot for Expo packages: they bump past the SDK's supported range.
+3. **Dependencies:** run `npx expo install --check`. It lists packages that have drifted from the versions this Expo SDK supports. Fix them with `npx expo install --fix`. Don't use `npm update` or Dependabot for Expo packages: they bump past the SDK's supported range. One exception: React Navigation runs ahead of Expo's ranges through the lockfile (7.21 against Expo's `^7.4.0`) to drop a deprecated `navigate` call. `package.json` keeps Expo's ranges so this check stays clean. Leave the lockfile versions alone.
 4. **Security:** run `npm audit --omit=dev` and patch anything that reaches the shipped app.
 5. **GitHub issues:** triage anything new.
 
