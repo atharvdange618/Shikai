@@ -20,6 +20,7 @@ import {
   areAlertsEnabled,
   disableAlerts,
   enableAlerts,
+  postTestAlert,
   wasPatRejected,
 } from "@/lib/background-notifications";
 import { MANAGE_REPO_ACCESS_URL, validatePAT } from "@/lib/github-rest";
@@ -371,6 +372,24 @@ export default function SettingsScreen() {
                 accessibilityLabel="Notification alerts"
               />
             </View>
+          )}
+
+          {__DEV__ && pat && alertsOn && (
+            <Pressable
+              style={({ pressed }) => [
+                s.menuRow,
+                s.rateLimitDivider,
+                pressed && s.menuRowPressed,
+              ]}
+              onPress={() => postTestAlert().catch(console.error)}
+            >
+              <Octicons
+                name="beaker"
+                size={IconSize.md}
+                color={colors.textSecondary}
+              />
+              <Text style={s.menuText}>Post a test alert (dev)</Text>
+            </Pressable>
           )}
         </View>
       </View>

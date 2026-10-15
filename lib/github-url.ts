@@ -123,6 +123,35 @@ export function parseGitHubUrl(url: string): string | null {
   }
 }
 
+const API_REPO_RE = /^https:\/\/api\.github\.com\/repos\/([^/]+)\/([^/]+)(?:\/(.*))?$/;
+
+/**
+ * Maps the API URL GitHub puts on a notification's subject
+ * (`https://api.github.com/repos/{owner}/{repo}/pulls/12`) to an in-app
+ * route, or null when the app has no screen for it. Shared by the
+ * notifications tab and the alert tap handler.
+ */
+export function parseGitHubApiUrl(url: string | null | undefined): string | null {
+  const match = url?.match(API_REPO_RE);
+  if (!match) return null;
+
+  const [, owner, repo, rest] = match;
+  const repoBase = `/(app)/repo/${encodeRepoId(owner, repo)}`;
+  if (!rest) return repoBase;
+
+  const [kind, id] = rest.split("/");
+  switch (kind) {
+    case "pulls":
+      return id ? `${repoBase}/pr/${id}` : null;
+    case "issues":
+      return id ? `${repoBase}/issue/${id}` : null;
+    case "commits":
+      return id ? `${repoBase}/commit/${id}` : null;
+    default:
+      return null;
+  }
+}
+
 function safeDecode(s: string): string {
   try {
     return decodeURIComponent(s);

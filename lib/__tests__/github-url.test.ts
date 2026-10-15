@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { parseGitHubUrl } from "@/lib/github-url";
+import { parseGitHubApiUrl, parseGitHubUrl } from "@/lib/github-url";
 
 describe("parseGitHubUrl", () => {
   it("rejects non-github hosts and github subdomains", () => {
@@ -116,5 +116,33 @@ describe("parseGitHubUrl", () => {
     expect(
       parseGitHubUrl("https://github.com/facebook/react/compare/main"),
     ).toBeNull();
+  });
+});
+
+describe("parseGitHubApiUrl", () => {
+  const api = "https://api.github.com/repos/facebook/react";
+  const base = "/(app)/repo/facebook~~react";
+
+  it("maps pulls, issues and commits to their screens", () => {
+    expect(parseGitHubApiUrl(`${api}/pulls/12`)).toBe(`${base}/pr/12`);
+    expect(parseGitHubApiUrl(`${api}/issues/34`)).toBe(`${base}/issue/34`);
+    expect(parseGitHubApiUrl(`${api}/commits/abc123`)).toBe(`${base}/commit/abc123`);
+  });
+
+  it("maps a bare repo URL to the repo screen", () => {
+    expect(parseGitHubApiUrl(api)).toBe(base);
+  });
+
+  it("returns null for types without a screen", () => {
+    // Release subjects carry a numeric release id, not a tag.
+    expect(parseGitHubApiUrl(`${api}/releases/987`)).toBeNull();
+    expect(parseGitHubApiUrl(`${api}/check-runs/5`)).toBeNull();
+    expect(parseGitHubApiUrl(`${api}/pulls`)).toBeNull();
+  });
+
+  it("returns null for missing or non-API URLs", () => {
+    expect(parseGitHubApiUrl(null)).toBeNull();
+    expect(parseGitHubApiUrl(undefined)).toBeNull();
+    expect(parseGitHubApiUrl("https://github.com/facebook/react/pull/12")).toBeNull();
   });
 });

@@ -38,6 +38,7 @@ import { OfflineBanner } from "@/components/OfflineBanner";
 import { ThemeProvider, useTheme } from "@/contexts/ThemeContext";
 import { useAppRatingPrompt } from "@/hooks/useAppRatingPrompt";
 import { useDeepLinks } from "@/hooks/useDeepLinks";
+import { useNotificationTaps } from "@/hooks/useNotificationTaps";
 import { useInAppUpdates } from "@/hooks/useInAppUpdates";
 import { setAuthReady } from "@/lib/axios";
 import { bootReducer, initialBootState, type BootAction } from "@/lib/boot-flow";
@@ -281,6 +282,7 @@ function AppStack({
   const router = useRouter();
 
   useDeepLinks(Boolean(token));
+  useNotificationTaps(Boolean(token));
 
   useEffect(() => {
     dispatch({ type: "TOKEN_CHANGED", token });

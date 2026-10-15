@@ -23,6 +23,7 @@ import {
   markAllNotificationsAsRead,
   markNotificationAsRead,
 } from "@/lib/github-rest";
+import { parseGitHubApiUrl } from "@/lib/github-url";
 import { queryKeys } from "@/lib/query-client";
 import { useAuthStore } from "@/stores/auth.store";
 
@@ -366,37 +367,8 @@ export default function NotificationsScreen() {
         markRead(notification);
       }
 
-      if (notification.subject.url) {
-        const url = notification.subject.url;
-        const match = url.match(
-          /\/repos\/([^/]+)\/([^/]+)\/(pulls|issues)\/(\d+)/,
-        );
-        if (match) {
-          const [, owner, repo, type, number] = match;
-          const route =
-            type === "pulls"
-              ? `/(app)/repo/${owner}~~${repo}/pr/${number}`
-              : `/(app)/repo/${owner}~~${repo}/issue/${number}`;
-          router.push(route as Href);
-          return;
-        }
-
-        const commitMatch = url.match(
-          /\/repos\/([^/]+)\/([^/]+)\/commits\/([a-f0-9]+)/,
-        );
-        if (commitMatch) {
-          router.push(
-            `/(app)/repo/${commitMatch[1]}~~${commitMatch[2]}` as Href,
-          );
-          return;
-        }
-
-        const repoMatch = url.match(/\/repos\/([^/]+)\/([^/]+)$/);
-        if (repoMatch) {
-          router.push(`/(app)/repo/${repoMatch[1]}~~${repoMatch[2]}` as Href);
-          return;
-        }
-      }
+      const route = parseGitHubApiUrl(notification.subject.url);
+      if (route) router.push(route as Href);
     },
     [router, markRead],
   );

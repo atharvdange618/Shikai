@@ -99,6 +99,25 @@ async function postAlerts(
 }
 
 /**
+ * Dev-only: posts one alert for a real PR so taps can be tested without
+ * waiting for someone to mention you. Goes through postAlerts unchanged.
+ */
+export async function postTestAlert(): Promise<void> {
+  await postAlerts(
+    [
+      {
+        threadId: "dev-test",
+        title: "Test alert: PR #16",
+        repoFullName: "atharvdange618/Shikai",
+        subjectType: "PullRequest",
+        subjectUrl: "https://api.github.com/repos/atharvdange618/Shikai/pulls/16",
+      },
+    ],
+    0,
+  );
+}
+
+/**
  * "blocked" means Android won't show the prompt again (denied twice, or
  * turned off in system settings); only the app's settings page can fix it.
  */
