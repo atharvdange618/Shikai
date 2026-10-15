@@ -16,6 +16,7 @@ vi.mock("@/lib/axios", () => ({ githubAxios: { get }, GitHubApiError }));
 import {
   fetchCommitActivity,
   fetchContributorStats,
+  fetchParticipatingNotifications,
   fetchPunchCard,
   fetchUserEvents,
   parseActionsJobId,
@@ -115,6 +116,53 @@ describe("stats endpoints", () => {
     it("returns an empty array on 204 (repo has no commits)", async () => {
       get.mockResolvedValue({ status: 204, data: "" });
       await expect(fetcher("facebook", "react")).resolves.toEqual([]);
+    });
+  });
+});
+
+describe("fetchParticipatingNotifications", () => {
+  beforeEach(() => get.mockReset());
+
+  it("asks for participating threads with the PAT and If-Modified-Since", async () => {
+    get.mockResolvedValue({ status: 200, data: [], headers: {} });
+    await fetchParticipatingNotifications("ghp_abc", "Wed, 15 Oct 2026 10:00:00 GMT");
+    const [path, config] = get.mock.calls[0];
+    expect(path).toBe("/notifications");
+    expect(config.params).toEqual({ participating: true, per_page: 50 });
+    expect(config.headers).toEqual({
+      Authorization: "Bearer ghp_abc",
+      "If-Modified-Since": "Wed, 15 Oct 2026 10:00:00 GMT",
+    });
+  });
+
+  it("leaves out If-Modified-Since when there is none", async () => {
+    get.mockResolvedValue({ status: 200, data: [], headers: {} });
+    await fetchParticipatingNotifications("ghp_abc", null);
+    expect(get.mock.calls[0][1].headers).toEqual({ Authorization: "Bearer ghp_abc" });
+  });
+
+  it("treats 304 as a normal response, not an error", async () => {
+    get.mockResolvedValue({ status: 304, data: "", headers: {} });
+    await expect(fetchParticipatingNotifications("ghp_abc", "x")).resolves.toEqual({
+      modified: false,
+    });
+    const { validateStatus } = get.mock.calls[0][1];
+    expect(validateStatus(304)).toBe(true);
+    expect(validateStatus(200)).toBe(true);
+    expect(validateStatus(401)).toBe(false);
+  });
+
+  it("returns the threads and Last-Modified on 200", async () => {
+    const data = [{ id: "1" }];
+    get.mockResolvedValue({
+      status: 200,
+      data,
+      headers: { "last-modified": "Wed, 15 Oct 2026 10:00:00 GMT" },
+    });
+    await expect(fetchParticipatingNotifications("ghp_abc", null)).resolves.toEqual({
+      modified: true,
+      notifications: data,
+      lastModified: "Wed, 15 Oct 2026 10:00:00 GMT",
     });
   });
 });
