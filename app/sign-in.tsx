@@ -41,10 +41,10 @@ import type { GitHubUser } from "@/types/github.types";
 import { clearAllMMKV } from "@/lib/mmkv";
 import { prefetchOverview } from "@/lib/prefetch";
 import { queryClient, queryKeys } from "@/lib/query-client";
+import { restorePATFor } from "@/lib/session";
 import {
   clearPendingAuth,
   getPendingAuth,
-  getStoredPAT,
   savePendingAuth,
   saveToken,
 } from "@/lib/secure-storage";
@@ -93,7 +93,7 @@ export default function SignInScreen() {
     async (accessToken: string, user: GitHubUser) => {
       await saveToken(accessToken);
 
-      const storedPAT = await getStoredPAT();
+      const storedPAT = await restorePATFor(user.login);
       if (storedPAT) setPat(storedPAT);
 
       setToken(accessToken);
@@ -338,7 +338,7 @@ export default function SignInScreen() {
         fetchAuthenticatedUser(),
       ]);
 
-      const storedPAT = await getStoredPAT();
+      const storedPAT = await restorePATFor(user.login);
       if (storedPAT) setPat(storedPAT);
 
       setToken(pendingToken);

@@ -65,9 +65,10 @@ export function lostAlertsAccess(
   return (Boolean(prev.token) && !next.token) || (Boolean(prev.pat) && !next.pat);
 }
 
-// The PAT outlives sign-out in SecureStore, and the task reads it from there,
-// so a registered task would keep alerting a signed-out phone. Stop it here,
-// once, instead of at each sign-out call site.
+// The task reads the PAT from SecureStore, and a 401 mid-session or a failed
+// token check at boot leaves it there, so a registered task would keep
+// alerting a signed-out phone. Stop it here, once, instead of at each
+// sign-out call site.
 useAuthStore.subscribe((next, prev) => {
   if (lostAlertsAccess(prev, next)) void disableAlerts();
 });

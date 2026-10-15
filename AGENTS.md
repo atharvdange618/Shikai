@@ -125,7 +125,7 @@ See `notes/MAINTENANCE.md` for the upgrade schedule, the release steps, and the 
 
 ## Token & Auth Flow
 
-OAuth uses PKCE flow. Tokens are stored in `expo-secure-store` (Keychain/Keystore) via `lib/secure-storage.ts`. PATs (optional, for notifications and alerts) use the same storage. Signing out from Settings (`signOut()` in `lib/sign-out.ts`) deletes both. A 401 mid-session or a failed token check at boot only clears auth state and keeps the PAT, which sign-in then restores. Auth state is managed in `stores/auth.store.ts`. On boot, `app/_layout.tsx` restores tokens from SecureStore and validates them. On 401, the axios interceptor calls `clearAuth()`.
+OAuth uses PKCE flow. Tokens are stored in `expo-secure-store` (Keychain/Keystore) via `lib/secure-storage.ts`. PATs (optional, for notifications and alerts) use the same storage. Signing out from Settings (`signOut()` in `lib/session.ts`) deletes both. A 401 mid-session or a failed token check at boot only clears auth state and keeps the PAT, so sign-in restores it through `restorePATFor()`, which checks the PAT's `/user` login against the account signing in and deletes it on a mismatch or when it can't confirm the owner. Auth state is managed in `stores/auth.store.ts`. On boot, `app/_layout.tsx` restores tokens from SecureStore and validates them. On 401, the axios interceptor calls `clearAuth()`.
 
 ## Caching
 

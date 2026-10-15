@@ -26,7 +26,7 @@ import {
 import { MANAGE_REPO_ACCESS_URL, validatePAT } from "@/lib/github-rest";
 import { clearAllMMKV } from "@/lib/mmkv";
 import { deletePAT, savePAT } from "@/lib/secure-storage";
-import { signOut } from "@/lib/sign-out";
+import { signOut } from "@/lib/session";
 import { format24HourTime } from "@/lib/utils";
 
 import {

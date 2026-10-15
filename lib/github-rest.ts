@@ -781,6 +781,14 @@ export async function validatePAT(pat: string): Promise<boolean> {
   }
 }
 
+/** Login of the account a PAT belongs to. Throws if GitHub rejects the PAT. */
+export async function fetchPATOwner(pat: string): Promise<string> {
+  const { data } = await githubAxios.get<GitHubUser>("/user", {
+    headers: patHeaders(pat),
+  });
+  return data.login;
+}
+
 export async function fetchPullRequestReviewComments(
   owner: string,
   repo: string,
