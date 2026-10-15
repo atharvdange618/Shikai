@@ -719,19 +719,20 @@ export type ParticipatingNotificationsResult =
   | {
       modified: true;
       notifications: GitHubNotification[];
-      lastModified: string | null;
+      etag: string | null;
     };
 
 /**
  * Unread threads that involve the user directly (review requests, mentions,
- * assignments), for background alerts. Sends If-Modified-Since so a quiet
- * poll comes back 304, which GitHub doesn't count against the rate limit.
+ * assignments), for background alerts. Sends If-None-Match so a quiet poll
+ * comes back 304, which GitHub doesn't count against the rate limit. ETag,
+ * not Last-Modified: GitHub leaves Last-Modified off when the list is empty.
  * 304 is accepted as a normal response: the interceptor would otherwise turn
  * it into a GitHubApiError.
  */
 export async function fetchParticipatingNotifications(
   pat: string,
-  ifModifiedSince: string | null,
+  etag: string | null,
 ): Promise<ParticipatingNotificationsResult> {
   const { data, status, headers } = await githubAxios.get<GitHubNotification[]>(
     "/notifications",
@@ -739,7 +740,7 @@ export async function fetchParticipatingNotifications(
       params: { participating: true, per_page: 50 },
       headers: {
         ...patHeaders(pat),
-        ...(ifModifiedSince ? { "If-Modified-Since": ifModifiedSince } : {}),
+        ...(etag ? { "If-None-Match": etag } : {}),
       },
       validateStatus: (s) => (s >= 200 && s < 300) || s === 304,
     },
@@ -748,7 +749,7 @@ export async function fetchParticipatingNotifications(
   return {
     modified: true,
     notifications: data,
-    lastModified: headers["last-modified"] ?? null,
+    etag: headers["etag"] ?? null,
   };
 }
 

@@ -35,7 +35,7 @@ import {
 import type { GitHubNotification } from "@/types/github.types";
 
 const MARKER_KEY = "notification-alerts.marker";
-const LAST_MODIFIED_KEY = "notification-alerts.last-modified";
+const ETAG_KEY = "notification-alerts.etag";
 
 function thread(
   id: string,
@@ -123,20 +123,20 @@ describe("pollNotifications", () => {
 
   describe("first run", () => {
     it("seeds the marker from the newest thread and posts nothing", async () => {
-      store.set(LAST_MODIFIED_KEY, "stale");
+      store.set(ETAG_KEY, "stale");
       fetchParticipatingNotifications.mockResolvedValue({
         modified: true,
         notifications: [
           thread("1", "2026-10-15T10:05:00Z"),
           thread("2", "2026-10-15T10:10:00Z"),
         ],
-        lastModified: "Wed, 15 Oct 2026 10:10:00 GMT",
+        etag: "\"etag-2\"",
       });
 
       await expect(pollNotifications()).resolves.toEqual({ kind: "seeded" });
       expect(store.get(MARKER_KEY)).toBe("2026-10-15T10:10:00Z");
-      expect(store.get(LAST_MODIFIED_KEY)).toBe("Wed, 15 Oct 2026 10:10:00 GMT");
-      // No marker yet, so the stale Last-Modified is not sent.
+      expect(store.get(ETAG_KEY)).toBe("\"etag-2\"");
+      // No marker yet, so the stale ETag is not sent.
       expect(fetchParticipatingNotifications).toHaveBeenCalledWith("ghp_abc", null);
     });
 
@@ -146,7 +146,7 @@ describe("pollNotifications", () => {
       fetchParticipatingNotifications.mockResolvedValue({
         modified: true,
         notifications: [],
-        lastModified: null,
+        etag: null,
       });
 
       await expect(pollNotifications()).resolves.toEqual({ kind: "seeded" });
@@ -154,27 +154,27 @@ describe("pollNotifications", () => {
     });
   });
 
-  it("sends the stored Last-Modified and stops on 304", async () => {
+  it("sends the stored ETag and stops on 304", async () => {
     store.set(MARKER_KEY, MARKER);
-    store.set(LAST_MODIFIED_KEY, "Wed, 15 Oct 2026 10:00:00 GMT");
+    store.set(ETAG_KEY, "\"etag-1\"");
     fetchParticipatingNotifications.mockResolvedValue({ modified: false });
 
     await expect(pollNotifications()).resolves.toEqual({ kind: "not-modified" });
     expect(fetchParticipatingNotifications).toHaveBeenCalledWith(
       "ghp_abc",
-      "Wed, 15 Oct 2026 10:00:00 GMT",
+      "\"etag-1\"",
     );
     expect(store.get(MARKER_KEY)).toBe(MARKER);
   });
 
-  it("returns capped alerts and saves the new marker and Last-Modified", async () => {
+  it("returns capped alerts and saves the new marker and ETag", async () => {
     store.set(MARKER_KEY, MARKER);
     fetchParticipatingNotifications.mockResolvedValue({
       modified: true,
       notifications: ["1", "2", "3", "4"].map((id) =>
         thread(id, `2026-10-15T10:0${id}:00Z`),
       ),
-      lastModified: "Wed, 15 Oct 2026 10:04:00 GMT",
+      etag: "\"etag-4\"",
     });
 
     const result = await pollNotifications();
@@ -183,7 +183,7 @@ describe("pollNotifications", () => {
     expect(result.alerts.map((a) => a.threadId)).toEqual(["4", "3", "2"]);
     expect(result.overflow).toBe(1);
     expect(store.get(MARKER_KEY)).toBe("2026-10-15T10:04:00Z");
-    expect(store.get(LAST_MODIFIED_KEY)).toBe("Wed, 15 Oct 2026 10:04:00 GMT");
+    expect(store.get(ETAG_KEY)).toBe("\"etag-4\"");
   });
 
   it("reports a 401 without touching the marker", async () => {
@@ -202,12 +202,12 @@ describe("pollNotifications", () => {
 
   it("starts over after a reset", async () => {
     store.set(MARKER_KEY, MARKER);
-    store.set(LAST_MODIFIED_KEY, "Wed, 15 Oct 2026 10:00:00 GMT");
+    store.set(ETAG_KEY, "\"etag-1\"");
     resetNotificationPoller();
     fetchParticipatingNotifications.mockResolvedValue({
       modified: true,
       notifications: [thread("1", "2026-10-15T10:05:00Z")],
-      lastModified: null,
+      etag: null,
     });
 
     await expect(pollNotifications()).resolves.toEqual({ kind: "seeded" });

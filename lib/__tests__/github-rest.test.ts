@@ -123,19 +123,19 @@ describe("stats endpoints", () => {
 describe("fetchParticipatingNotifications", () => {
   beforeEach(() => get.mockReset());
 
-  it("asks for participating threads with the PAT and If-Modified-Since", async () => {
+  it("asks for participating threads with the PAT and If-None-Match", async () => {
     get.mockResolvedValue({ status: 200, data: [], headers: {} });
-    await fetchParticipatingNotifications("ghp_abc", "Wed, 15 Oct 2026 10:00:00 GMT");
+    await fetchParticipatingNotifications("ghp_abc", "\"etag-1\"");
     const [path, config] = get.mock.calls[0];
     expect(path).toBe("/notifications");
     expect(config.params).toEqual({ participating: true, per_page: 50 });
     expect(config.headers).toEqual({
       Authorization: "Bearer ghp_abc",
-      "If-Modified-Since": "Wed, 15 Oct 2026 10:00:00 GMT",
+      "If-None-Match": "\"etag-1\"",
     });
   });
 
-  it("leaves out If-Modified-Since when there is none", async () => {
+  it("leaves out If-None-Match when there is no ETag", async () => {
     get.mockResolvedValue({ status: 200, data: [], headers: {} });
     await fetchParticipatingNotifications("ghp_abc", null);
     expect(get.mock.calls[0][1].headers).toEqual({ Authorization: "Bearer ghp_abc" });
@@ -152,17 +152,17 @@ describe("fetchParticipatingNotifications", () => {
     expect(validateStatus(401)).toBe(false);
   });
 
-  it("returns the threads and Last-Modified on 200", async () => {
+  it("returns the threads and ETag on 200", async () => {
     const data = [{ id: "1" }];
     get.mockResolvedValue({
       status: 200,
       data,
-      headers: { "last-modified": "Wed, 15 Oct 2026 10:00:00 GMT" },
+      headers: { etag: "\"etag-2\"" },
     });
     await expect(fetchParticipatingNotifications("ghp_abc", null)).resolves.toEqual({
       modified: true,
       notifications: data,
-      lastModified: "Wed, 15 Oct 2026 10:00:00 GMT",
+      etag: "\"etag-2\"",
     });
   });
 });

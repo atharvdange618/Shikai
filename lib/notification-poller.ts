@@ -10,7 +10,7 @@ export const MAX_ALERTS = 3;
 // clearAllMMKV wipes these on sign-in and sign-out, so a new account starts
 // from a fresh marker.
 const MARKER_KEY = "notification-alerts.marker";
-const LAST_MODIFIED_KEY = "notification-alerts.last-modified";
+const ETAG_KEY = "notification-alerts.etag";
 const EPOCH = new Date(0).toISOString();
 
 export interface NotificationAlert {
@@ -79,13 +79,13 @@ export async function pollNotifications(): Promise<PollResult> {
   if (!pat) return { kind: "no-pat" };
 
   const marker = mmkv.getString(MARKER_KEY) ?? null;
-  // Without a marker, a stale Last-Modified could hide the threads we need
-  // to seed from, so skip the conditional request.
-  const lastModified = marker ? (mmkv.getString(LAST_MODIFIED_KEY) ?? null) : null;
+  // Without a marker, a stale ETag could get a 304 and hide the threads we
+  // need to seed from, so skip the conditional request.
+  const etag = marker ? (mmkv.getString(ETAG_KEY) ?? null) : null;
 
   let result;
   try {
-    result = await fetchParticipatingNotifications(pat, lastModified);
+    result = await fetchParticipatingNotifications(pat, etag);
   } catch (error) {
     if (error instanceof GitHubApiError && error.status === 401) {
       return { kind: "unauthorized" };
@@ -94,7 +94,7 @@ export async function pollNotifications(): Promise<PollResult> {
   }
 
   if (!result.modified) return { kind: "not-modified" };
-  if (result.lastModified) mmkv.set(LAST_MODIFIED_KEY, result.lastModified);
+  if (result.etag) mmkv.set(ETAG_KEY, result.etag);
 
   if (!marker) {
     // Seed from GitHub's own clock so a phone running fast can't skip
@@ -113,5 +113,5 @@ export async function pollNotifications(): Promise<PollResult> {
 /** Forget the marker so turning alerts back on starts fresh, not with a backlog. */
 export function resetNotificationPoller(): void {
   mmkv.remove(MARKER_KEY);
-  mmkv.remove(LAST_MODIFIED_KEY);
+  mmkv.remove(ETAG_KEY);
 }
