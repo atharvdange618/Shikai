@@ -23,7 +23,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
   name: "Shikai",
   slug: "shikai",
-  version: "1.5.1",
+  version: "1.6.0",
   orientation: "portrait",
   icon: "./assets/images/icon.png",
   scheme: "shikai",
@@ -41,7 +41,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     edgeToEdgeEnabled: true,
     predictiveBackGestureEnabled: false,
     package: "com.atharvdange618.Shikai",
-    versionCode: 8,
+    versionCode: 9,
     // No autoVerify: Shikai just shows up in the chooser for github.com links.
     intentFilters: [
       {
@@ -80,6 +80,16 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     ],
     "expo-web-browser",
     "expo-updates",
+    // expo-background-task and expo-task-manager have plugins too, but they
+    // only edit iOS Info.plist. Autolinking covers their Android side.
+    [
+      "expo-notifications",
+      {
+        // White-on-transparent; regenerate with scripts/create-notification-icon.py.
+        icon: "./assets/images/notification-icon.png",
+        color: "#3B82F6",
+      },
+    ],
     "./plugins/withAndroidPackaging",
     "./plugins/withGradleProperties",
     "./plugins/withReleaseSigning",
