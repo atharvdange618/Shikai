@@ -153,10 +153,10 @@ export default function AboutScreen() {
         <View style={s.divider} />
         <Pressable
           style={({ pressed }) => [s.linkRow, pressed && { opacity: 0.7 }]}
-          onPress={() => Linking.openURL("https://atharvdangedev.in")}
+          onPress={() => Linking.openURL("https://atharvdange.com")}
         >
           <Octicons name="globe" size={IconSize.sm} color={colors.accent} />
-          <Text style={s.linkText}>atharvdangedev.in</Text>
+          <Text style={s.linkText}>atharvdange.com</Text>
           <Octicons name="link-external" size={12} color={colors.textMuted} />
         </Pressable>
         <Pressable
