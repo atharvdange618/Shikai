@@ -18,7 +18,7 @@ OVERVIEW
 Your personal GitHub dashboard with pinned repos, contribution graph with streaks, and a live activity feed. Pushes, stars, forks, releases, PRs, and issues, all in one place. Tap any item to jump to the repo.
 
 REPOSITORIES
-Browse all your repos with smart filters by language, type, or sort order. Explore file trees, view files with syntax highlighting, browse commit history per branch, and track issues and pull requests. Health badges flag missing licenses, no topics, and stale repos. SVG and PDF files render inline alongside markdown.
+Browse all your repos with smart filters by language, type, or sort order. Explore file trees, view files with syntax highlighting, browse commit history per branch, and track issues and pull requests. Insights show a year of commit activity, top contributors, and the hours people commit. Health badges flag missing licenses, no topics, and stale repos. SVG and PDF files render inline alongside markdown.
 
 SEARCH
 Global search across repos, users, and issues with fuzzy matching. Tab switching between result types, debounced input, eager-load pagination. Navigate in-app to any repo, user profile, or issue detail.
@@ -30,7 +30,7 @@ HOME SCREEN WIDGET
 Add the contribution streak widget to your Android home screen. See your current streak, longest streak, and recent activity without opening the app. Syncs with your app theme.
 
 NOTIFICATIONS (Requires PAT)
-GitHub notifications with attention-worthy filtering. Review requests, mentions, and assignments are highlighted. All/Unread/Attention filters with mark-all-read. Tap to navigate to issues and PRs.
+GitHub notifications with attention-worthy filtering. Review requests, mentions, and assignments are highlighted. All/Unread/Attention filters with mark-all-read. Tap to navigate to issues and PRs. Turn on alerts and Shikai checks GitHub in the background, then alerts you when someone requests your review, mentions you, or assigns you. No push server: alerts come from your phone.
 
 FOLLOWING FEED (Requires PAT)
 See recent activity from people you follow on GitHub. Compact preview on the Overview dashboard with a full feed view.

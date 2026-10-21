@@ -81,6 +81,8 @@ Optional PAT support unlocks features beyond the GitHub App token:
 
 With a token set, Notifications becomes a top-level tab with an unread count badge. Swipe a notification left to mark it read; review requests, mentions, and assignments sort to the top.
 
+Turn on **Notification alerts** in Settings and Shikai checks GitHub about every 15 minutes in the background, then alerts you to review requests, mentions, and assignments. Tapping an alert opens the PR, issue, or commit. Android sets the exact timing, so alerts can arrive late when the phone saves battery. The alerts row shows when Shikai last checked.
+
 Tokens are validated, stored securely in `expo-secure-store`, and used only for direct GitHub API calls.
 
 ### Themes
