@@ -6,6 +6,7 @@ import { mmkv } from "@/lib/mmkv";
 import {
   type NotificationAlert,
   pollNotifications,
+  recordPoll,
   resetNotificationPoller,
 } from "@/lib/notification-poller";
 import { useAuthStore } from "@/stores/auth.store";
@@ -33,6 +34,7 @@ Notifications.setNotificationHandler({
 TaskManager.defineTask(ALERTS_TASK, async () => {
   try {
     const result = await pollNotifications();
+    recordPoll(result.kind);
     if (__DEV__) {
       console.log(
         "[alerts] poll",
@@ -48,6 +50,7 @@ TaskManager.defineTask(ALERTS_TASK, async () => {
     }
     return BackgroundTask.BackgroundTaskResult.Success;
   } catch (error) {
+    recordPoll("failed");
     if (__DEV__) console.log("[alerts] poll failed", String(error));
     return BackgroundTask.BackgroundTaskResult.Failed;
   }

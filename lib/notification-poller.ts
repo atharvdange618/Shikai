@@ -11,6 +11,7 @@ export const MAX_ALERTS = 3;
 // from a fresh marker.
 const MARKER_KEY = "notification-alerts.marker";
 const ETAG_KEY = "notification-alerts.etag";
+const LAST_POLL_KEY = "notification-alerts.last-poll";
 const EPOCH = new Date(0).toISOString();
 
 export interface NotificationAlert {
@@ -110,8 +111,28 @@ export async function pollNotifications(): Promise<PollResult> {
   return { kind: "checked", alerts, overflow };
 }
 
+export interface LastPoll {
+  at: string;
+  outcome: PollResult["kind"] | "failed";
+}
+
+/**
+ * Saved after every background run so Settings can show when alerts last
+ * checked. Release builds log nothing, so this is the only trace a poll ran.
+ */
+export function recordPoll(outcome: LastPoll["outcome"]): void {
+  const lastPoll: LastPoll = { at: new Date().toISOString(), outcome };
+  mmkv.set(LAST_POLL_KEY, JSON.stringify(lastPoll));
+}
+
+export function getLastPoll(): LastPoll | null {
+  const raw = mmkv.getString(LAST_POLL_KEY);
+  return raw ? (JSON.parse(raw) as LastPoll) : null;
+}
+
 /** Forget the marker so turning alerts back on starts fresh, not with a backlog. */
 export function resetNotificationPoller(): void {
   mmkv.remove(MARKER_KEY);
   mmkv.remove(ETAG_KEY);
+  mmkv.remove(LAST_POLL_KEY);
 }

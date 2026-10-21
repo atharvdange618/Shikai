@@ -27,9 +27,11 @@ vi.mock("@/lib/mmkv", () => ({
 }));
 
 import {
+  getLastPoll,
   MAX_ALERTS,
   planAlerts,
   pollNotifications,
+  recordPoll,
   resetNotificationPoller,
 } from "@/lib/notification-poller";
 import type { GitHubNotification } from "@/types/github.types";
@@ -212,5 +214,29 @@ describe("pollNotifications", () => {
 
     await expect(pollNotifications()).resolves.toEqual({ kind: "seeded" });
     expect(fetchParticipatingNotifications).toHaveBeenCalledWith("ghp_abc", null);
+  });
+});
+
+describe("last poll", () => {
+  beforeEach(() => store.clear());
+
+  afterEach(() => vi.useRealTimers());
+
+  it("is null before the first poll", () => {
+    expect(getLastPoll()).toBeNull();
+  });
+
+  it("returns the outcome and time of the latest poll", () => {
+    vi.useFakeTimers({ now: new Date("2026-10-20T16:00:00Z") });
+    recordPoll("not-modified");
+    vi.setSystemTime(new Date("2026-10-20T16:30:00Z"));
+    recordPoll("failed");
+    expect(getLastPoll()).toEqual({ at: "2026-10-20T16:30:00.000Z", outcome: "failed" });
+  });
+
+  it("is cleared by a reset", () => {
+    recordPoll("checked");
+    resetNotificationPoller();
+    expect(getLastPoll()).toBeNull();
   });
 });

@@ -25,9 +25,10 @@ import {
 } from "@/lib/background-notifications";
 import { MANAGE_REPO_ACCESS_URL, validatePAT } from "@/lib/github-rest";
 import { clearAllMMKV } from "@/lib/mmkv";
+import { getLastPoll, type LastPoll } from "@/lib/notification-poller";
 import { deletePAT, savePAT } from "@/lib/secure-storage";
 import { signOut } from "@/lib/session";
-import { format24HourTime } from "@/lib/utils";
+import { format24HourTime, relativeTime } from "@/lib/utils";
 
 import {
   FontFamily,
@@ -132,6 +133,7 @@ export default function SettingsScreen() {
   const [alertsOn, setAlertsOn] = useState(false);
   const [alertsBusy, setAlertsBusy] = useState(false);
   const [patRejected, setPatRejected] = useState(false);
+  const [lastPoll, setLastPoll] = useState<LastPoll | null>(null);
 
   // Read fresh on focus: the task can turn itself off in the background (PAT
   // rejected), and the user can block notifications in system settings.
@@ -139,6 +141,7 @@ export default function SettingsScreen() {
     useCallback(() => {
       areAlertsEnabled().then(setAlertsOn).catch(() => setAlertsOn(false));
       setPatRejected(wasPatRejected());
+      setLastPoll(getLastPoll());
     }, []),
   );
 
@@ -356,8 +359,17 @@ export default function SettingsScreen() {
                 <Text style={s.rateLimitDetail}>
                   {patRejected && !alertsOn
                     ? "Turned off because GitHub rejected your token. Add a new token, then turn alerts on again."
-                    : "Checks about every 15 minutes for review requests, mentions and assignments. Android may delay checks to save battery."}
+                    : "Checks for review requests, mentions and assignments every 15 minutes or so. Android can stretch that to an hour or more to save battery."}
                 </Text>
+                {alertsOn && (
+                  <Text style={s.rateLimitDetail}>
+                    {!lastPoll
+                      ? "Not checked yet"
+                      : lastPoll.outcome === "failed"
+                        ? `Last check failed ${relativeTime(lastPoll.at)}`
+                        : `Last checked ${relativeTime(lastPoll.at)}`}
+                  </Text>
+                )}
               </View>
               <Switch
                 value={alertsOn}

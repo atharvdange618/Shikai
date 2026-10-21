@@ -12,6 +12,7 @@ const m = vi.hoisted(() => ({
   requestPermissionsAsync: vi.fn(),
   scheduleNotificationAsync: vi.fn(),
   pollNotifications: vi.fn(),
+  recordPoll: vi.fn(),
   resetNotificationPoller: vi.fn(),
 }));
 
@@ -38,6 +39,7 @@ vi.mock("expo-notifications", () => ({
 }));
 vi.mock("@/lib/notification-poller", () => ({
   pollNotifications: m.pollNotifications,
+  recordPoll: m.recordPoll,
   resetNotificationPoller: m.resetNotificationPoller,
 }));
 vi.mock("@/lib/mmkv", () => ({
@@ -170,6 +172,7 @@ describe("the background task", () => {
     m.pollNotifications.mockResolvedValue({ kind: "not-modified" });
     await m.task.run!();
     expect(m.scheduleNotificationAsync).not.toHaveBeenCalled();
+    expect(m.recordPoll).toHaveBeenCalledWith("not-modified");
   });
 
   it("turns alerts off and flags it when GitHub rejects the PAT", async () => {
@@ -182,6 +185,7 @@ describe("the background task", () => {
   it("reports a failure when the poll throws", async () => {
     m.pollNotifications.mockRejectedValue(new Error("offline"));
     await expect(m.task.run!()).resolves.toBe(2);
+    expect(m.recordPoll).toHaveBeenCalledWith("failed");
   });
 });
 
