@@ -164,6 +164,7 @@ export default function ProfileScreen() {
           label="Repositories"
           colors={colors}
           isLoading={isLoading}
+          onPress={() => router.navigate("/(app)/(tabs)/repos")}
         />
         <View style={s.statDivider} />
         <StatBlock
@@ -171,6 +172,15 @@ export default function ProfileScreen() {
           label="Followers"
           colors={colors}
           isLoading={isLoading}
+          onPress={
+            user?.login
+              ? () =>
+                  router.push({
+                    pathname: "/(app)/user/[username]/followers",
+                    params: { username: user.login },
+                  })
+              : undefined
+          }
         />
         <View style={s.statDivider} />
         <StatBlock
@@ -178,6 +188,15 @@ export default function ProfileScreen() {
           label="Following"
           colors={colors}
           isLoading={isLoading}
+          onPress={
+            user?.login
+              ? () =>
+                  router.push({
+                    pathname: "/(app)/user/[username]/following",
+                    params: { username: user.login },
+                  })
+              : undefined
+          }
         />
       </View>
 
@@ -334,14 +353,24 @@ function StatBlock({
   label,
   colors,
   isLoading,
+  onPress,
 }: {
   value: number;
   label: string;
   colors: ReturnType<typeof useTheme>["colors"];
   isLoading: boolean;
+  onPress?: () => void;
 }) {
   return (
-    <View style={{ flex: 1, alignItems: "center", gap: Spacing.xs }}>
+    <Pressable
+      style={({ pressed }) => [
+        { flex: 1, alignItems: "center", gap: Spacing.xs },
+        pressed && onPress && { opacity: 0.6 },
+      ]}
+      onPress={onPress}
+      disabled={!onPress}
+      accessibilityRole={onPress ? "button" : undefined}
+    >
       {isLoading ? (
         <>
           <View
@@ -384,7 +413,7 @@ function StatBlock({
           </Text>
         </>
       )}
-    </View>
+    </Pressable>
   );
 }
 

@@ -171,6 +171,12 @@ export default function UserProfileScreen() {
           label="Repositories"
           colors={colors}
           isLoading={isLoading}
+          onPress={() =>
+            router.push({
+              pathname: "/(app)/user/[username]/repos",
+              params: { username: username ?? "" },
+            })
+          }
         />
         <View style={s.statDivider} />
         <StatBlock
@@ -178,6 +184,12 @@ export default function UserProfileScreen() {
           label="Followers"
           colors={colors}
           isLoading={isLoading}
+          onPress={() =>
+            router.push({
+              pathname: "/(app)/user/[username]/followers",
+              params: { username: username ?? "" },
+            })
+          }
         />
         <View style={s.statDivider} />
         <StatBlock
@@ -185,6 +197,12 @@ export default function UserProfileScreen() {
           label="Following"
           colors={colors}
           isLoading={isLoading}
+          onPress={() =>
+            router.push({
+              pathname: "/(app)/user/[username]/following",
+              params: { username: username ?? "" },
+            })
+          }
         />
       </View>
 
@@ -399,14 +417,24 @@ function StatBlock({
   label,
   colors,
   isLoading,
+  onPress,
 }: {
   value: number;
   label: string;
   colors: ColorTokens;
   isLoading: boolean;
+  onPress?: () => void;
 }) {
   return (
-    <View style={statStyles.container}>
+    <Pressable
+      style={({ pressed }) => [
+        statStyles.container,
+        pressed && onPress && { opacity: 0.6 },
+      ]}
+      onPress={onPress}
+      disabled={!onPress}
+      accessibilityRole={onPress ? "button" : undefined}
+    >
       {isLoading ? (
         <>
           <View style={[statStyles.skeleton, { width: 48, height: 22 }]} />
@@ -422,7 +450,7 @@ function StatBlock({
           </Text>
         </>
       )}
-    </View>
+    </Pressable>
   );
 }
 

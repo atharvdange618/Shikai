@@ -33,6 +33,14 @@ export default function UserLayout() {
         options={{ ...sharedHeaderOptions, title: "Repositories" }}
       />
       <Stack.Screen
+        name="[username]/followers"
+        options={{ ...sharedHeaderOptions, title: "Followers" }}
+      />
+      <Stack.Screen
+        name="[username]/following"
+        options={{ ...sharedHeaderOptions, title: "Following" }}
+      />
+      <Stack.Screen
         name="[username]/gists"
         options={{ ...sharedHeaderOptions, title: "Gists" }}
       />
