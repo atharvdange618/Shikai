@@ -175,7 +175,7 @@ Contributions are welcome. Please open an issue first to discuss what you'd like
 
 ## License
 
-MIT
+MIT. The license covers the code only. The Shikai name and logo are not licensed for use in forks or derived apps.
 
 ---
 
