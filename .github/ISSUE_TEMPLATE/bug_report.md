@@ -1,38 +1,31 @@
 ---
 name: Bug report
-about: Create a report to help us improve
+about: Something in Shikai isn't working
 title: ''
-labels: ''
+labels: bug
 assignees: ''
 
 ---
 
-**Describe the bug**
-A clear and concise description of what the bug is.
+**What happened**
+What went wrong, in a sentence or two.
 
-**To Reproduce**
-Steps to reproduce the behavior:
-1. Go to '...'
-2. Click on '....'
-3. Scroll down to '....'
-4. See error
+**Steps to reproduce**
+1. Open '...'
+2. Tap '...'
+3. See the problem
 
-**Expected behavior**
-A clear and concise description of what you expected to happen.
+**What you expected**
+What should have happened instead.
 
-**Screenshots**
-If applicable, add screenshots to help explain your problem.
+**Screenshots or recording**
+If you have one, add it here.
 
-**Desktop (please complete the following information):**
- - OS: [e.g. iOS]
- - Browser [e.g. chrome, safari]
- - Version [e.g. 22]
+**Device**
+- Phone model: [e.g. Pixel 8]
+- Android version: [e.g. 15]
+- Shikai version: [Profile > About]
+- Installed from: [Play Store / GitHub release / dev build]
 
-**Smartphone (please complete the following information):**
- - Device: [e.g. iPhone6]
- - OS: [e.g. iOS8.1]
- - Browser [e.g. stock browser, safari]
- - Version [e.g. 22]
-
-**Additional context**
-Add any other context about the problem here.
+**Anything else**
+Other context that might help.
