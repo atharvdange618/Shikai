@@ -173,6 +173,10 @@ Developer mode is blocked by default on release builds. Developers can override 
 
 Contributions are welcome. Please open an issue first to discuss what you'd like to change, then see [CONTRIBUTING.md](CONTRIBUTING.md) for setup and PR guidelines.
 
+## Support
+
+Shikai is free with no ads. If it saves you time, you can [sponsor its development on GitHub](https://github.com/sponsors/atharvdange618).
+
 ## License
 
 MIT. The license covers the code only. The Shikai name and logo are not licensed for use in forks or derived apps.
