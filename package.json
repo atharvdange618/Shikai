@@ -33,7 +33,7 @@
     "prebuild:clean": "npx expo prebuild --clean",
     "android:assemble": "cd android && set SENTRY_DISABLE_AUTO_UPLOAD=true&& gradlew.bat assembleRelease",
     "android:bundle": "cd android && gradlew.bat bundleRelease",
-    "sentry:sourcemaps": "expo export --platform android --source-maps --output-dir dist && sentry-expo-upload-sourcemaps dist"
+    "sentry:sourcemaps": "sentry-expo-upload-sourcemaps dist"
   },
   "dependencies": {
     "@expo-google-fonts/inter": "^0.4.2",
