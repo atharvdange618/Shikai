@@ -1,3 +1,10 @@
+import type { HighlightTheme } from "@tanstack/highlight/theme";
+import { draculaTheme } from "@tanstack/highlight/themes/dracula";
+import { githubDarkTheme } from "@tanstack/highlight/themes/github-dark";
+import { githubLightTheme } from "@tanstack/highlight/themes/github-light";
+import { nordTheme } from "@tanstack/highlight/themes/nord";
+import { oneDarkProTheme } from "@tanstack/highlight/themes/one-dark-pro";
+
 export type ThemeName = "light" | "dark" | "tokyo-night" | "dracula" | "atom-one-dark";
 
 export interface ColorTokens {
@@ -55,10 +62,13 @@ export interface Theme {
   label: string;
   isDark: boolean;
   colors: ColorTokens;
+  /** Token colors for highlighted code. Background and plain text come from `colors`. */
+  syntaxTheme: HighlightTheme;
 }
 
 const Light: Theme = {
   name: "light",
+  syntaxTheme: githubLightTheme,
   label: "Light",
   isDark: false,
   colors: {
@@ -114,6 +124,7 @@ const Light: Theme = {
 
 const Dark: Theme = {
   name: "dark",
+  syntaxTheme: githubDarkTheme,
   label: "Dark",
   isDark: true,
   colors: {
@@ -169,6 +180,7 @@ const Dark: Theme = {
 
 const TokyoNight: Theme = {
   name: "tokyo-night",
+  syntaxTheme: nordTheme,
   label: "Tokyo Night",
   isDark: true,
   colors: {
@@ -224,6 +236,7 @@ const TokyoNight: Theme = {
 
 const Dracula: Theme = {
   name: "dracula",
+  syntaxTheme: draculaTheme,
   label: "Dracula",
   isDark: true,
   colors: {
@@ -279,6 +292,7 @@ const Dracula: Theme = {
 
 const AtomOneDark: Theme = {
   name: "atom-one-dark",
+  syntaxTheme: oneDarkProTheme,
   label: "Atom One Dark",
   isDark: true,
   colors: {

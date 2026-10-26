@@ -13,27 +13,22 @@ import {
   useTheme,
   type ColorTokens,
 } from "@/constants/theme";
-import { getLanguage } from "@/lib/utils";
 
-interface TextViewerProps {
+interface MarkdownViewerProps {
   content: string;
-  fileName: string;
-  /** Repo path of the file; markdown uses it to resolve relative links. */
+  /** Repo path of the file, for resolving relative links. */
   path: string;
   /** `owner/repo`, for GitHub's markdown rendering context. */
   repoContext: string;
-  isMarkdown: boolean;
   targetLine?: number;
 }
 
-export function TextViewer({
+export function MarkdownViewer({
   content,
-  fileName,
   path,
   repoContext,
-  isMarkdown,
   targetLine,
-}: TextViewerProps) {
+}: MarkdownViewerProps) {
   const { colors } = useTheme();
   const s = useMemo(() => buildStyles(colors), [colors]);
   const [copied, setCopied] = useState(false);
@@ -112,13 +107,9 @@ export function TextViewer({
         }}
       >
         <MarkdownRenderer
-          markdown={
-            isMarkdown
-              ? content
-              : `\`\`\`${getLanguage(fileName)}\n${content}\n\`\`\``
-          }
+          markdown={content}
           context={repoContext}
-          filePath={isMarkdown ? path : undefined}
+          filePath={path}
           onHeightChange={handleMarkdownHeightChange}
           targetLine={targetLine}
           onLineOffset={handleLineOffset}

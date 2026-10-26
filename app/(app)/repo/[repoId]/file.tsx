@@ -5,11 +5,12 @@ import { Pressable, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { ErrorBoundary } from "@/components";
+import { CodeViewer } from "@/components/file/CodeViewer";
 import { FileError } from "@/components/file/FileError";
 import { ImageViewer } from "@/components/file/ImageViewer";
 import { LoadingProgress } from "@/components/file/LoadingProgress";
+import { MarkdownViewer } from "@/components/file/MarkdownViewer";
 import { PdfViewer } from "@/components/file/PdfViewer";
-import { TextViewer } from "@/components/file/TextViewer";
 import { VideoViewer } from "@/components/file/VideoViewer";
 import { Spacing, useTheme } from "@/constants/theme";
 import { useFileContent, useRepo } from "@/hooks/useRepoDetails";
@@ -126,16 +127,27 @@ function FileViewerScreenContent() {
     if (!data) return null;
     const url = data.meta.download_url;
 
-    if (kind === "text" || kind === "markdown") {
+    const targetLine = line ? Number(line) : undefined;
+
+    if (kind === "text") {
       return (
-        <TextViewer
+        <CodeViewer
           key={path}
           content={data.content}
           fileName={fileName ?? ""}
+          targetLine={targetLine}
+        />
+      );
+    }
+
+    if (kind === "markdown") {
+      return (
+        <MarkdownViewer
+          key={path}
+          content={data.content}
           path={path ?? ""}
           repoContext={`${owner}/${repoName}`}
-          isMarkdown={kind === "markdown"}
-          targetLine={line ? Number(line) : undefined}
+          targetLine={targetLine}
         />
       );
     }
