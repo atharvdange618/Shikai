@@ -101,6 +101,20 @@ export function isVideoFile(filename: string): boolean {
   return VIDEO_EXTENSIONS.some((ext) => filename.toLowerCase().endsWith(ext));
 }
 
+export type FileKind = "image" | "video" | "pdf" | "markdown" | "text";
+
+const MARKDOWN_EXTENSIONS = [".md", ".mdx", ".markdown"];
+
+/** Picks the viewer for a file. SVGs count as images. */
+export function getFileKind(filename: string): FileKind {
+  const lower = filename.toLowerCase();
+  if (isImageFile(lower)) return "image";
+  if (isVideoFile(lower)) return "video";
+  if (lower.endsWith(".pdf")) return "pdf";
+  if (MARKDOWN_EXTENSIONS.some((ext) => lower.endsWith(ext))) return "markdown";
+  return "text";
+}
+
 const REPO_ID_SEPARATOR = "~~";
 
 export function encodeRepoId(owner: string, name: string): string {
