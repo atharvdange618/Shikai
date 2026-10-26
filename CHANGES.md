@@ -1,5 +1,14 @@
 # Changelog
 
+## v1.6.0 OTA update 2 (October 26, 2026)
+
+Shipped over the air to Play Store installs on 1.6.0. GitHub release APKs get this in the next release.
+
+### Features
+
+- **Tappable repo stats** - On a repo, tap Commits to open the commit history, or Forks to see every fork, most starred first. Stars opens the list of people who starred the repo, but only on repos you can push to and with a personal access token saved. GitHub now blocks that list for everyone else, and the token Shikai gets at sign-in can't read it. On other repos, Stars and Watching show the count only. ([`c837573`](https://github.com/atharvdange618/Shikai/commit/c837573), [`36be37f`](https://github.com/atharvdange618/Shikai/commit/36be37f))
+- **Tappable profile stats** - On any profile, tap Followers or Following to see those people, and Repositories to open that user's repos. On your own profile, Repositories opens the Repos tab, which also lists your private and org repos. ([`b9b3352`](https://github.com/atharvdange618/Shikai/commit/b9b3352))
+
 ## v1.6.0 OTA update (October 26, 2026)
 
 Shipped over the air to Play Store installs on 1.6.0. GitHub release APKs get this in the next release.
