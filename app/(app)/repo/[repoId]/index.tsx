@@ -18,6 +18,7 @@ import { getRunDisplay } from "@/lib/run-display";
 import { prefetchFileTree, prefetchRepoCommits } from "@/lib/prefetch";
 import { queryKeys } from "@/lib/query-client";
 import { decodeRepoId, encodeRepoId, formatCount } from "@/lib/utils";
+import { useAuthStore } from "@/stores/auth.store";
 import { useWatchlistStore } from "@/stores/watchlist.store";
 import { Octicons } from "@expo/vector-icons";
 import { useQueryClient } from "@tanstack/react-query";
@@ -82,6 +83,7 @@ export default function RepoDetailsScreen() {
     s.isWatchlisted(repoIdEncoded),
   );
   const toggleWatchlist = useWatchlistStore((s) => s.toggleWatchlist);
+  const pat = useAuthStore((s) => s.pat);
 
   const handleBookmarkToggle = useCallback(() => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -155,6 +157,16 @@ export default function RepoDetailsScreen() {
   const handleCommitsPress = useCallback(() => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     router.push(`/(app)/repo/${repoId}/commits`);
+  }, [router, repoId]);
+
+  const handleStarsPress = useCallback(() => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    router.push(`/(app)/repo/${repoId}/stargazers`);
+  }, [router, repoId]);
+
+  const handleForksPress = useCallback(() => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    router.push(`/(app)/repo/${repoId}/forks`);
   }, [router, repoId]);
 
   const handleCommitsPressIn = useCallback(() => {
@@ -362,6 +374,14 @@ export default function RepoDetailsScreen() {
             isLoading={isLoading.core}
             isCommitsLoading={isLoading.commitCount}
             colors={colors}
+            onStarsPress={
+              pat && (repo?.permissions?.admin || repo?.permissions?.push)
+                ? handleStarsPress
+                : undefined
+            }
+            onForksPress={handleForksPress}
+            onCommitsPress={handleCommitsPress}
+            onCommitsPressIn={handleCommitsPressIn}
           />
         </Animated.View>
 

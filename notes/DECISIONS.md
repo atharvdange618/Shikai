@@ -219,3 +219,13 @@ Entries D-001 to D-021 were backfilled on 2026-10-15 from commits, the changelog
 **Rejected.** Fetching each thread's timeline to see who acted last, which costs a request per thread on every background poll and still misses events like review requests. Leaving it to users to turn off participating email, which most would never find.
 **Consequences.** A thread the user really read within 2 minutes, say with the PR open in a browser, still alerts once. If someone else and the user both act on a thread inside one poll window, the user's action hides the other one. The Notifications tab still shows GitHub's own read state.
 **Revisit if.** GitHub starts telling apart reads from email images, or a preloader shows up that reads later than 2 minutes after delivery.
+
+## D-023: Stars opens the stargazers list only with push access and a saved PAT
+
+**Date:** 2026-10-26 · **Status:** Accepted
+
+**Context.** Stars, Forks and Commits on the repo screen open lists. Two GitHub changes block the stargazers list. Since mid-2026, `/repos/{owner}/{repo}/stargazers` serves only admins and collaborators ([changelog, 2026-06-30](https://github.blog/changelog/2026-06-30-upcoming-access-restrictions-to-public-api-endpoints-and-ui-views/)). For GitHub App tokens it also needs the Contents: write permission ([permissions table](https://docs.github.com/en/rest/authentication/permissions-required-for-github-apps)). Shikai's app is read-only, so its token got `403 Resource not accessible by integration` even on the signed-in user's own repo. A classic token with `repo` scope got a 200 on the same repo.
+**Decision.** Stars is tappable only when the repo's `permissions` says `admin` or `push` and a PAT is saved. `fetchStargazers()` always sends the PAT through `patHeaders()`, never the session token. Without both, Stars shows the count and does nothing, like Watching.
+**Rejected.** Adding Contents: write to the GitHub App, which would make every user approve write access to their code for a list of avatars, from an app that promises read-only. Removing the screen, which loses the list for users who have a PAT. Keeping Stars tappable for everyone, which sends most taps to an error.
+**Consequences.** Few users see the list, since it needs their own repo and a PAT. Stars and Forks look alike but act differently on most repos. Watching stays inert because the same changelog limits `/subscribers`. `push` stands in for "collaborator", so a triage-only collaborator GitHub would allow still can't open it. Only classic PATs are confirmed; a fine-grained PAT may hit the same Contents: write rule.
+**Revisit if.** GitHub drops the Contents: write requirement for App tokens, or the list fails for a viewer with `push` and a classic PAT.

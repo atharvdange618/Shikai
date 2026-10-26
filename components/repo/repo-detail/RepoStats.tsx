@@ -1,5 +1,5 @@
 import { Octicons } from "@expo/vector-icons";
-import { StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import {
   FontFamily,
@@ -18,6 +18,11 @@ interface RepoStatsProps {
   isLoading: boolean;
   isCommitsLoading: boolean;
   colors: ColorTokens;
+  /** Undefined leaves Stars inert: listing stargazers needs push access and a PAT (D-023). */
+  onStarsPress?: () => void;
+  onForksPress: () => void;
+  onCommitsPress: () => void;
+  onCommitsPressIn: () => void;
 }
 
 export function RepoStats({
@@ -28,6 +33,10 @@ export function RepoStats({
   isLoading,
   isCommitsLoading,
   colors,
+  onStarsPress,
+  onForksPress,
+  onCommitsPress,
+  onCommitsPressIn,
 }: RepoStatsProps) {
   const s = buildStyles(colors);
 
@@ -40,6 +49,7 @@ export function RepoStats({
         colors={colors}
         isLoading={isLoading}
         iconColor={colors.star}
+        onPress={onStarsPress}
       />
       <View style={s.statDivider} />
       <StatItem
@@ -48,6 +58,7 @@ export function RepoStats({
         label="Forks"
         colors={colors}
         isLoading={isLoading}
+        onPress={onForksPress}
       />
       <View style={s.statDivider} />
       <StatItem
@@ -64,6 +75,8 @@ export function RepoStats({
         label="Commits"
         colors={colors}
         isLoading={isLoading || isCommitsLoading}
+        onPress={onCommitsPress}
+        onPressIn={onCommitsPressIn}
       />
     </View>
   );
@@ -76,6 +89,8 @@ function StatItem({
   colors,
   isLoading,
   iconColor,
+  onPress,
+  onPressIn,
 }: {
   icon: React.ComponentProps<typeof Octicons>["name"];
   value: number;
@@ -83,6 +98,8 @@ function StatItem({
   colors: ColorTokens;
   isLoading: boolean;
   iconColor?: string;
+  onPress?: () => void;
+  onPressIn?: () => void;
 }) {
   if (isLoading) {
     return (
@@ -108,7 +125,17 @@ function StatItem({
   }
 
   return (
-    <View style={{ flex: 1, alignItems: "center", gap: 3 }}>
+    <Pressable
+      style={({ pressed }) => [
+        { flex: 1, alignItems: "center", gap: 3 },
+        pressed && onPress && { opacity: 0.6 },
+      ]}
+      onPress={onPress}
+      onPressIn={onPressIn}
+      disabled={!onPress}
+      accessibilityRole={onPress ? "button" : undefined}
+      accessibilityLabel={`${formatCount(value)} ${label}`}
+    >
       <Octicons
         name={icon}
         size={14}
@@ -133,7 +160,7 @@ function StatItem({
       >
         {label}
       </Text>
-    </View>
+    </Pressable>
   );
 }
 

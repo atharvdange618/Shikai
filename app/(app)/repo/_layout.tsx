@@ -57,6 +57,36 @@ export default function RepoLayout() {
       />
 
       <Stack.Screen
+        name="[repoId]/stargazers"
+        options={{
+          ...sharedHeaderOptions,
+          title: "Stargazers",
+          headerTransparent: Platform.OS === "ios",
+          headerBlurEffect:
+            Platform.OS === "ios" ? (isDark ? "dark" : "light") : undefined,
+          headerStyle:
+            Platform.OS === "ios"
+              ? undefined
+              : { backgroundColor: colors.background },
+        }}
+      />
+
+      <Stack.Screen
+        name="[repoId]/forks"
+        options={{
+          ...sharedHeaderOptions,
+          title: "Forks",
+          headerTransparent: Platform.OS === "ios",
+          headerBlurEffect:
+            Platform.OS === "ios" ? (isDark ? "dark" : "light") : undefined,
+          headerStyle:
+            Platform.OS === "ios"
+              ? undefined
+              : { backgroundColor: colors.background },
+        }}
+      />
+
+      <Stack.Screen
         name="[repoId]/files"
         options={{
           ...sharedHeaderOptions,
