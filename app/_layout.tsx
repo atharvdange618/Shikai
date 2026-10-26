@@ -39,6 +39,7 @@ import { ThemeProvider, useTheme } from "@/contexts/ThemeContext";
 import { useAppRatingPrompt } from "@/hooks/useAppRatingPrompt";
 import { useDeepLinks } from "@/hooks/useDeepLinks";
 import { useNotificationTaps } from "@/hooks/useNotificationTaps";
+import { useReviewPrompt } from "@/hooks/useReviewPrompt";
 import { useInAppUpdates } from "@/hooks/useInAppUpdates";
 import { setAuthReady } from "@/lib/axios";
 import { bootReducer, initialBootState, type BootAction } from "@/lib/boot-flow";
@@ -283,6 +284,7 @@ function AppStack({
 
   useDeepLinks(Boolean(token));
   useNotificationTaps(Boolean(token));
+  useReviewPrompt(Boolean(token));
 
   useEffect(() => {
     dispatch({ type: "TOKEN_CHANGED", token });
