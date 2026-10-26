@@ -62,13 +62,13 @@ Take a look at Shikai before you install: **[View Screenshots on Google Drive](h
 
 ### Core
 
-| Feature                | Description                                                                                                                          |
-| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| **Overview Dashboard** | Pinned repos, contribution graph with streaks, live activity feed, and following preview                                             |
-| **Repository Browser** | File trees with blame and per-file history, syntax highlighting, releases, discussions, repo insights (commit activity, top contributors, punch card), compare-two-refs, Actions workflow runs with job logs, PR detail with diffs, checks, reviewers, commits, and review comments with diff context, issue/PR timelines and reactions, and a branch selector |
-| **Global Search**      | Fuzzy search across repos, users, issues, and topics with debounced input, recent searches, and eager pagination                     |
-| **User Profiles**      | View any GitHub user's profile with avatar, bio, stats, and top repositories                                                         |
-| **Android Widget**     | Home screen widget showing contribution streak with longest streak and recent activity                                               |
+| Feature                | Description                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Overview Dashboard** | Pinned repos, contribution graph with streaks, live activity feed, and following preview                                                                                                                                                                                                                                                                                                                                           |
+| **Repository Browser** | File trees with blame and per-file history, syntax highlighting, releases, discussions, repo insights (commit activity, top contributors, punch card), compare-two-refs, Actions workflow runs with job logs, PR detail with diffs, checks, reviewers, commits, and review comments with diff context, issue/PR timelines and reactions, a branch selector, and tappable stats that open the commit history, forks, and stargazers |
+| **Global Search**      | Fuzzy search across repos, users, issues, and topics with debounced input, recent searches, and eager pagination                                                                                                                                                                                                                                                                                                                   |
+| **User Profiles**      | View any GitHub user's profile with avatar, bio, and top repositories. Tap Followers, Following, or Repositories to open those lists                                                                                                                                                                                                                                                                                               |
+| **Android Widget**     | Home screen widget showing contribution streak with longest streak and recent activity                                                                                                                                                                                                                                                                                                                                             |
 
 ### Personal Access Token
 
@@ -78,6 +78,9 @@ Optional PAT support unlocks features beyond the GitHub App token:
 | ------------------ | ----------------------- |
 | **Notifications**  | `notifications`         |
 | **Following Feed** | `notifications`, `repo` |
+| **Stargazers**     | `repo`                  |
+
+GitHub only shows a repo's stargazers to people who can push to it, and the sign-in token can't read that list, so Stars opens it only on your own repos with a token saved.
 
 With a token set, Notifications becomes a top-level tab with an unread count badge. Swipe a notification left to mark it read; review requests, mentions, and assignments sort to the top.
 
@@ -149,15 +152,6 @@ Shikai takes security seriously:
 - **Cache hygiene** - MMKV cache cleared on sign-in and sign-out
 
 Developer mode is blocked by default on release builds. Developers can override this after accepting a risk warning.
-
----
-
-## Beta Program
-
-Want early access to new features?
-
-- **Join the Beta** - [Sign up for early access](https://forms.gle/qdw2xTKfH9kGsmwt9)
-- **Share Feedback** - [Lemme know what you think](https://forms.gle/dDrchwJTrqDJyjQm9)
 
 ---
 
