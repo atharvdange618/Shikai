@@ -74,7 +74,7 @@ Tests live in `lib/__tests__/`. Add or update tests for logic you change. For UI
 
 ## Reporting security issues
 
-Don't open a public issue for a security problem. Message [@atharvdangedev](https://x.com/atharvdangedev) on X instead.
+Don't open a public issue for a security problem. See [`SECURITY.md`](SECURITY.md) for how to report it privately.
 
 ## License
 

@@ -1,20 +1,22 @@
 ---
 name: Feature request
-about: Suggest an idea for this project
+about: Suggest something Shikai should do
 title: ''
-labels: ''
+labels: enhancement
 assignees: ''
 
 ---
 
-**Is your feature request related to a problem? Please describe.**
-A clear and concise description of what the problem is. Ex. I'm always frustrated when [...]
+**What you want to do**
+What are you trying to see or do in Shikai that you can't today?
 
-**Describe the solution you'd like**
-A clear and concise description of what you want to happen.
+**How you'd like it to work**
+Where in the app it would live and what it would show.
 
-**Describe alternatives you've considered**
-A clear and concise description of any alternative solutions or features you've considered.
+**What you do now**
+How you handle this today, such as opening the GitHub app or a browser.
 
-**Additional context**
-Add any other context or screenshots about the feature request here.
+**Anything else**
+Screenshots, mockups, or links to how other apps do it.
+
+> Shikai is read-only on purpose. Requests to create, edit, merge, or delete things on GitHub are out of scope.
