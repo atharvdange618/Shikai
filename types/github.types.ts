@@ -53,6 +53,16 @@ export interface GitHubRepo {
   pushed_at: string;
 
   owner: GitHubUserSummary;
+  /** The viewer's access. Only present on authenticated requests. */
+  permissions?: GitHubRepoPermissions;
+}
+
+export interface GitHubRepoPermissions {
+  admin: boolean;
+  maintain?: boolean;
+  push: boolean;
+  triage?: boolean;
+  pull: boolean;
 }
 
 export interface GitHubLicense {
@@ -109,6 +119,12 @@ export interface GitHubContributor {
   html_url: string;
   contributions: number;
 }
+
+/** The user shape list endpoints return (stargazers, followers, following). */
+export type GitHubSimpleUser = Pick<
+  GitHubUser,
+  "id" | "login" | "avatar_url" | "html_url" | "type"
+>;
 
 /** One week from /stats/commit_activity. `days` runs Sunday to Saturday. */
 export interface GitHubCommitActivityWeek {

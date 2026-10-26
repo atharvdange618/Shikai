@@ -28,6 +28,7 @@ import type {
   GitHubRequestedReviewers,
   GitHubReview,
   GitHubReviewComment,
+  GitHubSimpleUser,
   GitHubSocialAccount,
   GitHubTimelineEvent,
   GitHubTree,
@@ -435,6 +436,63 @@ export async function fetchContributors(
     { params: { per_page: 20 } },
   );
   return data;
+}
+
+// GitHub answers 422 past page 400 on big lists like stargazers and forks, so
+// stop offering a next page there instead of letting the last fetch fail.
+export const MAX_LIST_PAGE = 400;
+
+async function fetchPagedList<T>(
+  path: string,
+  page: number,
+  params: Record<string, string | number> = {},
+  pat?: string,
+): Promise<{ items: T[]; pagination: GitHubPagination }> {
+  const { data, headers } = await githubAxios.get<T[]>(path, {
+    params: { page, per_page: 30, ...params },
+    headers: patHeaders(pat),
+  });
+  const pagination = parseLinkHeader(headers["link"]);
+  if (page >= MAX_LIST_PAGE) delete pagination.next;
+  return { items: data, pagination };
+}
+
+// GitHub App tokens need Contents: write for this list, which Shikai doesn't
+// ask for, so it always goes out with the PAT (D-023).
+export function fetchStargazers(
+  owner: string,
+  repo: string,
+  page: number,
+  pat: string,
+) {
+  return fetchPagedList<GitHubSimpleUser>(
+    `/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/stargazers`,
+    page,
+    {},
+    pat,
+  );
+}
+
+export function fetchForks(owner: string, repo: string, page: number) {
+  return fetchPagedList<GitHubRepo>(
+    `/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/forks`,
+    page,
+    { sort: "stargazers" },
+  );
+}
+
+export function fetchFollowers(username: string, page: number) {
+  return fetchPagedList<GitHubSimpleUser>(
+    `/users/${encodeURIComponent(username)}/followers`,
+    page,
+  );
+}
+
+export function fetchFollowing(username: string, page: number) {
+  return fetchPagedList<GitHubSimpleUser>(
+    `/users/${encodeURIComponent(username)}/following`,
+    page,
+  );
 }
 
 // GitHub caches /stats per default-branch SHA. On a cache miss it answers 202

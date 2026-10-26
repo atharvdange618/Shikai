@@ -71,6 +71,10 @@ export const queryKeys = {
     ["userProfile", username, "repos"] as const,
   userAllRepos: (username: string) =>
     ["userProfile", username, "repos", "all"] as const,
+  userFollowers: (username: string) =>
+    ["userProfile", username, "followers"] as const,
+  userFollowing: (username: string) =>
+    ["userProfile", username, "following"] as const,
   userProfileEvents: (username: string) =>
     ["userProfile", username, "events"] as const,
   repos: () => ["repos"] as const,
@@ -87,6 +91,10 @@ export const queryKeys = {
     ["repo", owner, repo, "lastCommit"] as const,
   repoContributors: (owner: string, repo: string) =>
     ["repo", owner, repo, "contributors"] as const,
+  repoStargazers: (owner: string, repo: string) =>
+    ["repo", owner, repo, "stargazers"] as const,
+  repoForks: (owner: string, repo: string) =>
+    ["repo", owner, repo, "forks"] as const,
   repoFileTree: (owner: string, repo: string, branch: string) =>
     ["repo", owner, repo, "tree", branch] as const,
   repoBranches: (owner: string, repo: string) =>

@@ -16,9 +16,14 @@ vi.mock("@/lib/axios", () => ({ githubAxios: { get }, GitHubApiError }));
 import {
   fetchCommitActivity,
   fetchContributorStats,
+  fetchFollowers,
+  fetchFollowing,
+  fetchForks,
   fetchParticipatingNotifications,
   fetchPunchCard,
+  fetchStargazers,
   fetchUserEvents,
+  MAX_LIST_PAGE,
   parseActionsJobId,
   parseCheckRunId,
 } from "@/lib/github-rest";
@@ -81,6 +86,53 @@ describe("fetchUserEvents", () => {
   it("leaves auth to the session token when there is no PAT", async () => {
     await fetchUserEvents("octocat", 1, 20, null);
     expect(get.mock.calls[0][1].headers).toBeUndefined();
+  });
+});
+
+describe("paged list endpoints", () => {
+  beforeEach(() => get.mockReset());
+
+  const next = (page: number) => ({
+    link: `<https://api.github.com/x?page=${page}>; rel="next"`,
+  });
+
+  const cases = [
+    ["fetchStargazers", () => fetchStargazers("o", "r", 2, "ghp_abc"), "/repos/o/r/stargazers"],
+    ["fetchForks", () => fetchForks("o", "r", 2), "/repos/o/r/forks"],
+    ["fetchFollowers", () => fetchFollowers("octo cat", 2), "/users/octo%20cat/followers"],
+    ["fetchFollowing", () => fetchFollowing("octo cat", 2), "/users/octo%20cat/following"],
+  ] as const;
+
+  it.each(cases)("%s hits the right path and reads the next page", async (_n, call, path) => {
+    get.mockResolvedValue({ data: [{ id: 1 }], headers: next(3) });
+    const result = await call();
+    expect(get.mock.calls[0][0]).toBe(path);
+    expect(get.mock.calls[0][1].params).toMatchObject({ page: 2, per_page: 30 });
+    expect(result).toEqual({ items: [{ id: 1 }], pagination: { next: 3 } });
+  });
+
+  it("sends stargazers with the PAT, since App tokens get a 403", async () => {
+    get.mockResolvedValue({ data: [], headers: {} });
+    await fetchStargazers("o", "r", 1, "ghp_abc");
+    expect(get.mock.calls[0][1].headers).toEqual({ Authorization: "Bearer ghp_abc" });
+  });
+
+  it("leaves the session token in place for the other lists", async () => {
+    get.mockResolvedValue({ data: [], headers: {} });
+    await fetchFollowers("octocat", 1);
+    expect(get.mock.calls[0][1].headers).toBeUndefined();
+  });
+
+  it("sorts forks by stars", async () => {
+    get.mockResolvedValue({ data: [], headers: {} });
+    await fetchForks("o", "r", 1);
+    expect(get.mock.calls[0][1].params.sort).toBe("stargazers");
+  });
+
+  it("offers no next page at the page cap, where GitHub would 422", async () => {
+    get.mockResolvedValue({ data: [], headers: next(MAX_LIST_PAGE + 1) });
+    const result = await fetchStargazers("o", "r", MAX_LIST_PAGE, "ghp_abc");
+    expect(result.pagination.next).toBeUndefined();
   });
 });
 
