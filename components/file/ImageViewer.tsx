@@ -1,3 +1,4 @@
+import { escapeHtml } from "@tanstack/highlight/core";
 import { useMemo, useState } from "react";
 import {
   ActivityIndicator,
@@ -73,7 +74,7 @@ export function ImageViewer({ url, isSvg }: ImageViewerProps) {
                   </style>
                 </head>
                 <body>
-                  <img src="${url}" />
+                  <img src="${escapeHtml(url)}" />
                 </body>
                 </html>
               `,
@@ -84,6 +85,7 @@ export function ImageViewer({ url, isSvg }: ImageViewerProps) {
               backgroundColor: "transparent",
             }}
             scrollEnabled={false}
+            javaScriptEnabled={false}
           />
         ) : (
           !imageError && (
