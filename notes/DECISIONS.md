@@ -229,3 +229,13 @@ Entries D-001 to D-021 were backfilled on 2026-10-15 from commits, the changelog
 **Rejected.** Adding Contents: write to the GitHub App, which would make every user approve write access to their code for a list of avatars, from an app that promises read-only. Removing the screen, which loses the list for users who have a PAT. Keeping Stars tappable for everyone, which sends most taps to an error.
 **Consequences.** Few users see the list, since it needs their own repo and a PAT. Stars and Forks look alike but act differently on most repos. Watching stays inert because the same changelog limits `/subscribers`. `push` stands in for "collaborator", so a triage-only collaborator GitHub would allow still can't open it. Only classic PATs are confirmed; a fine-grained PAT may hit the same Contents: write rule.
 **Revisit if.** GitHub drops the Contents: write requirement for App tokens, or the list fails for a viewer with `push` and a classic PAT.
+
+## D-024: Ask for a Play review once, on the fifth signed-in launch
+
+**Date:** 2026-10-26 · **Status:** Accepted
+
+**Context.** Most users are students, so ratings and reviews help Shikai more than sponsorships. A Sponsor link in the app is out: Play's payments policy exempts only tax-exempt donations and bars links to other payment methods.
+**Decision.** `expo-store-review` shows Play's review sheet 3 seconds after the fifth launch with a signed-in user, once per install. `lib/review-prompt.ts` keeps the count in its own MMKV instance (`shikai-review`), so `clearAllMMKV()` on sign-in and sign-out doesn't reset it.
+**Rejected.** Asking after an action such as starring a repo, which Shikai can't do since it is read-only. Asking again on a schedule: Play caps the sheet itself and never says whether it showed or whether the user rated, so repeat asks mostly do nothing.
+**Consequences.** A user who dismisses the sheet is never asked again. The sheet only shows for Play installs; GitHub APK installs skip it because `isAvailableAsync()` or Play itself declines.
+**Revisit if.** Play adds a way to know whether the user rated, or the review count stays flat after 1.7.0 reaches most users.

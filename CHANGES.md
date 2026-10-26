@@ -1,5 +1,13 @@
 # Changelog
 
+## v1.7.0 (unreleased)
+
+Needs a new store build: adds the `expo-store-review` native module.
+
+### Features
+
+- **Rate Shikai** - On your fifth launch while signed in, Shikai shows Google Play's rating sheet once. You can rate without leaving the app, or dismiss it and never see it again.
+
 ## v1.6.0 OTA update 2 (October 26, 2026)
 
 Shipped over the air to Play Store installs on 1.6.0. GitHub release APKs get this in the next release.
