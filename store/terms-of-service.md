@@ -24,6 +24,7 @@ Shikai is a read-only GitHub companion app. It displays your GitHub data (reposi
 ## Intellectual Property
 
 - **App Code:** Shikai is open source under the MIT license.
+- **Name and Logo:** The license covers the code only. The Shikai name and logo are not licensed for use in forks or derived apps.
 - **Your Data:** Your GitHub data belongs to you. Shikai does not claim any ownership.
 - **GitHub Data:** Data retrieved from GitHub is subject to GitHub's terms.
 
