@@ -13,6 +13,13 @@ const MARKER_KEY = "notification-alerts.marker";
 const ETAG_KEY = "notification-alerts.etag";
 const LAST_POLL_KEY = "notification-alerts.last-poll";
 const EPOCH = new Date(0).toISOString();
+/**
+ * GitHub marks a thread read when anything loads the tracking image in its
+ * email. Mail clients that preload images (Apple Mail Privacy Protection,
+ * some scanners) do that within seconds of delivery, so a read this soon
+ * after the update counts as unread. See D-022 in notes/DECISIONS.md.
+ */
+const READ_ON_DELIVERY_MS = 2 * 60_000;
 
 export interface NotificationAlert {
   threadId: string;
@@ -33,9 +40,22 @@ export type PollResult =
   | { kind: "checked"; alerts: NotificationAlert[]; overflow: number };
 
 /**
- * Picks unread threads updated after `marker`, newest first, capped at
- * MAX_ALERTS. `nextMarker` is the newest `updated_at` seen, never older than
- * the current marker.
+ * True for threads the user hasn't seen: unread, or read within
+ * READ_ON_DELIVERY_MS after the update. The user's own activity moves
+ * `updated_at` past `last_read_at`, so it never counts.
+ * ponytail: a time window, not proof. Widen it if a slower preloader shows up.
+ */
+function isUnseen(n: GitHubNotification): boolean {
+  if (n.unread) return true;
+  if (!n.last_read_at) return false;
+  const gap = Date.parse(n.last_read_at) - Date.parse(n.updated_at);
+  return gap >= 0 && gap < READ_ON_DELIVERY_MS;
+}
+
+/**
+ * Picks unseen threads (see isUnseen) updated after `marker`, newest first,
+ * capped at MAX_ALERTS. `nextMarker` is the newest `updated_at` seen, never
+ * older than the current marker.
  */
 export function planAlerts(
   notifications: GitHubNotification[],
@@ -43,7 +63,7 @@ export function planAlerts(
 ): { alerts: NotificationAlert[]; overflow: number; nextMarker: string } {
   const markerTime = Date.parse(marker);
   const fresh = notifications
-    .filter((n) => n.unread && Date.parse(n.updated_at) > markerTime)
+    .filter((n) => isUnseen(n) && Date.parse(n.updated_at) > markerTime)
     .sort((a, b) => Date.parse(b.updated_at) - Date.parse(a.updated_at));
 
   const nextMarker = notifications.reduce(

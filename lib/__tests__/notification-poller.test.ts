@@ -106,6 +106,38 @@ describe("planAlerts", () => {
     const { nextMarker } = planAlerts([thread("old", "2026-10-15T09:00:00Z")], MARKER);
     expect(nextMarker).toBe(MARKER);
   });
+
+  // Gaps taken from real threads: preloaded email images read in 1 to 5s,
+  // the user's own activity leaves last_read_at behind updated_at.
+  describe("threads GitHub already marked read", () => {
+    function readThread(id: string, updatedAt: string, lastReadAt: string) {
+      return { ...thread(id, updatedAt, false), last_read_at: lastReadAt };
+    }
+
+    it("alerts when an email preload read it seconds after the update", () => {
+      const { alerts } = planAlerts(
+        [readThread("preload", "2026-10-15T10:05:00Z", "2026-10-15T10:05:03Z")],
+        MARKER,
+      );
+      expect(alerts.map((a) => a.threadId)).toEqual(["preload"]);
+    });
+
+    it("skips threads the user's own activity updated", () => {
+      const { alerts } = planAlerts(
+        [readThread("mine", "2026-10-15T10:05:00Z", "2026-10-15T09:30:00Z")],
+        MARKER,
+      );
+      expect(alerts).toEqual([]);
+    });
+
+    it("skips threads the user read by hand minutes later", () => {
+      const { alerts } = planAlerts(
+        [readThread("by-hand", "2026-10-15T10:05:00Z", "2026-10-15T10:20:00Z")],
+        MARKER,
+      );
+      expect(alerts).toEqual([]);
+    });
+  });
 });
 
 describe("pollNotifications", () => {

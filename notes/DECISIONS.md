@@ -209,3 +209,13 @@ Entries D-001 to D-021 were backfilled on 2026-10-15 from commits, the changelog
 3. Repo and user screens moved out of the tabs into `(app)/repo/` and `(app)/user/`, and push onto the root stack (`9a71e5a`, 2026-06-30). The rewritten plan (`2701e71`) gives the reason: it "avoids the complexity of nested tab+stack navigation and provides a clean back button behavior."
 **Rejected.** The drawer navigator and the slide panel from the first plan.
 **Consequences.** The app has no drawers, and `@react-navigation/drawer` is no longer a dependency. Every repo screen, the file tree included, is a route, so deep links and alerts can open it. New detail screens go under `(app)/repo/` or `(app)/user/`, not inside a tab.
+
+## D-022: Alerts count a thread read seconds after its update as unread
+
+**Date:** 2026-10-25 · **Status:** Accepted
+
+**Context.** Alerts only fired for `unread` threads, and on one account none ever fired. GitHub marks a thread read when anything loads the tracking image in its notification email. On that account something loaded it 1 to 5 seconds after each email arrived, so every thread was read before the 15-minute poll saw it. Mail clients that preload images, like Apple Mail Privacy Protection, cause the same for their users, and we can't ask everyone to change their mail settings.
+**Decision.** `planAlerts` in `lib/notification-poller.ts` also alerts on a read thread when `last_read_at` lands between 0 and 2 minutes after `updated_at`. The user's own activity moves `updated_at` past `last_read_at` (a negative gap), so it never alerts. A real read comes minutes or days later.
+**Rejected.** Fetching each thread's timeline to see who acted last, which costs a request per thread on every background poll and still misses events like review requests. Leaving it to users to turn off participating email, which most would never find.
+**Consequences.** A thread the user really read within 2 minutes, say with the PR open in a browser, still alerts once. If someone else and the user both act on a thread inside one poll window, the user's action hides the other one. The Notifications tab still shows GitHub's own read state.
+**Revisit if.** GitHub starts telling apart reads from email images, or a preloader shows up that reads later than 2 minutes after delivery.
