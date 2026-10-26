@@ -1,7 +1,7 @@
 {
   "name": "shikai",
   "description": "A read-only GitHub dashboard for Android. Browse repos, contribution graphs, stars, and activity.",
-  "version": "1.6.0",
+  "version": "1.7.0",
   "author": "Atharv Dange (https://x.com/atharvdangedev)",
   "license": "MIT",
   "homepage": "https://github.com/atharvdange618/Shikai#readme",
@@ -69,6 +69,7 @@
     "expo-share-intent": "~5.1.1",
     "expo-splash-screen": "~31.0.13",
     "expo-status-bar": "~3.0.9",
+    "expo-store-review": "~9.0.9",
     "expo-symbols": "~1.0.8",
     "expo-system-ui": "~6.0.9",
     "expo-task-manager": "~14.0.9",
