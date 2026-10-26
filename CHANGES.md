@@ -1,5 +1,13 @@
 # Changelog
 
+## v1.6.0 OTA update (October 26, 2026)
+
+Shipped over the air to Play Store installs on 1.6.0. GitHub release APKs get this in the next release.
+
+### Fixes
+
+- **Missing notification alerts** - GitHub marks a thread read when anything loads the tracking image in its notification email. Some mail apps and scanners load those images within seconds of delivery, so the thread was already read when Shikai checked, and no alert came. Shikai now treats a thread GitHub marked read within 2 minutes of its update as unread. ([`8a06d18`](https://github.com/atharvdange618/Shikai/commit/8a06d18))
+
 ## v1.6.0
 
 ### Features
