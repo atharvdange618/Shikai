@@ -17,7 +17,7 @@ Needs a new store build: adds the `expo-store-review` native module.
 - **Binary files** - Jars, fonts, archives and other binaries opened in the code viewer as noise. They now show a message that Shikai can't preview them. ([`a2f7b50`](https://github.com/atharvdange618/Shikai/commit/a2f7b50))
 - **github.com links showed "Page not found"** - Opening a github.com link into Shikai while it was already running showed "Page not found" over the right screen. It now opens the file, PR, issue or profile, and links Shikai has no screen for open in the browser. ([`a42a59d`](https://github.com/atharvdange618/Shikai/commit/a42a59d))
 - **Shared links opened Overview** - Sharing a github.com link to Shikai while it was closed opened Overview instead of the shared page. It now opens the page, with Overview behind it. A link shared while signed out opens after you sign in. ([`db6b1fb`](https://github.com/atharvdange618/Shikai/commit/db6b1fb))
-- **Alert taps opened Overview** - Tapping an alert while Shikai was closed opened Overview instead of the thread. It now opens the thread, with Overview behind it. ([`357a9b6`](https://github.com/atharvdange618/Shikai/commit/357a9b6))
+- **Alert taps opened Overview** - Tapping an alert while Shikai was closed opened Overview instead of the thread. It now opens the thread, with Overview behind it. ([`0e08dca`](https://github.com/atharvdange618/Shikai/commit/0e08dca))
 
 ## v1.6.0 OTA update 2 (October 26, 2026)
 
