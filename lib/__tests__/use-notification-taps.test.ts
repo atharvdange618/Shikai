@@ -4,12 +4,14 @@ const m = vi.hoisted(() => ({
   push: vi.fn(),
   markNotificationAsRead: vi.fn(),
   response: null as unknown,
+  // The hook has one ref; sharing it across calls keeps it across re-renders.
+  ref: { current: null as unknown },
 }));
 
 // Effects run inline on each call, so calling the hook again is a re-render.
 vi.mock("react", () => ({
   useEffect: (effect: () => void) => effect(),
-  useRef: <T>(current: T) => ({ current }),
+  useRef: () => m.ref,
 }));
 vi.mock("expo-router", () => ({ useRouter: () => ({ push: m.push }) }));
 vi.mock("expo-notifications", () => ({
@@ -32,6 +34,7 @@ const subjectUrl = "https://api.github.com/repos/atharvdange618/Shikai/pulls/16"
 describe("useNotificationTaps", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    m.ref.current = null;
     m.response = {
       actionIdentifier: "default",
       notification: {
@@ -49,6 +52,12 @@ describe("useNotificationTaps", () => {
 
     useNotificationTaps(true);
     expect(m.push).toHaveBeenCalledWith(parseGitHubApiUrl(subjectUrl));
+  });
+
+  it("opens the same tap once across re-renders", () => {
+    useNotificationTaps(true);
+    useNotificationTaps(true);
+    expect(m.push).toHaveBeenCalledTimes(1);
   });
 
   it("opens the notifications tab for the summary alert", () => {
