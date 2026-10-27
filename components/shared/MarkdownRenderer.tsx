@@ -224,7 +224,7 @@ function buildHtml(html: string, isDark: boolean, targetLine?: number): string {
   .pl-kos, .pl-c1, .pl-c2 { color: ${plE}; }
   .pl-k, .pl-s1 .pl-kos { color: ${plKw}; }
   .pl-c  { color: ${plC}; font-style: italic; }
-  .pl-s, .pl-s1, .pl-pds { color: ${plS}; }
+  .pl-s, .pl-pds { color: ${plS}; }
   .pl-pse .pl-s1 { color: ${plS}; }
   .pl-e, .pl-en, .pl-enm { color: ${plEn}; }
   .pl-ent { color: ${plMs}; }
