@@ -43,15 +43,6 @@ export function MarkdownViewer({
   const contentScrollRef = useRef<ScrollView>(null);
   const hasScrolledToLineRef = useRef(false);
 
-  // Exact position: the WebView locates the target line via the Range API
-  // against the rendered code block and reports its real pixel offset.
-  const handleLineOffset = useCallback((y: number) => {
-    if (hasScrolledToLineRef.current) return;
-    const offsetY = Math.max(y - Spacing.xxl * 2, 0);
-    contentScrollRef.current?.scrollTo({ y: offsetY, animated: true });
-    hasScrolledToLineRef.current = true;
-  }, []);
-
   const rendererY = useRef(0);
   const handleAnchorOffset = useCallback((y: number) => {
     contentScrollRef.current?.scrollTo({
@@ -60,10 +51,9 @@ export function MarkdownViewer({
     });
   }, []);
 
-  // Fallback for markdown files: there's no single code block to locate a
-  // source line inside (the rendered prose doesn't map 1:1 to source lines),
-  // so this jumps to the line's proportional position in the WebView's total
-  // height instead. Only fires if the exact lookup above didn't already.
+  // Rendered prose doesn't map 1:1 to source lines and GitHub's HTML carries
+  // no source positions, so this jumps to the line's proportional position
+  // in the WebView's total height. Fires once, on the first height report.
   const handleMarkdownHeightChange = useCallback(
     (height: number) => {
       if (hasScrolledToLineRef.current || !targetLine || targetLine < 1) {
@@ -111,8 +101,6 @@ export function MarkdownViewer({
           context={repoContext}
           filePath={path}
           onHeightChange={handleMarkdownHeightChange}
-          targetLine={targetLine}
-          onLineOffset={handleLineOffset}
           onAnchorOffset={handleAnchorOffset}
         />
       </View>
