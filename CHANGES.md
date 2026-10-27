@@ -13,6 +13,8 @@ Needs a new store build: adds the `expo-store-review` native module.
 
 - **Variable names in markdown code blocks** - Variable names in code blocks, most visibly Python, showed in the string color. They now show in the normal text color, as on GitHub. ([`fdea181`](https://github.com/atharvdange618/Shikai/commit/fdea181))
 - **`#L` links into markdown files** - A line link into a README could jump into its first code block. It now scrolls to the line's rough position in the page. ([`b357304`](https://github.com/atharvdange618/Shikai/commit/b357304))
+- **Files over 1 MB** - A text file over 1 MB opened as a blank page that said "1 line", because GitHub doesn't send its contents. It now says the file is too large to preview. ([`bdcba07`](https://github.com/atharvdange618/Shikai/commit/bdcba07))
+- **Binary files** - Jars, fonts, archives and other binaries opened in the code viewer as noise. They now show a message that Shikai can't preview them. ([`a2f7b50`](https://github.com/atharvdange618/Shikai/commit/a2f7b50))
 
 ## v1.6.0 OTA update 2 (October 26, 2026)
 
