@@ -61,7 +61,7 @@ checkingSecurity ──pass──▶ restoringAuth ──▶ ready
 
 - `checkingSecurity` runs the native root and debugger checks in `modules/shikai-security/`. A rooted device stays blocked. A debugger or developer mode gets an "I'm a developer" override. The blocking screen runs the checks again every 10 seconds, so turning a setting off lets the user in without a restart.
 - `restoringAuth` loads the PAT and the session token from SecureStore. It then checks the token with `GET /user`. If that check fails, the app clears auth state and keeps the PAT. Routing then sends the user to sign-in.
-- `ready` hands control to expo-router.
+- `ready` hands control to expo-router. `AppStack` then replaces the stack with Overview or sign-in. Hooks that open a screen at launch (`useDeepLinks`, `useNotificationTaps`) run after that replace and wait until `lastRoutedToken === token`. Otherwise the replace lands on top of the screen they opened.
 
 The reducer is a pure function with its own tests. Add new boot states there, not as effects in the layout.
 
