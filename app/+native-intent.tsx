@@ -4,6 +4,10 @@
 // screen forever. sign-in.tsx reads the code through its own Linking listener,
 // so the router can drop the link. An empty string tells it not to navigate.
 // Cold starts keep the path: AppStack replaces the index with /sign-in anyway.
+//
+// github.com links (VIEW intents) have no matching route, so the router would
+// show +not-found. useDeepLinks maps them through parseGitHubUrl(), so the
+// router drops them on both warm and cold starts.
 export function redirectSystemPath({
   path,
   initial,
@@ -11,10 +15,15 @@ export function redirectSystemPath({
   path: string;
   initial: boolean;
 }): string {
+  if (isGitHubLink(path)) return "";
   if (!initial && isOAuthRedirect(path)) return "";
   return path;
 }
 
 function isOAuthRedirect(path: string): boolean {
   return path.startsWith("shikai:") && /[?&]code=/.test(path);
+}
+
+function isGitHubLink(path: string): boolean {
+  return /^https?:\/\/(?:www\.)?github\.com(?=\/|$)/i.test(path);
 }

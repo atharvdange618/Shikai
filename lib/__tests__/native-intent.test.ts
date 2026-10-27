@@ -14,8 +14,18 @@ describe("redirectSystemPath", () => {
     expect(redirectSystemPath({ path, initial: true })).toBe(path);
   });
 
+  it.each([true, false])("drops github.com links (initial: %s)", (initial) => {
+    for (const path of [
+      "https://github.com/facebook/react/blob/main/README.md#L10",
+      "https://www.github.com/facebook/react?code=1",
+      "http://github.com/facebook",
+    ]) {
+      expect(redirectSystemPath({ path, initial })).toBe("");
+    }
+  });
+
   it("passes through other links", () => {
-    const path = "https://github.com/facebook/react?code=1";
+    const path = "https://github.com.evil.dev/x";
     expect(redirectSystemPath({ path, initial: false })).toBe(path);
     expect(
       redirectSystemPath({ path: "shikai://repo/1", initial: false }),
