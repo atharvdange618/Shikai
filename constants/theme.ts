@@ -17,13 +17,6 @@ export const FontSize = {
   caption: 11,
 } as const;
 
-export const FontWeight = {
-  regular: "400",
-  medium: "500",
-  semiBold: "600",
-  bold: "700",
-} as const;
-
 export const LineHeight = {
   tight: 1.2,
   normal: 1.5,
