@@ -105,7 +105,7 @@ Network state detection with MMKV-backed disk persistence. The app works offline
 ### Additional Features
 
 - **OTA Updates** - Over-the-air updates via expo-updates. The app checks on launch and asks before restarting to apply an update.
-- **File Viewer** - SVG, PDF, and video rendering alongside markdown files. Syntax-highlighted code blocks with copy buttons.
+- **File Viewer** - Code files highlighted on device with line numbers, a wrap toggle, and the linked line marked. Markdown, SVG, PDF, and video rendering too, with a copy button for text files.
 - **Keyboard Shortcuts** - Cmd/Ctrl + 1-4 for tabs, Cmd/Ctrl + F for search, arrow keys for navigation
 - **Play Store Updates** - Native in-app update prompt when a new release is on the Play Store
 - **Haptics** - Feedback on pull-to-refresh, tab switch, and bookmark. Respects the system reduced-motion setting.

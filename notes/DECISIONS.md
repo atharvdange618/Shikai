@@ -175,7 +175,7 @@ Entries D-001 to D-021 were backfilled on 2026-10-15 from commits, the changelog
 
 ## D-018: Code and markdown render in a WebView, and repo content counts as untrusted
 
-**Date:** hardened on 2026-09-06 (`06d9ced`) · **Status:** Accepted
+**Date:** hardened on 2026-09-06 (`06d9ced`) · **Status:** Superseded in part by D-025 (code files)
 
 **Context.** Native syntax highlighters for React Native are unmaintained. A WebView with Prism.js handles over 100 languages with no extra native code. But READMEs and files come from any repo, so the page can hold hostile content.
 **Decision.** `MarkdownRenderer` renders code, markdown, diffs and mermaid in a WebView. Mermaid runs at `securityLevel: 'strict'` from a CDN URL pinned to an exact version. Link taps open in the system browser instead of moving the WebView. `allowUniversalAccessFromFileURLs` is off, and `originWhitelist` stays narrow.
@@ -239,3 +239,13 @@ Entries D-001 to D-021 were backfilled on 2026-10-15 from commits, the changelog
 **Rejected.** Asking after an action such as starring a repo, which Shikai can't do since it is read-only. Asking again on a schedule: Play caps the sheet itself and never says whether it showed or whether the user rated, so repeat asks mostly do nothing.
 **Consequences.** A user who dismisses the sheet is never asked again. The sheet only shows for Play installs; GitHub APK installs skip it because `isAvailableAsync()` or Play itself declines.
 **Revisit if.** Play adds a way to know whether the user rated, or the review count stays flat after 1.7.0 reaches most users.
+
+## D-025: Code files highlight on device; markdown keeps GitHub's renderer
+
+**Date:** 2026-10-27 · **Status:** Accepted
+
+**Context.** Users said code in the file viewer read like a terminal card. Code files went through GitHub's `/markdown` endpoint wrapped in one fenced block, so every open cost a network round trip (about 1.5 s) and the layout was a card inside the screen. A spike on dev Hermes tokenized a 2745-line TypeScript file in 183 ms and a 5266-line file in 299 ms with `@tanstack/highlight`.
+**Decision.** Code files render in `components/file/CodeViewer.tsx`, highlighted on device by `@tanstack/highlight` through `lib/highlight.ts`, edge to edge with line numbers, wrap on by default, and the `#L` line marked. Files over 5000 lines render as plaintext. Each app theme names a matching syntax theme in `constants/themes.ts`. Markdown files stay on `MarkdownRenderer` and GitHub's renderer for full GFM. Since GitHub's HTML has no source positions, a `#L` link into a markdown file scrolls to the line's share of the page height; the old newline count in the first `<pre>` is gone.
+**Rejected.** TanStack Markdown for `.md` files: not full GFM, and it escapes raw HTML that READMEs rely on. Keeping code on `/markdown`: slower, and the reason for the complaint. Mapping a markdown `#L` line to the heading above it: more code for links that are rare, since github.com's rendered view ignores `#L` too.
+**Consequences.** `MarkdownRenderer` and `blame-highlight.ts` still color with GitHub's `pl-*` classes, so code blocks in a README and a code file can differ slightly in color. Files over 5000 lines lose colors. A `#L` link into a markdown file lands near the line, not on it.
+**Revisit if.** Highlighting a 5000-line file takes over a second on a low-end phone, or users ask for exact lines in markdown files.
