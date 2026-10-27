@@ -7,11 +7,15 @@ const highlighter = createHighlighter({
   languages: Object.values(languages),
 });
 
-// ponytail: files past this size render as plaintext. Highlighting runs on
+// ponytail: files past either cap render as plaintext. Highlighting runs on
 // the JS thread at roughly 60ms per 1000 lines in dev Hermes, so a huge file
-// would freeze taps. If big files matter, run highlight() inside the
-// WebView, where V8 does the same work about 10x faster.
+// would freeze taps. The character cap catches minified files, which are one
+// long line. Plaintext stays cheap: 62ms for a 1 MB, 28k-line file in Node,
+// and GitHub sends no content past 1 MB. If big files matter, run
+// highlight() inside the WebView, where V8 does the same work about 10x
+// faster.
 export const MAX_HIGHLIGHT_LINES = 5000;
+export const MAX_HIGHLIGHT_CHARS = 200_000;
 
 /** Extensions the highlighter's own aliases miss. */
 const EXTENSION_LANGUAGES: Record<string, string> = { gradle: "groovy" };
@@ -45,7 +49,9 @@ export function highlightFile(
   const code = content.endsWith("\n") ? content.slice(0, -1) : content;
   const lineCount = code.split("\n").length;
   const lang =
-    lineCount > MAX_HIGHLIGHT_LINES ? "plaintext" : languageFor(fileName);
+    lineCount > MAX_HIGHLIGHT_LINES || code.length > MAX_HIGHLIGHT_CHARS
+      ? "plaintext"
+      : languageFor(fileName);
   const hasTarget =
     targetLine !== undefined &&
     Number.isInteger(targetLine) &&

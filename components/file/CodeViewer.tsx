@@ -24,6 +24,8 @@ import {
 } from "@/constants/theme";
 import { highlightFile, type HighlightedFile } from "@/lib/highlight";
 
+import { FileError } from "./FileError";
+
 interface CodeViewerProps {
   content: string;
   fileName: string;
@@ -35,16 +37,24 @@ export function CodeViewer({ content, fileName, targetLine }: CodeViewerProps) {
   const s = useMemo(() => buildStyles(colors), [colors]);
   const webViewRef = useRef<WebView>(null);
   const [file, setFile] = useState<HighlightedFile | null>(null);
+  const [failed, setFailed] = useState(false);
   const [wrap, setWrap] = useState(true);
   const [copied, setCopied] = useState(false);
 
   // Highlighting blocks the JS thread, so let the loading state paint first.
+  // It runs outside render, where the screen's ErrorBoundary can't catch a
+  // throw, so catch it here.
   useEffect(() => {
     setFile(null);
-    const id = setTimeout(
-      () => setFile(highlightFile(content, fileName, targetLine)),
-      0,
-    );
+    setFailed(false);
+    const id = setTimeout(() => {
+      try {
+        setFile(highlightFile(content, fileName, targetLine));
+      } catch (error) {
+        console.error("Highlighting failed", error);
+        setFailed(true);
+      }
+    }, 0);
     return () => clearTimeout(id);
   }, [content, fileName, targetLine]);
 
@@ -70,6 +80,10 @@ export function CodeViewer({ content, fileName, targetLine }: CodeViewerProps) {
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
+
+  if (failed) {
+    return <FileError title="Couldn't display this file" />;
+  }
 
   return (
     <View style={s.container}>

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  MAX_HIGHLIGHT_CHARS,
   MAX_HIGHLIGHT_LINES,
   highlightFile,
   languageFor,
@@ -56,6 +57,14 @@ describe("highlightFile", () => {
   it("skips highlighting past the size cap", () => {
     const big = "let x = 1;\n".repeat(MAX_HIGHLIGHT_LINES + 1);
     const { lang, html } = highlightFile(big, "big.ts");
+    expect(lang).toBe("plaintext");
+    expect(html).not.toContain("th-keyword");
+  });
+
+  it("skips highlighting a minified file past the character cap", () => {
+    const minified = "var a=1;".repeat(MAX_HIGHLIGHT_CHARS / 8 + 1);
+    const { lang, lineCount, html } = highlightFile(minified, "app.min.js");
+    expect(lineCount).toBe(1);
     expect(lang).toBe("plaintext");
     expect(html).not.toContain("th-keyword");
   });

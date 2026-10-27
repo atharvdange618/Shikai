@@ -153,7 +153,7 @@ Superseded 2026-10-27 (D-025): code files moved to `CodeViewer`, which marks and
 `#L` line itself. The newline lookup and `onLineOffset` were removed from `MarkdownRenderer`;
 markdown files keep the proportional scroll.
 
-Not done: line highlight (the target line scrolls into view but isn't visually marked).
+Not done: line highlight in markdown files (the rough position scrolls into view but no line is marked).
 
 #### 3.3 In-app check annotations · shipped
 

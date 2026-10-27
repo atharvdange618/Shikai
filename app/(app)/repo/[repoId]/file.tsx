@@ -129,6 +129,19 @@ function FileViewerScreenContent() {
 
     const targetLine = line ? Number(line) : undefined;
 
+    // GitHub's contents API leaves out the body of files over 1 MB.
+    if (
+      (kind === "text" || kind === "markdown") &&
+      data.meta.encoding === "none"
+    ) {
+      return (
+        <FileError
+          title="File too large to preview"
+          message="GitHub doesn't send the contents of files over 1 MB."
+        />
+      );
+    }
+
     if (kind === "text") {
       return (
         <CodeViewer
