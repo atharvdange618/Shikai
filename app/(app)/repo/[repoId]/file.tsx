@@ -62,6 +62,8 @@ function FileViewerScreenContent() {
                   }
                   hitSlop={8}
                   style={s.headerButton}
+                  accessibilityRole="button"
+                  accessibilityLabel="Blame"
                 >
                   <Octicons name="feed-person" size={20} color={colors.accent} />
                 </Pressable>
@@ -79,6 +81,8 @@ function FileViewerScreenContent() {
                 }
                 hitSlop={8}
                 style={s.headerButton}
+                accessibilityRole="button"
+                accessibilityLabel="File history"
               >
                 <Octicons name="history" size={20} color={colors.accent} />
               </Pressable>

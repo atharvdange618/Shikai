@@ -1,8 +1,6 @@
 import { Octicons } from "@expo/vector-icons";
 import type { HighlightTheme } from "@tanstack/highlight/theme";
 import { createThemeRule, themeTokenClasses } from "@tanstack/highlight/theme";
-import * as Clipboard from "expo-clipboard";
-import * as Haptics from "expo-haptics";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
@@ -22,6 +20,7 @@ import {
   useTheme,
   type ColorTokens,
 } from "@/constants/theme";
+import { useCopyToClipboard } from "@/hooks/useCopyToClipboard";
 import { highlightFile, type HighlightedFile } from "@/lib/highlight";
 
 import { FileError } from "./FileError";
@@ -39,7 +38,7 @@ export function CodeViewer({ content, fileName, targetLine }: CodeViewerProps) {
   const [file, setFile] = useState<HighlightedFile | null>(null);
   const [failed, setFailed] = useState(false);
   const [wrap, setWrap] = useState(true);
-  const [copied, setCopied] = useState(false);
+  const { copied, copy } = useCopyToClipboard();
 
   // Highlighting blocks the JS thread, so let the loading state paint first.
   // It runs outside render, where the screen's ErrorBoundary can't catch a
@@ -74,13 +73,6 @@ export function CodeViewer({ content, fileName, targetLine }: CodeViewerProps) {
     syncWrap(!wrap);
   };
 
-  const handleCopy = async () => {
-    await Clipboard.setStringAsync(content);
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
   if (failed) {
     return <FileError title="Couldn't display this file" />;
   }
@@ -95,7 +87,7 @@ export function CodeViewer({ content, fileName, targetLine }: CodeViewerProps) {
         </Text>
         <Pressable
           onPress={toggleWrap}
-          hitSlop={8}
+          hitSlop={{ top: 12, bottom: 12 }}
           style={[s.pill, wrap && s.pillActive]}
           accessibilityRole="switch"
           accessibilityState={{ checked: wrap }}
@@ -104,9 +96,9 @@ export function CodeViewer({ content, fileName, targetLine }: CodeViewerProps) {
           <Text style={[s.pillText, wrap && s.pillTextActive]}>Wrap</Text>
         </Pressable>
         <Pressable
-          onPress={handleCopy}
-          hitSlop={8}
+          onPress={() => copy(content)}
           style={s.iconButton}
+          accessibilityRole="button"
           accessibilityLabel="Copy file"
         >
           <Octicons
@@ -204,7 +196,11 @@ function buildHtml(
     min-width: 100%;
     box-sizing: border-box;
   }
-  .th-target { background: ${colors.accentSubtle}; }
+  /* The inset bar marks the line without relying on color alone. */
+  .th-target {
+    background: ${colors.accentSubtle};
+    box-shadow: inset 3px 0 0 ${colors.accent};
+  }
   .th-target::before { color: ${colors.accent}; }
 </style>
 </head>
@@ -270,8 +266,13 @@ function buildStyles(colors: ColorTokens) {
       color: colors.accent,
     },
 
+    // 48dp touch target; the negative margin keeps the toolbar's height.
     iconButton: {
-      padding: Spacing.xs,
+      minWidth: 48,
+      minHeight: 48,
+      marginVertical: -Spacing.md,
+      alignItems: "center",
+      justifyContent: "center",
     },
 
     webview: {

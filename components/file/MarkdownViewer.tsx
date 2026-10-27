@@ -1,7 +1,5 @@
 import { Octicons } from "@expo/vector-icons";
-import * as Clipboard from "expo-clipboard";
-import * as Haptics from "expo-haptics";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef } from "react";
 import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 
 import { MarkdownRenderer } from "@/components/shared/MarkdownRenderer";
@@ -13,6 +11,7 @@ import {
   useTheme,
   type ColorTokens,
 } from "@/constants/theme";
+import { useCopyToClipboard } from "@/hooks/useCopyToClipboard";
 
 interface MarkdownViewerProps {
   content: string;
@@ -31,14 +30,7 @@ export function MarkdownViewer({
 }: MarkdownViewerProps) {
   const { colors } = useTheme();
   const s = useMemo(() => buildStyles(colors), [colors]);
-  const [copied, setCopied] = useState(false);
-
-  const handleCopy = useCallback(async () => {
-    await Clipboard.setStringAsync(content);
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  }, [content]);
+  const { copied, copy } = useCopyToClipboard();
 
   const contentScrollRef = useRef<ScrollView>(null);
   const hasScrolledToLineRef = useRef(false);
@@ -82,7 +74,10 @@ export function MarkdownViewer({
             pressed && s.copyButtonPressed,
             copied && s.copyButtonCopied,
           ]}
-          onPress={handleCopy}
+          onPress={() => copy(content)}
+          hitSlop={8}
+          accessibilityRole="button"
+          accessibilityLabel="Copy file"
         >
           <Octicons
             name={copied ? "check" : "copy"}
