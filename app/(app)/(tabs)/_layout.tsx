@@ -1,6 +1,6 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { BlurView } from "expo-blur";
-import { Tabs, useRouter } from "expo-router";
+import { Tabs } from "expo-router";
 import { useEffect, useMemo } from "react";
 import { Platform, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -15,7 +15,6 @@ import {
   Spacing,
   useTheme,
 } from "@/constants/theme";
-import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { useNotifications } from "@/hooks/useNotifications";
 import { useUser } from "@/hooks/useUser";
 import { prefetchOverview, prefetchProfile } from "@/lib/prefetch";
@@ -111,20 +110,6 @@ export default function TabsLayout() {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const queryClient = useQueryClient();
-  const router = useRouter();
-
-  useKeyboardShortcuts({
-    onTabSwitch: (index: number) => {
-      const routes = [
-        "/(app)/(tabs)/overview",
-        "/(app)/(tabs)/repos",
-        "/(app)/(tabs)/search",
-        "/(app)/(tabs)/profile",
-      ] as const;
-      const route = routes[index];
-      if (route) router.push(route);
-    },
-  });
 
   const { data: user } = useUser();
   const pat = useAuthStore((s) => s.pat);

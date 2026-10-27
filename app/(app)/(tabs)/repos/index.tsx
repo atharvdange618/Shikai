@@ -5,11 +5,9 @@ import { useRouter } from "expo-router";
 import { useCallback, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
-  Keyboard,
   RefreshControl,
   StyleSheet,
   Text,
-  TextInput,
   View,
 } from "react-native";
 
@@ -23,7 +21,6 @@ import { KeyboardAvoid } from "@/components/shared/KeyboardAvoid";
 import { SearchBar } from "@/components/shared/SearchBar";
 import { useFirstBookmarkNudge } from "@/hooks/useFirstBookmarkNudge";
 import { useInstallations } from "@/hooks/useInstallations";
-import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { useRepos } from "@/hooks/useRepos";
 import { useUsername } from "@/hooks/useUser";
 import {
@@ -69,9 +66,7 @@ export default function ReposScreen() {
   const { colors, isDark } = useTheme();
   const router = useRouter();
   const queryClient = useQueryClient();
-  const searchInputRef = useRef<TextInput>(null);
   const flashListRef = useRef<any>(null);
-  const [selectedIndex, setSelectedIndex] = useState(-1);
 
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState<SortOption>("pushed");
@@ -109,31 +104,6 @@ export default function ReposScreen() {
     },
     [router],
   );
-
-  useKeyboardShortcuts({
-    onSearchFocus: useCallback(() => {
-      searchInputRef.current?.focus();
-    }, []),
-    onEscape: useCallback(() => {
-      Keyboard.dismiss();
-      if (search) {
-        setSearch("");
-      } else if (selectedIndex >= 0) {
-        setSelectedIndex(-1);
-      }
-    }, [search, selectedIndex]),
-    onArrowUp: useCallback(() => {
-      setSelectedIndex((prev) => Math.max(0, prev - 1));
-    }, []),
-    onArrowDown: useCallback(() => {
-      setSelectedIndex((prev) => Math.min(repos.length - 1, prev + 1));
-    }, [repos.length]),
-    onEnter: useCallback(() => {
-      if (selectedIndex >= 0 && selectedIndex < repos.length) {
-        handleRepoPress(repos[selectedIndex]);
-      }
-    }, [selectedIndex, repos, handleRepoPress]),
-  });
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -255,7 +225,6 @@ export default function ReposScreen() {
       <View style={s.container}>
       <View style={s.listHeader}>
         <SearchBar
-          ref={searchInputRef}
           value={search}
           onChangeText={setSearch}
           placeholder="Search repositories…"
