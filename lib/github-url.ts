@@ -4,6 +4,8 @@ import { encodeRepoId } from "./utils";
 // Keeps out api.github.com, gist.github.com, raw.githubusercontent.com, etc.
 const GITHUB_HOST_RE = /^(?:https?:\/\/)?(?:www\.)?github\.com(?=\/|$)/i;
 
+export const isGitHubUrl = (url: string): boolean => GITHUB_HOST_RE.test(url.trim());
+
 // First path segments that are github.com's own pages, not a user or org.
 const RESERVED_FIRST_SEGMENT = new Set([
   "orgs",

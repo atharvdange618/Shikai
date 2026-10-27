@@ -1,3 +1,5 @@
+import { isGitHubUrl } from "@/lib/github-url";
+
 // The OAuth redirect (shikai://?code=...) maps to the blank index route. On a
 // warm start, letting the router navigate there buries the sign-in screen, so
 // any outcome that doesn't set a token (install prompt, error) shows a blank
@@ -7,7 +9,8 @@
 //
 // github.com links (VIEW intents) have no matching route, so the router would
 // show +not-found. useDeepLinks maps them through parseGitHubUrl(), so the
-// router drops them on both warm and cold starts.
+// router drops them on both warm and cold starts. Signed out, useDeepLinks
+// isn't listening: a cold-start link opens after sign-in, a warm one is dropped.
 export function redirectSystemPath({
   path,
   initial,
@@ -15,15 +18,11 @@ export function redirectSystemPath({
   path: string;
   initial: boolean;
 }): string {
-  if (isGitHubLink(path)) return "";
+  if (isGitHubUrl(path)) return "";
   if (!initial && isOAuthRedirect(path)) return "";
   return path;
 }
 
 function isOAuthRedirect(path: string): boolean {
   return path.startsWith("shikai:") && /[?&]code=/.test(path);
-}
-
-function isGitHubLink(path: string): boolean {
-  return /^https?:\/\/(?:www\.)?github\.com(?=\/|$)/i.test(path);
 }

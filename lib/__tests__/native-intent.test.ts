@@ -14,14 +14,19 @@ describe("redirectSystemPath", () => {
     expect(redirectSystemPath({ path, initial: true })).toBe(path);
   });
 
-  it.each([true, false])("drops github.com links (initial: %s)", (initial) => {
-    for (const path of [
-      "https://github.com/facebook/react/blob/main/README.md#L10",
-      "https://www.github.com/facebook/react?code=1",
-      "http://github.com/facebook",
-    ]) {
-      expect(redirectSystemPath({ path, initial })).toBe("");
-    }
+  const githubLinks = [
+    "https://github.com/facebook/react/blob/main/README.md#L10",
+    "https://www.github.com/facebook/react?code=1",
+    "https://GitHub.com/facebook",
+  ];
+
+  it.each(
+    githubLinks.flatMap((path) => [
+      [path, true],
+      [path, false],
+    ]),
+  )("drops %s (initial: %s)", (path, initial) => {
+    expect(redirectSystemPath({ path, initial })).toBe("");
   });
 
   it("passes through other links", () => {
