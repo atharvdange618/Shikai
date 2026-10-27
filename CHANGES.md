@@ -16,6 +16,7 @@ Needs a new store build: adds the `expo-store-review` native module.
 - **Files over 1 MB** - A text file over 1 MB opened as a blank page that said "1 line", because GitHub doesn't send its contents. It now says the file is too large to preview. ([`bdcba07`](https://github.com/atharvdange618/Shikai/commit/bdcba07))
 - **Binary files** - Jars, fonts, archives and other binaries opened in the code viewer as noise. They now show a message that Shikai can't preview them. ([`a2f7b50`](https://github.com/atharvdange618/Shikai/commit/a2f7b50))
 - **github.com links showed "Page not found"** - Opening a github.com link into Shikai while it was already running showed "Page not found" over the right screen. It now opens the file, PR, issue or profile, and links Shikai has no screen for open in the browser. ([`a42a59d`](https://github.com/atharvdange618/Shikai/commit/a42a59d))
+- **Shared links opened Overview** - Sharing a github.com link to Shikai while it was closed opened Overview instead of the shared page. It now opens the page, with Overview behind it. A link shared while signed out opens after you sign in. ([`db6b1fb`](https://github.com/atharvdange618/Shikai/commit/db6b1fb))
 
 ## v1.6.0 OTA update 2 (October 26, 2026)
 
