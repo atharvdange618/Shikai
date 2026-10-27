@@ -55,7 +55,6 @@
     "expo": "~54.0.37",
     "expo-auth-session": "~7.0.11",
     "expo-background-task": "~1.0.10",
-    "expo-blur": "~15.0.8",
     "expo-clipboard": "~8.0.8",
     "expo-constants": "~18.0.14",
     "expo-crypto": "~15.0.9",
