@@ -63,7 +63,7 @@ npx tsc --noEmit
 npx vitest run
 ```
 
-Tests live in `lib/__tests__/`. Add or update tests for logic you change. For UI changes, test on a device or emulator and attach a screenshot or screen recording to the PR.
+Tests live in `lib/__tests__/`. Add or update tests for logic you change. For UI changes, test on a device or emulator and attach a before and an after screenshot (or screen recording) of each screen the change touches.
 
 ## Commits and PRs
 

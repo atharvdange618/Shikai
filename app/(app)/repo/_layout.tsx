@@ -1,345 +1,36 @@
 import { Stack } from "expo-router";
-import { Platform } from "react-native";
 
 import { FontFamily, FontSize, useTheme } from "@/constants/theme";
 
 export default function RepoLayout() {
-  const { colors, isDark } = useTheme();
-
-  const sharedHeaderOptions = {
-    headerStyle: {
-      backgroundColor: colors.background,
-    },
-    headerTitleStyle: {
-      fontFamily: FontFamily.semiBold,
-      fontSize: FontSize.title,
-      color: colors.textPrimary,
-    },
-    headerTintColor: colors.accent,
-    headerShadowVisible: false,
-    headerBackButtonDisplayMode: "minimal" as const,
-    headerBackTitle: "",
-    headerBottomBorderColor: colors.border,
-  };
+  const { colors } = useTheme();
 
   return (
     <Stack
-      screenOptions={{ contentStyle: { backgroundColor: colors.background } }}
+      screenOptions={{
+        contentStyle: { backgroundColor: colors.background },
+        headerStyle: {
+          backgroundColor: colors.background,
+        },
+        headerTitleStyle: {
+          fontFamily: FontFamily.semiBold,
+          fontSize: FontSize.title,
+          color: colors.textPrimary,
+        },
+        headerTintColor: colors.accent,
+        headerShadowVisible: false,
+        headerBackButtonDisplayMode: "minimal",
+        headerBackTitle: "",
+        // Most screens set their title with navigation.setOptions.
+        title: "",
+      }}
     >
-      <Stack.Screen
-        name="[repoId]/index"
-        options={{
-          ...sharedHeaderOptions,
-          title: "",
-          headerTransparent: Platform.OS === "ios",
-          headerBlurEffect:
-            Platform.OS === "ios" ? (isDark ? "dark" : "light") : undefined,
-          headerStyle:
-            Platform.OS === "ios"
-              ? undefined
-              : { backgroundColor: colors.background },
-        }}
-      />
-
-      <Stack.Screen
-        name="[repoId]/commits"
-        options={{
-          ...sharedHeaderOptions,
-          title: "Commits",
-          headerTransparent: Platform.OS === "ios",
-          headerBlurEffect:
-            Platform.OS === "ios" ? (isDark ? "dark" : "light") : undefined,
-          headerStyle:
-            Platform.OS === "ios"
-              ? undefined
-              : { backgroundColor: colors.background },
-        }}
-      />
-
+      <Stack.Screen name="[repoId]/commits" options={{ title: "Commits" }} />
       <Stack.Screen
         name="[repoId]/stargazers"
-        options={{
-          ...sharedHeaderOptions,
-          title: "Stargazers",
-          headerTransparent: Platform.OS === "ios",
-          headerBlurEffect:
-            Platform.OS === "ios" ? (isDark ? "dark" : "light") : undefined,
-          headerStyle:
-            Platform.OS === "ios"
-              ? undefined
-              : { backgroundColor: colors.background },
-        }}
+        options={{ title: "Stargazers" }}
       />
-
-      <Stack.Screen
-        name="[repoId]/forks"
-        options={{
-          ...sharedHeaderOptions,
-          title: "Forks",
-          headerTransparent: Platform.OS === "ios",
-          headerBlurEffect:
-            Platform.OS === "ios" ? (isDark ? "dark" : "light") : undefined,
-          headerStyle:
-            Platform.OS === "ios"
-              ? undefined
-              : { backgroundColor: colors.background },
-        }}
-      />
-
-      <Stack.Screen
-        name="[repoId]/files"
-        options={{
-          ...sharedHeaderOptions,
-          title: "Files",
-          headerTransparent: Platform.OS === "ios",
-          headerBlurEffect:
-            Platform.OS === "ios" ? (isDark ? "dark" : "light") : undefined,
-          headerStyle:
-            Platform.OS === "ios"
-              ? undefined
-              : { backgroundColor: colors.background },
-        }}
-      />
-
-      <Stack.Screen
-        name="[repoId]/file"
-        options={{
-          ...sharedHeaderOptions,
-          title: "",
-          headerTransparent: Platform.OS === "ios",
-          headerBlurEffect:
-            Platform.OS === "ios" ? (isDark ? "dark" : "light") : undefined,
-          headerStyle:
-            Platform.OS === "ios"
-              ? undefined
-              : { backgroundColor: colors.background },
-        }}
-      />
-
-      <Stack.Screen
-        name="[repoId]/issues"
-        options={{
-          ...sharedHeaderOptions,
-          title: "Issues",
-          headerTransparent: Platform.OS === "ios",
-          headerBlurEffect:
-            Platform.OS === "ios" ? (isDark ? "dark" : "light") : undefined,
-          headerStyle:
-            Platform.OS === "ios"
-              ? undefined
-              : { backgroundColor: colors.background },
-        }}
-      />
-
-      <Stack.Screen
-        name="[repoId]/pull-requests"
-        options={{
-          ...sharedHeaderOptions,
-          title: "Pull Requests",
-          headerTransparent: Platform.OS === "ios",
-          headerBlurEffect:
-            Platform.OS === "ios" ? (isDark ? "dark" : "light") : undefined,
-          headerStyle:
-            Platform.OS === "ios"
-              ? undefined
-              : { backgroundColor: colors.background },
-        }}
-      />
-
-      <Stack.Screen
-        name="[repoId]/issue/[number]"
-        options={{
-          ...sharedHeaderOptions,
-          title: "",
-          headerTransparent: Platform.OS === "ios",
-          headerBlurEffect:
-            Platform.OS === "ios" ? (isDark ? "dark" : "light") : undefined,
-          headerStyle:
-            Platform.OS === "ios"
-              ? undefined
-              : { backgroundColor: colors.background },
-        }}
-      />
-
-      <Stack.Screen
-        name="[repoId]/pr/[number]"
-        options={{
-          ...sharedHeaderOptions,
-          title: "",
-          headerTransparent: Platform.OS === "ios",
-          headerBlurEffect:
-            Platform.OS === "ios" ? (isDark ? "dark" : "light") : undefined,
-          headerStyle:
-            Platform.OS === "ios"
-              ? undefined
-              : { backgroundColor: colors.background },
-        }}
-      />
-
-      <Stack.Screen
-        name="[repoId]/commit/[sha]"
-        options={{
-          ...sharedHeaderOptions,
-          title: "",
-          headerTransparent: Platform.OS === "ios",
-          headerBlurEffect:
-            Platform.OS === "ios" ? (isDark ? "dark" : "light") : undefined,
-          headerStyle:
-            Platform.OS === "ios"
-              ? undefined
-              : { backgroundColor: colors.background },
-        }}
-      />
-
-      <Stack.Screen
-        name="[repoId]/blame"
-        options={{
-          ...sharedHeaderOptions,
-          title: "",
-          headerTransparent: Platform.OS === "ios",
-          headerBlurEffect:
-            Platform.OS === "ios" ? (isDark ? "dark" : "light") : undefined,
-          headerStyle:
-            Platform.OS === "ios"
-              ? undefined
-              : { backgroundColor: colors.background },
-        }}
-      />
-
-      <Stack.Screen
-        name="[repoId]/checks/[runId]"
-        options={{
-          ...sharedHeaderOptions,
-          title: "",
-          headerTransparent: Platform.OS === "ios",
-          headerBlurEffect:
-            Platform.OS === "ios" ? (isDark ? "dark" : "light") : undefined,
-          headerStyle:
-            Platform.OS === "ios"
-              ? undefined
-              : { backgroundColor: colors.background },
-        }}
-      />
-
-      <Stack.Screen
-        name="[repoId]/actions"
-        options={{
-          ...sharedHeaderOptions,
-          title: "Actions",
-          headerTransparent: Platform.OS === "ios",
-          headerBlurEffect:
-            Platform.OS === "ios" ? (isDark ? "dark" : "light") : undefined,
-          headerStyle:
-            Platform.OS === "ios"
-              ? undefined
-              : { backgroundColor: colors.background },
-        }}
-      />
-
-      <Stack.Screen
-        name="[repoId]/run/[runId]"
-        options={{
-          ...sharedHeaderOptions,
-          title: "",
-          headerTransparent: Platform.OS === "ios",
-          headerBlurEffect:
-            Platform.OS === "ios" ? (isDark ? "dark" : "light") : undefined,
-          headerStyle:
-            Platform.OS === "ios"
-              ? undefined
-              : { backgroundColor: colors.background },
-        }}
-      />
-
-      <Stack.Screen
-        name="[repoId]/compare"
-        options={{
-          ...sharedHeaderOptions,
-          title: "Compare",
-          headerTransparent: Platform.OS === "ios",
-          headerBlurEffect:
-            Platform.OS === "ios" ? (isDark ? "dark" : "light") : undefined,
-          headerStyle:
-            Platform.OS === "ios"
-              ? undefined
-              : { backgroundColor: colors.background },
-        }}
-      />
-
-      <Stack.Screen
-        name="[repoId]/releases"
-        options={{
-          ...sharedHeaderOptions,
-          title: "Releases",
-          headerTransparent: Platform.OS === "ios",
-          headerBlurEffect:
-            Platform.OS === "ios" ? (isDark ? "dark" : "light") : undefined,
-          headerStyle:
-            Platform.OS === "ios"
-              ? undefined
-              : { backgroundColor: colors.background },
-        }}
-      />
-
-      <Stack.Screen
-        name="[repoId]/insights"
-        options={{
-          ...sharedHeaderOptions,
-          title: "Insights",
-          headerTransparent: Platform.OS === "ios",
-          headerBlurEffect:
-            Platform.OS === "ios" ? (isDark ? "dark" : "light") : undefined,
-          headerStyle:
-            Platform.OS === "ios"
-              ? undefined
-              : { backgroundColor: colors.background },
-        }}
-      />
-
-      <Stack.Screen
-        name="[repoId]/discussions"
-        options={{
-          ...sharedHeaderOptions,
-          title: "Discussions",
-          headerTransparent: Platform.OS === "ios",
-          headerBlurEffect:
-            Platform.OS === "ios" ? (isDark ? "dark" : "light") : undefined,
-          headerStyle:
-            Platform.OS === "ios"
-              ? undefined
-              : { backgroundColor: colors.background },
-        }}
-      />
-
-      <Stack.Screen
-        name="[repoId]/discussion/[number]"
-        options={{
-          ...sharedHeaderOptions,
-          title: "",
-          headerTransparent: Platform.OS === "ios",
-          headerBlurEffect:
-            Platform.OS === "ios" ? (isDark ? "dark" : "light") : undefined,
-          headerStyle:
-            Platform.OS === "ios"
-              ? undefined
-              : { backgroundColor: colors.background },
-        }}
-      />
-
-      <Stack.Screen
-        name="[repoId]/release/[tag]"
-        options={{
-          ...sharedHeaderOptions,
-          title: "",
-          headerTransparent: Platform.OS === "ios",
-          headerBlurEffect:
-            Platform.OS === "ios" ? (isDark ? "dark" : "light") : undefined,
-          headerStyle:
-            Platform.OS === "ios"
-              ? undefined
-              : { backgroundColor: colors.background },
-        }}
-      />
+      <Stack.Screen name="[repoId]/forks" options={{ title: "Forks" }} />
     </Stack>
   );
 }

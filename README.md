@@ -106,7 +106,6 @@ Network state detection with MMKV-backed disk persistence. The app works offline
 
 - **OTA Updates** - Over-the-air updates via expo-updates. The app checks on launch and asks before restarting to apply an update.
 - **File Viewer** - Code files highlighted on device with line numbers, a wrap toggle, and the linked line marked. Markdown, SVG, PDF, and video rendering too, with a copy button for text files.
-- **Keyboard Shortcuts** - Cmd/Ctrl + 1-4 for tabs, Cmd/Ctrl + F for search, arrow keys for navigation
 - **Play Store Updates** - Native in-app update prompt when a new release is on the Play Store
 - **Haptics** - Feedback on pull-to-refresh, tab switch, and bookmark. Respects the system reduced-motion setting.
 - **Error Recovery** - Error boundaries around the root, tabs, file viewer, and PR/issue screens, with a custom 404 screen
@@ -125,17 +124,6 @@ Network state detection with MMKV-backed disk persistence. The app works offline
 4. Optionally, add a PAT in Profile > Settings > Notifications & Following for notifications and activity feed
 
 No browser handy, or GitHub's device verification getting in the way? Use **Sign in with a token** instead: paste a classic or fine-grained PAT with `repo` and `read:user` scopes to start a session directly.
-
----
-
-## Keyboard Shortcuts
-
-| Shortcut       | Action              |
-| -------------- | ------------------- |
-| Cmd/Ctrl + 1-4 | Switch between tabs |
-| Cmd/Ctrl + F   | Focus search bar    |
-| Arrow Up/Down  | Navigate lists      |
-| Escape         | Dismiss search      |
 
 ---
 

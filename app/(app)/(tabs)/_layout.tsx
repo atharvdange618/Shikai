@@ -1,11 +1,10 @@
 import { useQueryClient } from "@tanstack/react-query";
-import { BlurView } from "expo-blur";
-import { Tabs, useRouter } from "expo-router";
+import { Tabs } from "expo-router";
 import { useEffect, useMemo } from "react";
-import { Platform, StyleSheet, View } from "react-native";
+import { View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { ErrorBoundary } from "@/components";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { TabBarIcon } from "@/components/navigation/TabBarIcon";
 import { TooltipProvider } from "@/components/shared/Tooltip";
 import {
@@ -15,23 +14,10 @@ import {
   Spacing,
   useTheme,
 } from "@/constants/theme";
-import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { useNotifications } from "@/hooks/useNotifications";
 import { useUser } from "@/hooks/useUser";
 import { prefetchOverview, prefetchProfile } from "@/lib/prefetch";
 import { useAuthStore } from "@/stores/auth.store";
-
-function IOSTabBarBackground() {
-  const { isDark } = useTheme();
-
-  return (
-    <BlurView
-      tint={isDark ? "dark" : "light"}
-      intensity={80}
-      style={StyleSheet.absoluteFill}
-    />
-  );
-}
 
 const renderOverviewIcon = ({
   color,
@@ -111,20 +97,6 @@ export default function TabsLayout() {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const queryClient = useQueryClient();
-  const router = useRouter();
-
-  useKeyboardShortcuts({
-    onTabSwitch: (index: number) => {
-      const routes = [
-        "/(app)/(tabs)/overview",
-        "/(app)/(tabs)/repos",
-        "/(app)/(tabs)/search",
-        "/(app)/(tabs)/profile",
-      ] as const;
-      const route = routes[index];
-      if (route) router.push(route);
-    },
-  });
 
   const { data: user } = useUser();
   const pat = useAuthStore((s) => s.pat);
@@ -155,28 +127,17 @@ export default function TabsLayout() {
                 fontFamily: FontFamily.medium,
                 fontSize: 12,
                 marginTop: -2,
-                marginBottom: Platform.OS === "android" ? 4 : 0,
+                marginBottom: 4,
               },
 
               tabBarStyle: {
                 height: Layout.tabBarHeight + insets.bottom,
                 paddingBottom: insets.bottom,
-                backgroundColor: Platform.select({
-                  ios: "transparent",
-                  android: colors.tabBarBackground,
-                }),
-                borderTopWidth: Platform.select({
-                  ios: 0,
-                  android: BorderWidth.thin,
-                }),
+                backgroundColor: colors.tabBarBackground,
+                borderTopWidth: BorderWidth.thin,
                 borderTopColor: colors.border,
                 elevation: 0,
               },
-
-              tabBarBackground:
-                Platform.OS === "ios"
-                  ? () => <IOSTabBarBackground />
-                  : undefined,
 
               tabBarIconStyle: {
                 marginTop: Spacing.xs,

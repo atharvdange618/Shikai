@@ -26,13 +26,10 @@ import {
 import { StatusBar } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 
-import {
-  AlertProvider,
-  AnimatedSplashScreen,
-  BlockingScreen,
-  ErrorBoundary,
-  useAlert,
-} from "@/components";
+import { AnimatedSplashScreen } from "@/components/AnimatedSplashScreen";
+import { BlockingScreen } from "@/components/BlockingScreen";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { AlertProvider, useAlert } from "@/components/shared/Alert";
 import { AppRatingPrompt } from "@/components/AppRatingPrompt";
 import { OfflineBanner } from "@/components/OfflineBanner";
 import { ThemeProvider, useTheme } from "@/contexts/ThemeContext";

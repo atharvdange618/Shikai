@@ -1,4 +1,4 @@
-import { ErrorBoundary } from "@/components";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { DiffFileList } from "@/components/repo/DiffFileList";
 import {
   FontFamily,

@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { ErrorBoundary } from "@/components";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { CodeViewer } from "@/components/file/CodeViewer";
 import { FileError } from "@/components/file/FileError";
 import { ImageViewer } from "@/components/file/ImageViewer";

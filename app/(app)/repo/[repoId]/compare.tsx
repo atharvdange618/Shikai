@@ -1,4 +1,4 @@
-import { ErrorBoundary } from "@/components";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { DiffCommitList } from "@/components/repo/DiffCommitList";
 import { DiffFileList } from "@/components/repo/DiffFileList";
 import {
