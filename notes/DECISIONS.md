@@ -196,7 +196,7 @@ Entries D-001 to D-021 were backfilled on 2026-10-15 from commits, the changelog
 
 **Context.** Early builds sent many taps to the browser, which pulled people out of the app.
 **Decision.** Issue, PR, commit, check and repo links route to in-app screens through `parseGitHubUrl()` and `parseGitHubApiUrl()` in `lib/github-url.ts`. Links Shikai has no screen for open in the browser.
-**Consequences.** A new screen should add its route case to `lib/github-url.ts`, so links from the feed, share sheet and alerts reach it.
+**Consequences.** A new screen should add its route case to `lib/github-url.ts`, so links from the feed, share sheet and alerts reach it. `useDeepLinks` is the only handler for github.com links opened into the app: `app/+native-intent.tsx` makes expo-router drop them, so don't add an app route that mirrors a GitHub path. A link that arrives while signed out and the app is running is dropped.
 
 ## D-021: Navigation is tabs plus stacks, with no drawers, and the file explorer is a full screen
 

@@ -4,7 +4,7 @@ import { useRouter } from "expo-router";
 import { useShareIntentContext } from "expo-share-intent";
 import { useEffect, useRef } from "react";
 
-import { parseGitHubUrl } from "@/lib/github-url";
+import { isGitHubUrl, parseGitHubUrl } from "@/lib/github-url";
 
 /**
  * Sends github.com URLs to the right in-app screen, from two sources:
@@ -28,7 +28,7 @@ export function useDeepLinks(enabled: boolean) {
   const initialHandled = useRef(false);
 
   function route(url: string) {
-    if (!/github\.com/i.test(url)) return;
+    if (!isGitHubUrl(url)) return;
     const target = parseGitHubUrl(url);
     if (target) routerRef.current.push(target as Href);
     else Linking.openURL(url).catch(() => {});
