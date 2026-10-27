@@ -52,16 +52,16 @@ export function useDeepLinks(enabled: boolean) {
     return () => sub.remove();
   }, [enabled]);
 
+  // A share that lands during boot or while signed out waits here, and routes
+  // once `enabled` turns true. Resetting it early would lose it.
   useEffect(() => {
-    if (!hasShareIntent) return;
+    if (!enabled || !hasShareIntent) return;
 
-    if (enabled) {
-      const shared =
-        shareIntent.webUrl ??
-        shareIntent.text?.match(/https?:\/\/\S+/)?.[0] ??
-        shareIntent.text;
-      if (shared) routeRef.current(shared);
-    }
+    const shared =
+      shareIntent.webUrl ??
+      shareIntent.text?.match(/https?:\/\/\S+/)?.[0] ??
+      shareIntent.text;
+    if (shared) routeRef.current(shared);
     resetShareIntent();
   }, [enabled, hasShareIntent, shareIntent, resetShareIntent]);
 }

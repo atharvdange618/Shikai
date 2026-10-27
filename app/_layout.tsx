@@ -282,7 +282,6 @@ function AppStack({
   const theme = useTheme();
   const router = useRouter();
 
-  useDeepLinks(Boolean(token));
   useNotificationTaps(Boolean(token));
   useReviewPrompt(Boolean(token));
 
@@ -294,6 +293,10 @@ function AppStack({
     if (lastRoutedToken === undefined) return;
     router.replace(lastRoutedToken ? "/(app)/(tabs)/overview" : "/sign-in");
   }, [lastRoutedToken, router]);
+
+  // Called after the replace above and gated on it, so a link or share that
+  // arrives during boot opens on top of overview instead of being replaced.
+  useDeepLinks(Boolean(token) && lastRoutedToken === token);
 
   return (
     <Stack
