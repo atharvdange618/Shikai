@@ -1,4 +1,3 @@
-import { escapeHtml } from "@tanstack/highlight/core";
 import { useMemo, useState } from "react";
 import {
   ActivityIndicator,
@@ -19,6 +18,7 @@ import {
   useTheme,
   type ColorTokens,
 } from "@/constants/theme";
+import { buildSvgHtml } from "@/lib/file-html";
 
 import { FileError } from "./FileError";
 
@@ -50,35 +50,7 @@ export function ImageViewer({ url, isSvg }: ImageViewerProps) {
         {imageError && !isSvg && <FileError title="Failed to load image" />}
         {isSvg ? (
           <WebView
-            source={{
-              html: `
-                <!DOCTYPE html>
-                <html>
-                <head>
-                  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-                  <style>
-                    body {
-                      margin: 0;
-                      padding: 16px;
-                      display: flex;
-                      justify-content: center;
-                      align-items: center;
-                      min-height: 100vh;
-                      background-color: ${colors.background};
-                    }
-                    img {
-                      max-width: 100%;
-                      max-height: 90vh;
-                      object-fit: contain;
-                    }
-                  </style>
-                </head>
-                <body>
-                  <img src="${escapeHtml(url)}" />
-                </body>
-                </html>
-              `,
-            }}
+            source={{ html: buildSvgHtml(url, colors.background) }}
             style={{
               width: screenWidth - Spacing.lg * 2,
               height: 400,
