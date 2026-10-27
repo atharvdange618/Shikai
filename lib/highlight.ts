@@ -17,17 +17,15 @@ const highlighter = createHighlighter({
 export const MAX_HIGHLIGHT_LINES = 5000;
 export const MAX_HIGHLIGHT_CHARS = 200_000;
 
-/** Extensions the highlighter's own aliases miss. */
-const EXTENSION_LANGUAGES: Record<string, string> = { gradle: "groovy" };
-
 /**
  * The highlighter language for a file name. Tries the extension first since
  * the highlighter knows more aliases than getLanguage (tsx, kt, Dockerfile).
  */
 export function languageFor(fileName: string): string {
   const ext = fileName.split(".").pop()?.toLowerCase() ?? "";
+  // The highlighter's aliases miss .gradle.
   const byExtension = highlighter.normalizeLanguage(
-    EXTENSION_LANGUAGES[ext] ?? ext,
+    ext === "gradle" ? "groovy" : ext,
   );
   if (byExtension !== "plaintext") return byExtension;
   return highlighter.normalizeLanguage(getLanguage(fileName));
@@ -54,7 +52,6 @@ export function highlightFile(
       : languageFor(fileName);
   const hasTarget =
     targetLine !== undefined &&
-    Number.isInteger(targetLine) &&
     targetLine >= 1 &&
     targetLine <= lineCount;
 

@@ -114,6 +114,9 @@ export function CodeViewer({ content, fileName, targetLine }: CodeViewerProps) {
           source={{ html }}
           style={s.webview}
           originWhitelist={["about:*", "data:*"]}
+          // D-018: the page never navigates. The code is escaped text, so
+          // this only guards against a bug in that escaping.
+          onShouldStartLoadWithRequest={(req) => !/^https?:/i.test(req.url)}
           onLoadEnd={() => syncWrap(wrap)}
           javaScriptEnabled
         />

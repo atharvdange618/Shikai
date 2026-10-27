@@ -14,7 +14,7 @@ import { PdfViewer } from "@/components/file/PdfViewer";
 import { VideoViewer } from "@/components/file/VideoViewer";
 import { Spacing, useTheme } from "@/constants/theme";
 import { useFileContent, useRepo } from "@/hooks/useRepoDetails";
-import { decodeRepoId, getFileKind } from "@/lib/utils";
+import { decodeRepoId, getFileKind, parseTargetLine } from "@/lib/utils";
 
 export default function FileViewerScreen() {
   return (
@@ -123,20 +123,27 @@ function FileViewerScreenContent() {
           message={error?.message}
         />
       )}
-      {data && !isLoading && !isError && renderViewer()}
+      {data && !isLoading && !isError && renderViewer(data)}
     </SafeAreaView>
   );
 
-  function renderViewer() {
-    if (!data) return null;
-    const url = data.meta.download_url;
+  function renderViewer(file: NonNullable<typeof data>) {
+    const url = file.meta.download_url;
+    const targetLine = parseTargetLine(line);
 
-    const targetLine = line ? Number(line) : undefined;
+    if (kind === "binary") {
+      return (
+        <FileError
+          title="Binary file"
+          message="Shikai can't preview this file type."
+        />
+      );
+    }
 
     // GitHub's contents API leaves out the body of files over 1 MB.
     if (
       (kind === "text" || kind === "markdown") &&
-      data.meta.encoding === "none"
+      file.meta.encoding === "none"
     ) {
       return (
         <FileError
@@ -150,7 +157,7 @@ function FileViewerScreenContent() {
       return (
         <CodeViewer
           key={path}
-          content={data.content}
+          content={file.content}
           fileName={fileName ?? ""}
           targetLine={targetLine}
         />
@@ -161,7 +168,7 @@ function FileViewerScreenContent() {
       return (
         <MarkdownViewer
           key={path}
-          content={data.content}
+          content={file.content}
           path={path ?? ""}
           repoContext={`${owner}/${repoName}`}
           targetLine={targetLine}

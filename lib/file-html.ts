@@ -19,7 +19,7 @@ export function buildCodeHtml(
     .map((token) => `.th-${token} { color: var(--th-${token}); }`)
     .join("\n");
   const scrollToTarget =
-    targetLine !== undefined && Number.isInteger(targetLine)
+    targetLine !== undefined
       ? `var t = document.querySelector('[data-line="${targetLine}"]');
          if (t) t.scrollIntoView({ block: "center" });`
       : "";

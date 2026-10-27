@@ -12,6 +12,7 @@ import {
   getLanguage,
   isImageFile,
   isVideoFile,
+  parseTargetLine,
   relativeTime,
 } from "@/lib/utils";
 
@@ -107,6 +108,12 @@ describe("getFileKind", () => {
     expect(getFileKind("notes.markdown")).toBe("markdown");
   });
 
+  it("keeps binaries out of the code viewer", () => {
+    expect(getFileKind("gradle-wrapper.jar")).toBe("binary");
+    expect(getFileKind("Inter.WOFF2")).toBe("binary");
+    expect(getFileKind("libapp.so")).toBe("binary");
+  });
+
   it("ignores case", () => {
     expect(getFileKind("SCAN.PDF")).toBe("pdf");
     expect(getFileKind("CHANGELOG.MD")).toBe("markdown");
@@ -149,5 +156,20 @@ describe("formatDuration", () => {
 
   it("never goes negative on clock skew", () => {
     expect(formatDuration(start, "2025-12-31T23:59:50Z")).toBe("0s");
+  });
+});
+
+describe("parseTargetLine", () => {
+  it("reads a positive line number", () => {
+    expect(parseTargetLine("42")).toBe(42);
+  });
+
+  it("drops missing, zero, negative and non-numeric values", () => {
+    expect(parseTargetLine(undefined)).toBeUndefined();
+    expect(parseTargetLine("")).toBeUndefined();
+    expect(parseTargetLine("0")).toBeUndefined();
+    expect(parseTargetLine("-3")).toBeUndefined();
+    expect(parseTargetLine("2x")).toBeUndefined();
+    expect(parseTargetLine("1.5")).toBeUndefined();
   });
 });

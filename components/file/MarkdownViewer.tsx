@@ -45,20 +45,34 @@ export function MarkdownViewer({
 
   // Rendered prose doesn't map 1:1 to source lines and GitHub's HTML carries
   // no source positions, so this jumps to the line's proportional position
-  // in the WebView's total height. Fires once, on the first height report.
+  // in the WebView's total height. Set once, on the first height report.
+  // The scroll waits for onContentSizeChange: the ScrollView hasn't grown to
+  // that height yet, and Android clamps an earlier scrollTo to 0.
+  const pendingOffsetRef = useRef<number | null>(null);
   const handleMarkdownHeightChange = useCallback(
     (height: number) => {
-      if (hasScrolledToLineRef.current || !targetLine || targetLine < 1) {
+      if (hasScrolledToLineRef.current || targetLine === undefined) {
         return;
       }
       const totalLines = content.split("\n").length;
-      const fraction = Math.min(Math.max((targetLine - 1) / totalLines, 0), 1);
-      const offsetY = Math.max(fraction * height - Spacing.xxl * 2, 0);
-      contentScrollRef.current?.scrollTo({ y: offsetY, animated: true });
+      const fraction = Math.min((targetLine - 1) / totalLines, 1);
+      pendingOffsetRef.current = Math.max(
+        fraction * height - Spacing.xxl * 2,
+        0,
+      );
       hasScrolledToLineRef.current = true;
     },
     [targetLine, content],
   );
+
+  const handleContentSizeChange = useCallback(() => {
+    if (pendingOffsetRef.current === null) return;
+    contentScrollRef.current?.scrollTo({
+      y: pendingOffsetRef.current,
+      animated: true,
+    });
+    pendingOffsetRef.current = null;
+  }, []);
 
   return (
     <ScrollView
@@ -66,6 +80,7 @@ export function MarkdownViewer({
       style={s.contentScroll}
       contentContainerStyle={s.content}
       showsVerticalScrollIndicator={false}
+      onContentSizeChange={handleContentSizeChange}
     >
       <View style={s.codeHeader}>
         <Pressable
