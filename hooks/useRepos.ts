@@ -42,13 +42,3 @@ export function useRepos(filters: RepoFilters = {}) {
     filter: combinedFilter,
   });
 }
-
-export function useRepoLanguageOptions(): string[] {
-  const { repos } = useRepos();
-
-  const languages = repos
-    .map((r) => r.language)
-    .filter((lang): lang is string => lang !== null);
-
-  return Array.from(new Set(languages)).sort();
-}

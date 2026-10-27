@@ -28,13 +28,3 @@ export function useStarred(filters: StarredFilters = {}) {
     filter: languageFilter,
   });
 }
-
-export function useStarredLanguageOptions(): string[] {
-  const { repos } = useStarred();
-
-  const languages = repos
-    .map((r) => r.language)
-    .filter((lang): lang is string => lang !== null);
-
-  return Array.from(new Set(languages)).sort();
-}
