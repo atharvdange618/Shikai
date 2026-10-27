@@ -4,7 +4,7 @@ import { useEffect, useMemo } from "react";
 import { View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { ErrorBoundary } from "@/components";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { TabBarIcon } from "@/components/navigation/TabBarIcon";
 import { TooltipProvider } from "@/components/shared/Tooltip";
 import {

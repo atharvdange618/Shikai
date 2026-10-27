@@ -1,4 +1,4 @@
-import { ErrorBoundary } from "@/components";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 import {
   FontFamily,
   FontSize,

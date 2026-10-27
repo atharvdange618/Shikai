@@ -13,7 +13,7 @@ import {
   View,
 } from "react-native";
 
-import { useAlert } from "@/components";
+import { useAlert } from "@/components/shared/Alert";
 import { KeyboardAvoid } from "@/components/shared/KeyboardAvoid";
 import { rateLimit } from "@/lib/axios";
 import {
