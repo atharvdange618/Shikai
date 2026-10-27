@@ -1,5 +1,5 @@
 import { Octicons } from "@expo/vector-icons";
-import { forwardRef, useMemo } from "react";
+import { useMemo } from "react";
 import {
   Pressable,
   StyleSheet,
@@ -24,53 +24,52 @@ interface SearchBarProps {
   textInputProps?: Partial<TextInputProps>;
 }
 
-export const SearchBar = forwardRef<TextInput, SearchBarProps>(
-  function SearchBar(
-    { value, onChangeText, placeholder = "Searchâ€¦", textInputProps },
-    ref,
-  ) {
-    const { colors } = useTheme();
-    const s = useMemo(() => buildStyles(colors), [colors]);
+export function SearchBar({
+  value,
+  onChangeText,
+  placeholder = "Search…",
+  textInputProps,
+}: SearchBarProps) {
+  const { colors } = useTheme();
+  const s = useMemo(() => buildStyles(colors), [colors]);
 
-    return (
-      <View style={s.container}>
-        <Octicons
-          name="search"
-          size={15}
-          color={colors.textMuted}
-          style={s.icon}
-        />
+  return (
+    <View style={s.container}>
+      <Octicons
+        name="search"
+        size={15}
+        color={colors.textMuted}
+        style={s.icon}
+      />
 
-        <TextInput
-          ref={ref}
-          style={s.input}
-          value={value}
-          onChangeText={onChangeText}
-          placeholder={placeholder}
-          placeholderTextColor={colors.textMuted}
-          autoCapitalize="none"
-          autoCorrect={false}
-          returnKeyType="search"
-          clearButtonMode="never"
-          accessibilityLabel={placeholder}
-          {...textInputProps}
-        />
+      <TextInput
+        style={s.input}
+        value={value}
+        onChangeText={onChangeText}
+        placeholder={placeholder}
+        placeholderTextColor={colors.textMuted}
+        autoCapitalize="none"
+        autoCorrect={false}
+        returnKeyType="search"
+        clearButtonMode="never"
+        accessibilityLabel={placeholder}
+        {...textInputProps}
+      />
 
-        {value.length > 0 && (
-          <Pressable
-            onPress={() => onChangeText("")}
-            hitSlop={12}
-            style={s.clearButton}
-            accessibilityLabel="Clear search"
-            accessibilityRole="button"
-          >
-            <Octicons name="x-circle-fill" size={15} color={colors.textMuted} />
-          </Pressable>
-        )}
-      </View>
-    );
-  },
-);
+      {value.length > 0 && (
+        <Pressable
+          onPress={() => onChangeText("")}
+          hitSlop={12}
+          style={s.clearButton}
+          accessibilityLabel="Clear search"
+          accessibilityRole="button"
+        >
+          <Octicons name="x-circle-fill" size={15} color={colors.textMuted} />
+        </Pressable>
+      )}
+    </View>
+  );
+}
 
 function buildStyles(colors: ColorTokens) {
   return StyleSheet.create({
