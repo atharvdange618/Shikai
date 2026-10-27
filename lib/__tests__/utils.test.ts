@@ -8,9 +8,11 @@ import {
   formatBytes,
   formatCount,
   formatDuration,
+  getFileKind,
   getLanguage,
   isImageFile,
   isVideoFile,
+  parseTargetLine,
   relativeTime,
 } from "@/lib/utils";
 
@@ -92,6 +94,44 @@ describe("file type checks", () => {
   });
 });
 
+describe("getFileKind", () => {
+  it("routes media to their viewers", () => {
+    expect(getFileKind("logo.png")).toBe("image");
+    expect(getFileKind("icon.svg")).toBe("image");
+    expect(getFileKind("demo.mp4")).toBe("video");
+    expect(getFileKind("paper.pdf")).toBe("pdf");
+  });
+
+  it("treats every markdown extension as markdown", () => {
+    expect(getFileKind("README.md")).toBe("markdown");
+    expect(getFileKind("page.mdx")).toBe("markdown");
+    expect(getFileKind("notes.markdown")).toBe("markdown");
+  });
+
+  it("keeps binaries out of the code viewer", () => {
+    expect(getFileKind("gradle-wrapper.jar")).toBe("binary");
+    expect(getFileKind("Inter.WOFF2")).toBe("binary");
+    expect(getFileKind("libapp.so")).toBe("binary");
+  });
+
+  it("ignores case", () => {
+    expect(getFileKind("SCAN.PDF")).toBe("pdf");
+    expect(getFileKind("CHANGELOG.MD")).toBe("markdown");
+  });
+
+  it("falls back to text for code, dotfiles and missing names", () => {
+    expect(getFileKind("index.tsx")).toBe("text");
+    expect(getFileKind(".gitignore")).toBe("text");
+    expect(getFileKind("Makefile")).toBe("text");
+    expect(getFileKind("")).toBe("text");
+  });
+
+  it("only looks at the last extension", () => {
+    expect(getFileKind("pdf.ts")).toBe("text");
+    expect(getFileKind("backup.md.txt")).toBe("text");
+  });
+});
+
 describe("getLanguage", () => {
   it("maps known extensions", () => {
     expect(getLanguage("index.tsx")).toBe("typescript");
@@ -116,5 +156,20 @@ describe("formatDuration", () => {
 
   it("never goes negative on clock skew", () => {
     expect(formatDuration(start, "2025-12-31T23:59:50Z")).toBe("0s");
+  });
+});
+
+describe("parseTargetLine", () => {
+  it("reads a positive line number", () => {
+    expect(parseTargetLine("42")).toBe(42);
+  });
+
+  it("drops missing, zero, negative and non-numeric values", () => {
+    expect(parseTargetLine(undefined)).toBeUndefined();
+    expect(parseTargetLine("")).toBeUndefined();
+    expect(parseTargetLine("0")).toBeUndefined();
+    expect(parseTargetLine("-3")).toBeUndefined();
+    expect(parseTargetLine("2x")).toBeUndefined();
+    expect(parseTargetLine("1.5")).toBeUndefined();
   });
 });

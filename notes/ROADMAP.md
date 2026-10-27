@@ -149,7 +149,11 @@ works when the file is rendered as a single fenced code block (i.e. not a `.md` 
 source lines don't map 1:1 onto the rendered prose); the original proportional-height scroll
 stays as the fallback for that case.
 
-Not done: line highlight (the target line scrolls into view but isn't visually marked).
+Superseded 2026-10-27 (D-025): code files moved to `CodeViewer`, which marks and scrolls to the
+`#L` line itself. The newline lookup and `onLineOffset` were removed from `MarkdownRenderer`;
+markdown files keep the proportional scroll.
+
+Not done: line highlight in markdown files (the rough position scrolls into view but no line is marked).
 
 #### 3.3 In-app check annotations · shipped
 

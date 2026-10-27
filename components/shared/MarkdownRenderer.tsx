@@ -23,8 +23,6 @@ interface MarkdownRendererProps {
   style?: StyleProp<ViewStyle>;
   context?: string;
   onHeightChange?: (height: number) => void;
-  targetLine?: number;
-  onLineOffset?: (y: number) => void;
   /**
    * Repo path of the file being shown (README.md, docs/GUIDE.md). Renders in
    * document mode, which gives headings the ids that #links point at, and
@@ -50,7 +48,7 @@ function resolveImageUrls(html: string, context?: string): string {
   );
 }
 
-function buildHtml(html: string, isDark: boolean, targetLine?: number): string {
+function buildHtml(html: string, isDark: boolean): string {
   const bg = isDark ? "#0D1117" : "#FAF9F6";
   const text = isDark ? "#E6EDF3" : "#1A2332";
   const textSecondary = isDark ? "#8B949E" : "#5A6B7B";
@@ -224,7 +222,7 @@ function buildHtml(html: string, isDark: boolean, targetLine?: number): string {
   .pl-kos, .pl-c1, .pl-c2 { color: ${plE}; }
   .pl-k, .pl-s1 .pl-kos { color: ${plKw}; }
   .pl-c  { color: ${plC}; font-style: italic; }
-  .pl-s, .pl-s1, .pl-pds { color: ${plS}; }
+  .pl-s, .pl-pds { color: ${plS}; }
   .pl-pse .pl-s1 { color: ${plS}; }
   .pl-e, .pl-en, .pl-enm { color: ${plEn}; }
   .pl-ent { color: ${plMs}; }
@@ -324,48 +322,6 @@ function buildHtml(html: string, isDark: boolean, targetLine?: number): string {
 
     hl.parentNode.insertBefore(wrapper, hl);
     wrapper.appendChild(hl);
-  }
-
-  // Finds the pixel offset of a 1-indexed source line inside the file's code
-  // block by counting newlines across the pre's text nodes and reading the
-  // position with Range.getBoundingClientRect — no need to wrap every line
-  // in its own element first.
-  function computeLineOffset(targetLine) {
-    var pre = document.querySelector('.code-block-wrapper pre') || document.querySelector('.markdown-body pre');
-    if (!pre || !targetLine || targetLine < 1) return null;
-    if (targetLine === 1) {
-      var firstRange = document.createRange();
-      firstRange.selectNodeContents(pre);
-      firstRange.collapse(true);
-      return firstRange.getBoundingClientRect().top + window.scrollY;
-    }
-    var walker = document.createTreeWalker(pre, NodeFilter.SHOW_TEXT, null, false);
-    var newlinesSeen = 0;
-    var node;
-    while ((node = walker.nextNode())) {
-      var text = node.textContent;
-      for (var i = 0; i < text.length; i++) {
-        if (text[i] === '\\n') {
-          newlinesSeen++;
-          if (newlinesSeen === targetLine - 1) {
-            var range = document.createRange();
-            range.setStart(node, i + 1);
-            range.collapse(true);
-            return range.getBoundingClientRect().top + window.scrollY;
-          }
-        }
-      }
-    }
-    return null;
-  }
-
-  function postLineOffset() {
-    var targetLine = ${Number.isFinite(targetLine) ? targetLine : "null"};
-    if (!targetLine || !window.ReactNativeWebView) return;
-    var offset = computeLineOffset(targetLine);
-    if (offset !== null) {
-      window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'lineOffset', y: offset }));
-    }
   }
 
   function isMermaid(el) {
@@ -531,7 +487,6 @@ function buildHtml(html: string, isDark: boolean, targetLine?: number): string {
 
   document.addEventListener('DOMContentLoaded', function() {
     init();
-    postLineOffset();
     postHeight();
     setTimeout(postHeight, 80);
   });
@@ -546,8 +501,6 @@ export function MarkdownRenderer({
   style,
   context,
   onHeightChange,
-  targetLine,
-  onLineOffset,
   filePath,
   onAnchorOffset,
 }: MarkdownRendererProps) {
@@ -577,7 +530,7 @@ export function MarkdownRenderer({
         );
 
         if (!cancelled) {
-          setHtml(buildHtml(resolveImageUrls(data, context), isDark, targetLine));
+          setHtml(buildHtml(resolveImageUrls(data, context), isDark));
         }
       } catch {
         if (!cancelled) {
@@ -586,7 +539,7 @@ export function MarkdownRenderer({
             .replace(/</g, "&lt;")
             .replace(/>/g, "&gt;")
             .replace(/\n/g, "<br>");
-          setHtml(buildHtml(`<pre>${escaped}</pre>`, isDark, targetLine));
+          setHtml(buildHtml(`<pre>${escaped}</pre>`, isDark));
         }
       }
     }
@@ -595,7 +548,7 @@ export function MarkdownRenderer({
     return () => {
       cancelled = true;
     };
-  }, [markdown, isDark, context, targetLine, filePath]);
+  }, [markdown, isDark, context, filePath]);
 
   // Hide the WebView until its content has painted and reported a height. A new
   // html string means a reload, so drop back to hidden and wait for that one.
@@ -632,8 +585,6 @@ export function MarkdownRenderer({
           setHeight(data.height);
           onHeightChange?.(data.height);
           reveal();
-        } else if (data.type === "lineOffset" && typeof data.y === "number") {
-          onLineOffset?.(data.y);
         } else if (data.type === "anchor" && typeof data.y === "number") {
           onAnchorOffset?.(data.y);
         } else if (data.type === "link" && typeof data.href === "string") {
@@ -652,7 +603,6 @@ export function MarkdownRenderer({
     [
       reveal,
       onHeightChange,
-      onLineOffset,
       onAnchorOffset,
       context,
       filePath,
