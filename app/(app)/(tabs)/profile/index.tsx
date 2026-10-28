@@ -14,6 +14,7 @@ import {
   View,
 } from "react-native";
 
+import { StatBlock } from "@/components/shared/StatBlock";
 import { useRepoCount } from "@/hooks/useRepoCount";
 import { useUser } from "@/hooks/useUser";
 import { queryKeys } from "@/lib/query-client";
@@ -162,7 +163,6 @@ export default function ProfileScreen() {
         <StatBlock
           value={repoCount ?? user?.public_repos ?? 0}
           label="Repositories"
-          colors={colors}
           isLoading={isLoading}
           onPress={() => router.navigate("/(app)/(tabs)/repos")}
         />
@@ -170,7 +170,6 @@ export default function ProfileScreen() {
         <StatBlock
           value={user?.followers ?? 0}
           label="Followers"
-          colors={colors}
           isLoading={isLoading}
           onPress={
             user?.login
@@ -186,7 +185,6 @@ export default function ProfileScreen() {
         <StatBlock
           value={user?.following ?? 0}
           label="Following"
-          colors={colors}
           isLoading={isLoading}
           onPress={
             user?.login
@@ -345,75 +343,6 @@ export default function ProfileScreen() {
         </Text>
       )}
     </ScrollView>
-  );
-}
-
-function StatBlock({
-  value,
-  label,
-  colors,
-  isLoading,
-  onPress,
-}: {
-  value: number;
-  label: string;
-  colors: ReturnType<typeof useTheme>["colors"];
-  isLoading: boolean;
-  onPress?: () => void;
-}) {
-  return (
-    <Pressable
-      style={({ pressed }) => [
-        { flex: 1, alignItems: "center", gap: Spacing.xs },
-        pressed && onPress && { opacity: 0.6 },
-      ]}
-      onPress={onPress}
-      disabled={!onPress}
-      accessibilityRole={onPress ? "button" : undefined}
-    >
-      {isLoading ? (
-        <>
-          <View
-            style={{
-              width: 48,
-              height: 22,
-              borderRadius: 4,
-              backgroundColor: colors.surfaceSecondary,
-            }}
-          />
-          <View
-            style={{
-              width: 64,
-              height: 13,
-              borderRadius: 4,
-              backgroundColor: colors.surfaceSecondary,
-            }}
-          />
-        </>
-      ) : (
-        <>
-          <Text
-            style={{
-              fontFamily: FontFamily.bold,
-              fontSize: FontSize.title,
-              color: colors.textPrimary,
-              fontVariant: ["tabular-nums"],
-            }}
-          >
-            {value.toLocaleString()}
-          </Text>
-          <Text
-            style={{
-              fontFamily: FontFamily.regular,
-              fontSize: FontSize.caption,
-              color: colors.textMuted,
-            }}
-          >
-            {label}
-          </Text>
-        </>
-      )}
-    </Pressable>
   );
 }
 

@@ -13,6 +13,7 @@ import {
   View,
 } from "react-native";
 
+import { StatBlock } from "@/components/shared/StatBlock";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { useUserProfileRepos } from "@/hooks/useUserProfileRepos";
 import { prefetchRepoDetails } from "@/lib/prefetch";
@@ -169,7 +170,6 @@ export default function UserProfileScreen() {
         <StatBlock
           value={user?.public_repos ?? 0}
           label="Repositories"
-          colors={colors}
           isLoading={isLoading}
           onPress={() =>
             router.push({
@@ -182,7 +182,6 @@ export default function UserProfileScreen() {
         <StatBlock
           value={user?.followers ?? 0}
           label="Followers"
-          colors={colors}
           isLoading={isLoading}
           onPress={() =>
             router.push({
@@ -195,7 +194,6 @@ export default function UserProfileScreen() {
         <StatBlock
           value={user?.following ?? 0}
           label="Following"
-          colors={colors}
           isLoading={isLoading}
           onPress={() =>
             router.push({
@@ -411,69 +409,6 @@ function RepoRow({
     </Pressable>
   );
 }
-
-function StatBlock({
-  value,
-  label,
-  colors,
-  isLoading,
-  onPress,
-}: {
-  value: number;
-  label: string;
-  colors: ColorTokens;
-  isLoading: boolean;
-  onPress?: () => void;
-}) {
-  return (
-    <Pressable
-      style={({ pressed }) => [
-        statStyles.container,
-        pressed && onPress && { opacity: 0.6 },
-      ]}
-      onPress={onPress}
-      disabled={!onPress}
-      accessibilityRole={onPress ? "button" : undefined}
-    >
-      {isLoading ? (
-        <>
-          <View style={[statStyles.skeleton, { width: 48, height: 22 }]} />
-          <View style={[statStyles.skeleton, { width: 64, height: 13 }]} />
-        </>
-      ) : (
-        <>
-          <Text style={[statStyles.value, { color: colors.textPrimary }]}>
-            {value.toLocaleString()}
-          </Text>
-          <Text style={[statStyles.label, { color: colors.textMuted }]}>
-            {label}
-          </Text>
-        </>
-      )}
-    </Pressable>
-  );
-}
-
-const statStyles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: "center",
-    gap: Spacing.xs,
-  },
-  value: {
-    fontFamily: FontFamily.bold,
-    fontSize: FontSize.title,
-    fontVariant: ["tabular-nums"],
-  },
-  label: {
-    fontFamily: FontFamily.regular,
-    fontSize: FontSize.caption,
-  },
-  skeleton: {
-    borderRadius: 4,
-    backgroundColor: "rgba(0,0,0,0.06)",
-  },
-});
 
 function MetaRow({
   icon,
