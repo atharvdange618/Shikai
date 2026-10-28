@@ -30,10 +30,8 @@ import { AnimatedSplashScreen } from "@/components/AnimatedSplashScreen";
 import { BlockingScreen } from "@/components/BlockingScreen";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { AlertProvider, useAlert } from "@/components/shared/Alert";
-import { AppRatingPrompt } from "@/components/AppRatingPrompt";
 import { OfflineBanner } from "@/components/OfflineBanner";
 import { ThemeProvider, useTheme } from "@/contexts/ThemeContext";
-import { useAppRatingPrompt } from "@/hooks/useAppRatingPrompt";
 import { useDeepLinks } from "@/hooks/useDeepLinks";
 import { useNotificationTaps } from "@/hooks/useNotificationTaps";
 import { useReviewPrompt } from "@/hooks/useReviewPrompt";
@@ -106,7 +104,6 @@ export default Sentry.wrap(function RootLayout() {
   const setUser = useAuthStore((s) => s.setUser);
   const setPat = useAuthStore((s) => s.setPat);
   useOnlineManager();
-  const { visible, rate, dismiss } = useAppRatingPrompt();
   useInAppUpdates();
 
   const [state, dispatch] = useReducer(bootReducer, initialBootState);
@@ -230,11 +227,6 @@ export default Sentry.wrap(function RootLayout() {
           >
             <AlertProvider>
               <OfflineBanner />
-              <AppRatingPrompt
-                visible={visible}
-                onRate={rate}
-                onDismiss={dismiss}
-              />
               <ThemeEffects />
               <OTAUpdateEffects />
               {showSplash && (

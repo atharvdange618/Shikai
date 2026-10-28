@@ -235,7 +235,7 @@ Entries D-001 to D-021 were backfilled on 2026-10-15 from commits, the changelog
 **Date:** 2026-10-26 · **Status:** Accepted
 
 **Context.** Most users are students, so ratings and reviews help Shikai more than sponsorships. A Sponsor link in the app is out: Play's payments policy exempts only tax-exempt donations and bars links to other payment methods.
-**Decision.** `expo-store-review` shows Play's review sheet 3 seconds after the fifth launch with a signed-in user, once per install. `lib/review-prompt.ts` keeps the count in its own MMKV instance (`shikai-review`), so `clearAllMMKV()` on sign-in and sign-out doesn't reset it.
+**Decision.** `expo-store-review` shows Play's review sheet 3 seconds after the fifth launch with a signed-in user, once per install. `lib/review-prompt.ts` holds the counting logic, and `hooks/useReviewPrompt.ts` keeps the count in its own MMKV instance (`shikai-review`), so `clearAllMMKV()` on sign-in and sign-out doesn't reset it. Play's sheet replaces the custom rating modal from 1.6.0, which is gone.
 **Rejected.** Asking after an action such as starring a repo, which Shikai can't do since it is read-only. Asking again on a schedule: Play caps the sheet itself and never says whether it showed or whether the user rated, so repeat asks mostly do nothing.
 **Consequences.** A user who dismisses the sheet is never asked again. The sheet only shows for Play installs; GitHub APK installs skip it because `isAvailableAsync()` or Play itself declines.
 **Revisit if.** Play adds a way to know whether the user rated, or the review count stays flat after 1.7.0 reaches most users.
