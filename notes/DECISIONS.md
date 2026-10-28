@@ -249,3 +249,13 @@ Entries D-001 to D-021 were backfilled on 2026-10-15 from commits, the changelog
 **Rejected.** TanStack Markdown for `.md` files: not full GFM, and it escapes raw HTML that READMEs rely on. Keeping code on `/markdown`: slower, and the reason for the complaint. Mapping a markdown `#L` line to the heading above it: more code for links that are rare, since github.com's rendered view ignores `#L` too.
 **Consequences.** `MarkdownRenderer` and `blame-highlight.ts` still color with GitHub's `pl-*` classes, so code blocks in a README and a code file can differ slightly in color. Files over 5000 lines, and minified files, lose colors. A `#L` link into a markdown file lands near the line, not on it.
 **Revisit if.** Highlighting a 5000-line file takes over a second on a low-end phone, or users ask for exact lines in markdown files.
+
+## D-026: People and fork lists stay off the disk cache
+
+**Date:** 2026-10-28 · **Status:** Accepted
+
+**Context.** Stargazers, forks, followers and following are paged lists that can run to 400 pages. Under D-006 they persisted to MMKV like any other query, so every page a user scrolled through stayed on disk for 24 hours.
+**Decision.** `useStargazers`, `useForks`, `useFollowers` and `useFollowing` set `meta: { persist: false }`. They still cache in memory for 5 minutes (`PAGED_LIST_STALE_TIME`).
+**Rejected.** Persisting them: users rarely reopen these lists after a restart, and the stargazers list is fetched with the PAT, which D-006 keeps off disk.
+**Consequences.** Opening one of these lists after a cold start shows a spinner instead of cached rows.
+**Revisit if.** Users reopen these lists often enough that the spinner gets complaints.

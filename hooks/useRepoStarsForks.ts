@@ -17,6 +17,7 @@ export function useStargazers(owner: string, repo: string) {
         fetchStargazers(owner, repo, pageParam, pat),
       enabled: Boolean(owner && repo && pat),
       staleTime: PAGED_LIST_STALE_TIME,
+      meta: { persist: false },
     },
     flattenItems,
   );
@@ -31,6 +32,7 @@ export function useForks(owner: string, repo: string) {
       queryFn: ({ pageParam }) => fetchForks(owner, repo, pageParam),
       enabled: Boolean(owner && repo),
       staleTime: PAGED_LIST_STALE_TIME,
+      meta: { persist: false },
     },
     flattenItems,
   );

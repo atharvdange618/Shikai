@@ -13,6 +13,7 @@ export function useFollowers(username: string) {
       queryFn: ({ pageParam }) => fetchFollowers(username, pageParam),
       enabled: Boolean(username),
       staleTime: PAGED_LIST_STALE_TIME,
+      meta: { persist: false },
     },
     flattenItems,
   );
@@ -27,6 +28,7 @@ export function useFollowing(username: string) {
       queryFn: ({ pageParam }) => fetchFollowing(username, pageParam),
       enabled: Boolean(username),
       staleTime: PAGED_LIST_STALE_TIME,
+      meta: { persist: false },
     },
     flattenItems,
   );
