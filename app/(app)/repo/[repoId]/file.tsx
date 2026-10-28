@@ -14,7 +14,12 @@ import { PdfViewer } from "@/components/file/PdfViewer";
 import { VideoViewer } from "@/components/file/VideoViewer";
 import { Spacing, useTheme } from "@/constants/theme";
 import { useFileContent, useRepo } from "@/hooks/useRepoDetails";
-import { decodeRepoId, getFileKind, parseTargetLine } from "@/lib/utils";
+import {
+  decodeRepoId,
+  getFileKind,
+  isSvgFile,
+  parseTargetLine,
+} from "@/lib/utils";
 
 export default function FileViewerScreen() {
   return (
@@ -191,7 +196,7 @@ function FileViewerScreenContent() {
           <ImageViewer
             key={url}
             url={url}
-            isSvg={fileName?.toLowerCase().endsWith(".svg") ?? false}
+            isSvg={isSvgFile(fileName ?? "")}
           />
         );
       case "video":

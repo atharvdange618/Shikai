@@ -11,6 +11,7 @@ import {
   getFileKind,
   getLanguage,
   isImageFile,
+  isSvgFile,
   isVideoFile,
   parseTargetLine,
   relativeTime,
@@ -86,6 +87,12 @@ describe("file type checks", () => {
   it("matches image extensions case-insensitively", () => {
     expect(isImageFile("Diagram.PNG")).toBe(true);
     expect(isImageFile("notes.txt")).toBe(false);
+  });
+
+  it("matches svg case-insensitively and nothing else", () => {
+    expect(isSvgFile("Logo.SVG")).toBe(true);
+    expect(isSvgFile("logo.png")).toBe(false);
+    expect(isSvgFile("svg")).toBe(false);
   });
 
   it("matches video extensions", () => {
