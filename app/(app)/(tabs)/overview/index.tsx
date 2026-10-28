@@ -465,8 +465,8 @@ export default function OverviewScreen() {
               </Text>
             </View>
             <Text style={[s.patPromptBody, { color: colors.textSecondary }]}>
-              Add a Personal Access Token to see who&apos;s following you and get
-              real-time notifications.
+              Add a Personal Access Token to see what people you follow are up
+              to and get alerts when someone needs you.
             </Text>
             <View style={s.patPromptFeatures}>
               <View style={s.patPromptFeature}>
@@ -478,7 +478,7 @@ export default function OverviewScreen() {
               <View style={s.patPromptFeature}>
                 <Octicons name="bell" size={12} color={colors.textMuted} />
                 <Text style={[s.patPromptFeatureText, { color: colors.textMuted }]}>
-                  Push notifications
+                  Notification alerts
                 </Text>
               </View>
             </View>
