@@ -1,6 +1,6 @@
 # Shikai Roadmap
 
-> **Version:** 1.6.0 · **Last Updated:** October 21, 2026 · **Status:** Active Development
+> **Version:** 1.7.0 · **Last Updated:** October 28, 2026 · **Status:** Active Development
 
 This document tracks the feature backlog and development progress for Shikai.
 
@@ -11,7 +11,7 @@ This document tracks the feature backlog and development progress for Shikai.
 | Feature                           | Description                                                                                                                                     | Status |
 | --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
 | GitHub Contribution Streak Widget | Android home screen widget displaying current streak, longest streak, and recent activity. Syncs with app theme and updates on data refresh.    | Done   |
-| OTA Updates                       | Silent over-the-air updates via `expo-updates` with EAS build profiles. App checks for updates on launch and applies them transparently.        | Done   |
+| OTA Updates                       | Over-the-air updates via `expo-updates` with EAS build profiles. App checks for updates on launch, downloads them, and asks before restarting to apply. | Done   |
 | SVG and PDF Rendering             | File viewer now supports SVG and PDF files with native rendering. Replaced `VirtualizedCodeViewer` with `MarkdownRenderer` for unified display. | Done   |
 | OAuth 2FA Fix                     | Opens OAuth in external browser and handles deep link redirect to survive 2FA authentication flows.                                             | Done   |
 | Tooltip Behavior Fix              | Tooltips close on outside press and tab change for cleaner UX.                                                                                  | Done   |
@@ -34,6 +34,9 @@ This document tracks the feature backlog and development progress for Shikai.
 | Repository access hint            | `useInstallations` reads the user's GitHub App installations. When their own installation is missing or set to selected repos, the Repos tab shows a "Manage access" hint, and Settings has a "Manage repository access" row; both open GitHub's installation page. Installations refetch whenever the app returns to the foreground (`staleTime: 0`). Sign-in asks for an install unless `hasOwnInstallation` finds one on the user's own account, since `/user/installations` also lists org installs; "Skip for now" signs in anyway. Shipped by OTA on 1.5.0. (#18) | Done   |
 | Repo insights                     | An "Insights" row on repo detail opens `repo/[repoId]/insights.tsx`: 52 weeks of commit activity as bars, the top 10 contributors with lines added and removed (hidden on 10,000+ commit repos, where GitHub reports zeros), and a 7x24 punch card in the contribution graph colors. Reads `/stats/commit_activity`, `/stats/contributors` and `/stats/punch_card`. GitHub answers 202 while it builds stats, so `getStats` in `lib/github-rest.ts` throws on 202 and `statsRetry` in `lib/query-client.ts` retries 5 times, 3s apart. `/stats/code_frequency` left out (422 on 10,000+ commit repos). github.com `/pulse` and `/graphs/*` links open it. | Done   |
 | Notification alerts               | Opt-in "Notification alerts" switch in Settings (needs a PAT). An `expo-background-task` (WorkManager) task in `lib/background-notifications.ts` polls `/notifications?participating=true` every 15 minutes or later, sending `If-None-Match` with the stored ETag so a quiet poll is a free 304 (GitHub omits `Last-Modified` when the list is empty). `lib/notification-poller.ts` keeps a marker in MMKV, seeded silently on the first run from GitHub's newest `updated_at`, and alerts on at most 3 threads plus an "N more" summary. Local notifications only, no push service. An auth store subscription turns alerts off on sign-out or PAT removal; a 401 on the PAT turns them off with a note in Settings. `hooks/useNotificationTaps.ts` opens the thread on tap, warm or cold start, via `parseGitHubApiUrl()`. Native packages, so it ships in the 1.6.0 store build. | Done   |
+| Tappable stats                    | Repo stats open the commit history, forks (most starred first, capped at GitHub's 400-page limit) and stargazers (only with push access and a PAT, see D-023). Profile stats open followers, following and repos. The lists share `PagedList` in `components/shared/` and stay off the disk cache (D-026). Shipped by OTA on 1.6.0. | Done   |
+| On-device code highlighting       | Code files render in `components/file/CodeViewer.tsx`, highlighted on device by `@tanstack/highlight`, with line numbers, a wrap toggle and the `#L` line marked. Markdown stays on GitHub's renderer. See D-025. 1.7.0. | Done   |
+| Play review prompt                | `expo-store-review` shows Play's review sheet once, on the fifth signed-in launch. Replaces the 1.6.0 custom rating modal. See D-024. 1.7.0. | Done   |
 
 ---
 

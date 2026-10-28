@@ -69,7 +69,7 @@ The reducer is a pure function with its own tests. Add new boot states there, no
 
 - **Server state** lives in React Query (`lib/query-client.ts`). Every key comes from the `queryKeys` table, and each resource has a hook in `hooks/`. Stale times run from 1 minute (commits, events) to 30 minutes (profiles). The comment at the top of `query-client.ts` lists them.
 - **Prefetch.** `lib/prefetch.ts` warms the cache before a screen opens, in three layers. Route prefetch readies the screen. Data prefetch fires on mount or press: for example, search results prefetch repo details as they appear. Chained prefetch fetches what the next screen depends on, like the repo before its file tree. The goal is that screens paint from cache.
-- **Disk cache.** React Query persists to MMKV (`lib/persister.ts`) and keeps entries for 24 hours. A query opts out with `meta: { persist: false }`. Use that for anything short-lived or private, like search.
+- **Disk cache.** React Query persists to MMKV (`lib/persister.ts`) and keeps entries for 24 hours. A query opts out with `meta: { persist: false }`. Use that for anything short-lived or private, like search, and for long paged lists such as stargazers and followers (D-026).
 - **Local state** lives in Zustand stores (`stores/`). The watchlist and recent searches each persist to their own MMKV instance.
 - **Account switches wipe everything.** Sign-in and sign-out call `clearAllMMKV()`, which clears the cache and resets the persisted stores. Any new store that holds account data must join that function, or it leaks into the next account.
 

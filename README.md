@@ -39,7 +39,7 @@ Shikai gives you a clean, read-only view of your GitHub world. No write operatio
     <td><img src="https://img.shields.io/badge/-Repositories-blue?style=flat-square" alt="Repos"> Browse repos with filters, file trees, syntax highlighting, and health badges</td>
   </tr>
   <tr>
-    <td><img src="https://img.shields.io/badge/-Search-green?style=flat-square" alt="Search"> Global search across repos, users, and issues with fuzzy matching</td>
+    <td><img src="https://img.shields.io/badge/-Search-green?style=flat-square" alt="Search"> Global search across repos, users, issues, and topics</td>
     <td><img src="https://img.shields.io/badge/-Profile-orange?style=flat-square" alt="Profile"> Your GitHub card with stats, social links, notifications, and saved repos</td>
   </tr>
 </table>
@@ -66,7 +66,7 @@ Take a look at Shikai before you install: **[View Screenshots on Google Drive](h
 | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Overview Dashboard** | Pinned repos, contribution graph with streaks, live activity feed, and following preview                                                                                                                                                                                                                                                                                                                                           |
 | **Repository Browser** | File trees with blame and per-file history, syntax highlighting, releases, discussions, repo insights (commit activity, top contributors, punch card), compare-two-refs, Actions workflow runs with job logs, PR detail with diffs, checks, reviewers, commits, and review comments with diff context, issue/PR timelines and reactions, a branch selector, and tappable stats that open the commit history, forks, and stargazers |
-| **Global Search**      | Fuzzy search across repos, users, issues, and topics with debounced input, recent searches, and eager pagination                                                                                                                                                                                                                                                                                                                   |
+| **Global Search**      | Search across repos, users, issues, and topics with debounced input, recent searches, and eager pagination                                                                                                                                                                                                                                                                                                                         |
 | **User Profiles**      | View any GitHub user's profile with avatar, bio, and top repositories. Tap Followers, Following, or Repositories to open those lists                                                                                                                                                                                                                                                                                               |
 | **Android Widget**     | Home screen widget showing contribution streak with longest streak and recent activity                                                                                                                                                                                                                                                                                                                                             |
 
@@ -107,7 +107,9 @@ Network state detection with MMKV-backed disk persistence. The app works offline
 - **OTA Updates** - Over-the-air updates via expo-updates. The app checks on launch and asks before restarting to apply an update.
 - **File Viewer** - Code files highlighted on device with line numbers, a wrap toggle, and the linked line marked. Markdown, SVG, PDF, and video rendering too, with a copy button for text files.
 - **Play Store Updates** - Native in-app update prompt when a new release is on the Play Store
-- **Haptics** - Feedback on pull-to-refresh, tab switch, and bookmark. Respects the system reduced-motion setting.
+- **Haptics** - Feedback on pull-to-refresh, tab switch, and bookmark
+- **Reduced Motion** - The Overview fade-in and tab icon animations turn off when the system reduced-motion setting is on
+- **Rate Shikai** - On your fifth launch while signed in, Play Store installs show Google Play's rating sheet once
 - **Error Recovery** - Error boundaries around the root, tabs, file viewer, and PR/issue screens, with a custom 404 screen
 - **Repository Access** - The Repos tab tells you when Shikai can only see some of your repos, and Settings links to GitHub's page for choosing which ones it can read
 - **Saved Repos** - Bookmark any repo. Stars and Watchlist combined in one screen with search and filter
