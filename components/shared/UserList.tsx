@@ -1,25 +1,16 @@
 import { Octicons } from "@expo/vector-icons";
-import { FlashList } from "@shopify/flash-list";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
-import { useCallback, useMemo, useState } from "react";
-import {
-  ActivityIndicator,
-  Pressable,
-  RefreshControl,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { useCallback, useMemo } from "react";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 
-import { ListItemSeparator } from "@/components/shared/ListItemSeparator";
+import { PagedList } from "@/components/shared/PagedList";
 import type { GitHubSimpleUser } from "@/types/github.types";
 
 import {
   type ColorTokens,
   FontFamily,
   FontSize,
-  Layout,
   Radius,
   Spacing,
   useTheme,
@@ -53,13 +44,6 @@ export function UserList({
   const router = useRouter();
   const { colors } = useTheme();
   const s = useMemo(() => buildStyles(colors), [colors]);
-  const [refreshing, setRefreshing] = useState(false);
-
-  const onRefresh = useCallback(async () => {
-    setRefreshing(true);
-    await refetch();
-    setRefreshing(false);
-  }, [refetch]);
 
   const renderItem = useCallback(
     ({ item }: { item: GitHubSimpleUser }) => (
@@ -88,60 +72,25 @@ export function UserList({
     [s, colors, router],
   );
 
-  const ListEmpty = isLoading ? (
-    <View style={s.centered}>
-      <ActivityIndicator size="large" color={colors.accent} />
-    </View>
-  ) : (
-    <View style={s.centered}>
-      <Text style={s.emptyTitle}>{isError ? errorText : emptyText}</Text>
-    </View>
-  );
-
   return (
-    <View style={s.container}>
-      <FlashList
-        data={users}
-        renderItem={renderItem}
-        keyExtractor={keyExtractor}
-        contentContainerStyle={s.listContent}
-        ItemSeparatorComponent={ListItemSeparator}
-        ListEmptyComponent={ListEmpty}
-        ListFooterComponent={
-          isFetchingNextPage ? (
-            <View style={s.footerLoader}>
-              <ActivityIndicator size="small" color={colors.accent} />
-            </View>
-          ) : null
-        }
-        onEndReached={() => {
-          if (hasNextPage) fetchNextPage();
-        }}
-        onEndReachedThreshold={0.5}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            tintColor={colors.accent}
-            colors={[colors.accent]}
-          />
-        }
-      />
-    </View>
+    <PagedList
+      data={users}
+      renderItem={renderItem}
+      keyExtractor={keyExtractor}
+      isLoading={isLoading}
+      isError={isError}
+      hasNextPage={hasNextPage}
+      isFetchingNextPage={isFetchingNextPage}
+      fetchNextPage={fetchNextPage}
+      refetch={refetch}
+      emptyText={emptyText}
+      errorText={errorText}
+    />
   );
 }
 
 function buildStyles(colors: ColorTokens) {
   return StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: colors.background,
-    },
-    listContent: {
-      paddingHorizontal: Layout.screenPadding,
-      paddingTop: Spacing.md,
-      paddingBottom: Spacing.xxl,
-    },
     card: {
       flexDirection: "row",
       alignItems: "center",
@@ -171,20 +120,6 @@ function buildStyles(colors: ColorTokens) {
       fontFamily: FontFamily.regular,
       fontSize: FontSize.caption,
       color: colors.textMuted,
-    },
-    centered: {
-      paddingTop: Spacing["3xl"],
-      alignItems: "center",
-      gap: Spacing.md,
-    },
-    emptyTitle: {
-      fontFamily: FontFamily.semiBold,
-      fontSize: FontSize.body,
-      color: colors.textSecondary,
-    },
-    footerLoader: {
-      paddingVertical: Spacing.lg,
-      alignItems: "center",
     },
   });
 }
