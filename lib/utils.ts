@@ -95,6 +95,10 @@ export function isImageFile(filename: string): boolean {
   return IMAGE_EXTENSIONS.some((ext) => filename.toLowerCase().endsWith(ext));
 }
 
+export function isSvgFile(filename: string): boolean {
+  return filename.toLowerCase().endsWith(".svg");
+}
+
 const VIDEO_EXTENSIONS = [".mp4", ".mov", ".webm", ".mkv", ".avi", ".m4v"];
 
 export function isVideoFile(filename: string): boolean {

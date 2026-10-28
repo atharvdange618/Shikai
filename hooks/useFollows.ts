@@ -1,6 +1,10 @@
 import { fetchFollowers, fetchFollowing } from "@/lib/github-rest";
 import { queryKeys } from "@/lib/query-client";
-import { useInfinitePagedQuery } from "@/hooks/useInfinitePagedQuery";
+import {
+  flattenItems,
+  PAGED_LIST_STALE_TIME,
+  useInfinitePagedQuery,
+} from "@/hooks/useInfinitePagedQuery";
 
 export function useFollowers(username: string) {
   const { items: users, ...rest } = useInfinitePagedQuery(
@@ -8,9 +12,10 @@ export function useFollowers(username: string) {
       queryKey: queryKeys.userFollowers(username),
       queryFn: ({ pageParam }) => fetchFollowers(username, pageParam),
       enabled: Boolean(username),
-      staleTime: 1000 * 60 * 5,
+      staleTime: PAGED_LIST_STALE_TIME,
+      meta: { persist: false },
     },
-    (data) => data?.pages.flatMap((p) => p.items) ?? [],
+    flattenItems,
   );
 
   return { users, ...rest };
@@ -22,9 +27,10 @@ export function useFollowing(username: string) {
       queryKey: queryKeys.userFollowing(username),
       queryFn: ({ pageParam }) => fetchFollowing(username, pageParam),
       enabled: Boolean(username),
-      staleTime: 1000 * 60 * 5,
+      staleTime: PAGED_LIST_STALE_TIME,
+      meta: { persist: false },
     },
-    (data) => data?.pages.flatMap((p) => p.items) ?? [],
+    flattenItems,
   );
 
   return { users, ...rest };

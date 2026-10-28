@@ -9,12 +9,12 @@ import {
   type ColorTokens,
 } from "@/constants/theme";
 
-interface LoadingProgressProps {
+interface FileLoadingProps {
   isLoading: boolean;
   fileName: string;
 }
 
-export function LoadingProgress({ isLoading, fileName }: LoadingProgressProps) {
+export function FileLoading({ isLoading, fileName }: FileLoadingProps) {
   const { colors } = useTheme();
   const s = useMemo(() => buildStyles(colors), [colors]);
 

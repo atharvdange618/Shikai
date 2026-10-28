@@ -446,7 +446,7 @@ async function fetchPagedList<T>(
   path: string,
   page: number,
   params: Record<string, string | number> = {},
-  pat?: string,
+  pat?: string | null,
 ): Promise<{ items: T[]; pagination: GitHubPagination }> {
   const { data, headers } = await githubAxios.get<T[]>(path, {
     params: { page, per_page: 30, ...params },
@@ -463,7 +463,7 @@ export function fetchStargazers(
   owner: string,
   repo: string,
   page: number,
-  pat: string,
+  pat: string | null,
 ) {
   return fetchPagedList<GitHubSimpleUser>(
     `/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/stargazers`,
