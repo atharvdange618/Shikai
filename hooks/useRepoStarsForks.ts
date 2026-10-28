@@ -14,7 +14,7 @@ export function useStargazers(owner: string, repo: string) {
     {
       queryKey: queryKeys.repoStargazers(owner, repo),
       queryFn: ({ pageParam }) =>
-        fetchStargazers(owner, repo, pageParam, pat ?? ""),
+        fetchStargazers(owner, repo, pageParam, pat),
       enabled: Boolean(owner && repo && pat),
       staleTime: PAGED_LIST_STALE_TIME,
     },
