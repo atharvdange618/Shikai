@@ -14,6 +14,16 @@ type PagedQueryOptions<TQueryFnData extends Paged, TData> = Omit<
   "initialPageParam" | "getNextPageParam"
 >;
 
+/** How long the people and fork lists stay fresh. */
+export const PAGED_LIST_STALE_TIME = 1000 * 60 * 5;
+
+/** The `flatten` for pages shaped `{ items }`: every page's items in order. */
+export function flattenItems<T>(
+  data: InfiniteData<{ items: T[] }> | undefined,
+): T[] {
+  return data?.pages.flatMap((p) => p.items) ?? [];
+}
+
 /**
  * Wraps useInfiniteQuery for the REST endpoints that all page the same way
  * (numeric page param, `pagination.next` from the Link header) and return
