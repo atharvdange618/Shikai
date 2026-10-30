@@ -8,6 +8,9 @@ Needs a new store build: adds the `expo-store-review` native module.
 
 - **Rate Shikai** - On your fifth launch while signed in, Shikai shows Google Play's rating sheet once. You can rate without leaving the app, or dismiss it and never see it again. The old in-app rating card is gone.
 - **Readable code files** - Code files fill the screen instead of sitting in a card, with line numbers, a wrap toggle, and syntax colors that match your theme. They open faster too, since Shikai colors them on your phone instead of asking GitHub. A `#L` link marks its line. Files over 5000 lines, and minified files, show without colors. ([`721c770`](https://github.com/atharvdange618/Shikai/commit/721c770), [`adf70ae`](https://github.com/atharvdange618/Shikai/commit/adf70ae))
+- **Redesigned Settings** - Settings is four grouped cards: your account at the top, a strip of theme previews, Alerts, and Account with your access token, repo access and sign out. Your theme now survives Clear cache. ([#29](https://github.com/atharvdange618/Shikai/pull/29), [`476d220`](https://github.com/atharvdange618/Shikai/commit/476d220))
+- **Redesigned Profile** - Your profile and other people's profiles share one header, and yours lists your recently updated repos. ([#30](https://github.com/atharvdange618/Shikai/pull/30), [`21f9916`](https://github.com/atharvdange618/Shikai/commit/21f9916))
+- **Redesigned sign-in** - The sign-in buttons sit at the bottom, in reach of your thumb, with three lines above them on what Shikai does. In token mode the field stays above the keyboard, with a link that opens GitHub's token page with the right scopes ticked. ([#31](https://github.com/atharvdange618/Shikai/pull/31), [`5ea1ddb`](https://github.com/atharvdange618/Shikai/commit/5ea1ddb))
 
 ### Fixes
 
@@ -18,6 +21,9 @@ Needs a new store build: adds the `expo-store-review` native module.
 - **github.com links showed "Page not found"** - Opening a github.com link into Shikai while it was already running showed "Page not found" over the right screen. It now opens the file, PR, issue or profile, and links Shikai has no screen for open in the browser. ([`a42a59d`](https://github.com/atharvdange618/Shikai/commit/a42a59d))
 - **Shared links opened Overview** - Sharing a github.com link to Shikai while it was closed opened Overview instead of the shared page. It now opens the page, with Overview behind it. A link shared while signed out opens after you sign in. ([`db6b1fb`](https://github.com/atharvdange618/Shikai/commit/db6b1fb))
 - **Alert taps opened Overview** - Tapping an alert while Shikai was closed opened Overview instead of the thread. It now opens the thread, with Overview behind it. ([`0e08dca`](https://github.com/atharvdange618/Shikai/commit/0e08dca))
+- **Issue search found nothing** - Your work showed "Nothing here right now" and the Issues tab in Search found nothing, because GitHub's issue search returns no results for the token Shikai gets at sign-in. Both now use your saved personal access token, and ask for one when none is saved. ([#33](https://github.com/atharvdange618/Shikai/pull/33), [`ebad522`](https://github.com/atharvdange618/Shikai/commit/ebad522))
+- **Activity out of order** - Recent Activity and the Following feed showed events out of order, because GitHub doesn't send them by date. They now read newest first. ([#34](https://github.com/atharvdange618/Shikai/pull/34), [`d6ad488`](https://github.com/atharvdange618/Shikai/commit/d6ad488))
+- **Mark all read offline** - Mark all read while offline left every thread looking read. It now puts them back when the request fails. Lists also show a spinner while the next page loads, and the contribution info icon is easier to tap. ([#32](https://github.com/atharvdange618/Shikai/pull/32), [`82cb261`](https://github.com/atharvdange618/Shikai/commit/82cb261))
 
 ## v1.6.0 OTA update 2 (October 26, 2026)
 
