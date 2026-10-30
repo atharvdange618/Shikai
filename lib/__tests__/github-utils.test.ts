@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import type { ColorTokens } from "@/constants/theme";
-import { getEventDisplay } from "@/lib/github-utils";
+import { getEventDisplay, sortEventsNewestFirst } from "@/lib/github-utils";
 import type { GitHubEvent } from "@/types/github.types";
 
 // getEventDisplay reads only three color tokens.
@@ -88,5 +88,23 @@ describe("getEventDisplay", () => {
         colors,
       ),
     ).toBeNull();
+  });
+});
+
+describe("sortEventsNewestFirst", () => {
+  it("orders events by created_at, newest first", () => {
+    const at = (created_at: string) => ({ created_at }) as GitHubEvent;
+    const sorted = sortEventsNewestFirst([
+      at("2026-10-21T18:25:12Z"),
+      at("2026-10-23T11:00:11Z"),
+      at("2025-06-23T08:37:30Z"),
+      at("2026-10-30T12:38:29Z"),
+    ]);
+    expect(sorted.map((e) => e.created_at)).toEqual([
+      "2026-10-30T12:38:29Z",
+      "2026-10-23T11:00:11Z",
+      "2026-10-21T18:25:12Z",
+      "2025-06-23T08:37:30Z",
+    ]);
   });
 });

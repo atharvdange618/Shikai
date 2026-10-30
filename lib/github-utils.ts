@@ -2,6 +2,12 @@ import type { ColorTokens } from "@/constants/theme";
 import type { GitHubEvent } from "@/types/github.types";
 import type { Octicons } from "@expo/vector-icons";
 
+// GitHub's events feed isn't in date order, so a push can land below older events.
+// ISO timestamps sort as strings.
+export function sortEventsNewestFirst(events: GitHubEvent[]): GitHubEvent[] {
+  return [...events].sort((a, b) => b.created_at.localeCompare(a.created_at));
+}
+
 export interface EventDisplay {
   icon: React.ComponentProps<typeof Octicons>["name"];
   iconColor: string;

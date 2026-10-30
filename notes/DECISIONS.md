@@ -259,3 +259,17 @@ Entries D-001 to D-021 were backfilled on 2026-10-15 from commits, the changelog
 **Rejected.** Persisting them: users rarely reopen these lists after a restart, and the stargazers list is fetched with the PAT, which D-006 keeps off disk.
 **Consequences.** Opening one of these lists after a cold start shows a spinner instead of cached rows.
 **Revisit if.** Users reopen these lists often enough that the spinner gets complaints.
+
+## D-028: Activity feeds sort by date and show only what GitHub's events API returns
+
+**Date:** 2026-10-30 · **Status:** Accepted
+
+**Context.** Recent Activity and the Following feed read `/users/{user}/events` and `/users/{user}/received_events`. On 2026-10-30, a user reported that NFC-Manager and Toolchain never showed in Recent Activity. `gh api /users/atharvdange618/events` showed three limits on GitHub's side:
+- The API keeps at most 300 events and about 30 days. Busy repos fill it: 117 Shikai and 87 yt-prototype events pushed NFC-Manager and Toolchain to positions 150 to 268, page 8 or later at 20 a page.
+- The feed is not in date order. That one response had 83 inversions, and a 2025-06-23 event sat near position 207.
+- Some pushes never get an event. Toolchain's push on 2026-10-30 (`pushedAt` 08:48Z) had no PushEvent, though its commits and `pushedAt` showed it.
+
+**Decision.** `sortEventsNewestFirst()` in `lib/github-utils.ts` sorts the loaded events in `useEvents` and `useReceivedEvents`. Beyond that, the feeds show what the API returns. Shikai can't show events that fall past the 300 cap or that GitHub never created.
+**Rejected.** Fetching every page up front: it costs up to 15 requests per load and still misses events GitHub never created. Rebuilding activity from per-repo commits: one request per repo, and it drifts from what github.com shows.
+**Consequences.** Loading the next page can drop a newer event in above rows already on screen. When a user reports a missing repo or push, check the raw API with `gh api /users/<login>/events --paginate -q '.[] | "\(.created_at) \(.type) \(.repo.name)"'`. If the event is missing there or past position 300, the gap comes from GitHub, not Shikai.
+**Revisit if.** Users keep asking for recently active repos. A "recently pushed repos" row from `/user/repos?sort=pushed` would cover both the buried repos and the missing pushes; it isn't built yet.
