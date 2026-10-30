@@ -4,7 +4,13 @@ import * as Crypto from "expo-crypto";
 import { Image } from "expo-image";
 import * as Linking from "expo-linking";
 import * as WebBrowser from "expo-web-browser";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  type ComponentProps,
+} from "react";
 import {
   ActivityIndicator,
   Pressable,
@@ -21,9 +27,11 @@ import Animated, {
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { KeyboardAvoid } from "@/components/shared/KeyboardAvoid";
 import {
   FontFamily,
   FontSize,
+  IconSize,
   Radius,
   Shadows,
   Spacing,
@@ -58,6 +66,19 @@ const OAUTH_PROXY_URL = process.env.EXPO_PUBLIC_OAUTH_PROXY_URL!;
 const SCOPES = ["read:user", "user:email", "repo:status", "read:repo"].join(
   ",",
 );
+
+// Classic-token scopes that cover every read path in the app.
+const NEW_TOKEN_URL =
+  "https://github.com/settings/tokens/new?scopes=repo,read:user&description=Shikai";
+
+const FEATURES: {
+  icon: ComponentProps<typeof Octicons>["name"];
+  text: string;
+}[] = [
+  { icon: "repo", text: "Repos, pull requests and issues in one place" },
+  { icon: "graph", text: "Your contribution graph as a home screen widget" },
+  { icon: "bell", text: "Optional alerts for review requests and mentions" },
+];
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
@@ -419,154 +440,182 @@ export default function SignInScreen() {
   );
 
   return (
-    <View style={s.container}>
-      <Animated.View
-        entering={FadeInDown.delay(0).duration(400).springify()}
-        style={s.logoBlock}
-      >
-        <View style={s.logoMark}>
-          <Image
-            source={
-              isDark
-                ? require("@/assets/images/splash-icon-dark.png")
-                : require("@/assets/images/splash-icon.png")
-            }
-            style={s.logoImage}
-            contentFit="contain"
-          />
-        </View>
-        <Text style={s.appName}>Shikai</Text>
-        <Text style={s.tagline}>Your GitHub dashboard, at a glance.</Text>
-      </Animated.View>
-
-      <Animated.View
-        entering={FadeInDown.delay(80).duration(400).springify()}
-        style={s.pillRow}
-      >
-        {["Read-only", "No tracking", "On-device"].map((label) => (
-          <View key={label} style={s.pill}>
-            <Text style={s.pillText}>{label}</Text>
-          </View>
-        ))}
-      </Animated.View>
-
-      <Animated.View
-        entering={FadeInDown.delay(160).duration(400).springify()}
-        style={s.ctaBlock}
-      >
-        {needsInstall ? (
-          <>
-            <Text style={s.installTitle}>One more step</Text>
-            <Text style={s.installDesc}>
-              Choose which repositories Shikai can access on GitHub.
-            </Text>
-            <AnimatedPressable
-              style={[s.button, isLoading && s.buttonLoading, buttonStyle]}
-              onPress={handleInstall}
-              onPressIn={handlePressIn}
-              onPressOut={handlePressOut}
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <ActivityIndicator color="#fff" size="small" />
-              ) : (
-                <Text style={s.buttonText}>Set up repo access</Text>
-              )}
-            </AnimatedPressable>
-            <Pressable onPress={handleSkipInstall} disabled={isLoading}>
-              <Text style={s.secondaryLink}>Skip for now</Text>
-            </Pressable>
-          </>
-        ) : showTokenInput ? (
-          <>
-            <TextInput
-              style={s.tokenInput}
-              value={tokenInput}
-              onChangeText={(text) => {
-                setTokenInput(text);
-                setTokenError(null);
-              }}
-              placeholder="ghp_… or github_pat_…"
-              placeholderTextColor={colors.textMuted}
-              autoCapitalize="none"
-              autoCorrect={false}
-              secureTextEntry
-              editable={!tokenLoading}
-            />
-            <AnimatedPressable
-              style={[s.button, tokenLoading && s.buttonLoading, buttonStyle]}
-              onPress={handleTokenSignIn}
-              onPressIn={handlePressIn}
-              onPressOut={handlePressOut}
-              disabled={tokenLoading || !tokenInput.trim()}
-            >
-              {tokenLoading ? (
-                <ActivityIndicator color="#fff" size="small" />
-              ) : (
-                <Text style={s.buttonText}>Continue</Text>
-              )}
-            </AnimatedPressable>
-            <Pressable
-              onPress={() => {
-                setShowTokenInput(false);
-                setTokenInput("");
-                setTokenError(null);
-              }}
-              disabled={tokenLoading}
-            >
-              <Text style={s.secondaryLink}>Back to GitHub sign in</Text>
-            </Pressable>
-            {tokenError && (
-              <Animated.View entering={FadeInDown.duration(200)}>
-                <Text style={s.errorText}>{tokenError}</Text>
-              </Animated.View>
-            )}
-          </>
-        ) : (
-          <>
-            <AnimatedPressable
-              style={[s.button, isLoading && s.buttonLoading, buttonStyle]}
-              onPress={handleSignIn}
-              onPressIn={handlePressIn}
-              onPressOut={handlePressOut}
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <ActivityIndicator color="#fff" size="small" />
-              ) : (
-                <>
-                  <Octicons
-                    name="mark-github"
-                    size={18}
-                    color="#fff"
-                    style={s.buttonIcon}
-                  />
-                  <Text style={s.buttonText}>Sign in with GitHub</Text>
-                </>
-              )}
-            </AnimatedPressable>
-            <Pressable
-              onPress={() => setShowTokenInput(true)}
-              disabled={isLoading}
-            >
-              <Text style={s.secondaryLink}>Sign in with a token</Text>
-            </Pressable>
-          </>
-        )}
-
-        {error && !showTokenInput && (
-          <Animated.View entering={FadeInDown.duration(200)}>
-            <Text style={s.errorText}>{error}</Text>
+    <KeyboardAvoid>
+      <View style={s.container}>
+        <View style={s.intro}>
+          <Animated.View
+            entering={FadeInDown.delay(0).duration(400).springify()}
+            style={s.logoBlock}
+          >
+            <View style={s.logoMark}>
+              <Image
+                source={
+                  isDark
+                    ? require("@/assets/images/splash-icon-dark.png")
+                    : require("@/assets/images/splash-icon.png")
+                }
+                style={s.logoImage}
+                contentFit="contain"
+              />
+            </View>
+            <Text style={s.appName}>Shikai</Text>
+            <Text style={s.tagline}>Your GitHub dashboard, at a glance.</Text>
           </Animated.View>
-        )}
-      </Animated.View>
 
-      <Animated.View entering={FadeInDown.delay(240).duration(400).springify()}>
-        <Text style={s.footerNote}>
-          Shikai is read-only. It will never modify your GitHub data.
-        </Text>
-      </Animated.View>
-    </View>
+          {/* Hidden in token mode: the keyboard leaves no room for it, and
+            someone pasting a token has already decided to sign in. */}
+          {!showTokenInput && (
+            <Animated.View
+              entering={FadeInDown.delay(80).duration(400).springify()}
+              style={s.featureList}
+            >
+              {FEATURES.map((feature) => (
+                <View key={feature.text} style={s.featureRow}>
+                  <View style={s.featureIcon}>
+                    <Octicons
+                      name={feature.icon}
+                      size={IconSize.sm}
+                      color={colors.accent}
+                    />
+                  </View>
+                  <Text style={s.featureText}>{feature.text}</Text>
+                </View>
+              ))}
+            </Animated.View>
+          )}
+        </View>
+
+        <Animated.View
+          entering={FadeInDown.delay(160).duration(400).springify()}
+          style={s.ctaBlock}
+        >
+          {needsInstall ? (
+            <>
+              <Text style={s.installTitle}>One more step</Text>
+              <Text style={s.installDesc}>
+                Choose which repositories Shikai can access on GitHub.
+              </Text>
+              <AnimatedPressable
+                style={[s.button, isLoading && s.buttonLoading, buttonStyle]}
+                onPress={handleInstall}
+                onPressIn={handlePressIn}
+                onPressOut={handlePressOut}
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <ActivityIndicator color={colors.textOnAccent} size="small" />
+                ) : (
+                  <Text style={s.buttonText}>Set up repo access</Text>
+                )}
+              </AnimatedPressable>
+              <Pressable onPress={handleSkipInstall} disabled={isLoading}>
+                <Text style={s.secondaryLink}>Skip for now</Text>
+              </Pressable>
+            </>
+          ) : showTokenInput ? (
+            <>
+              <Text style={s.tokenHint}>
+                The token needs the <Text style={s.bold}>repo</Text> and{" "}
+                <Text style={s.bold}>read:user</Text> scopes.{" "}
+                <Text
+                  style={s.link}
+                  onPress={() => Linking.openURL(NEW_TOKEN_URL)}
+                >
+                  Create a token
+                </Text>
+              </Text>
+              <TextInput
+                style={s.tokenInput}
+                value={tokenInput}
+                onChangeText={(text) => {
+                  setTokenInput(text);
+                  setTokenError(null);
+                }}
+                placeholder="ghp_… or github_pat_…"
+                placeholderTextColor={colors.textMuted}
+                autoCapitalize="none"
+                autoCorrect={false}
+                secureTextEntry
+                editable={!tokenLoading}
+              />
+              <AnimatedPressable
+                style={[
+                  s.button,
+                  tokenLoading && s.buttonLoading,
+                  !tokenLoading && !tokenInput.trim() && s.buttonDisabled,
+                  buttonStyle,
+                ]}
+                onPress={handleTokenSignIn}
+                onPressIn={handlePressIn}
+                onPressOut={handlePressOut}
+                disabled={tokenLoading || !tokenInput.trim()}
+              >
+                {tokenLoading ? (
+                  <ActivityIndicator color={colors.textOnAccent} size="small" />
+                ) : (
+                  <Text style={s.buttonText}>Continue</Text>
+                )}
+              </AnimatedPressable>
+              <Pressable
+                onPress={() => {
+                  setShowTokenInput(false);
+                  setTokenInput("");
+                  setTokenError(null);
+                }}
+                disabled={tokenLoading}
+              >
+                <Text style={s.secondaryLink}>Back to GitHub sign in</Text>
+              </Pressable>
+              {tokenError && (
+                <Animated.View entering={FadeInDown.duration(200)}>
+                  <Text style={s.errorText}>{tokenError}</Text>
+                </Animated.View>
+              )}
+            </>
+          ) : (
+            <>
+              <AnimatedPressable
+                style={[s.button, isLoading && s.buttonLoading, buttonStyle]}
+                onPress={handleSignIn}
+                onPressIn={handlePressIn}
+                onPressOut={handlePressOut}
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <ActivityIndicator color={colors.textOnAccent} size="small" />
+                ) : (
+                  <>
+                    <Octicons
+                      name="mark-github"
+                      size={18}
+                      color={colors.textOnAccent}
+                      style={s.buttonIcon}
+                    />
+                    <Text style={s.buttonText}>Sign in with GitHub</Text>
+                  </>
+                )}
+              </AnimatedPressable>
+              <Pressable
+                onPress={() => setShowTokenInput(true)}
+                disabled={isLoading}
+              >
+                <Text style={s.secondaryLink}>Sign in with a token</Text>
+              </Pressable>
+            </>
+          )}
+
+          {error && !showTokenInput && (
+            <Animated.View entering={FadeInDown.duration(200)}>
+              <Text style={s.errorText}>{error}</Text>
+            </Animated.View>
+          )}
+
+          <Text style={s.footerNote}>
+            Read-only. Shikai never changes your GitHub data.
+          </Text>
+        </Animated.View>
+      </View>
+    </KeyboardAvoid>
   );
 }
 
@@ -581,12 +630,19 @@ function buildStyles(
     container: {
       flex: 1,
       backgroundColor: colors.background,
-      alignItems: "center",
-      justifyContent: "center",
       paddingHorizontal: Spacing.lg,
       paddingTop: Math.max(topInset, Spacing.xxl),
-      paddingBottom: Math.max(bottomInset, Spacing.xxl),
+      paddingBottom: Math.max(bottomInset, Spacing.lg),
       gap: Spacing.xl,
+    },
+
+    // Takes the space above the actions, so the buttons sit at the bottom
+    // within thumb reach.
+    intro: {
+      flex: 1,
+      justifyContent: "center",
+      gap: Spacing.xxl,
+      overflow: "hidden",
     },
 
     logoBlock: {
@@ -626,24 +682,49 @@ function buildStyles(
       textAlign: "center",
     },
 
-    pillRow: {
-      flexDirection: "row",
-      gap: Spacing.sm,
+    featureList: {
+      gap: Spacing.md,
+      paddingHorizontal: Spacing.sm,
     },
 
-    pill: {
+    featureRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: Spacing.md,
+    },
+
+    featureIcon: {
+      width: 32,
+      height: 32,
+      borderRadius: Radius.md,
       backgroundColor: colors.accentSubtle,
-      borderRadius: 999,
       borderWidth: 1,
       borderColor: isDark ? colors.accentMuted : colors.border,
-      paddingHorizontal: Spacing.md,
-      paddingVertical: Spacing.xs,
+      alignItems: "center",
+      justifyContent: "center",
     },
 
-    pillText: {
+    featureText: {
+      flex: 1,
       fontFamily: FontFamily.medium,
+      fontSize: FontSize.body,
+      color: colors.textSecondary,
+    },
+
+    tokenHint: {
+      fontFamily: FontFamily.regular,
       fontSize: FontSize.caption,
-      color: colors.accent,
+      color: colors.textMuted,
+      lineHeight: FontSize.caption * 1.5,
+    },
+
+    bold: {
+      fontFamily: FontFamily.semiBold,
+    },
+
+    link: {
+      fontFamily: FontFamily.medium,
+      color: colors.textLink,
     },
 
     ctaBlock: {
@@ -663,6 +744,10 @@ function buildStyles(
 
     buttonLoading: {
       opacity: 0.85,
+    },
+
+    buttonDisabled: {
+      opacity: 0.5,
     },
 
     tokenInput: {
@@ -693,7 +778,7 @@ function buildStyles(
     buttonText: {
       fontFamily: FontFamily.semiBold,
       fontSize: FontSize.body,
-      color: "#FFFFFF",
+      color: colors.textOnAccent,
     },
 
     errorText: {
