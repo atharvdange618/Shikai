@@ -37,7 +37,7 @@ The app can hold two GitHub tokens at once, and most of the auth code exists to 
 |                 | Session token                                             | PAT                                                      |
 | --------------- | --------------------------------------------------------- | -------------------------------------------------------- |
 | Comes from      | OAuth (PKCE, external browser), or "Sign in with a token" | The user pastes it in Settings                           |
-| What it unlocks | Everything the GitHub App installation covers             | Notifications, alerts, private events in Recent Activity |
+| What it unlocks | Everything the GitHub App installation covers             | Notifications, alerts, issue search, Your work, stargazers, private events in Recent Activity |
 | In memory       | `useAuthStore().token`                                    | `useAuthStore().pat`                                     |
 | On disk         | `expo-secure-store` via `lib/secure-storage.ts`           | Same                                                     |
 | Sent by         | The axios request interceptor, by default                 | `patHeaders(pat)`, set per call                          |
