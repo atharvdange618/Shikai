@@ -41,7 +41,7 @@ Tests live in `lib/__tests__/`. Run `expo lint` and `npx vitest run` before cons
 
 ## Architecture
 
-Deeper docs: `notes/ARCHITECTURE.md` (data flow, token rules, background work) and `notes/DECISIONS.md` (why things are this way; read an entry before undoing it, and add one when you make a call a future reader would question).
+Deeper docs: `notes/ARCHITECTURE.md` (data flow, token rules, background work) and `notes/DECISIONS.md` (why things are this way; read an entry before undoing it, and add one when you make a call a future reader would question). `notes/GITHUB-QUIRKS.md` lists GitHub API quirks that make Shikai look broken: read it before debugging an empty list, a missing item or a 4xx, and add an entry in the same change whenever a bug traces back to GitHub.
 
 **Routing**: expo-router file-based routing in `app/`. Entry is `app/_layout.tsx` (root) → `app/(app)/_layout.tsx` → `app/(app)/(tabs)/` (bottom tabs: overview, repos, search, profile).
 
