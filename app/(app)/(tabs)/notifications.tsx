@@ -3,6 +3,7 @@ import { type InfiniteData, useQueryClient } from "@tanstack/react-query";
 import { Href, useRouter } from "expo-router";
 import { useCallback, useMemo, useRef, useState } from "react";
 import {
+  ActivityIndicator,
   Pressable,
   RefreshControl,
   StyleSheet,
@@ -521,6 +522,13 @@ export default function NotificationsScreen() {
           )}
           keyExtractor={keyExtractor}
           ItemSeparatorComponent={ListItemSeparator}
+          ListFooterComponent={
+            isFetchingNextPage ? (
+              <View style={s.footerLoader}>
+                <ActivityIndicator size="small" color={colors.accent} />
+              </View>
+            ) : null
+          }
           onEndReached={handleEndReached}
           onEndReachedThreshold={0.5}
           removeClippedSubviews
@@ -623,6 +631,10 @@ function buildStyles(colors: ColorTokens, isDark: boolean) {
     },
     listContent: {
       paddingBottom: Spacing.xxl,
+    },
+    footerLoader: {
+      paddingVertical: Spacing.lg,
+      alignItems: "center",
     },
     skeletonContainer: {
       padding: Spacing.lg,
