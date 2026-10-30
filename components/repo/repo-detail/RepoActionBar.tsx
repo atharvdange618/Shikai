@@ -43,15 +43,15 @@ export function RepoActionBar({
       <Pressable
         style={({ pressed }) => [
           s.actionButton,
-          s.actionButtonOutline,
+          s.actionButtonFilled,
           pressed && s.actionButtonPressed,
         ]}
         onPress={onCodePress}
         onPressIn={onCodePressIn}
       >
-        <Octicons name="code" size={IconSize.sm} color={colors.textPrimary} />
+        <Octicons name="code" size={IconSize.sm} color={colors.textOnAccent} />
         <Text
-          style={s.actionButtonOutlineText}
+          style={s.actionButtonFilledText}
           numberOfLines={1}
           adjustsFontSizeToFit
         >
@@ -62,7 +62,7 @@ export function RepoActionBar({
       <Pressable
         style={({ pressed }) => [
           s.actionButton,
-          s.actionButtonFilled,
+          s.actionButtonOutline,
           pressed && s.actionButtonPressed,
         ]}
         onPress={onCommitsPress}
@@ -71,10 +71,10 @@ export function RepoActionBar({
         <Octicons
           name="history"
           size={IconSize.sm}
-          color={colors.textOnAccent}
+          color={colors.textPrimary}
         />
         <Text
-          style={s.actionButtonFilledText}
+          style={s.actionButtonOutlineText}
           numberOfLines={1}
           adjustsFontSizeToFit
         >
