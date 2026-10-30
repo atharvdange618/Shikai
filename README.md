@@ -40,7 +40,7 @@ Shikai gives you a clean, read-only view of your GitHub world. No write operatio
   </tr>
   <tr>
     <td><img src="https://img.shields.io/badge/-Search-green?style=flat-square" alt="Search"> Global search across repos, users, issues, and topics</td>
-    <td><img src="https://img.shields.io/badge/-Profile-orange?style=flat-square" alt="Profile"> Your GitHub card with stats, social links, notifications, and saved repos</td>
+    <td><img src="https://img.shields.io/badge/-Profile-orange?style=flat-square" alt="Profile"> Your GitHub card with stats, social links, recently updated repos, and saved repos</td>
   </tr>
 </table>
 
@@ -64,9 +64,9 @@ Take a look at Shikai before you install: **[View Screenshots on Google Drive](h
 
 | Feature                | Description                                                                                                                                                                                                                                                                                                                                                                                                                        |
 | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Overview Dashboard** | Pinned repos, contribution graph with streaks, live activity feed, and following preview                                                                                                                                                                                                                                                                                                                                           |
+| **Overview Dashboard** | Pinned repos, contribution graph with streaks, live activity feed, following preview, and Your work: review requests, assignments, authored issues and pull requests, and mentions                                                                                                                                                                                                                                               |
 | **Repository Browser** | File trees with blame and per-file history, syntax highlighting, releases, discussions, repo insights (commit activity, top contributors, punch card), compare-two-refs, Actions workflow runs with job logs, PR detail with diffs, checks, reviewers, commits, and review comments with diff context, issue/PR timelines and reactions, a branch selector, and tappable stats that open the commit history, forks, and stargazers |
-| **Global Search**      | Search across repos, users, issues, and topics with debounced input, recent searches, and eager pagination                                                                                                                                                                                                                                                                                                                         |
+| **Global Search**      | Search across repos, users, issues, and topics with debounced input, recent searches, and eager pagination. Issue results need a personal access token                                                                                                                                                                                                                                                                           |
 | **User Profiles**      | View any GitHub user's profile with avatar, bio, and top repositories. Tap Followers, Following, or Repositories to open those lists                                                                                                                                                                                                                                                                                               |
 | **Android Widget**     | Home screen widget showing contribution streak with longest streak and recent activity                                                                                                                                                                                                                                                                                                                                             |
 
@@ -79,8 +79,9 @@ Optional PAT support unlocks features beyond the GitHub App token:
 | **Notifications**  | `notifications`         |
 | **Following Feed** | `notifications`, `repo` |
 | **Stargazers**     | `repo`                  |
+| **Issue Search**   | `repo`                  |
 
-GitHub only shows a repo's stargazers to people who can push to it, and the sign-in token can't read that list, so Stars opens it only on your own repos with a token saved.
+GitHub only shows a repo's stargazers to people who can push to it, and the sign-in token can't read that list, so Stars opens it only on your own repos with a token saved. GitHub also returns no issue search results for the sign-in token, so Your work and the Issues tab in Search ask for a token when none is saved.
 
 With a token set, Notifications becomes a top-level tab with an unread count badge. Swipe a notification left to mark it read; review requests, mentions, and assignments sort to the top.
 
@@ -96,7 +97,7 @@ Choose from 5 palettes, each with unique contribution graph colours:
 | :--------------: | :--------------: | :-----------: | :----------: | :------------: |
 | Clean and bright | Easy on the eyes | Neon-inspired | Rich purples | Warm and muted |
 
-Pick your favourite from Profile > Settings > Theme. Selection persists across app restarts.
+Pick your favourite from Profile > Settings > Appearance. Selection persists across app restarts and survives Clear cache.
 
 ### Offline Support
 
@@ -122,8 +123,9 @@ Network state detection with MMKV-backed disk persistence. The app works offline
 
 1. Open Shikai and tap **Sign in with GitHub**
 2. Authorize the app (read-only permissions only)
-3. Your dashboard loads instantly
-4. Optionally, add a PAT in Profile > Settings > Notifications & Following for notifications and activity feed
+3. Choose which repositories Shikai can read, or skip for now
+4. Your dashboard loads instantly
+5. Optionally, add a PAT in Profile > Settings > Account > Access token for notifications, your work, and issue search
 
 No browser handy, or GitHub's device verification getting in the way? Use **Sign in with a token** instead: paste a classic or fine-grained PAT with `repo` and `read:user` scopes to start a session directly.
 
