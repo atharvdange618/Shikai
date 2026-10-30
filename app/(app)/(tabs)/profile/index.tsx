@@ -1,7 +1,6 @@
-import { FontAwesome6, Octicons } from "@expo/vector-icons";
+import { Octicons } from "@expo/vector-icons";
 import { useQueryClient } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
-import { Image } from "expo-image";
 import { Href, useRouter } from "expo-router";
 import { useCallback, useMemo, useState } from "react";
 import {
@@ -14,13 +13,18 @@ import {
   View,
 } from "react-native";
 
-import { StatBlock } from "@/components/shared/StatBlock";
+import {
+  ProfileHeader,
+  type ProfileLink,
+} from "@/components/shared/ProfileHeader";
+import { RecentRepos } from "@/components/shared/RecentRepos";
 import { useRepoCount } from "@/hooks/useRepoCount";
+import { useSocialAccounts } from "@/hooks/useSocialAccounts";
 import { useUser } from "@/hooks/useUser";
+import { useUserProfileRepos } from "@/hooks/useUserProfileRepos";
 import { queryKeys } from "@/lib/query-client";
 
 import {
-  AvatarSize,
   BorderWidth,
   FontFamily,
   FontSize,
@@ -30,8 +34,66 @@ import {
   Shadows,
   Spacing,
   useTheme,
+  type ColorTokens,
 } from "@/constants/theme";
-import { useSocialAccounts } from "@/hooks/useSocialAccounts";
+import type { GitHubUser } from "@/types/github.types";
+
+// Your own profile also reads social accounts, which carry LinkedIn and can
+// override the X handle and blog on the user record.
+function buildLinks(
+  user: GitHubUser | undefined,
+  socialUrls: string[],
+  genericUrl: string | undefined,
+): ProfileLink[] {
+  if (!user) return [];
+  const linkedInUrl = socialUrls.find((url) => url.includes("linkedin.com"));
+  const twitterUrl = socialUrls.find(
+    (url) => url.includes("x.com") || url.includes("twitter.com"),
+  );
+  const blog = genericUrl || user.blog;
+
+  const links: ProfileLink[] = [];
+  if (user.location) {
+    links.push({ icon: { set: "octicons", name: "location" }, text: user.location });
+  }
+  if (user.company) {
+    links.push({
+      icon: { set: "octicons", name: "organization" },
+      text: user.company.replace(/^@/, ""),
+    });
+  }
+  if (linkedInUrl) {
+    links.push({
+      icon: { set: "fontawesome6", name: "linkedin" },
+      text: linkedInUrl.split("/in/").pop()?.split("/")[0] || "LinkedIn",
+      url: linkedInUrl,
+    });
+  }
+  if (twitterUrl || user.twitter_username) {
+    links.push({
+      icon: { set: "fontawesome6", name: "x-twitter" },
+      text: twitterUrl
+        ? `@${twitterUrl.split("/").pop()}`
+        : `@${user.twitter_username}`,
+      url: twitterUrl || `https://twitter.com/${user.twitter_username}`,
+    });
+  }
+  if (blog) {
+    links.push({
+      icon: { set: "octicons", name: "globe" },
+      text: blog.replace(/^https?:\/\//, ""),
+      url: blog.startsWith("http") ? blog : `https://${blog}`,
+    });
+  }
+  if (user.email) {
+    links.push({
+      icon: { set: "octicons", name: "mail" },
+      text: user.email,
+      url: `mailto:${user.email}`,
+    });
+  }
+  return links;
+}
 
 export default function ProfileScreen() {
   const { colors, isDark } = useTheme();
@@ -42,19 +104,15 @@ export default function ProfileScreen() {
   const { data: user, isLoading } = useUser();
   const { data: socialAccounts } = useSocialAccounts();
   const { data: repoCount } = useRepoCount();
+  const { data: recentRepos, isLoading: reposLoading } = useUserProfileRepos(
+    user?.login ?? "",
+  );
 
-  const linkedInUrl = socialAccounts?.find((account) =>
-    account.url.includes("linkedin.com"),
-  )?.url;
-
-  const twitterUrl = socialAccounts?.find(
-    (account) =>
-      account.url.includes("x.com") || account.url.includes("twitter.com"),
-  )?.url;
-
-  const blogUrl = socialAccounts?.find(
-    (account) => account.provider === "generic",
-  )?.url;
+  const links = buildLinks(
+    user,
+    socialAccounts?.map((account) => account.url) ?? [],
+    socialAccounts?.find((account) => account.provider === "generic")?.url,
+  );
 
   const [refreshing, setRefreshing] = useState(false);
 
@@ -64,10 +122,24 @@ export default function ProfileScreen() {
       queryClient.invalidateQueries({ queryKey: queryKeys.user() }),
       queryClient.invalidateQueries({ queryKey: queryKeys.socialAccounts() }),
       queryClient.invalidateQueries({ queryKey: queryKeys.repoCount() }),
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.userProfileRepos(user?.login ?? ""),
+      }),
     ]);
     setRefreshing(false);
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-  }, [queryClient]);
+  }, [queryClient, user?.login]);
+
+  const openUserList = useCallback(
+    (list: "followers" | "following") => {
+      if (!user?.login) return;
+      router.push({
+        pathname: `/(app)/user/[username]/${list}`,
+        params: { username: user.login },
+      });
+    },
+    [router, user?.login],
+  );
 
   const s = useMemo(() => buildStyles(colors, shadows), [colors, shadows]);
 
@@ -86,252 +158,97 @@ export default function ProfileScreen() {
       }
     >
       <View style={s.headerRow}>
-        <View style={s.headerSpacer} />
-        <View style={s.headerIcons}>
+        <Pressable
+          style={({ pressed }) => [
+            s.headerIconButton,
+            pressed && s.pressed,
+          ]}
+          onPress={() => router.push("/(app)/(tabs)/profile/settings" as Href)}
+          hitSlop={8}
+          accessibilityLabel="Settings"
+        >
+          <Octicons name="gear" size={20} color={colors.textSecondary} />
+        </Pressable>
+      </View>
+
+      <ProfileHeader
+        user={user}
+        isLoading={isLoading}
+        repoCount={repoCount ?? user?.public_repos ?? 0}
+        links={links}
+        onReposPress={() => router.navigate("/(app)/(tabs)/repos")}
+        onFollowersPress={() => openUserList("followers")}
+        onFollowingPress={() => openUserList("following")}
+        emptyBio={
           <Pressable
-            style={({ pressed }) => [
-              s.headerIconButton,
-              pressed && s.headerIconButtonPressed,
-            ]}
+            style={({ pressed }) => [s.profilePrompt, pressed && s.pressed]}
             onPress={() =>
-              router.push("/(app)/(tabs)/profile/settings" as Href)
+              Linking.openURL("https://github.com/settings/profile")
             }
-            hitSlop={8}
           >
-            <Octicons name="gear" size={20} color={colors.textSecondary} />
+            <Octicons name="person" size={14} color={colors.accent} />
+            <Text style={s.profilePromptText}>Add a bio to your profile</Text>
+            <Octicons name="link-external" size={10} color={colors.textMuted} />
           </Pressable>
-        </View>
-      </View>
+        }
+      />
 
-      <View style={s.heroSection}>
-        {user?.avatar_url ? (
-          <Image
-            source={{ uri: user.avatar_url }}
-            style={s.avatar}
-            contentFit="cover"
-            transition={300}
-          />
-        ) : (
-          <View style={[s.avatar, s.avatarFallback]}>
-            <Octicons
-              name="person"
-              size={IconSize.xxl}
-              color={colors.textMuted}
-            />
-          </View>
-        )}
+      {/* See all opens the Repos tab, which includes your private repos. */}
+      <RecentRepos
+        repos={recentRepos?.repos}
+        isLoading={reposLoading || isLoading}
+        onSeeAll={() => router.navigate("/(app)/(tabs)/repos")}
+      />
 
-        {isLoading ? (
-          <View style={s.nameSkeleton}>
-            <View style={[s.skeleton, { width: 160, height: 26 }]} />
-            <View style={[s.skeleton, { width: 100, height: 16 }]} />
-          </View>
-        ) : (
-          <View style={s.nameBlock}>
-            {user?.name && <Text style={s.displayName}>{user.name}</Text>}
-            <Text style={s.username}>@{user?.login}</Text>
-            {user?.hireable && (
-              <View style={s.hireableBadge}>
-                <View style={s.hireableDot} />
-                <Text style={s.hireableText}>Open to work</Text>
-              </View>
-            )}
-          </View>
-        )}
-
-        {user?.bio && <Text style={s.bio}>{user.bio}</Text>}
-      </View>
-
-      {user && !user.bio && (
+      <View style={s.card}>
         <Pressable
-          style={({ pressed }) => [
-            s.profilePrompt,
-            { borderColor: colors.border, backgroundColor: colors.surface },
-            pressed && { opacity: 0.7 },
-          ]}
-          onPress={() => Linking.openURL("https://github.com/settings/profile")}
-        >
-          <Octicons name="person" size={14} color={colors.accent} />
-          <Text style={[s.profilePromptText, { color: colors.textSecondary }]}>
-            Add a bio to your profile
-          </Text>
-          <Octicons name="link-external" size={10} color={colors.textMuted} />
-        </Pressable>
-      )}
-
-      <View style={[s.statsCard, shadows]}>
-        <StatBlock
-          value={repoCount ?? user?.public_repos ?? 0}
-          label="Repositories"
-          isLoading={isLoading}
-          onPress={() => router.navigate("/(app)/(tabs)/repos")}
-        />
-        <View style={s.statDivider} />
-        <StatBlock
-          value={user?.followers ?? 0}
-          label="Followers"
-          isLoading={isLoading}
-          onPress={
-            user?.login
-              ? () =>
-                  router.push({
-                    pathname: "/(app)/user/[username]/followers",
-                    params: { username: user.login },
-                  })
-              : undefined
-          }
-        />
-        <View style={s.statDivider} />
-        <StatBlock
-          value={user?.following ?? 0}
-          label="Following"
-          isLoading={isLoading}
-          onPress={
-            user?.login
-              ? () =>
-                  router.push({
-                    pathname: "/(app)/user/[username]/following",
-                    params: { username: user.login },
-                  })
-              : undefined
-          }
-        />
-      </View>
-
-      {(user?.location ||
-        user?.company ||
-        user?.blog ||
-        blogUrl ||
-        user?.twitter_username ||
-        twitterUrl ||
-        linkedInUrl) && (
-        <View style={s.metaCard}>
-          {user?.location && (
-            <MetaRow icon="location" text={user.location} colors={colors} />
-          )}
-          {user?.company && (
-            <MetaRow
-              icon="organization"
-              text={user.company.replace(/^@/, "")}
-              colors={colors}
-            />
-          )}
-          {linkedInUrl && (
-            <MetaRow
-              iconType="fontawesome6"
-              icon="linkedin"
-              text={
-                linkedInUrl.split("/in/").pop()?.split("/")[0] || "LinkedIn"
-              }
-              colors={colors}
-              isLink
-              onPress={() => Linking.openURL(linkedInUrl)}
-            />
-          )}
-          {(twitterUrl || user?.twitter_username) && (
-            <MetaRow
-              iconType="fontawesome6"
-              icon="x-twitter"
-              text={
-                twitterUrl
-                  ? `@${twitterUrl.split("/").pop()}`
-                  : `@${user?.twitter_username}`
-              }
-              colors={colors}
-              isLink
-              onPress={() =>
-                Linking.openURL(
-                  twitterUrl || `https://twitter.com/${user?.twitter_username}`,
-                )
-              }
-            />
-          )}
-          {(blogUrl || user?.blog) && (
-            <MetaRow
-              icon="globe"
-              text={(blogUrl || user?.blog)!.replace(/^https?:\/\//, "")}
-              colors={colors}
-              isLink
-              onPress={() => {
-                const url = blogUrl || user?.blog!;
-                const finalUrl = url.startsWith("http")
-                  ? url
-                  : `https://${url}`;
-                Linking.openURL(finalUrl);
-              }}
-            />
-          )}
-          {user?.email && (
-            <MetaRow
-              icon="mail"
-              text={user.email}
-              colors={colors}
-              isLink
-              onPress={() => Linking.openURL(`mailto:${user.email}`)}
-            />
-          )}
-        </View>
-      )}
-
-      {user?.html_url && (
-        <Pressable
-          style={({ pressed }) => [
-            s.githubButton,
-            pressed && s.githubButtonPressed,
-          ]}
-          onPress={() => Linking.openURL(user.html_url)}
-          hitSlop={8}
+          style={({ pressed }) => [s.row, pressed && s.pressed]}
+          onPress={() => router.push("/(app)/(tabs)/profile/saved" as Href)}
         >
           <Octicons
-            name="mark-github"
+            name="bookmark"
             size={IconSize.md}
             color={colors.textSecondary}
           />
-          <Text style={s.githubButtonText}>View on GitHub</Text>
-          <Octicons name="link-external" size={13} color={colors.textMuted} />
-        </Pressable>
-      )}
-
-      <Pressable
-        style={({ pressed }) => [
-          s.savedButton,
-          pressed && s.savedButtonPressed,
-        ]}
-        onPress={() => router.push("/(app)/(tabs)/profile/saved" as Href)}
-        hitSlop={8}
-      >
-        <Octicons
-          name="bookmark"
-          size={IconSize.md}
-          color={colors.textSecondary}
-        />
-        <Text style={s.savedButtonText}>Saved Repos</Text>
-        <Octicons name="chevron-right" size={13} color={colors.textMuted} />
-      </Pressable>
-
-      {user?.login && (
-        <Pressable
-          style={({ pressed }) => [
-            s.savedButton,
-            pressed && s.savedButtonPressed,
-          ]}
-          onPress={() =>
-            router.push({
-              pathname: "/(app)/user/[username]/gists",
-              params: { username: user.login },
-            })
-          }
-          hitSlop={8}
-        >
-          <Octicons
-            name="code"
-            size={IconSize.md}
-            color={colors.textSecondary}
-          />
-          <Text style={s.savedButtonText}>Gists</Text>
+          <Text style={s.rowLabel}>Saved Repos</Text>
           <Octicons name="chevron-right" size={13} color={colors.textMuted} />
         </Pressable>
-      )}
+
+        {user?.login && (
+          <Pressable
+            style={({ pressed }) => [s.row, s.rowDivider, pressed && s.pressed]}
+            onPress={() =>
+              router.push({
+                pathname: "/(app)/user/[username]/gists",
+                params: { username: user.login },
+              })
+            }
+          >
+            <Octicons
+              name="code"
+              size={IconSize.md}
+              color={colors.textSecondary}
+            />
+            <Text style={s.rowLabel}>Gists</Text>
+            <Octicons name="chevron-right" size={13} color={colors.textMuted} />
+          </Pressable>
+        )}
+
+        {user?.html_url && (
+          <Pressable
+            style={({ pressed }) => [s.row, s.rowDivider, pressed && s.pressed]}
+            onPress={() => Linking.openURL(user.html_url)}
+          >
+            <Octicons
+              name="mark-github"
+              size={IconSize.md}
+              color={colors.textSecondary}
+            />
+            <Text style={s.rowLabel}>View on GitHub</Text>
+            <Octicons name="link-external" size={13} color={colors.textMuted} />
+          </Pressable>
+        )}
+      </View>
 
       {user?.created_at && (
         <Text style={s.memberSince}>
@@ -346,63 +263,7 @@ export default function ProfileScreen() {
   );
 }
 
-function MetaRow({
-  icon,
-  text,
-  colors,
-  isLink = false,
-  onPress,
-  iconType = "octicons",
-}: {
-  icon: React.ComponentProps<typeof Octicons>["name"] | string;
-  text: string;
-  colors: ReturnType<typeof useTheme>["colors"];
-  isLink?: boolean;
-  onPress?: () => void;
-  iconType?: "octicons" | "fontawesome6";
-}) {
-  const IconComponent = iconType === "fontawesome6" ? FontAwesome6 : Octicons;
-
-  const content = (
-    <View
-      style={{ flexDirection: "row", alignItems: "center", gap: Spacing.md }}
-    >
-      <IconComponent name={icon as any} size={15} color={colors.textMuted} />
-      <Text
-        style={{
-          flex: 1,
-          fontFamily: FontFamily.regular,
-          fontSize: FontSize.body,
-          color: isLink ? colors.accent : colors.textSecondary,
-        }}
-        numberOfLines={1}
-      >
-        {text}
-      </Text>
-      {isLink && (
-        <Octicons name="link-external" size={12} color={colors.textMuted} />
-      )}
-    </View>
-  );
-
-  if (isLink && onPress) {
-    return (
-      <Pressable
-        onPress={onPress}
-        style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
-      >
-        {content}
-      </Pressable>
-    );
-  }
-
-  return content;
-}
-
-function buildStyles(
-  colors: ReturnType<typeof useTheme>["colors"],
-  shadows: object,
-) {
+function buildStyles(colors: ColorTokens, shadows: object) {
   return StyleSheet.create({
     scroll: {
       flex: 1,
@@ -423,15 +284,6 @@ function buildStyles(
       marginTop: Spacing["3xl"],
     },
 
-    headerSpacer: {
-      flex: 1,
-    },
-
-    headerIcons: {
-      flexDirection: "row",
-      gap: Spacing.sm,
-    },
-
     headerIconButton: {
       width: 40,
       height: 40,
@@ -441,156 +293,54 @@ function buildStyles(
       backgroundColor: colors.surfaceSecondary,
     },
 
-    headerIconButtonPressed: {
+    pressed: {
       opacity: 0.7,
     },
 
-    heroSection: {
-      alignItems: "center",
-      gap: Spacing.md,
-    },
-
-    avatar: {
-      width: AvatarSize.xl,
-      height: AvatarSize.xl,
-      borderRadius: AvatarSize.xl / 2,
-      borderWidth: 3,
-      borderColor: colors.border,
-    },
-
-    avatarFallback: {
-      backgroundColor: colors.surfaceSecondary,
-      alignItems: "center",
-      justifyContent: "center",
-    },
-
-    nameSkeleton: {
+    profilePrompt: {
+      flexDirection: "row",
       alignItems: "center",
       gap: Spacing.sm,
+      paddingHorizontal: Spacing.md,
+      paddingVertical: Spacing.sm,
+      borderRadius: Radius.md,
+      borderWidth: BorderWidth.normal,
+      borderColor: colors.border,
+      backgroundColor: colors.surface,
     },
 
-    nameBlock: {
+    profilePromptText: {
+      fontFamily: FontFamily.regular,
+      fontSize: FontSize.label,
+      color: colors.textSecondary,
+    },
+
+    card: {
+      backgroundColor: colors.surface,
+      borderRadius: Radius.lg,
+      borderWidth: 1,
+      borderColor: colors.border,
+      overflow: "hidden",
+      ...shadows,
+    },
+
+    row: {
+      flexDirection: "row",
       alignItems: "center",
-      gap: Spacing.xs,
+      gap: Spacing.md,
+      padding: Spacing.md,
     },
 
-    displayName: {
-      fontFamily: FontFamily.bold,
-      fontSize: FontSize.heading,
+    rowDivider: {
+      borderTopWidth: 1,
+      borderTopColor: colors.border,
+    },
+
+    rowLabel: {
+      flex: 1,
+      fontFamily: FontFamily.medium,
+      fontSize: FontSize.body,
       color: colors.textPrimary,
-      textAlign: "center",
-    },
-
-    username: {
-      fontFamily: FontFamily.regular,
-      fontSize: FontSize.body,
-      color: colors.textSecondary,
-    },
-
-    hireableBadge: {
-      flexDirection: "row",
-      alignItems: "center",
-      gap: 6,
-      paddingHorizontal: Spacing.sm,
-      paddingVertical: 4,
-      borderRadius: Radius.full,
-      backgroundColor: `${colors.success}18`,
-      marginTop: 4,
-    },
-
-    hireableDot: {
-      width: 6,
-      height: 6,
-      borderRadius: 3,
-      backgroundColor: colors.success,
-    },
-
-    hireableText: {
-      fontFamily: FontFamily.medium,
-      fontSize: FontSize.caption,
-      color: colors.success,
-    },
-
-    bio: {
-      fontFamily: FontFamily.regular,
-      fontSize: FontSize.body,
-      color: colors.textSecondary,
-      textAlign: "center",
-      lineHeight: FontSize.body * 1.5,
-      paddingHorizontal: Spacing.md,
-    },
-
-    statsCard: {
-      flexDirection: "row",
-      alignItems: "center",
-      backgroundColor: colors.surface,
-      borderRadius: Radius.lg,
-      borderWidth: 1,
-      borderColor: colors.border,
-      paddingVertical: Spacing.lg,
-      paddingHorizontal: Spacing.md,
-    },
-
-    statDivider: {
-      width: 1,
-      height: 36,
-      backgroundColor: colors.border,
-    },
-
-    metaCard: {
-      backgroundColor: colors.surface,
-      borderRadius: Radius.lg,
-      borderWidth: 1,
-      borderColor: colors.border,
-      padding: Spacing.lg,
-      gap: Spacing.md,
-      ...shadows,
-    },
-
-    githubButton: {
-      flexDirection: "row",
-      alignItems: "center",
-      gap: Spacing.md,
-      backgroundColor: colors.surface,
-      borderRadius: Radius.lg,
-      borderWidth: 1,
-      borderColor: colors.border,
-      padding: Spacing.md,
-      ...shadows,
-    },
-
-    githubButtonPressed: {
-      opacity: 0.7,
-    },
-
-    githubButtonText: {
-      flex: 1,
-      fontFamily: FontFamily.medium,
-      fontSize: FontSize.body,
-      color: colors.textSecondary,
-    },
-
-    savedButton: {
-      flexDirection: "row",
-      alignItems: "center",
-      gap: Spacing.md,
-      backgroundColor: colors.surface,
-      borderRadius: Radius.lg,
-      borderWidth: 1,
-      borderColor: colors.border,
-      padding: Spacing.md,
-      ...shadows,
-    },
-
-    savedButtonPressed: {
-      opacity: 0.7,
-    },
-
-    savedButtonText: {
-      flex: 1,
-      fontFamily: FontFamily.medium,
-      fontSize: FontSize.body,
-      color: colors.textSecondary,
     },
 
     memberSince: {
@@ -598,29 +348,6 @@ function buildStyles(
       fontSize: FontSize.caption,
       color: colors.textMuted,
       textAlign: "center",
-    },
-
-    skeleton: {
-      borderRadius: 4,
-      backgroundColor: colors.surfaceSecondary,
-    },
-
-    profilePrompt: {
-      flexDirection: "row",
-      alignItems: "center",
-      gap: Spacing.sm,
-      marginHorizontal: Spacing.lg,
-      marginTop: Spacing.sm,
-      paddingHorizontal: Spacing.md,
-      paddingVertical: Spacing.sm,
-      borderRadius: Radius.md,
-      borderWidth: BorderWidth.normal,
-    },
-
-    profilePromptText: {
-      fontFamily: FontFamily.regular,
-      fontSize: FontSize.label,
-      flex: 1,
     },
   });
 }
