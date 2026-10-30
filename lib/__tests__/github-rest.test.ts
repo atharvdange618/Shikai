@@ -26,6 +26,7 @@ import {
   MAX_LIST_PAGE,
   parseActionsJobId,
   parseCheckRunId,
+  searchIssues,
 } from "@/lib/github-rest";
 
 describe("parseActionsJobId", () => {
@@ -86,6 +87,21 @@ describe("fetchUserEvents", () => {
   it("leaves auth to the session token when there is no PAT", async () => {
     await fetchUserEvents("octocat", 1, 20, null);
     expect(get.mock.calls[0][1].headers).toBeUndefined();
+  });
+});
+
+describe("searchIssues", () => {
+  beforeEach(() => {
+    get.mockReset();
+    get.mockResolvedValue({ data: { items: [], total_count: 0 }, headers: {} });
+  });
+
+  it("sends the PAT, since the App token gets no results", async () => {
+    await searchIssues("is:open author:@me", 1, 20, "updated", "desc", "ghp_abc");
+    expect(get).toHaveBeenCalledWith("/search/issues", {
+      params: { q: "is:open author:@me", page: 1, per_page: 20, sort: "updated", order: "desc" },
+      headers: { Authorization: "Bearer ghp_abc" },
+    });
   });
 });
 

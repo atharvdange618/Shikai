@@ -2,7 +2,7 @@ import { Octicons } from "@expo/vector-icons";
 import NetInfo from "@react-native-community/netinfo";
 import { useQueryClient } from "@tanstack/react-query";
 import { Image } from "expo-image";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { type Href, useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
@@ -72,6 +72,7 @@ export default function SearchScreen() {
   }, []);
 
   const {
+    needsPat,
     repos,
     users,
     issues,
@@ -202,6 +203,23 @@ export default function SearchScreen() {
         </View>
       );
     }
+    if (needsPat) {
+      return (
+        <View style={s.emptyContainer}>
+          <Octicons name="key" size={32} color={colors.textMuted} />
+          <Text style={s.emptyTitle}>Needs a personal access token</Text>
+          <Text style={s.emptySubtitle}>
+            GitHub only answers issue searches with a PAT.
+          </Text>
+          <Pressable
+            onPress={() => router.push("/(app)/(tabs)/profile/settings" as Href)}
+            hitSlop={8}
+          >
+            <Text style={s.settingsLink}>Add one in Settings</Text>
+          </Pressable>
+        </View>
+      );
+    }
     if (isOffline && debouncedSearch && data.length === 0) {
       return (
         <View style={s.emptyContainer}>
@@ -270,7 +288,7 @@ export default function SearchScreen() {
         <Text style={s.emptySubtitle}>Try a different search term</Text>
       </View>
     );
-  }, [isLoading, isOffline, debouncedSearch, data.length, recentTerms, s, colors, clearRecentTerms, handleRecentTermPress, removeRecentTerm]);
+  }, [isLoading, needsPat, router, isOffline, debouncedSearch, data.length, recentTerms, s, colors, clearRecentTerms, handleRecentTermPress, removeRecentTerm]);
 
   const ListFooter = isFetchingNextPage ? (
     <View style={s.footerLoader}>
@@ -321,7 +339,7 @@ export default function SearchScreen() {
           ))}
         </View>
 
-        {debouncedSearch.length > 0 && (
+        {debouncedSearch.length > 0 && !needsPat && (
           <Text style={s.resultCount}>
             {totalCount.toLocaleString()} {tab} found
           </Text>
@@ -468,6 +486,12 @@ function buildStyles(colors: ColorTokens) {
       fontFamily: FontFamily.medium,
       fontSize: FontSize.label,
       color: colors.textMuted,
+    },
+
+    settingsLink: {
+      fontFamily: FontFamily.medium,
+      fontSize: FontSize.label,
+      color: colors.accent,
     },
 
     clearAll: {

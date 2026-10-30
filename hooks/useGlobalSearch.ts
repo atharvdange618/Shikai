@@ -7,6 +7,7 @@ import {
   searchUsers,
 } from "@/lib/github-rest";
 import { queryKeys } from "@/lib/query-client";
+import { useAuthStore } from "@/stores/auth.store";
 
 const PER_PAGE = 10;
 
@@ -20,6 +21,7 @@ interface UseGlobalSearchOptions {
 
 export function useGlobalSearch({ query, tab, enabled = true }: UseGlobalSearchOptions) {
   const trimmedQuery = query.trim();
+  const pat = useAuthStore((s) => s.pat);
 
   const reposQuery = useInfiniteQuery({
     queryKey: queryKeys.searchRepos(trimmedQuery),
@@ -43,11 +45,12 @@ export function useGlobalSearch({ query, tab, enabled = true }: UseGlobalSearchO
 
   const issuesQuery = useInfiniteQuery({
     queryKey: queryKeys.searchIssues(trimmedQuery),
-    queryFn: ({ pageParam }) => searchIssues(trimmedQuery, pageParam, PER_PAGE),
+    queryFn: ({ pageParam }) =>
+      searchIssues(trimmedQuery, pageParam, PER_PAGE, undefined, undefined, pat),
     initialPageParam: 1,
     getNextPageParam: (lastPage) => lastPage.pagination.next ?? undefined,
     staleTime: 1000 * 60 * 5,
-    enabled: enabled && tab === "issues" && trimmedQuery.length > 0,
+    enabled: enabled && tab === "issues" && trimmedQuery.length > 0 && !!pat,
     meta: { persist: false },
   });
 
@@ -81,9 +84,10 @@ export function useGlobalSearch({ query, tab, enabled = true }: UseGlobalSearchO
     [usersQuery.data],
   );
 
+  // A disabled query keeps its cache, so drop PAT results once the PAT is gone.
   const issues = useMemo(
-    () => issuesQuery.data?.pages.flatMap((p) => p.issues) ?? [],
-    [issuesQuery.data],
+    () => (pat ? issuesQuery.data?.pages.flatMap((p) => p.issues) ?? [] : []),
+    [issuesQuery.data, pat],
   );
 
   const topics = useMemo(
@@ -92,6 +96,7 @@ export function useGlobalSearch({ query, tab, enabled = true }: UseGlobalSearchO
   );
 
   return {
+    needsPat: tab === "issues" && !pat,
     repos,
     users,
     issues,

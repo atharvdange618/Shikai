@@ -432,7 +432,8 @@ export default function SettingsScreen() {
                 <Text style={s.rowLabel}>Access token</Text>
               </View>
               <Text style={s.rowDetail}>
-                Turns on the Notifications tab and alerts. It needs the{" "}
+                Turns on Notifications, alerts, Your work and issue search. It{" "}
+                needs the{" "}
                 <Text style={s.bold}>notifications</Text> and{" "}
                 <Text style={s.bold}>repo</Text> scopes.{" "}
                 <Text
