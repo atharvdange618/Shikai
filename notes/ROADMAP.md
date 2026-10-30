@@ -1,6 +1,6 @@
 # Shikai Roadmap
 
-> **Version:** 1.7.0 · **Last Updated:** October 28, 2026 · **Status:** Active Development
+> **Version:** 1.7.0 · **Last Updated:** October 30, 2026 · **Status:** Active Development
 
 This document tracks the feature backlog and development progress for Shikai.
 
@@ -37,6 +37,11 @@ This document tracks the feature backlog and development progress for Shikai.
 | Tappable stats                    | Repo stats open the commit history, forks (most starred first, capped at GitHub's 400-page limit) and stargazers (only with push access and a PAT, see D-023). Profile stats open followers, following and repos. The lists share `PagedList` in `components/shared/` and stay off the disk cache (D-026). Shipped by OTA on 1.6.0. | Done   |
 | On-device code highlighting       | Code files render in `components/file/CodeViewer.tsx`, highlighted on device by `@tanstack/highlight`, with line numbers, a wrap toggle and the `#L` line marked. Markdown stays on GitHub's renderer. See D-025. 1.7.0. | Done   |
 | Play review prompt                | `expo-store-review` shows Play's review sheet once, on the fifth signed-in launch. Replaces the 1.6.0 custom rating modal. See D-024. 1.7.0. | Done   |
+| Redesigned Settings               | An account card at the top, then Appearance (a strip of theme previews), Alerts, Account (access token, manage repository access, sign out) and Data & About (API rate limit, Clear cache, About Shikai). Clear cache keeps the saved theme, which now lives outside the wiped cache. (#29, D-029) | Done   |
+| Redesigned Profile                | Your profile and other people's profiles share `components/shared/ProfileHeader.tsx`, and yours lists your recently updated repos via `components/shared/RecentRepos.tsx`. (#30) | Done   |
+| Redesigned sign-in                | Actions sit at the bottom of the screen, with three lines above them on what Shikai does. Token mode keeps the field above the keyboard and links to GitHub's token page with `repo` and `read:user` pre-ticked. (#31) | Done   |
+| Issue search on the PAT           | GitHub returns no results from `/search/issues` for the sign-in token, so Your work and the Issues tab in Search now send the saved PAT, and ask for one when none is saved. See D-027. (#33) | Done   |
+| Activity feeds newest first       | Recent Activity and the Following feed sort client-side, because GitHub's events endpoints don't return by date. See D-028. (#34) | Done   |
 
 ---
 
