@@ -58,7 +58,7 @@ export function ContributionStatsRow({ stats }: Props) {
         <View style={s.labelRow}>
           <Text style={s.label}>Day streak</Text>
           <Tooltip content={STAT_INFO.streak} align="left">
-            <Pressable hitSlop={8}>
+            <Pressable hitSlop={19}>
               <Octicons name="info" size={10} color={colors.textMuted} />
             </Pressable>
           </Tooltip>
@@ -91,7 +91,7 @@ export function ContributionStatsRow({ stats }: Props) {
         <View style={s.labelRow}>
           <Text style={s.label}>Best streak</Text>
           <Tooltip content={STAT_INFO.best} align="center">
-            <Pressable hitSlop={8}>
+            <Pressable hitSlop={19}>
               <Octicons name="info" size={10} color={colors.textMuted} />
             </Pressable>
           </Tooltip>
@@ -109,7 +109,7 @@ export function ContributionStatsRow({ stats }: Props) {
         <View style={s.labelRow}>
           <Text style={s.label}>Most active</Text>
           <Tooltip content={STAT_INFO.active} align="right">
-            <Pressable hitSlop={8}>
+            <Pressable hitSlop={19}>
               <Octicons name="info" size={10} color={colors.textMuted} />
             </Pressable>
           </Tooltip>
