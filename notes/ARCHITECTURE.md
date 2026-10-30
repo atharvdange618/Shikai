@@ -71,7 +71,7 @@ The reducer is a pure function with its own tests. Add new boot states there, no
 - **Prefetch.** `lib/prefetch.ts` warms the cache before a screen opens, in three layers. Route prefetch readies the screen. Data prefetch fires on mount or press: for example, search results prefetch repo details as they appear. Chained prefetch fetches what the next screen depends on, like the repo before its file tree. The goal is that screens paint from cache.
 - **Disk cache.** React Query persists to MMKV (`lib/persister.ts`) and keeps entries for 24 hours. A query opts out with `meta: { persist: false }`. Use that for anything short-lived or private, like search, and for long paged lists such as stargazers and followers (D-026).
 - **Local state** lives in Zustand stores (`stores/`). The watchlist and recent searches each persist to their own MMKV instance.
-- **Account switches wipe everything.** Sign-in and sign-out call `clearAllMMKV()`, which clears the cache and resets the persisted stores. Any new store that holds account data must join that function, or it leaks into the next account.
+- **Account switches wipe everything.** Sign-in and sign-out call `clearAllMMKV()`, which clears the cache and resets the persisted stores. Any new store that holds account data must join that function, or it leaks into the next account. The one exception is the theme: it's a device setting, not account data, so `clearAllMMKV()` saves and restores it (`THEME_KEY`).
 
 ## Work outside the React tree
 

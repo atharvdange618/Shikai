@@ -283,3 +283,13 @@ Entries D-001 to D-021 were backfilled on 2026-10-15 from commits, the changelog
 **Rejected.** Fetching every page up front: it costs up to 15 requests per load and still misses events GitHub never created. Rebuilding activity from per-repo commits: one request per repo, and it drifts from what github.com shows.
 **Consequences.** Loading the next page can drop a newer event in above rows already on screen. When a user reports a missing repo or push, check the raw API with `gh api /users/<login>/events --paginate -q '.[] | "\(.created_at) \(.type) \(.repo.name)"'`. If the event is missing there or past position 300, the gap comes from GitHub, not Shikai.
 **Revisit if.** Users keep asking for recently active repos. A "recently pushed repos" row from `/user/repos?sort=pushed` would cover both the buried repos and the missing pushes; it isn't built yet.
+
+## D-029: The theme survives a cache wipe
+
+**Date:** 2026-10-30 · **Status:** Accepted
+
+**Context.** `clearAllMMKV()` clears React Query's disk cache and resets every MMKV-backed store on Clear cache, sign-in and sign-out, so account data can't leak into the next account. The theme lived in the same MMKV instance, so a wipe sent the app back to Dark on the next launch. Users read that as a bug: the palette is a device preference, not something tied to the account.
+**Decision.** `clearAllMMKV()` reads `THEME_KEY` before `mmkv.clearAll()` and writes it back after. `THEME_KEY` lives in `lib/mmkv.ts` so `ThemeContext` and the widget task handler share one constant. The theme is a device setting, so it stays put while account data goes.
+**Rejected.** A separate MMKV instance for device settings, like the review counter's (`shikai-review`, D-024): one more instance and one more place to remember for a single key the shared wipe can handle. Keeping the theme only in React state and re-saving it after the wipe: the context reads MMKV on launch, so a cold start after a wipe would still fall back to Dark.
+**Consequences.** Clear cache no longer resets appearance. Any other key that must survive a wipe has to be saved and restored in `clearAllMMKV()` explicitly; a new store that isn't added there is wiped (which is the safe default for account data).
+**Revisit if.** A second device-level setting needs the same treatment; at that point a dedicated settings instance beats growing the save-and-restore list.
