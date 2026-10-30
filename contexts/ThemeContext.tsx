@@ -1,9 +1,7 @@
 import { createContext, useCallback, useContext, useState } from "react";
 
 import { themes, type Theme, type ThemeName } from "@/constants/themes";
-import { mmkv } from "@/lib/mmkv";
-
-const THEME_KEY = "shikai-theme";
+import { mmkv, THEME_KEY } from "@/lib/mmkv";
 
 interface ThemeContextValue {
   theme: Theme;

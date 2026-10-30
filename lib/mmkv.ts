@@ -4,6 +4,9 @@ import { useWatchlistStore } from "@/stores/watchlist.store";
 
 export const mmkv = createMMKV({ id: "shikai-cache" });
 
+// Read by ThemeContext and the widget task handler.
+export const THEME_KEY = "shikai-theme";
+
 export const mmkvStorage = {
   getItem: async (key: string) => mmkv.getString(key) ?? null,
   setItem: async (key: string, value: string) => mmkv.set(key, value),
@@ -13,8 +16,11 @@ export const mmkvStorage = {
 // Clears every MMKV-backed store, not just the React Query cache instance.
 // Must stay exhaustive: watchlist/recent-searches are account-specific data
 // that would otherwise leak into the next account signed in on this device.
+// The theme is a device setting, not account data, so it survives the wipe.
 export function clearAllMMKV() {
+  const theme = mmkv.getString(THEME_KEY);
   mmkv.clearAll();
+  if (theme) mmkv.set(THEME_KEY, theme);
   useWatchlistStore.getState().reset();
   useRecentSearchesStore.getState().clearAll();
 }
