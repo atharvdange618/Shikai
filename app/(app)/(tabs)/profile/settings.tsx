@@ -1,4 +1,5 @@
 import { Octicons } from "@expo/vector-icons";
+import { Image } from "expo-image";
 import * as Linking from "expo-linking";
 import { Href, useFocusEffect, useRouter } from "expo-router";
 import { useCallback, useMemo, useState } from "react";
@@ -11,10 +12,12 @@ import {
   Text,
   TextInput,
   View,
+  useWindowDimensions,
 } from "react-native";
 
 import { useAlert } from "@/components/shared/Alert";
 import { KeyboardAvoid } from "@/components/shared/KeyboardAvoid";
+import { useUser } from "@/hooks/useUser";
 import { rateLimit } from "@/lib/axios";
 import {
   areAlertsEnabled,
@@ -31,6 +34,7 @@ import { signOut } from "@/lib/session";
 import { format24HourTime, relativeTime } from "@/lib/utils";
 
 import {
+  AvatarSize,
   FontFamily,
   FontSize,
   IconSize,
@@ -54,6 +58,12 @@ export default function SettingsScreen() {
   const queryClient = useQueryClient();
   const alert = useAlert();
   const s = useMemo(() => buildStyles(colors), [colors]);
+  const { data: user } = useUser();
+
+  // Three and a half cards fit on any screen width, so the cut-off card at
+  // the edge shows the strip scrolls.
+  const { width: windowWidth } = useWindowDimensions();
+  const themeCardWidth = (windowWidth - Spacing.lg - Spacing.md * 3) / 3.5;
 
   const pat = useAuthStore((s) => s.pat);
   const setPat = useAuthStore((s) => s.setPat);
@@ -137,12 +147,18 @@ export default function SettingsScreen() {
 
   // Read fresh on focus: the task can turn itself off in the background (PAT
   // rejected), and the user can block notifications in system settings.
+  // Also re-read when the PAT changes: removing it turns alerts off without
+  // leaving this screen.
   useFocusEffect(
     useCallback(() => {
-      areAlertsEnabled().then(setAlertsOn).catch(() => setAlertsOn(false));
       setPatRejected(wasPatRejected());
       setLastPoll(getLastPoll());
-    }, []),
+      if (!pat) {
+        setAlertsOn(false);
+        return;
+      }
+      areAlertsEnabled().then(setAlertsOn).catch(() => setAlertsOn(false));
+    }, [pat]),
   );
 
   const handleToggleAlerts = useCallback(
@@ -225,144 +241,124 @@ export default function SettingsScreen() {
         contentContainerStyle={s.content}
         showsVerticalScrollIndicator={false}
       >
+      {user && (
+        <View style={[s.card, s.accountHeader]}>
+          <Image
+            source={{ uri: user.avatar_url }}
+            style={s.avatar}
+            contentFit="cover"
+          />
+          <View style={s.rowBody}>
+            <Text style={s.accountName} numberOfLines={1}>
+              {user.name || user.login}
+            </Text>
+            <Text style={s.rowDetail} numberOfLines={1}>
+              @{user.login}
+            </Text>
+          </View>
+        </View>
+      )}
+
       <View style={s.section}>
         <Text style={s.sectionTitle}>Appearance</Text>
-        <View style={s.card}>
-          {themeList.map((t, i) => {
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={s.themeStrip}
+          contentContainerStyle={s.themeStripContent}
+        >
+          {themeList.map((t) => {
             const isActive = t.name === themeName;
-            const isLast = i === themeList.length - 1;
 
             return (
               <Pressable
                 key={t.name}
                 style={({ pressed }) => [
-                  s.themeRow,
-                  !isLast && s.themeRowBorder,
-                  pressed && s.themeRowPressed,
+                  s.themeOption,
+                  { width: themeCardWidth },
+                  pressed && s.pressed,
                 ]}
                 onPress={() => {
                   setThemeName(t.name as ThemeName);
                   refreshWidgetTheme(t.name as ThemeName).catch(() => {});
                 }}
+                accessibilityRole="radio"
+                accessibilityState={{ selected: isActive }}
+                accessibilityLabel={`${t.label} theme`}
               >
-                <View style={s.themeInfo}>
-                  <View style={s.themeDots}>
+                <View
+                  style={[
+                    s.themePreview,
+                    {
+                      backgroundColor: t.colors.background,
+                      borderColor: isActive ? colors.accent : colors.border,
+                    },
+                    isActive && s.themePreviewActive,
+                  ]}
+                >
+                  <View
+                    style={[
+                      s.themePreviewCard,
+                      {
+                        backgroundColor: t.colors.surface,
+                        borderColor: t.colors.border,
+                      },
+                    ]}
+                  >
                     <View
-                      style={[s.dot, { backgroundColor: t.colors.background }]}
+                      style={[
+                        s.themePreviewLine,
+                        { backgroundColor: t.colors.textPrimary },
+                      ]}
                     />
                     <View
-                      style={[s.dot, { backgroundColor: t.colors.accent }]}
-                    />
-                    <View
-                      style={[s.dot, { backgroundColor: t.colors.textPrimary }]}
+                      style={[
+                        s.themePreviewAccent,
+                        { backgroundColor: t.colors.accent },
+                      ]}
                     />
                   </View>
-                  <Text style={[s.themeLabel, isActive && s.themeLabelActive]}>
-                    {t.label}
-                  </Text>
+                  {isActive && (
+                    <View style={s.themeCheck}>
+                      <Octicons
+                        name="check"
+                        size={10}
+                        color={colors.textOnAccent}
+                      />
+                    </View>
+                  )}
                 </View>
-                {isActive && (
-                  <Octicons name="check" size={16} color={colors.accent} />
-                )}
+                <Text
+                  style={[s.themeLabel, isActive && s.themeLabelActive]}
+                  numberOfLines={1}
+                >
+                  {t.label}
+                </Text>
               </Pressable>
             );
           })}
-        </View>
+        </ScrollView>
       </View>
 
-      <View style={s.section}>
-        <Text style={s.sectionTitle}>Notifications & Following</Text>
-        <View style={s.card}>
-          <View style={s.patInfo}>
-            <Text style={s.patDescription}>
-              A Personal Access Token enables the Notifications tab and the
-              Following activity feed. Without one, these features are hidden.
-            </Text>
-            <Pressable
-              onPress={() =>
-                Linking.openURL(
-                  "https://github.com/settings/tokens/new?scopes=notifications,repo&description=Shikai%20Notifications",
-                )
-              }
-            >
-              <Text style={s.patLink}>Create a token here</Text>
-            </Pressable>
-            <Text style={s.patDescription}>
-              with the <Text style={s.patBold}>notifications</Text> and{" "}
-              <Text style={s.patBold}>repo</Text> scopes, then paste it below.
-            </Text>
-          </View>
-
-          {pat ? (
-            <View style={s.patActiveRow}>
-              <View style={s.patActiveInfo}>
-                <View style={[s.patDot, { backgroundColor: colors.success }]} />
-                <Text style={s.patActiveText}>Token configured</Text>
-              </View>
-              <Pressable
-                style={({ pressed }) => [
-                  s.patRemoveBtn,
-                  pressed && s.menuRowPressed,
-                ]}
-                onPress={handleRemovePAT}
-              >
-                <Text style={s.patRemoveText}>Remove</Text>
-              </Pressable>
-            </View>
-          ) : (
-            <View style={s.patInputContainer}>
-              <TextInput
-                style={s.patInput}
-                value={patInput}
-                onChangeText={(text) => {
-                  setPatInput(text);
-                  setPatError(null);
-                }}
-                placeholder="ghp_xxxx or github_pat_xxxx"
-                placeholderTextColor={colors.textMuted}
-                autoCapitalize="none"
-                autoCorrect={false}
-                secureTextEntry
-              />
-              {patError && (
-                <Text style={[s.patError, { color: colors.danger }]}>
-                  {patError}
-                </Text>
-              )}
-              <Pressable
-                style={({ pressed }) => [
-                  s.patSaveBtn,
-                  { backgroundColor: colors.accent },
-                  (pressed || validating) && s.menuRowPressed,
-                ]}
-                onPress={handleSavePAT}
-                disabled={validating || !patInput.trim()}
-              >
-                {validating ? (
-                  <ActivityIndicator size="small" color="#fff" />
-                ) : (
-                  <Text style={s.patSaveBtnText}>Save</Text>
-                )}
-              </Pressable>
-            </View>
-          )}
-
-          {pat && (
-            <View style={[s.menuRow, s.rateLimitDivider]}>
+      {pat && (
+        <View style={s.section}>
+          <Text style={s.sectionTitle}>Alerts</Text>
+          <View style={s.card}>
+            <View style={s.row}>
               <Octicons
                 name="bell"
                 size={IconSize.md}
                 color={colors.textSecondary}
               />
-              <View style={s.rateLimitInfo}>
-                <Text style={s.menuText}>Notification alerts</Text>
-                <Text style={s.rateLimitDetail}>
+              <View style={s.rowBody}>
+                <Text style={s.rowLabel}>Notification alerts</Text>
+                <Text style={s.rowDetail}>
                   {patRejected && !alertsOn
                     ? "Turned off because GitHub rejected your token. Add a new token, then turn alerts on again."
-                    : "Checks for review requests, mentions and assignments every 15 minutes or so. Android can stretch that to an hour or more to save battery."}
+                    : "Checks for review requests, mentions and assignments every 15 minutes or so. Android may wait longer to save battery."}
                 </Text>
                 {alertsOn && (
-                  <Text style={s.rateLimitDetail}>
+                  <Text style={s.rowDetail}>
                     {!lastPoll
                       ? "Not checked yet"
                       : lastPoll.outcome === "failed"
@@ -380,91 +376,109 @@ export default function SettingsScreen() {
                 accessibilityLabel="Notification alerts"
               />
             </View>
-          )}
 
-          {__DEV__ && pat && alertsOn && (
-            <Pressable
-              style={({ pressed }) => [
-                s.menuRow,
-                s.rateLimitDivider,
-                pressed && s.menuRowPressed,
-              ]}
-              onPress={() => postTestAlert().catch(console.error)}
-            >
-              <Octicons
-                name="beaker"
-                size={IconSize.md}
-                color={colors.textSecondary}
-              />
-              <Text style={s.menuText}>Post a test alert (dev)</Text>
-            </Pressable>
-          )}
-        </View>
-      </View>
-
-      <View style={s.section}>
-        <Text style={s.sectionTitle}>Data & Storage</Text>
-        <View style={s.card}>
-          <View style={s.menuRow}>
-            <Octicons
-              name="graph"
-              size={IconSize.md}
-              color={colors.textSecondary}
-            />
-            <View style={s.rateLimitInfo}>
-              <Text style={s.menuText}>API rate limit</Text>
-              <Text style={s.rateLimitDetail}>
-                {rateLimitSnapshot.remaining !== null &&
-                rateLimitSnapshot.limit !== null
-                  ? `${rateLimitSnapshot.remaining} / ${rateLimitSnapshot.limit} requests remaining` +
-                    (rateLimitSnapshot.reset
-                      ? `, resets at ${format24HourTime(rateLimitSnapshot.reset.toISOString())}`
-                      : "")
-                  : "No API activity yet this session"}
-              </Text>
-            </View>
+            {__DEV__ && alertsOn && (
+              <Pressable
+                style={({ pressed }) => [
+                  s.row,
+                  s.rowDivider,
+                  pressed && s.pressed,
+                ]}
+                onPress={() => postTestAlert().catch(console.error)}
+              >
+                <Octicons
+                  name="beaker"
+                  size={IconSize.md}
+                  color={colors.textSecondary}
+                />
+                <Text style={s.rowLabel}>Post a test alert (dev)</Text>
+              </Pressable>
+            )}
           </View>
-          <Pressable
-            style={({ pressed }) => [
-              s.menuRow,
-              s.rateLimitDivider,
-              pressed && s.menuRowPressed,
-            ]}
-            onPress={handleClearCache}
-          >
-            <Octicons
-              name="trash"
-              size={IconSize.md}
-              color={colors.textSecondary}
-            />
-            <Text style={s.menuText}>Clear cache</Text>
-          </Pressable>
         </View>
-      </View>
-
-      <View style={s.section}>
-        <Text style={s.sectionTitle}>About</Text>
-        <View style={s.card}>
-          <Pressable
-            style={({ pressed }) => [s.menuRow, pressed && s.menuRowPressed]}
-            onPress={() => router.push("/(app)/(tabs)/profile/about" as Href)}
-          >
-            <Octicons
-              name="info"
-              size={IconSize.md}
-              color={colors.textSecondary}
-            />
-            <Text style={s.menuText}>About Shikai</Text>
-            <Octicons name="chevron-right" size={13} color={colors.textMuted} />
-          </Pressable>
-        </View>
-      </View>
+      )}
 
       <View style={s.section}>
         <Text style={s.sectionTitle}>Account</Text>
         <View style={s.card}>
+          {pat ? (
+            <View style={s.row}>
+              <Octicons
+                name="key"
+                size={IconSize.md}
+                color={colors.textSecondary}
+              />
+              <Text style={s.rowLabel}>Access token</Text>
+              <View style={s.tokenStatus}>
+                <View style={s.statusDot} />
+                <Text style={s.rowDetail}>Active</Text>
+              </View>
+              <Pressable
+                style={({ pressed }) => [s.removeBtn, pressed && s.pressed]}
+                onPress={handleRemovePAT}
+                hitSlop={8}
+              >
+                <Text style={s.removeText}>Remove</Text>
+              </Pressable>
+            </View>
+          ) : (
+            <View style={s.tokenSetup}>
+              <View style={s.tokenSetupHeader}>
+                <Octicons
+                  name="key"
+                  size={IconSize.md}
+                  color={colors.textSecondary}
+                />
+                <Text style={s.rowLabel}>Access token</Text>
+              </View>
+              <Text style={s.rowDetail}>
+                Turns on the Notifications tab and alerts. It needs the{" "}
+                <Text style={s.bold}>notifications</Text> and{" "}
+                <Text style={s.bold}>repo</Text> scopes.{" "}
+                <Text
+                  style={s.link}
+                  onPress={() =>
+                    Linking.openURL(
+                      "https://github.com/settings/tokens/new?scopes=notifications,repo&description=Shikai%20Notifications",
+                    )
+                  }
+                >
+                  Create a token
+                </Text>
+              </Text>
+              <TextInput
+                style={s.patInput}
+                value={patInput}
+                onChangeText={(text) => {
+                  setPatInput(text);
+                  setPatError(null);
+                }}
+                placeholder="ghp_xxxx or github_pat_xxxx"
+                placeholderTextColor={colors.textMuted}
+                autoCapitalize="none"
+                autoCorrect={false}
+                secureTextEntry
+              />
+              {patError && <Text style={s.patError}>{patError}</Text>}
+              <Pressable
+                style={({ pressed }) => [
+                  s.saveBtn,
+                  (pressed || validating) && s.pressed,
+                ]}
+                onPress={handleSavePAT}
+                disabled={validating || !patInput.trim()}
+              >
+                {validating ? (
+                  <ActivityIndicator size="small" color={colors.textOnAccent} />
+                ) : (
+                  <Text style={s.saveBtnText}>Save</Text>
+                )}
+              </Pressable>
+            </View>
+          )}
+
           <Pressable
-            style={({ pressed }) => [s.menuRow, pressed && s.menuRowPressed]}
+            style={({ pressed }) => [s.row, s.rowDivider, pressed && s.pressed]}
             onPress={() => Linking.openURL(MANAGE_REPO_ACCESS_URL)}
           >
             <Octicons
@@ -472,23 +486,18 @@ export default function SettingsScreen() {
               size={IconSize.md}
               color={colors.textSecondary}
             />
-            <View style={s.rateLimitInfo}>
-              <Text style={s.menuText}>Manage repository access</Text>
-              <Text style={s.rateLimitDetail}>
+            <View style={s.rowBody}>
+              <Text style={s.rowLabel}>Manage repository access</Text>
+              <Text style={s.rowDetail}>
                 Missing private repos? Choose which ones Shikai can see on
                 GitHub.
               </Text>
             </View>
             <Octicons name="link-external" size={13} color={colors.textMuted} />
           </Pressable>
-        </View>
-        <View style={s.dangerCard}>
+
           <Pressable
-            style={({ pressed }) => [
-              s.menuRow,
-              s.dangerRow,
-              pressed && s.menuRowPressed,
-            ]}
+            style={({ pressed }) => [s.row, s.rowDivider, pressed && s.pressed]}
             onPress={handleSignOut}
           >
             <Octicons
@@ -496,7 +505,59 @@ export default function SettingsScreen() {
               size={IconSize.md}
               color={colors.danger}
             />
-            <Text style={s.dangerText}>Sign out</Text>
+            <Text style={[s.rowLabel, s.dangerText]}>Sign out</Text>
+          </Pressable>
+        </View>
+      </View>
+
+      <View style={s.section}>
+        <Text style={s.sectionTitle}>Data & About</Text>
+        <View style={s.card}>
+          <View style={s.row}>
+            <Octicons
+              name="graph"
+              size={IconSize.md}
+              color={colors.textSecondary}
+            />
+            <View style={s.rowBody}>
+              <Text style={s.rowLabel}>API rate limit</Text>
+              <Text style={s.rowDetail}>
+                {rateLimitSnapshot.reset
+                  ? `Resets at ${format24HourTime(rateLimitSnapshot.reset.toISOString())}`
+                  : "No API activity yet this session"}
+              </Text>
+            </View>
+            {rateLimitSnapshot.remaining !== null &&
+              rateLimitSnapshot.limit !== null && (
+                <Text style={s.rowValue}>
+                  {rateLimitSnapshot.remaining} / {rateLimitSnapshot.limit}
+                </Text>
+              )}
+          </View>
+
+          <Pressable
+            style={({ pressed }) => [s.row, s.rowDivider, pressed && s.pressed]}
+            onPress={handleClearCache}
+          >
+            <Octicons
+              name="trash"
+              size={IconSize.md}
+              color={colors.textSecondary}
+            />
+            <Text style={s.rowLabel}>Clear cache</Text>
+          </Pressable>
+
+          <Pressable
+            style={({ pressed }) => [s.row, s.rowDivider, pressed && s.pressed]}
+            onPress={() => router.push("/(app)/(tabs)/profile/about" as Href)}
+          >
+            <Octicons
+              name="info"
+              size={IconSize.md}
+              color={colors.textSecondary}
+            />
+            <Text style={s.rowLabel}>About Shikai</Text>
+            <Octicons name="chevron-right" size={13} color={colors.textMuted} />
           </Pressable>
         </View>
       </View>
@@ -540,54 +601,89 @@ function buildStyles(colors: ColorTokens) {
       overflow: "hidden",
     },
 
-    dangerCard: {
-      backgroundColor: colors.surface,
-      borderRadius: Radius.lg,
-      borderWidth: 1,
-      borderColor: colors.dangerSubtle,
-      overflow: "hidden",
-    },
-
-    themeRow: {
-      flexDirection: "row",
-      alignItems: "center",
-      justifyContent: "space-between",
-      paddingVertical: Spacing.md,
-      paddingHorizontal: Spacing.lg,
-    },
-
-    themeRowBorder: {
-      borderBottomWidth: 1,
-      borderBottomColor: colors.border,
-    },
-
-    themeRowPressed: {
-      opacity: 0.6,
-    },
-
-    themeInfo: {
+    accountHeader: {
       flexDirection: "row",
       alignItems: "center",
       gap: Spacing.md,
+      padding: Spacing.lg,
     },
 
-    themeDots: {
-      flexDirection: "row",
+    avatar: {
+      width: AvatarSize.md,
+      height: AvatarSize.md,
+      borderRadius: AvatarSize.md / 2,
+      backgroundColor: colors.surfaceSecondary,
+    },
+
+    accountName: {
+      fontFamily: FontFamily.semiBold,
+      fontSize: FontSize.title,
+      color: colors.textPrimary,
+    },
+
+    // Bleeds past the screen padding so cards scroll to the screen edge.
+    themeStrip: {
+      marginHorizontal: -Spacing.lg,
+    },
+
+    themeStripContent: {
+      gap: Spacing.md,
+      paddingHorizontal: Spacing.lg,
+    },
+
+    themeOption: {
+      gap: Spacing.xs,
+    },
+
+    themePreview: {
+      height: 64,
+      borderRadius: Radius.md,
+      borderWidth: 1,
+      padding: Spacing.sm,
+      justifyContent: "flex-end",
+    },
+
+    themePreviewActive: {
+      borderWidth: 2,
+    },
+
+    themePreviewCard: {
+      borderRadius: Radius.sm,
+      borderWidth: 1,
+      padding: 6,
       gap: 4,
     },
 
-    dot: {
-      width: 14,
-      height: 14,
-      borderRadius: 7,
-      borderWidth: 1,
-      borderColor: "rgba(255,255,255,0.1)",
+    themePreviewLine: {
+      width: "70%",
+      height: 4,
+      borderRadius: 2,
+      opacity: 0.8,
+    },
+
+    themePreviewAccent: {
+      width: "40%",
+      height: 4,
+      borderRadius: 2,
+    },
+
+    themeCheck: {
+      position: "absolute",
+      top: 6,
+      right: 6,
+      width: 16,
+      height: 16,
+      borderRadius: 8,
+      backgroundColor: colors.accent,
+      alignItems: "center",
+      justifyContent: "center",
     },
 
     themeLabel: {
       fontFamily: FontFamily.medium,
-      fontSize: FontSize.body,
+      fontSize: FontSize.label,
       color: colors.textSecondary,
+      textAlign: "center",
     },
 
     themeLabelActive: {
@@ -595,7 +691,7 @@ function buildStyles(colors: ColorTokens) {
       fontFamily: FontFamily.semiBold,
     },
 
-    menuRow: {
+    row: {
       flexDirection: "row",
       alignItems: "center",
       gap: Spacing.md,
@@ -603,115 +699,88 @@ function buildStyles(colors: ColorTokens) {
       paddingHorizontal: Spacing.lg,
     },
 
-    menuRowPressed: {
-      opacity: 0.6,
-    },
-
-    menuText: {
-      flex: 1,
-      fontFamily: FontFamily.medium,
-      fontSize: FontSize.body,
-      color: colors.textSecondary,
-    },
-
-    dangerRow: {
-      gap: Spacing.md,
-    },
-
-    rateLimitInfo: {
-      flex: 1,
-      gap: 2,
-    },
-
-    rateLimitDetail: {
-      fontFamily: FontFamily.regular,
-      fontSize: FontSize.caption,
-      color: colors.textMuted,
-    },
-
-    rateLimitDivider: {
+    rowDivider: {
       borderTopWidth: 1,
       borderTopColor: colors.border,
     },
 
-    dangerText: {
-      flex: 1,
-      fontFamily: FontFamily.medium,
-      fontSize: FontSize.body,
-      color: colors.danger,
+    pressed: {
+      opacity: 0.6,
     },
 
-    patInfo: {
-      paddingHorizontal: Spacing.lg,
-      paddingTop: Spacing.md,
-      paddingBottom: Spacing.sm,
+    rowBody: {
+      flex: 1,
       gap: 2,
     },
 
-    patDescription: {
+    rowLabel: {
+      flex: 1,
+      fontFamily: FontFamily.medium,
+      fontSize: FontSize.body,
+      color: colors.textPrimary,
+    },
+
+    rowDetail: {
       fontFamily: FontFamily.regular,
       fontSize: FontSize.caption,
       color: colors.textMuted,
       lineHeight: FontSize.caption * 1.5,
     },
 
-    patLink: {
-      fontFamily: FontFamily.medium,
-      fontSize: FontSize.caption,
-      color: colors.accent,
-      textDecorationLine: "underline",
-    },
-
-    patBold: {
-      fontFamily: FontFamily.semiBold,
-    },
-
-    patActiveRow: {
-      flexDirection: "row",
-      alignItems: "center",
-      justifyContent: "space-between",
-      paddingVertical: Spacing.md,
-      paddingHorizontal: Spacing.lg,
-      borderTopWidth: 1,
-      borderTopColor: colors.border,
-    },
-
-    patActiveInfo: {
-      flexDirection: "row",
-      alignItems: "center",
-      gap: Spacing.sm,
-    },
-
-    patDot: {
-      width: 8,
-      height: 8,
-      borderRadius: 4,
-    },
-
-    patActiveText: {
-      fontFamily: FontFamily.medium,
-      fontSize: FontSize.body,
+    rowValue: {
+      fontFamily: FontFamily.mono,
+      fontSize: FontSize.label,
       color: colors.textSecondary,
     },
 
-    patRemoveBtn: {
-      paddingHorizontal: Spacing.md,
+    dangerText: {
+      color: colors.danger,
+    },
+
+    tokenStatus: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 6,
+    },
+
+    statusDot: {
+      width: 8,
+      height: 8,
+      borderRadius: 4,
+      backgroundColor: colors.success,
+    },
+
+    removeBtn: {
+      paddingHorizontal: Spacing.sm,
       paddingVertical: Spacing.xs,
       borderRadius: Radius.sm,
     },
 
-    patRemoveText: {
+    removeText: {
       fontFamily: FontFamily.medium,
-      fontSize: FontSize.caption,
+      fontSize: FontSize.label,
       color: colors.danger,
     },
 
-    patInputContainer: {
+    tokenSetup: {
       paddingHorizontal: Spacing.lg,
       paddingVertical: Spacing.md,
       gap: Spacing.sm,
-      borderTopWidth: 1,
-      borderTopColor: colors.border,
+    },
+
+    tokenSetupHeader: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: Spacing.md,
+    },
+
+    bold: {
+      fontFamily: FontFamily.semiBold,
+    },
+
+    link: {
+      fontFamily: FontFamily.medium,
+      color: colors.textLink,
     },
 
     patInput: {
@@ -729,19 +798,21 @@ function buildStyles(colors: ColorTokens) {
     patError: {
       fontFamily: FontFamily.regular,
       fontSize: FontSize.caption,
+      color: colors.danger,
     },
 
-    patSaveBtn: {
+    saveBtn: {
       alignItems: "center",
       justifyContent: "center",
       borderRadius: Radius.sm,
       paddingVertical: Spacing.sm,
+      backgroundColor: colors.accent,
     },
 
-    patSaveBtnText: {
+    saveBtnText: {
       fontFamily: FontFamily.semiBold,
       fontSize: FontSize.label,
-      color: "#fff",
+      color: colors.textOnAccent,
     },
   });
 }
