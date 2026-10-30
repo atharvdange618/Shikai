@@ -24,7 +24,7 @@ If you have one, add it here.
 **Device**
 - Phone model: [e.g. Pixel 8]
 - Android version: [e.g. 15]
-- Shikai version: [Profile > About]
+- Shikai version: [Profile > Settings > About Shikai]
 - Installed from: [Play Store / GitHub release / dev build]
 
 **Anything else**
