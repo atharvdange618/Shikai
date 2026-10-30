@@ -17,6 +17,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { FlashList } from "@shopify/flash-list";
 
+import { useAlert } from "@/components/shared/Alert";
 import { ListItemSeparator } from "@/components/shared/ListItemSeparator";
 import { useNotifications } from "@/hooks/useNotifications";
 import {
@@ -299,6 +300,7 @@ export default function NotificationsScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [filter, setFilter] = useState<Filter>("all");
   const pat = useAuthStore((s) => s.pat);
+  const alert = useAlert();
 
   const {
     notifications,
@@ -375,6 +377,10 @@ export default function NotificationsScreen() {
   );
 
   const handleMarkAllRead = useCallback(() => {
+    const previous =
+      queryClient.getQueryData<InfiniteData<FetchNotificationsResult>>(
+        notificationsQueryKey,
+      );
     queryClient.setQueryData<InfiniteData<FetchNotificationsResult>>(
       notificationsQueryKey,
       (old) =>
@@ -391,9 +397,18 @@ export default function NotificationsScreen() {
     );
 
     markAllNotificationsAsRead(pat).catch(() => {
+      // Roll back first: offline, the refetch below fails too and would
+      // leave every thread showing as read.
+      queryClient.setQueryData(notificationsQueryKey, previous);
       queryClient.invalidateQueries({ queryKey: notificationsQueryKey });
+      alert.show({
+        variant: "danger",
+        title: "Couldn't mark all as read",
+        message:
+          "Nothing changed on GitHub. Check your connection and try again.",
+      });
     });
-  }, [queryClient, notificationsQueryKey, pat]);
+  }, [queryClient, notificationsQueryKey, pat, alert]);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
