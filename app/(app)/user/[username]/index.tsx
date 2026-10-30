@@ -1,6 +1,4 @@
-import { FontAwesome6, Octicons } from "@expo/vector-icons";
-import { useQueryClient } from "@tanstack/react-query";
-import { Image } from "expo-image";
+import { Octicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
@@ -13,13 +11,15 @@ import {
   View,
 } from "react-native";
 
-import { StatBlock } from "@/components/shared/StatBlock";
+import {
+  ProfileHeader,
+  type ProfileLink,
+} from "@/components/shared/ProfileHeader";
+import { RecentRepos } from "@/components/shared/RecentRepos";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { useUserProfileRepos } from "@/hooks/useUserProfileRepos";
-import { prefetchRepoDetails } from "@/lib/prefetch";
 
 import {
-  AvatarSize,
   FontFamily,
   FontSize,
   IconSize,
@@ -30,8 +30,43 @@ import {
   useTheme,
   type ColorTokens,
 } from "@/constants/theme";
-import { encodeRepoId, formatCount } from "@/lib/utils";
-import type { GitHubRepo } from "@/types/github.types";
+import type { GitHubUser } from "@/types/github.types";
+
+function buildLinks(user: GitHubUser | undefined): ProfileLink[] {
+  if (!user) return [];
+  const links: ProfileLink[] = [];
+  if (user.location) {
+    links.push({ icon: { set: "octicons", name: "location" }, text: user.location });
+  }
+  if (user.company) {
+    links.push({
+      icon: { set: "octicons", name: "organization" },
+      text: user.company.replace(/^@/, ""),
+    });
+  }
+  if (user.twitter_username) {
+    links.push({
+      icon: { set: "fontawesome6", name: "x-twitter" },
+      text: `@${user.twitter_username}`,
+      url: `https://twitter.com/${user.twitter_username}`,
+    });
+  }
+  if (user.blog) {
+    links.push({
+      icon: { set: "octicons", name: "globe" },
+      text: user.blog.replace(/^https?:\/\//, ""),
+      url: user.blog.startsWith("http") ? user.blog : `https://${user.blog}`,
+    });
+  }
+  if (user.email) {
+    links.push({
+      icon: { set: "octicons", name: "mail" },
+      text: user.email,
+      url: `mailto:${user.email}`,
+    });
+  }
+  return links;
+}
 
 export default function UserProfileScreen() {
   const { username } = useLocalSearchParams<{ username: string }>();
@@ -39,7 +74,6 @@ export default function UserProfileScreen() {
   const shadows = useMemo(() => (isDark ? {} : Shadows.light.sm), [isDark]);
   const navigation = useNavigation();
   const router = useRouter();
-  const queryClient = useQueryClient();
 
   const {
     data: user,
@@ -48,7 +82,7 @@ export default function UserProfileScreen() {
     refetch,
   } = useUserProfile(username ?? "");
 
-  const { data: topRepos, isLoading: reposLoading } = useUserProfileRepos(
+  const { data: recentRepos, isLoading: reposLoading } = useUserProfileRepos(
     username ?? "",
   );
 
@@ -70,19 +104,14 @@ export default function UserProfileScreen() {
     setRefreshing(false);
   }, [refetch]);
 
-  const handleRepoPress = useCallback(
-    (repo: GitHubRepo) => {
-      const repoId = encodeRepoId(repo.owner.login, repo.name);
-      router.push({ pathname: "/(app)/repo/[repoId]", params: { repoId } });
+  const openUserList = useCallback(
+    (list: "repos" | "followers" | "following") => {
+      router.push({
+        pathname: `/(app)/user/[username]/${list}`,
+        params: { username: username ?? "" },
+      });
     },
-    [router],
-  );
-
-  const handleRepoPressIn = useCallback(
-    (repo: GitHubRepo) => {
-      prefetchRepoDetails(queryClient, repo.owner.login, repo.name);
-    },
-    [queryClient],
+    [router, username],
   );
 
   const s = useMemo(() => buildStyles(colors, shadows), [colors, shadows]);
@@ -119,223 +148,55 @@ export default function UserProfileScreen() {
         />
       }
     >
-      <View style={s.heroSection}>
-        {isLoading ? (
-          <View style={[s.avatar, s.skeleton]} />
-        ) : user?.avatar_url ? (
-          <Image
-            source={{ uri: user.avatar_url }}
-            style={s.avatar}
-            contentFit="cover"
-            transition={300}
-          />
-        ) : (
-          <View style={[s.avatar, s.avatarFallback]}>
+      <ProfileHeader
+        user={user}
+        isLoading={isLoading}
+        repoCount={user?.public_repos ?? 0}
+        links={buildLinks(user)}
+        onReposPress={() => openUserList("repos")}
+        onFollowersPress={() => openUserList("followers")}
+        onFollowingPress={() => openUserList("following")}
+      />
+
+      <RecentRepos
+        repos={recentRepos?.repos}
+        isLoading={reposLoading}
+        onSeeAll={() => openUserList("repos")}
+      />
+
+      {!isLoading && user && (
+        <View style={s.card}>
+          <Pressable
+            style={({ pressed }) => [s.row, pressed && s.pressed]}
+            onPress={() =>
+              router.push({
+                pathname: "/(app)/user/[username]/gists",
+                params: { username: user.login },
+              })
+            }
+          >
             <Octicons
-              name="person"
-              size={IconSize.xxl}
-              color={colors.textMuted}
+              name="code"
+              size={IconSize.md}
+              color={colors.textSecondary}
             />
-          </View>
-        )}
+            <Text style={s.rowLabel}>Gists</Text>
+            <Octicons name="chevron-right" size={13} color={colors.textMuted} />
+          </Pressable>
 
-        {isLoading ? (
-          <View style={s.nameSkeleton}>
-            <View style={[s.skeleton, { width: 160, height: 26 }]} />
-            <View style={[s.skeleton, { width: 100, height: 16 }]} />
-          </View>
-        ) : (
-          <View style={s.nameBlock}>
-            {user?.name && <Text style={s.displayName}>{user.name}</Text>}
-            <Text style={s.username}>@{user?.login}</Text>
-            {user?.type === "Organization" && (
-              <View style={s.orgBadge}>
-                <Octicons name="organization" size={12} color={colors.accent} />
-                <Text style={s.orgText}>Organization</Text>
-              </View>
-            )}
-            {user?.hireable && (
-              <View style={s.hireableBadge}>
-                <View style={s.hireableDot} />
-                <Text style={s.hireableText}>Open to work</Text>
-              </View>
-            )}
-          </View>
-        )}
-
-        {user?.bio && <Text style={s.bio}>{user.bio}</Text>}
-      </View>
-
-      <View style={[s.statsCard, shadows]}>
-        <StatBlock
-          value={user?.public_repos ?? 0}
-          label="Repositories"
-          isLoading={isLoading}
-          onPress={() =>
-            router.push({
-              pathname: "/(app)/user/[username]/repos",
-              params: { username: username ?? "" },
-            })
-          }
-        />
-        <View style={s.statDivider} />
-        <StatBlock
-          value={user?.followers ?? 0}
-          label="Followers"
-          isLoading={isLoading}
-          onPress={() =>
-            router.push({
-              pathname: "/(app)/user/[username]/followers",
-              params: { username: username ?? "" },
-            })
-          }
-        />
-        <View style={s.statDivider} />
-        <StatBlock
-          value={user?.following ?? 0}
-          label="Following"
-          isLoading={isLoading}
-          onPress={() =>
-            router.push({
-              pathname: "/(app)/user/[username]/following",
-              params: { username: username ?? "" },
-            })
-          }
-        />
-      </View>
-
-      {!isLoading &&
-        (user?.location ||
-          user?.company ||
-          user?.blog ||
-          user?.twitter_username) && (
-          <View style={s.metaCard}>
-            {user?.location && (
-              <MetaRow icon="location" text={user.location} colors={colors} />
-            )}
-            {user?.company && (
-              <MetaRow
-                icon="organization"
-                text={user.company.replace(/^@/, "")}
-                colors={colors}
-              />
-            )}
-            {user?.twitter_username && (
-              <MetaRow
-                iconType="fontawesome6"
-                icon="x-twitter"
-                text={`@${user.twitter_username}`}
-                colors={colors}
-                isLink
-                onPress={() =>
-                  Linking.openURL(
-                    `https://twitter.com/${user.twitter_username}`,
-                  )
-                }
-              />
-            )}
-            {user?.blog && (
-              <MetaRow
-                icon="globe"
-                text={user.blog.replace(/^https?:\/\//, "")}
-                colors={colors}
-                isLink
-                onPress={() => {
-                  const url = user.blog!;
-                  const finalUrl = url.startsWith("http")
-                    ? url
-                    : `https://${url}`;
-                  Linking.openURL(finalUrl);
-                }}
-              />
-            )}
-            {user?.email && (
-              <MetaRow
-                icon="mail"
-                text={user.email}
-                colors={colors}
-                isLink
-                onPress={() => Linking.openURL(`mailto:${user.email}`)}
-              />
-            )}
-          </View>
-        )}
-
-      {reposLoading ? (
-        <View style={s.section}>
-          <Text style={s.sectionTitle}>Top Repositories</Text>
-          <View style={s.reposSkeleton}>
-            {[1, 2, 3].map((i) => (
-              <View key={i} style={[s.skeleton, s.repoSkeleton]} />
-            ))}
-          </View>
-        </View>
-      ) : topRepos?.repos && topRepos.repos.length > 0 ? (
-        <View style={s.section}>
-          <View style={s.sectionHeader}>
-            <Text style={s.sectionTitle}>Top Repositories</Text>
-            {username && (
-              <Pressable
-                onPress={() =>
-                  router.push({
-                    pathname: "/(app)/user/[username]/repos",
-                    params: { username },
-                  })
-                }
-                hitSlop={8}
-                style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
-              >
-                <Text style={s.seeAll}>See all</Text>
-              </Pressable>
-            )}
-          </View>
-          {topRepos.repos.slice(0, 5).map((repo: GitHubRepo) => (
-            <RepoRow
-              key={repo.id}
-              repo={repo}
-              colors={colors}
-              onPress={handleRepoPress}
-              onPressIn={handleRepoPressIn}
+          <Pressable
+            style={({ pressed }) => [s.row, s.rowDivider, pressed && s.pressed]}
+            onPress={() => Linking.openURL(user.html_url)}
+          >
+            <Octicons
+              name="mark-github"
+              size={IconSize.md}
+              color={colors.textSecondary}
             />
-          ))}
+            <Text style={s.rowLabel}>View on GitHub</Text>
+            <Octicons name="link-external" size={13} color={colors.textMuted} />
+          </Pressable>
         </View>
-      ) : null}
-
-      {!isLoading && user?.login && (
-        <Pressable
-          style={({ pressed }) => [
-            s.githubButton,
-            pressed && s.githubButtonPressed,
-          ]}
-          onPress={() =>
-            router.push({
-              pathname: "/(app)/user/[username]/gists",
-              params: { username: user.login },
-            })
-          }
-        >
-          <Octicons name="code" size={IconSize.md} color={colors.textSecondary} />
-          <Text style={s.githubButtonText}>Gists</Text>
-          <Octicons name="chevron-right" size={13} color={colors.textMuted} />
-        </Pressable>
-      )}
-
-      {!isLoading && user?.html_url && (
-        <Pressable
-          style={({ pressed }) => [
-            s.githubButton,
-            pressed && s.githubButtonPressed,
-          ]}
-          onPress={() => Linking.openURL(user.html_url)}
-        >
-          <Octicons
-            name="mark-github"
-            size={IconSize.md}
-            color={colors.textSecondary}
-          />
-          <Text style={s.githubButtonText}>View on GitHub</Text>
-          <Octicons name="link-external" size={13} color={colors.textMuted} />
-        </Pressable>
       )}
 
       {!isLoading && user?.created_at && (
@@ -350,189 +211,6 @@ export default function UserProfileScreen() {
     </ScrollView>
   );
 }
-
-function RepoRow({
-  repo,
-  colors,
-  onPress,
-  onPressIn,
-}: {
-  repo: GitHubRepo;
-  colors: ColorTokens;
-  onPress: (repo: GitHubRepo) => void;
-  onPressIn: (repo: GitHubRepo) => void;
-}) {
-  return (
-    <Pressable
-      style={({ pressed }) => [
-        styles.repoRow,
-        { borderColor: colors.border, backgroundColor: colors.surface },
-        pressed && { opacity: 0.7 },
-      ]}
-      onPress={() => onPress(repo)}
-      onPressIn={() => onPressIn(repo)}
-    >
-      <View style={styles.repoInfo}>
-        <Text
-          style={[styles.repoName, { color: colors.accent }]}
-          numberOfLines={1}
-        >
-          {repo.name}
-        </Text>
-        {repo.description && (
-          <Text
-            style={[styles.repoDesc, { color: colors.textSecondary }]}
-            numberOfLines={1}
-          >
-            {repo.description}
-          </Text>
-        )}
-      </View>
-      <View style={styles.repoStats}>
-        {repo.stargazers_count > 0 && (
-          <View style={styles.repoStat}>
-            <Octicons name="star" size={11} color={colors.star} />
-            <Text style={[styles.repoStatText, { color: colors.textMuted }]}>
-              {formatCount(repo.stargazers_count)}
-            </Text>
-          </View>
-        )}
-        {repo.forks_count > 0 && (
-          <View style={styles.repoStat}>
-            <Octicons name="repo-forked" size={11} color={colors.textMuted} />
-            <Text style={[styles.repoStatText, { color: colors.textMuted }]}>
-              {formatCount(repo.forks_count)}
-            </Text>
-          </View>
-        )}
-      </View>
-    </Pressable>
-  );
-}
-
-function MetaRow({
-  icon,
-  text,
-  colors,
-  isLink = false,
-  onPress,
-  iconType = "octicons",
-}: {
-  icon: React.ComponentProps<typeof Octicons>["name"] | string;
-  text: string;
-  colors: ColorTokens;
-  isLink?: boolean;
-  onPress?: () => void;
-  iconType?: "octicons" | "fontawesome6";
-}) {
-  const IconComponent = iconType === "fontawesome6" ? FontAwesome6 : Octicons;
-
-  const content = (
-    <View style={metaStyles.row}>
-      <IconComponent name={icon as any} size={15} color={colors.textMuted} />
-      <Text
-        style={[
-          metaStyles.text,
-          { color: isLink ? colors.accent : colors.textSecondary },
-        ]}
-        numberOfLines={1}
-      >
-        {text}
-      </Text>
-      {isLink && (
-        <Octicons name="link-external" size={12} color={colors.textMuted} />
-      )}
-    </View>
-  );
-
-  if (isLink && onPress) {
-    return (
-      <Pressable
-        onPress={onPress}
-        style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
-      >
-        {content}
-      </Pressable>
-    );
-  }
-
-  return content;
-}
-
-const metaStyles = StyleSheet.create({
-  row: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: Spacing.md,
-  },
-  text: {
-    flex: 1,
-    fontFamily: FontFamily.regular,
-    fontSize: FontSize.body,
-  },
-});
-
-const styles = StyleSheet.create({
-  section: {
-    gap: Spacing.sm,
-  },
-
-  sectionTitle: {
-    fontFamily: FontFamily.semiBold,
-    fontSize: FontSize.title,
-    color: "inherit",
-    marginBottom: Spacing.xs,
-  },
-
-  reposSkeleton: {
-    gap: Spacing.sm,
-  },
-
-  repoSkeleton: {
-    height: 60,
-    borderRadius: Radius.lg,
-  },
-
-  repoRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    borderWidth: 1,
-    borderRadius: Radius.lg,
-    padding: Spacing.md,
-    gap: Spacing.md,
-  },
-
-  repoInfo: {
-    flex: 1,
-    gap: 2,
-  },
-
-  repoName: {
-    fontFamily: FontFamily.semiBold,
-    fontSize: FontSize.body,
-  },
-
-  repoDesc: {
-    fontFamily: FontFamily.regular,
-    fontSize: FontSize.caption,
-  },
-
-  repoStats: {
-    flexDirection: "row",
-    gap: Spacing.md,
-  },
-
-  repoStat: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-  },
-
-  repoStatText: {
-    fontFamily: FontFamily.regular,
-    fontSize: FontSize.caption,
-  },
-});
 
 function buildStyles(colors: ColorTokens, shadows: object) {
   return StyleSheet.create({
@@ -582,179 +260,36 @@ function buildStyles(colors: ColorTokens, shadows: object) {
       alignSelf: "center",
     },
 
-    section: {
-      gap: Spacing.sm,
-    },
-
-    sectionHeader: {
-      flexDirection: "row",
-      alignItems: "center",
-      justifyContent: "space-between",
-      marginBottom: Spacing.xs,
-    },
-
-    sectionTitle: {
-      fontFamily: FontFamily.semiBold,
-      fontSize: FontSize.title,
-      color: colors.textPrimary,
-      marginBottom: Spacing.xs,
-    },
-
-    seeAll: {
-      fontFamily: FontFamily.medium,
-      fontSize: FontSize.label,
-      color: colors.accent,
-    },
-
-    reposSkeleton: {
-      gap: Spacing.sm,
-    },
-
-    repoSkeleton: {
-      height: 60,
-      borderRadius: Radius.lg,
-    },
-
-    heroSection: {
-      alignItems: "center",
-      gap: Spacing.md,
-    },
-
-    avatar: {
-      width: AvatarSize.xl,
-      height: AvatarSize.xl,
-      borderRadius: AvatarSize.xl / 2,
-      borderWidth: 3,
-      borderColor: colors.border,
-    },
-
-    avatarFallback: {
-      backgroundColor: colors.surfaceSecondary,
-      alignItems: "center",
-      justifyContent: "center",
-    },
-
-    nameSkeleton: {
-      alignItems: "center",
-      gap: Spacing.sm,
-    },
-
-    nameBlock: {
-      alignItems: "center",
-      gap: Spacing.xs,
-    },
-
-    displayName: {
-      fontFamily: FontFamily.bold,
-      fontSize: FontSize.heading,
-      color: colors.textPrimary,
-      textAlign: "center",
-    },
-
-    username: {
-      fontFamily: FontFamily.regular,
-      fontSize: FontSize.body,
-      color: colors.textSecondary,
-    },
-
-    orgBadge: {
-      flexDirection: "row",
-      alignItems: "center",
-      gap: 6,
-      paddingHorizontal: Spacing.sm,
-      paddingVertical: 4,
-      borderRadius: Radius.full,
-      backgroundColor: colors.accentSubtle,
-      marginTop: 4,
-    },
-
-    orgText: {
-      fontFamily: FontFamily.medium,
-      fontSize: FontSize.caption,
-      color: colors.accent,
-    },
-
-    hireableBadge: {
-      flexDirection: "row",
-      alignItems: "center",
-      gap: 6,
-      paddingHorizontal: Spacing.sm,
-      paddingVertical: 4,
-      borderRadius: Radius.full,
-      backgroundColor: `${colors.success}18`,
-      marginTop: 4,
-    },
-
-    hireableDot: {
-      width: 6,
-      height: 6,
-      borderRadius: 3,
-      backgroundColor: colors.success,
-    },
-
-    hireableText: {
-      fontFamily: FontFamily.medium,
-      fontSize: FontSize.caption,
-      color: colors.success,
-    },
-
-    bio: {
-      fontFamily: FontFamily.regular,
-      fontSize: FontSize.body,
-      color: colors.textSecondary,
-      textAlign: "center",
-      lineHeight: FontSize.body * 1.5,
-      paddingHorizontal: Spacing.md,
-    },
-
-    statsCard: {
-      flexDirection: "row",
-      alignItems: "center",
+    card: {
       backgroundColor: colors.surface,
       borderRadius: Radius.lg,
       borderWidth: 1,
       borderColor: colors.border,
-      paddingVertical: Spacing.lg,
-      paddingHorizontal: Spacing.md,
-    },
-
-    statDivider: {
-      width: 1,
-      height: 36,
-      backgroundColor: colors.border,
-    },
-
-    metaCard: {
-      backgroundColor: colors.surface,
-      borderRadius: Radius.lg,
-      borderWidth: 1,
-      borderColor: colors.border,
-      padding: Spacing.lg,
-      gap: Spacing.md,
+      overflow: "hidden",
       ...shadows,
     },
 
-    githubButton: {
+    row: {
       flexDirection: "row",
       alignItems: "center",
       gap: Spacing.md,
-      backgroundColor: colors.surface,
-      borderRadius: Radius.lg,
-      borderWidth: 1,
-      borderColor: colors.border,
       padding: Spacing.md,
-      ...shadows,
     },
 
-    githubButtonPressed: {
+    rowDivider: {
+      borderTopWidth: 1,
+      borderTopColor: colors.border,
+    },
+
+    pressed: {
       opacity: 0.7,
     },
 
-    githubButtonText: {
+    rowLabel: {
       flex: 1,
       fontFamily: FontFamily.medium,
       fontSize: FontSize.body,
-      color: colors.textSecondary,
+      color: colors.textPrimary,
     },
 
     memberSince: {
@@ -762,11 +297,6 @@ function buildStyles(colors: ColorTokens, shadows: object) {
       fontSize: FontSize.caption,
       color: colors.textMuted,
       textAlign: "center",
-    },
-
-    skeleton: {
-      borderRadius: 4,
-      backgroundColor: colors.surfaceSecondary,
     },
   });
 }
