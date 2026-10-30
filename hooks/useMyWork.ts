@@ -2,6 +2,7 @@ import { useQueries } from "@tanstack/react-query";
 
 import { searchIssues } from "@/lib/github-rest";
 import { queryKeys } from "@/lib/query-client";
+import { useAuthStore } from "@/stores/auth.store";
 
 const PER_PAGE = 20;
 
@@ -39,10 +40,13 @@ export const MY_WORK_SECTIONS: {
 ];
 
 export function useMyWork() {
+  const pat = useAuthStore((s) => s.pat);
   const results = useQueries({
     queries: MY_WORK_SECTIONS.map((section) => ({
       queryKey: queryKeys.searchIssues(section.query),
-      queryFn: () => searchIssues(section.query, 1, PER_PAGE, "updated", "desc"),
+      queryFn: () =>
+        searchIssues(section.query, 1, PER_PAGE, "updated", "desc", pat),
+      enabled: !!pat,
       staleTime: 1000 * 60 * 2,
       meta: { persist: false },
     })),
@@ -55,6 +59,7 @@ export function useMyWork() {
   }));
 
   return {
+    needsPat: !pat,
     sections,
     isLoading: results.every((r) => r.isLoading),
     isError: results.every((r) => r.isError),
