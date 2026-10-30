@@ -15,16 +15,16 @@ Shikai is a read-only GitHub companion built for Android. See your repos, contri
 GitHub's mobile app is built for work, reviewing PRs, responding to issues, managing projects. Shikai is built for you. No write operations. No accidental mistakes. Just your work, at a glance.
 
 OVERVIEW
-Your personal GitHub dashboard with pinned repos, contribution graph with streaks, and a live activity feed. Pushes, stars, forks, releases, PRs, and issues, all in one place. Tap any item to jump to the repo.
+Your personal GitHub dashboard with pinned repos, contribution graph with streaks, a live activity feed, and a following preview. Pushes, stars, forks, releases, PRs, and issues, all in one place. Tap any item to jump to the repo. Your work collects the review requests, assignments, and mentions that need you.
 
 REPOSITORIES
 Browse all your repos with smart filters by language, type, or sort order. Explore file trees, read code full screen with line numbers, a wrap toggle, and syntax colors that match your theme, browse commit history per branch, and track issues and pull requests. Tap a repo's stats to open its commit history, forks, or stargazers. Insights show a year of commit activity, top contributors, and the hours people commit. Health badges flag missing licenses, no topics, and stale repos. SVG and PDF files render inline alongside markdown.
 
 SEARCH
-Global search across repos, users, issues, and topics. Tab switching between result types, debounced input, eager-load pagination. Navigate in-app to any repo, user profile, or issue detail.
+Global search across repos, users, issues, and topics. Issue results require a personal access token, because GitHub answers no issue search for the sign-in token. Tab switching between result types, debounced input, eager-load pagination. Navigate in-app to any repo, user profile, or issue detail.
 
 PROFILE
-Your GitHub card with stats, social links, location, and hireable status. Tap Followers, Following, or Repositories to open those lists, on your profile or anyone else's. Saved repos and gists are one tap away, and settings sit behind the gear icon.
+Your GitHub card with stats, social links, location, and hireable status. Your own profile lists your recently updated repos. Tap Followers, Following, or Repositories to open those lists, on your profile or anyone else's. Saved repos and gists are one tap away, and settings sit behind the gear icon.
 
 HOME SCREEN WIDGET
 Add the contribution streak widget to your Android home screen. See your current streak, longest streak, and recent activity without opening the app. Syncs with your app theme.
@@ -39,7 +39,7 @@ SAVED REPOS
 Bookmark any repo from anywhere in the app. Stars and Watchlist combined in one screen with search and filter.
 
 THEMES
-Choose from 5 carefully crafted palettes: Light, Dark, Tokyo Night, Dracula, and Atom One Dark. Theme selection persists across app restarts.
+Choose from 5 carefully crafted palettes: Light, Dark, Tokyo Night, Dracula, and Atom One Dark. Theme selection persists across app restarts and survives Clear cache.
 
 OTA UPDATES
 Small updates download in the background when you open the app, and Shikai asks before restarting to apply them. Bigger releases come through the Play Store, with an in-app prompt when one is ready.
