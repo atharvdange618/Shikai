@@ -2,6 +2,7 @@ import { fetchReceivedEvents } from "@/lib/github-rest";
 import { queryKeys } from "@/lib/query-client";
 import { useAuthStore } from "@/stores/auth.store";
 import { useInfinitePagedQuery } from "@/hooks/useInfinitePagedQuery";
+import { sortEventsNewestFirst } from "@/lib/github-utils";
 import type { GitHubEventType } from "@/types/github.types";
 
 const RENDERED_EVENT_TYPES: GitHubEventType[] = [
@@ -40,7 +41,7 @@ export function useReceivedEvents() {
         })),
       }),
     },
-    (data) => data?.pages.flatMap((p) => p.events) ?? [],
+    (data) => sortEventsNewestFirst(data?.pages.flatMap((p) => p.events) ?? []),
   );
 
   return { events, ...rest };
