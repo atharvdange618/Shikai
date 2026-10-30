@@ -98,7 +98,7 @@
             <img src="assets/icon.png" alt="Shikai" width="40" height="40">
             <h1>Privacy Policy</h1>
         </div>
-        <p class="updated">Last updated: October 15, 2026</p>
+        <p class="updated">Last updated: October 30, 2026</p>
 
         <h2>Overview</h2>
         <p>Shikai is a read-only GitHub companion app. This privacy policy explains how we handle your data.</p>
@@ -109,7 +109,7 @@
         <h3>Authentication Data</h3>
         <ul>
             <li><strong>OAuth Token:</strong> Stored locally on your device using secure encrypted storage (expo-secure-store). This token is used to authenticate with GitHub's API.</li>
-            <li><strong>Personal Access Token (Optional):</strong> If you choose to enable notifications, you may provide a GitHub Personal Access Token. This is stored locally on your device only.</li>
+            <li><strong>Personal Access Token (Optional):</strong> If you turn on notification alerts, open Your work, search issues, or view stargazers, you may provide a GitHub Personal Access Token. This is stored locally on your device only.</li>
         </ul>
 
         <h3>Cached Data</h3>
@@ -137,7 +137,7 @@
 
         <h2>Data Usage</h2>
         <ul>
-            <li><strong>API Communication:</strong> Your OAuth token is sent directly from your device to GitHub's API. It passes through a secure Cloudflare Worker proxy only during the initial authentication exchange.</li>
+            <li><strong>API Communication:</strong> Your OAuth token, and your Personal Access Token when a feature needs it, are sent directly from your device to GitHub's API. The OAuth token passes through a secure Cloudflare Worker proxy only during the initial authentication exchange.</li>
             <li><strong>Background Checks:</strong> When notification alerts are on, your Personal Access Token is sent directly from your device to GitHub's API about every 15 minutes. Tapping an alert marks that notification as read on GitHub, the same as tapping it in the Notifications tab.</li>
             <li><strong>No Server Storage:</strong> Shikai does not store your tokens or personal data on any external servers.</li>
             <li><strong>Crash Reporting:</strong> Anonymous crash and performance data is sent to Sentry as described above. It is not used for advertising or profiling.</li>

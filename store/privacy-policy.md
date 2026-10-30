@@ -1,6 +1,6 @@
 # Privacy Policy - Shikai
 
-**Last updated:** October 15, 2026
+**Last updated:** October 30, 2026
 
 ## Overview
 
@@ -13,7 +13,7 @@ Shikai collects minimal data necessary to provide its services:
 ### Authentication Data
 
 - **OAuth Token:** Stored locally on your device using secure encrypted storage (expo-secure-store). This token is used to authenticate with GitHub's API.
-- **Personal Access Token (Optional):** If you choose to enable notifications, you may provide a GitHub Personal Access Token. This is stored locally on your device only.
+- **Personal Access Token (Optional):** If you turn on notification alerts, open Your work, search issues, or view stargazers, you may provide a GitHub Personal Access Token. This is stored locally on your device only.
 
 ### Cached Data
 
@@ -37,7 +37,7 @@ Shikai collects minimal data necessary to provide its services:
 
 ## Data Usage
 
-- **API Communication:** Your OAuth token is sent directly from your device to GitHub's API. It passes through a secure Cloudflare Worker proxy only during the initial authentication exchange.
+- **API Communication:** Your OAuth token, and your Personal Access Token when a feature needs it, are sent directly from your device to GitHub's API. The OAuth token passes through a secure Cloudflare Worker proxy only during the initial authentication exchange.
 - **Background Checks:** When notification alerts are on, your Personal Access Token is sent directly from your device to GitHub's API about every 15 minutes. Tapping an alert marks that notification as read on GitHub, the same as tapping it in the Notifications tab.
 - **No Server Storage:** Shikai does not store your tokens or personal data on any external servers.
 - **Crash Reporting:** Anonymous crash and performance data is sent to Sentry as described above. It is not used for advertising or profiling.
