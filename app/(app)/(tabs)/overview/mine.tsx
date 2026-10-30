@@ -1,4 +1,5 @@
 import { Octicons } from "@expo/vector-icons";
+import { type Href, useRouter } from "expo-router";
 import { useCallback, useMemo, useState } from "react";
 import {
   Pressable,
@@ -23,7 +24,8 @@ import {
 
 export default function MyWorkScreen() {
   const { colors } = useTheme();
-  const { sections, isLoading, isError, refetch } = useMyWork();
+  const router = useRouter();
+  const { needsPat, sections, isLoading, isError, refetch } = useMyWork();
   const [refreshing, setRefreshing] = useState(false);
   const [collapsed, setCollapsed] = useState<Set<MyWorkSectionKey>>(new Set());
 
@@ -43,6 +45,24 @@ export default function MyWorkScreen() {
       return next;
     });
   }, []);
+
+  if (needsPat) {
+    return (
+      <View style={s.centered}>
+        <Octicons name="key" size={40} color={colors.textMuted} />
+        <Text style={s.emptyTitle}>Needs a personal access token</Text>
+        <Text style={s.emptySubtitle}>
+          GitHub only answers these searches with a PAT. Add one in Settings.
+        </Text>
+        <Pressable
+          style={s.retry}
+          onPress={() => router.push("/(app)/(tabs)/profile/settings" as Href)}
+        >
+          <Text style={s.retryText}>Open Settings</Text>
+        </Pressable>
+      </View>
+    );
+  }
 
   if (isError) {
     return (
@@ -179,6 +199,13 @@ function buildStyles(colors: ColorTokens) {
       fontFamily: FontFamily.semiBold,
       fontSize: FontSize.title,
       color: colors.textPrimary,
+    },
+    emptySubtitle: {
+      fontFamily: FontFamily.regular,
+      fontSize: FontSize.label,
+      color: colors.textMuted,
+      textAlign: "center",
+      paddingHorizontal: Spacing.xl,
     },
     retry: {
       backgroundColor: colors.accent,

@@ -217,6 +217,13 @@ export default function SavedScreen() {
         contentContainerStyle={s.listContent}
         ItemSeparatorComponent={ListItemSeparator}
         ListEmptyComponent={ListEmpty}
+        ListFooterComponent={
+          tab === "stars" && isFetchingNextStarred ? (
+            <View style={s.footerLoader}>
+              <ActivityIndicator size="small" color={colors.accent} />
+            </View>
+          ) : null
+        }
         onEndReached={onEndReached}
         onEndReachedThreshold={0.5}
         keyboardShouldPersistTaps="handled"
@@ -359,6 +366,10 @@ function buildStyles(colors: ReturnType<typeof useTheme>["colors"]) {
     listContent: {
       paddingHorizontal: Layout.screenPadding,
       paddingBottom: Spacing.xxl,
+    },
+    footerLoader: {
+      paddingVertical: Spacing.lg,
+      alignItems: "center",
     },
     loadingContainer: {
       paddingTop: Spacing["3xl"],

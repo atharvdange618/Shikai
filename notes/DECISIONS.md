@@ -260,6 +260,16 @@ Entries D-001 to D-021 were backfilled on 2026-10-15 from commits, the changelog
 **Consequences.** Opening one of these lists after a cold start shows a spinner instead of cached rows.
 **Revisit if.** Users reopen these lists often enough that the spinner gets complaints.
 
+## D-027: Issue search runs on the PAT
+
+**Date:** 2026-10-30 · **Status:** Accepted
+
+**Context.** `/search/issues` returns 200 with 0 items for every query on the App token (D-002), even `repo:microsoft/vscode is:open`, which finds 21,957 with no token at all. Your work and the Issues tab in Search looked empty instead of broken. The cause is inferred from results: the App token seems to limit issue search to repos where the app is installed, like D-023.
+**Decision.** `searchIssues()` takes a PAT. `useMyWork` and the Issues tab in `useGlobalSearch` only run with a saved PAT, and without one the screens say a PAT is needed and link to Settings.
+**Rejected.** Searching with no token: no private repos and 10 requests a minute. Asking users to install the app on all their repos: it still misses public repos they don't own, where most review requests and mentions come from.
+**Consequences.** Your work and issue search need a PAT, like Notifications (D-003). Classic PATs are confirmed to work; fine-grained PATs are untested.
+**Revisit if.** GitHub lets App user tokens search issues outside installed repos.
+
 ## D-028: Activity feeds sort by date and show only what GitHub's events API returns
 
 **Date:** 2026-10-30 · **Status:** Accepted

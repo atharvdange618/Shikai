@@ -6,7 +6,6 @@ import { Href, useRouter } from "expo-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
-  Linking,
   Pressable,
   RefreshControl,
   ScrollView,
@@ -342,22 +341,6 @@ export default function OverviewScreen() {
           </View>
           <View style={s.headerActions}>
             <Pressable
-              style={({ pressed }) => [
-                s.githubButton,
-                pressed && { opacity: 0.6 },
-              ]}
-              onPress={() =>
-                Linking.openURL("https://github.com/atharvdange618/shikai")
-              }
-              hitSlop={8}
-            >
-              <Octicons
-                name="mark-github"
-                size={20}
-                color={colors.textSecondary}
-              />
-            </Pressable>
-            <Pressable
               onPress={() => router.push("/(app)/(tabs)/profile" as Href)}
               onPressIn={handleAvatarPressIn}
               hitSlop={8}
@@ -548,13 +531,6 @@ function buildStyles(colors: ColorTokens) {
       flexDirection: "row",
       alignItems: "center",
       gap: Spacing.md,
-    },
-
-    githubButton: {
-      width: 32,
-      height: 32,
-      alignItems: "center",
-      justifyContent: "center",
     },
 
     greeting: {

@@ -379,14 +379,19 @@ export async function searchIssues(
   per_page: number = 10,
   sort?: "comments" | "reactions" | "interactions" | "created" | "updated",
   order?: "desc" | "asc",
+  pat?: string | null,
 ): Promise<{
   issues: GitHubIssue[];
   totalCount: number;
   pagination: GitHubPagination;
 }> {
+  // The App token gets 0 results here for every query, so callers pass the PAT (D-027).
   const { data, headers } = await githubAxios.get<
     GitHubSearchResult<GitHubIssue>
-  >("/search/issues", { params: { q: query, page, per_page, sort, order } });
+  >("/search/issues", {
+    params: { q: query, page, per_page, sort, order },
+    headers: patHeaders(pat),
+  });
   return {
     issues: data.items,
     totalCount: data.total_count,
