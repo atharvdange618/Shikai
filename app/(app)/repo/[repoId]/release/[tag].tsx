@@ -31,8 +31,10 @@ import {
 import Animated, {
   FadeIn,
   FadeOut,
-  SlideInDown,
   SlideOutDown,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -295,6 +297,20 @@ function AssetActionMenu({
 }) {
   const insets = useSafeAreaInsets();
   const [copied, setCopied] = useState(false);
+  // Slide in with a transform, not a SlideInDown entering animation. The
+  // Modal lays out short by the status bar height, then grows to full
+  // screen; a layout animation keeps the first frame, so the sheet ends up
+  // floating above the bottom edge.
+  const slide = useSharedValue(400);
+  const slideStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: slide.value }],
+  }));
+
+  useEffect(() => {
+    if (!target) return;
+    slide.value = 400;
+    slide.value = withTiming(0, { duration: 220 });
+  }, [target, slide]);
 
   if (!target) return null;
 
@@ -327,10 +343,10 @@ function AssetActionMenu({
       >
         <Pressable style={StyleSheet.absoluteFill} onPress={onClose} />
         <Animated.View
-          entering={SlideInDown.duration(220)}
           exiting={SlideOutDown.duration(140)}
           style={[
             s.menuSheet,
+            slideStyle,
             {
               backgroundColor: colors.surface,
               borderColor: colors.border,
