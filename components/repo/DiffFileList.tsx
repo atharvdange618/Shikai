@@ -9,7 +9,13 @@ import type { GitHubPullRequestFile } from "@/types/github.types";
 import { Octicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useMemo, useState } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import {
+  ActivityIndicator,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 
 function getFileStatusDisplay(
   status: GitHubPullRequestFile["status"],
@@ -42,17 +48,29 @@ export function DiffFileList({
   colors,
   repoId,
   diffSource,
+  totals,
+  hasMore = false,
+  isLoadingMore = false,
+  onLoadMore,
 }: {
   files: GitHubPullRequestFile[];
   colors: ColorTokens;
   repoId: string;
   diffSource: DiffSource;
+  /** Whole-diff counts, for when `files` is only the pages loaded so far. */
+  totals?: { files: number; additions: number; deletions: number };
+  hasMore?: boolean;
+  isLoadingMore?: boolean;
+  onLoadMore?: () => void;
 }) {
   const s = useMemo(() => buildStyles(colors), [colors]);
   const [sectionExpanded, setSectionExpanded] = useState(false);
 
-  const totalAdditions = files.reduce((sum, f) => sum + f.additions, 0);
-  const totalDeletions = files.reduce((sum, f) => sum + f.deletions, 0);
+  const fileCount = totals?.files ?? files.length;
+  const totalAdditions =
+    totals?.additions ?? files.reduce((sum, f) => sum + f.additions, 0);
+  const totalDeletions =
+    totals?.deletions ?? files.reduce((sum, f) => sum + f.deletions, 0);
 
   const openFile = (filename: string) => {
     router.push({
@@ -70,7 +88,7 @@ export function DiffFileList({
         onPress={() => setSectionExpanded((v) => !v)}
       >
         <Text style={[s.sectionTitle, { color: colors.textPrimary }]}>
-          {files.length} file{files.length === 1 ? "" : "s"} changed
+          {fileCount} file{fileCount === 1 ? "" : "s"} changed
         </Text>
         <View
           style={{ flexDirection: "row", alignItems: "center", gap: Spacing.sm }}
@@ -114,6 +132,25 @@ export function DiffFileList({
             </Pressable>
           );
         })}
+
+      {sectionExpanded &&
+        hasMore &&
+        onLoadMore &&
+        (isLoadingMore ? (
+          <View style={s.row}>
+            <ActivityIndicator size="small" color={colors.accent} style={s.loadMore} />
+          </View>
+        ) : (
+          <Pressable
+            style={({ pressed }) => [s.row, pressed && s.rowPressed]}
+            onPress={onLoadMore}
+            accessibilityRole="button"
+          >
+            <Text style={[s.loadMore, s.loadMoreText, { color: colors.accent }]}>
+              Load more files ({files.length} of {fileCount})
+            </Text>
+          </Pressable>
+        ))}
     </View>
   );
 }
@@ -156,6 +193,14 @@ function buildStyles(colors: ColorTokens) {
     diffStat: {
       fontFamily: FontFamily.mono,
       fontSize: 11,
+    },
+    loadMore: {
+      flex: 1,
+      textAlign: "center",
+    },
+    loadMoreText: {
+      fontFamily: FontFamily.medium,
+      fontSize: FontSize.caption,
     },
   });
 }

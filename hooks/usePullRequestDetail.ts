@@ -8,6 +8,7 @@ import {
   fetchPullRequestReviews,
   fetchRequestedReviewers,
 } from "@/lib/github-rest";
+import { useInfinitePagedQuery } from "@/hooks/useInfinitePagedQuery";
 import { queryKeys } from "@/lib/query-client";
 import type { GitHubCheckConclusion } from "@/types/github.types";
 import { queryOptions, useQuery } from "@tanstack/react-query";
@@ -44,20 +45,27 @@ export function usePullRequestReviewComments(
   );
 }
 
+// GitHub's max page size. The endpoint stops at 3000 files.
+const FILES_PER_PAGE = 100;
+
 export function usePullRequestFiles(
   owner: string,
   repo: string,
   number: number,
 ) {
-  return useQuery(
-    queryOptions({
+  const { items: files, ...rest } = useInfinitePagedQuery(
+    {
       queryKey: queryKeys.prFiles(owner, repo, number),
-      queryFn: () => fetchPullRequestFiles(owner, repo, number),
+      queryFn: ({ pageParam }) =>
+        fetchPullRequestFiles(owner, repo, number, pageParam, FILES_PER_PAGE),
       enabled: Boolean(owner && repo && number),
       staleTime: 1000 * 60 * 2,
       meta: { persist: false },
-    }),
+    },
+    (data) => data?.pages.flatMap((p) => p.files) ?? [],
   );
+
+  return { files, ...rest };
 }
 
 export function usePullRequestReviews(

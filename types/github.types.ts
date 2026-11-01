@@ -373,6 +373,13 @@ export interface GitHubPullRequest {
   base: { ref: string; label: string; sha: string };
 }
 
+/** The single-PR endpoint adds totals the list endpoint leaves out. */
+export interface GitHubPullRequestDetail extends GitHubPullRequest {
+  additions: number;
+  deletions: number;
+  changed_files: number;
+}
+
 export interface GitHubRelease {
   id: number;
   tag_name: string;

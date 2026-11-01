@@ -61,7 +61,7 @@ function DiffScreenContent() {
     params.source === "pr" ? pr : params.source === "commit" ? commit : compare;
   const files =
     params.source === "pr"
-      ? pr.data?.files
+      ? pr.files
       : params.source === "commit"
         ? commit.data?.files
         : compare.data?.files;

@@ -20,6 +20,7 @@ import {
   fetchFollowing,
   fetchForks,
   fetchParticipatingNotifications,
+  fetchPullRequestFiles,
   fetchPunchCard,
   fetchStargazers,
   fetchUserEvents,
@@ -149,6 +150,14 @@ describe("paged list endpoints", () => {
     get.mockResolvedValue({ data: [], headers: next(MAX_LIST_PAGE + 1) });
     const result = await fetchStargazers("o", "r", MAX_LIST_PAGE, "ghp_abc");
     expect(result.pagination.next).toBeUndefined();
+  });
+
+  it("pages PR files so diffs past the first page can load", async () => {
+    get.mockResolvedValue({ data: [{ filename: "a.ts" }], headers: next(3) });
+    const result = await fetchPullRequestFiles("o", "r", 7, 2, 100);
+    expect(get.mock.calls[0][0]).toBe("/repos/o/r/pulls/7/files");
+    expect(get.mock.calls[0][1].params).toEqual({ page: 2, per_page: 100 });
+    expect(result).toEqual({ files: [{ filename: "a.ts" }], pagination: { next: 3 } });
   });
 });
 

@@ -20,6 +20,7 @@ import type {
   GitHubNotification,
   GitHubPagination,
   GitHubPullRequest,
+  GitHubPullRequestDetail,
   GitHubPullRequestFile,
   GitHubPunchCardEntry,
   GitHubReadme,
@@ -743,8 +744,8 @@ export async function fetchPullRequestDetail(
   owner: string,
   repo: string,
   prNumber: number,
-): Promise<GitHubPullRequest> {
-  const { data } = await githubAxios.get<GitHubPullRequest>(
+): Promise<GitHubPullRequestDetail> {
+  const { data } = await githubAxios.get<GitHubPullRequestDetail>(
     `/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/pulls/${prNumber}`,
   );
   return data;

@@ -94,8 +94,12 @@ function PullRequestDetailScreenContent() {
   );
   const reviewComments = reviewCommentsData?.comments ?? [];
 
-  const { data: filesData } = usePullRequestFiles(owner, repoName, prNumber);
-  const files = filesData?.files ?? [];
+  const {
+    files,
+    hasNextPage: hasMoreFiles,
+    fetchNextPage: fetchMoreFiles,
+    isFetchingNextPage: isFetchingMoreFiles,
+  } = usePullRequestFiles(owner, repoName, prNumber);
 
   const { data: reviews = [] } = usePullRequestReviews(
     owner,
@@ -261,6 +265,14 @@ function PullRequestDetailScreenContent() {
           colors={colors}
           repoId={repoId ?? ""}
           diffSource={{ source: "pr", number: String(prNumber) }}
+          totals={{
+            files: pr.changed_files,
+            additions: pr.additions,
+            deletions: pr.deletions,
+          }}
+          hasMore={hasMoreFiles}
+          isLoadingMore={isFetchingMoreFiles}
+          onLoadMore={() => fetchMoreFiles()}
         />
       )}
 
