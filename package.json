@@ -112,10 +112,12 @@
     "core-js@3.47.0": true,
     "esbuild@0.27.3": true,
     "esbuild@0.28.1": true,
+    "esbuild@0.28.2": true,
     "sharp@0.34.5": true,
     "unrs-resolver@1.11.1": true,
     "workerd@1.20260504.1": true,
     "workerd@1.20260617.1": true,
+    "workerd@1.20261023.1": true,
     "bufferutil@4.1.0": true,
     "utf-8-validate@6.0.6": true
   }
