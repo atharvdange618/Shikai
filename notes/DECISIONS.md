@@ -293,3 +293,13 @@ Entries D-001 to D-021 were backfilled on 2026-10-15 from commits, the changelog
 **Rejected.** A separate MMKV instance for device settings, like the review counter's (`shikai-review`, D-024): one more instance and one more place to remember for a single key the shared wipe can handle. Keeping the theme only in React state and re-saving it after the wipe: the context reads MMKV on launch, so a cold start after a wipe would still fall back to Dark.
 **Consequences.** Clear cache no longer resets appearance. Any other key that must survive a wipe has to be saved and restored in `clearAllMMKV()` explicitly; a new store that isn't added there is wiped (which is the safe default for account data).
 **Revisit if.** A second device-level setting needs the same treatment; at that point a dedicated settings instance beats growing the save-and-restore list.
+
+## D-030: Sentry gets only the GitHub errors that point at a problem
+
+**Date:** 2026-11-01 · **Status:** Accepted
+
+**Context.** Request errors end in React Query, which keeps them out of Sentry, so Sentry showed no API errors at all. The monthly "4xx by endpoint" check could never find anything.
+**Decision.** The axios error interceptor calls `reportApiError()` in `lib/sentry.ts`. It sends 5xx and any status Shikai never expects, tagged `http.status_code` and `endpoint`, one issue per endpoint and status. It skips 0 (offline, timeout) and 401, 403, 404, 409, 410, 422, 429 and 451, which GitHub sends for ordinary reasons (`notes/GITHUB-QUIRKS.md`; 429 is the secondary rate limit). The endpoint tag keeps only known GitHub path words; owner, repo, username and ids become `:x`, so no report names a person. The same method, endpoint and status goes out at most once a minute, because React Query retries a failed query up to 3 times and screens share queries, so one outage would otherwise send the same event many times.
+**Rejected.** Reporting every 4xx: a 404 on a private repo or a 403 on the rate limit happens daily and would bury real problems and spend the free event quota. Sending the raw URL: it carries usernames, against the no-PII rule in `lib/sentry.ts`. Reporting from `QueryCache.onError`, which fires once after retries: it doesn't see the method or URL, and it misses calls made outside React Query (the background poller, the widget).
+**Consequences.** A deprecation that answers with an expected status (say 404 or 410) stays invisible. A new endpoint whose path words are missing from `ENDPOINT_WORDS` groups less precisely but never leaks. Event counts undercount an outage: a minute of failures on one endpoint shows as one event. The dedupe lives in memory, so a restart clears it.
+**Revisit if.** GitHub starts answering deprecated endpoints with a status in the skip list.

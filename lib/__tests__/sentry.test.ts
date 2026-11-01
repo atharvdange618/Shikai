@@ -1,10 +1,10 @@
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-// scrubEvent uses no Sentry runtime, only the Event type. Stub the native
-// package so importing lib/sentry works under Node.
-vi.mock("@sentry/react-native", () => ({}));
+// Stub the native package so importing lib/sentry works under Node.
+const { captureMessage } = vi.hoisted(() => ({ captureMessage: vi.fn() }));
+vi.mock("@sentry/react-native", () => ({ captureMessage }));
 
-import { scrubEvent } from "@/lib/sentry";
+import { apiEndpoint, reportApiError, scrubEvent } from "@/lib/sentry";
 
 const OAUTH = "gho_0123456789abcdefghijklmnopqrstuvwx";
 const FINE_PAT = "github_pat_0123456789abcdefghij0123456789";
@@ -50,4 +50,78 @@ describe("scrubEvent", () => {
     const event = { message: "hi" };
     expect(scrubEvent(event)).toBe(event);
   });
+});
+
+describe("apiEndpoint", () => {
+  it("replaces owner, repo and ids, and drops the query", () => {
+    expect(apiEndpoint("/repos/octocat/hello/pulls/7/files?page=2")).toBe(
+      "/repos/:x/:x/pulls/:x/files",
+    );
+  });
+
+  it("strips the origin from a full pagination URL", () => {
+    expect(apiEndpoint("https://api.github.com/users/octocat/repos")).toBe(
+      "/users/:x/repos",
+    );
+  });
+
+  it("keeps a path with no identifiers as-is", () => {
+    expect(apiEndpoint("/search/issues")).toBe("/search/issues");
+  });
+});
+
+describe("reportApiError", () => {
+  // Each test starts more than a minute after the last, so the dedupe window
+  // from an earlier test never hides a report.
+  let clock = 1_000_000;
+  beforeEach(() => {
+    captureMessage.mockClear();
+    vi.useFakeTimers();
+    clock += 61_000;
+    vi.setSystemTime(clock);
+  });
+  afterEach(() => vi.useRealTimers());
+
+  it("reports a 5xx tagged by status and endpoint", () => {
+    reportApiError(502, "get", "/repos/octocat/hello");
+    expect(captureMessage).toHaveBeenCalledWith(
+      "GitHub 502 on GET /repos/:x/:x",
+      expect.objectContaining({
+        tags: { "http.status_code": "502", endpoint: "/repos/:x/:x" },
+      }),
+    );
+  });
+
+  it("reports an unexpected 4xx", () => {
+    reportApiError(400, "post", "/graphql");
+    expect(captureMessage).toHaveBeenCalledOnce();
+  });
+
+  it("sends a repeat of the same failure once within a minute", () => {
+    reportApiError(503, "get", "/repos/octocat/hello");
+    reportApiError(503, "get", "/repos/someone/else");
+    expect(captureMessage).toHaveBeenCalledOnce();
+  });
+
+  it("sends the same failure again after a minute", () => {
+    reportApiError(503, "get", "/users/octocat");
+    vi.advanceTimersByTime(60_000);
+    reportApiError(503, "get", "/users/octocat");
+    expect(captureMessage).toHaveBeenCalledTimes(2);
+  });
+
+  it("keeps different statuses or endpoints apart inside the window", () => {
+    reportApiError(500, "get", "/search/issues");
+    reportApiError(502, "get", "/search/issues");
+    reportApiError(500, "get", "/search/commits");
+    expect(captureMessage).toHaveBeenCalledTimes(3);
+  });
+
+  it.each([0, 401, 403, 404, 409, 410, 422, 429, 451])(
+    "skips expected status %i",
+    (status) => {
+      reportApiError(status, "get", "/user");
+      expect(captureMessage).not.toHaveBeenCalled();
+    },
+  );
 });

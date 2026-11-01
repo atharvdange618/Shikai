@@ -1,4 +1,7 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+
+// github-rest pulls in lib/axios, which reports errors through Sentry.
+vi.mock("@sentry/react-native", () => ({}));
 
 import {
   hasOwnInstallation,

@@ -4,7 +4,7 @@ Shikai rarely breaks on its own. It breaks when a platform under it moves: Googl
 
 ## Monthly (30 minutes)
 
-1. **Sentry:** look for new issues and for any endpoint with a jump in 4xx errors. A new 4xx on one GitHub endpoint usually means a deprecation.
+1. **Sentry:** look for new issues. GitHub API failures show up as `GitHub <status> on <METHOD> <endpoint>`, one issue per endpoint and status. Only 5xx and statuses Shikai never expects get reported (see D-030), so a new one on a single endpoint usually means GitHub changed or deprecated it.
 2. **Play Console:** check Android vitals (crash rate, ANR rate) and read new reviews.
 3. **Dependencies:** run `npx expo install --check`. It lists packages that have drifted from the versions this Expo SDK supports. `npx expo install --fix` fails here with `EALLOWSCRIPTS`, because the Expo CLI passes `--allow-scripts` and npm rejects it next to the `allowScripts` field in `package.json`. Install the versions `--check` lists with plain `npm install pkg@~x.y.z`, then run `--check` again. Don't use `npm update` or Dependabot for Expo packages: they bump past the SDK's supported range. One exception: React Navigation runs ahead of Expo's ranges through the lockfile (7.21 against Expo's `^7.4.0`) to drop a deprecated `navigate` call. `package.json` keeps Expo's ranges so this check stays clean. Leave the lockfile versions alone.
 4. **Security:** run `npm audit --omit=dev` and patch anything that reaches the shipped app.
