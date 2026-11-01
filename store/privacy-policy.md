@@ -1,6 +1,6 @@
 # Privacy Policy - Shikai
 
-**Last updated:** October 30, 2026
+**Last updated:** November 1, 2026
 
 ## Overview
 
@@ -31,6 +31,7 @@ Shikai collects minimal data necessary to provide its services:
 
 - **What:** When the app crashes or hits an error, Shikai sends a diagnostic report to Sentry. The report contains the error and stack trace, the device model, the OS version, the app version, and a short trail of the in-app actions that led up to it. It also samples a fraction of sessions for screen-load and network timing.
 - **What it does not contain:** No name, email, GitHub username, or account id. Your GitHub OAuth token and Personal Access Token are stripped from every report before it leaves the device. No repository contents. No session recording.
+- **API failures:** When GitHub returns a 5xx or a status Shikai never expects, the report carries the HTTP status and a templated endpoint such as `GET /repos/{owner}/{repo}/issues`. The owner, repo, and username are removed, so the tag says which kind of request failed, not which account made it. Offline, cancelled, and ordinary 4xx answers are not reported, and the same failure is sent at most once a minute.
 - **Why:** Play Console's built-in crash reporting is aggregated, partial, and cannot tell which over-the-air update a device is running. Sentry provides the per-crash detail, the trail of actions, and the update version needed to actually fix issues.
 - **Where:** Sentry (Functional Software, Inc.), on servers in the European Union.
 - **Turning it off:** There is no in-app toggle. Reporting is disabled entirely in development builds and is only active in released builds.
@@ -56,7 +57,7 @@ Shikai collects minimal data necessary to provide its services:
 
 ## Data Deletion
 
-- **Sign Out:** Signing out clears all locally cached data and tokens.
+- **Sign Out:** Signing out clears locally cached data and tokens. Your theme choice is kept.
 - **Uninstall:** Uninstalling the app removes all local data.
 - **PAT Removal:** You can remove your Personal Access Token from Settings at any time.
 - **Notification Alerts:** Turning alerts off, removing your Personal Access Token, or signing out stops the background checks and deletes the stored check state.

@@ -67,10 +67,10 @@
             <img src="assets/icon.png" alt="Shikai" width="40" height="40">
             <h1>Delete Your Data</h1>
         </div>
-        <p class="updated">Last updated: October 30, 2026</p>
+        <p class="updated">Last updated: November 1, 2026</p>
 
         <div class="highlight">
-            <strong>Important:</strong> Shikai stores your GitHub data locally on your device. The only data that leaves your device is anonymous crash and performance diagnostics sent to Sentry, described below.
+            <strong>Important:</strong> Shikai stores your GitHub data locally on your device. It has no server of its own: your requests go straight to GitHub. The only diagnostics sent to a third-party service are anonymous crash and performance reports to Sentry, described below.
         </div>
 
         <h2>How to Delete Your Data</h2>
@@ -101,7 +101,7 @@
         </ul>
 
         <h2>Crash Reports</h2>
-        <p>Released builds send anonymous crash and performance diagnostics to Sentry. These reports carry no name, email, GitHub username, or account id, and your tokens are stripped before they leave the device. Because a report cannot be tied to you, there is nothing to look up and delete for a single user. Reports age out on Sentry's retention schedule. See the <a href="index.html">privacy policy</a> for the full description.</p>
+        <p>Released builds send anonymous crash and performance diagnostics to Sentry. These reports carry no name, email, GitHub username, or account id, and your tokens are stripped before they leave the device. When a GitHub request fails in a way that points at a problem, the report also carries the HTTP status and a templated endpoint with owners, repos and usernames removed. Because a report cannot be tied to you, there is nothing to look up and delete for a single user. Reports age out on Sentry's retention schedule. See the <a href="index.html">privacy policy</a> for the full description.</p>
 
         <h2>Data Retention</h2>
         <p>Your GitHub data is stored locally on your device only. When you sign out or uninstall, all of it is immediately and permanently deleted.</p>

@@ -65,7 +65,7 @@ Take a look at Shikai before you install: **[View Screenshots on Google Drive](h
 | Feature                | Description                                                                                                                                                                                                                                                                                                                                                                                                                        |
 | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Overview Dashboard** | Pinned repos, contribution graph with streaks, live activity feed, following preview, and Your work: review requests, assignments, authored issues and pull requests, and mentions                                                                                                                                                                                                                                               |
-| **Repository Browser** | File trees with blame and per-file history, syntax highlighting, releases, discussions, repo insights (commit activity, top contributors, punch card), compare-two-refs, Actions workflow runs with job logs, PR detail with diffs, checks, reviewers, commits, and review comments with diff context, issue/PR timelines and reactions, a branch selector, and tappable stats that open the commit history, forks, and stargazers |
+| **Repository Browser** | File trees with blame and per-file history, syntax highlighting, releases, discussions, repo insights (commit activity, top contributors, punch card), compare-two-refs, Actions workflow runs with job logs, PR detail with full-screen diffs, checks, reviewers, commits, and review comments with diff context, issue/PR timelines and reactions, a branch selector, and tappable stats that open the commit history, forks, and stargazers |
 | **Global Search**      | Search across repos, users, issues, and topics with debounced input, recent searches, and eager pagination. Issue results need a personal access token                                                                                                                                                                                                                                                                           |
 | **User Profiles**      | View any GitHub user's profile with avatar, bio, and top repositories. Tap Followers, Following, or Repositories to open those lists                                                                                                                                                                                                                                                                                               |
 | **Android Widget**     | Home screen widget showing contribution streak with longest streak and recent activity                                                                                                                                                                                                                                                                                                                                             |
@@ -107,6 +107,7 @@ Network state detection with MMKV-backed disk persistence. The app works offline
 
 - **OTA Updates** - Over-the-air updates via expo-updates. The app checks on launch and asks before restarting to apply an update.
 - **File Viewer** - Code files highlighted on device with line numbers, a wrap toggle, and the linked line marked. Markdown, SVG, PDF, and video rendering too, with a copy button for text files.
+- **Full-Screen Diffs** - Tap any changed file in a pull request, commit, or comparison to read the whole patch on its own screen, with old and new line numbers, a wrap toggle, and a copy button. Large pull requests load 100 files a page instead of GitHub's default 30.
 - **Play Store Updates** - Native in-app update prompt when a new release is on the Play Store
 - **Haptics** - Feedback on pull-to-refresh, tab switch, and bookmark
 - **Reduced Motion** - The Overview fade-in and tab icon animations turn off when the system reduced-motion setting is on
@@ -136,12 +137,12 @@ No browser handy, or GitHub's device verification getting in the way? Use **Sign
 Shikai takes security seriously:
 
 - **Read-only access** - Cannot modify, create, or delete anything on your GitHub account
-- **Secure token exchange** - OAuth tokens are exchanged via a Cloudflare Worker proxy and never leave your device
+- **Secure token exchange** - OAuth codes are exchanged for tokens by a Cloudflare Worker proxy, so the client secret never ships inside the app
 - **On-device encryption** - Tokens stored with `expo-secure-store` (Keychain/Keystore)
 - **Root/debugger detection** - Blocks usage on compromised environments
 - **Token safety** - PATs and OAuth tokens are used only for direct GitHub API calls, and are stripped from crash reports before they are sent
 - **Crash reporting** - Released builds send anonymous crash and performance diagnostics to Sentry (EU). No PII, no repository contents, no session recording. Off in development. See the [privacy policy](store/privacy-policy.md).
-- **Cache hygiene** - MMKV cache cleared on sign-in and sign-out
+- **Cache hygiene** - MMKV cache cleared on sign-in and sign-out, with your theme kept
 
 Developer mode is blocked by default on release builds. Developers can override this after accepting a risk warning.
 

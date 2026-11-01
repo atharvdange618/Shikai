@@ -1,6 +1,6 @@
 # Shikai Roadmap
 
-> **Version:** 1.7.0 · **Last Updated:** October 30, 2026 · **Status:** Active Development
+> **Version:** 1.7.0 · **Last Updated:** November 1, 2026 · **Status:** Active Development
 
 This document tracks the feature backlog and development progress for Shikai.
 
@@ -26,7 +26,7 @@ This document tracks the feature backlog and development progress for Shikai.
 | Commit detail screen              | Tapping a commit (commits list, PR commits section, repo-detail spotlight) opens a screen with the message, author, SHA, and full diff. `FilesChangedSection` extracted to `components/repo/DiffFileList.tsx`. (Backlog 1.1)                             | Done   |
 | Compare two refs                  | `repo/[repoId]/compare.tsx` shows commits and file diffs between a base and head ref. Opened from a compare button on each branch row in the commits screen. `CommitsSection` extracted to `components/repo/DiffCommitList.tsx`. (Backlog 1.2)          | Done   |
 | Releases tab                      | A "Releases" row on repo detail (shown when the repo has releases) opens a list, and each opens a detail screen: notes via `MarkdownRenderer`, author, "compare to previous tag", asset rows with size and download count plus source-code zip/tar.gz, each with a Share / Copy link / Download menu. (Backlog 1.3)                                                                    | Done   |
-| GitHub URL router                 | `lib/github-url.ts` maps a github.com web URL to an in-app route (repo, PR, issue, commit, compare, releases, blob, tree, user, and `/pulse` or `/graphs/*` to insights). `useDeepLinks` in `app/_layout.tsx` runs it for links opened into the app and, via `expo-share-intent`, for links shared from the Android share sheet. Unmatched URLs fall back to the browser. Android `intentFilters` for github.com added (no `autoVerify`). `tree/{ref}/{path}` now drills into that folder (`files.tsx` expands every ancestor plus the target and scrolls it into view) and `blob/{ref}/{path}#L10` carries the line number through so the file viewer scrolls to its approximate position. (Backlog 3.1) | Done   |
+| GitHub URL router                 | `lib/github-url.ts` maps a github.com web URL to an in-app route (repo, PR, issue, commit, compare, releases, blob, tree, user, and `/pulse` or `/graphs/*` to insights). `useDeepLinks` in `app/_layout.tsx` runs it for links opened into the app and, via `expo-share-intent`, for links shared from the Android share sheet. Unmatched URLs fall back to the browser. A `shikai://` link that cold-started the app waits for the boot replace and then opens with Overview behind it, so Back works. Android `intentFilters` for github.com added (no `autoVerify`). `tree/{ref}/{path}` now drills into that folder (`files.tsx` expands every ancestor plus the target and scrolls it into view), and `blob/{ref}/{path}#L10` carries the line number into `CodeViewer`, which marks and scrolls to it. (Backlog 3.1) | Done   |
 | In-app check annotations          | Tapping a GitHub Actions check in the PR checks list opens `repo/[repoId]/checks/[runId].tsx`: status line, the run's `output` summary via `MarkdownRenderer`, and annotation cards (level icon, `path:line`, title, message, raw details). `fetchCheckRun` and `fetchCheckRunAnnotations` added to `lib/github-rest.ts`; annotations fetch only when `annotations_count > 0`. External CI statuses still link out. Full job logs still open on GitHub. (Backlog 3.3) | Done   |
 | File history                      | A "history" button in the file viewer header opens `commits.tsx` with a `path` param. In that mode the branch selector is hidden, the header title is the filename, and the list shows only commits that touched the file. `fetchCommits` / `useCommits` / `queryKeys.repoCommits` gained an optional `path` arg. Each row still opens commit detail. (Backlog 2.1) | Done   |
 | Blame                             | A second file-viewer header button (hidden for images/video/PDF) opens `repo/[repoId]/blame.tsx`: a `FlashList` of lines with a left gutter showing short SHA and relative date on each range's first line, alternating tint per range, tap → commit detail. `fetchBlame` in `lib/github-graphql.ts` resolves the ref's tip commit and reads `blame(path)` off it (GitHub's schema puts `blame` on `Commit`, not `Blob`), plus the blob text in the same request via an aliased `object(expression)`. Plain text, no syntax highlighting. (Backlog 2.2) | Done   |
@@ -86,19 +86,23 @@ This document tracks the feature backlog and development progress for Shikai.
 | Notifications-Lite / Attention Feed | GitHub notifications API (`/notifications`) with attention-worthy filtering (review requests, mentions, assignments). Accessible via bell icon in Profile header. All/Unread/Attention filters, mark-all-read, FlashList virtualization, tap-to-navigate to issues/PRs. | Done   |
 | Tab Reorganization                  | Consolidated 7 tabs to 4 (Overview, Repos, Search, Profile). Stars + Watchlist merged into "Saved Repos" sub-screen under Profile. Notifications moved to Profile header bell icon. Keyboard shortcuts updated for 4 tabs.                                              | Done   |
 | Following Activity Feed             | Dashboard-style feed showing recent activity from users you follow on GitHub. Uses `/user/received_events` API. Accessible via "Following" button in Overview. Avatar, actor name, event details with tap-to-navigate.                                                  | Done   |
+| Full-Screen Diffs                   | A changed file in a PR, commit or compare opens the whole patch on its own screen, with old and new line numbers, Wrap and Copy. Shikai colors it on device with `@tanstack/highlight` instead of GitHub's renderer; review threads draw their hunks natively. PR file lists page at 100 instead of the default 30, and a diff link past the first page keeps loading until the file appears. (D-031) | Done   |
+| Themed Pull-To-Refresh              | One shared `PullToRefresh` control replaces the 19 `RefreshControl` copies, taking its arc and tray from the theme so a dark app on a light-mode phone no longer draws a white circle. Repo details gained pull-to-refresh for the header, stats, activity, languages, contributors, README, releases and latest workflow run. (D-032) | Done   |
+| API Failure Reporting               | The axios error interceptor sends GitHub 5xx and statuses Shikai never expects to Sentry through `reportApiError()`, tagged by status and a templated endpoint that drops owners, repos and usernames. Sends at most once a minute per failure, and background alert polls and the widget report through the same path. (D-030) | Done   |
 
 ---
 
 ## Backlog
 
 Read-only value additions, sequenced so each item unlocks the next. The through-line:
-Shikai already has a working diff renderer (`file.patch` in a ```diff fence handed to
-`MarkdownRenderer`with a repo`context`). Commit detail, compare, and release diffs all
-reuse it. No new diff engine.
+Shikai already had a working diff renderer when this was written (`file.patch` in a ```diff
+fence handed to `MarkdownRenderer` with a repo `context`). D-031 replaced that: diffs now
+color on device through `lib/highlight.ts` and open full screen at
+`app/(app)/repo/[repoId]/diff.tsx`. Commit detail, compare, and release diffs all use it.
 
-Already shipped and not repeated below: the PR diff view with file-level review threads,
-checks, reviewers, and a commits list; `markNotificationAsRead` / `markAllNotificationsAsRead`
-(the only write calls, and the whole write exception).
+Already shipped and not repeated below: the PR diff view with review threads (a flat list
+since 5.1), checks, reviewers, and a commits list; `markNotificationAsRead` /
+`markAllNotificationsAsRead` (the only write calls, and the whole write exception).
 
 **Backlog is fully cleared.** All of Phase 1-5, see Completed, plus 5.1-5.4.
 (`DiffFileList` and `DiffCommitList` now exist in `components/repo/`. `parseGitHubUrl` lives in
@@ -146,20 +150,15 @@ file viewer and file tree read the default branch).
 
 `tree/{ref}/{...path}` now passes the path to `files.tsx`, which expands every ancestor
 folder plus the target directory and scrolls the `FlashList` to it. `blob/{ref}/{...path}#L10`
-passes the starting line number as `line`; `file.tsx` scrolls the outer `ScrollView` to that
-line's proportional position once `MarkdownRenderer` reports its rendered height — an
-approximation, since the rendered HTML has no per-line anchors to measure exactly against.
+passes the starting line number as `line`. Code files open in `CodeViewer`, which marks and
+scrolls to that line exactly; markdown files keep a proportional-height scroll, since rendered
+prose has no per-line anchors. A `shikai://` link that cold-started the app is held by
+`app/+native-intent.tsx` until the boot replace runs, then opens the linked screen with
+Overview behind it, so Back works.
 
-Exact-pixel `#L` scroll added: no DOM surgery needed after all. `MarkdownRenderer`'s WebView
-walks the code block's text nodes counting newlines and reads the target line's real position
-via `Range.getBoundingClientRect()`, then reports it to `file.tsx` via `onLineOffset`. Only
-works when the file is rendered as a single fenced code block (i.e. not a `.md` file, where
-source lines don't map 1:1 onto the rendered prose); the original proportional-height scroll
-stays as the fallback for that case.
-
-Superseded 2026-10-27 (D-025): code files moved to `CodeViewer`, which marks and scrolls to the
-`#L` line itself. The newline lookup and `onLineOffset` were removed from `MarkdownRenderer`;
-markdown files keep the proportional scroll.
+History: the proportional scroll and later an exact `Range.getBoundingClientRect()` lookup
+(with `onLineOffset`) lived in `MarkdownRenderer`. D-025 moved code files to `CodeViewer` on
+2026-10-27 and removed both from `MarkdownRenderer`; markdown keeps the proportional fallback.
 
 Not done: line highlight in markdown files (the rough position scrolls into view but no line is marked).
 
@@ -201,7 +200,7 @@ under a comment whenever `pageInfo.hasNextPage` is true.
 
 | #   | Item                          | Size | Note                                                                                                                                                   |
 | --- | ----------------------------- | ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| ~~5.1~~ | ~~Line-anchored review comments~~ | S-M | Done. `components/repo/ReviewThreadList.tsx` renders review threads as a flat, chronological list on the PR detail screen; each thread shows its `diff_hunk` (as a diff codeblock) and `path:line` above the comment, so no more expanding the file diff to find context. Replaced the old per-file thread bucketing in `DiffFileList`, which is now a plain diff browser again. |
+| ~~5.1~~ | ~~Line-anchored review comments~~ | S-M | Done. `components/repo/ReviewThreadList.tsx` renders review threads as a flat, chronological list on the PR detail screen; each thread shows its `diff_hunk` (through `components/repo/DiffHunk.tsx`, colored on device by `highlightDiff`) and `path:line` above the comment, so no more expanding the file diff to find context. Replaced the old per-file thread bucketing in `DiffFileList`, which is now a plain diff browser again. |
 | ~~5.2~~ | ~~Reactions row~~ | S | Done. `GitHubReactions` added to `GitHubIssue` and `GitHubComment` (the counts were already in the REST response, just untyped). `components/repo/ReactionsRow.tsx` renders a small emoji+count pill row, one pill per reaction type with a nonzero count. Shown under the issue body and under every regular comment on both the issue and PR detail screens. Not shown under the PR body itself: `GET /pulls/{number}` doesn't return `reactions` at all (only the Issues API does, despite a PR being an issue under the hood) — fetching it would mean a second full issue-object request just for a reactions count, so skipped. Review-comment threads and discussion comments don't get it either (out of scope for this pass). |
 | ~~5.3~~ | ~~Issue/PR timeline events~~ | M | Done. `fetchIssueTimeline` (`lib/github-rest.ts`) + `useIssueTimeline` (`hooks/useIssueDetail.ts`). `lib/timeline.ts` merges it with the existing comments fetch into one chronological list, keeping only the event types it renders (labels, closed/reopened/merged, force-pushes, cross-referenced) and dropping the rest (reviews, mentions, project moves, ...) since those already show elsewhere or aren't useful here. `components/repo/TimelineEventRow.tsx` renders each as a compact icon+sentence row; cross-referenced rows open the linked issue/PR in-app if it's the same repo, external browser otherwise. Wired into both the issue and PR detail screens. |
 | ~~5.4~~ | ~~Per-commit diff inside a PR~~ | XS | Done. `DiffCommitList` rows push to the commit detail screen, in the PR and compare screens both.                                                    |

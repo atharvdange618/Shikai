@@ -19,7 +19,7 @@ Expo ships about three SDKs a year. Upgrade one SDK at a time, never two at once
 3. `npm install expo@^<new version>`, then align the rest by hand as in the monthly dependency step, since `--fix` hits `EALLOWSCRIPTS`.
 4. `npx expo prebuild --clean`. The config plugins in `plugins/` throw if Expo's `build.gradle` template has changed. If one throws, update that plugin's regex to match the new template.
 5. `npx expo lint`, `npx tsc --noEmit`, `npx vitest run`.
-6. Build a release APK (see Releasing) and test on a device: sign in, open a repo, open a PR diff, check the widget.
+6. Build a release APK (see Releasing) and test on a device: sign in, open a repo, open a full-screen diff, check the widget.
 7. Check `modules/shikai-security/`. The Kotlin module can break on a new Kotlin or Android Gradle Plugin version.
 8. Pin `react-native` again if a patch release causes trouble. Otherwise leave it unpinned.
 
@@ -42,14 +42,21 @@ Google Play requires updates to target a recent Android API level and usually ra
 
    ```bash
    export SHIKAI_KEYSTORE_PASSWORD=...   # Gradle reads it at build time
-   # The token lives in .env.local. The Expo CLI reads it, but the Sentry
-   # upload task runs from Gradle and only sees the shell.
-   export SENTRY_AUTH_TOKEN=$(sed -n 's/^SENTRY_AUTH_TOKEN=//p' .env.local | tr -d '\r"')
    npx expo prebuild --clean
-   cd android && ./gradlew.bat assembleRelease
+   npm run android:assemble              # sets SENTRY_DISABLE_AUTO_UPLOAD
    ```
 
-   Local builds embed no update channel, and Expo's update server rejects requests without one. GitHub APK users never get OTA updates, so they update by installing each release's APK over the old one.
+   `android:assemble` skips the Sentry source-map upload, since GitHub APKs don't need it. Local builds embed no update channel, and Expo's update server rejects requests without one. GitHub APK users never get OTA updates, so they update by installing each release's APK over the old one.
+
+5. **Tag and publish:** create the tag on the release commit, then publish the GitHub release with the three APKs.
+
+   ```bash
+   git tag vX.Y.Z && git push origin vX.Y.Z
+   gh release create vX.Y.Z android/app/build/outputs/apk/release/*.apk \
+     --draft --title "Shikai Release vX.Y.Z" --notes-file store/GITHUB-RELEASE.md
+   ```
+
+   Don't publish a release to reserve the version: whatever the tag points at is what users download, and later work under the same version needs the tag and release redone. Keep it a draft until the APKs are attached, tested, and the notes are final. A draft keeps its assets, so publishing later just attaches it to the tag.
 
 ### OTA updates vs a new build
 

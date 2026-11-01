@@ -98,7 +98,7 @@
             <img src="assets/icon.png" alt="Shikai" width="40" height="40">
             <h1>Privacy Policy</h1>
         </div>
-        <p class="updated">Last updated: October 30, 2026</p>
+        <p class="updated">Last updated: November 1, 2026</p>
 
         <h2>Overview</h2>
         <p>Shikai is a read-only GitHub companion app. This privacy policy explains how we handle your data.</p>
@@ -130,6 +130,7 @@
         <ul>
             <li><strong>What:</strong> When the app crashes or hits an error, Shikai sends a diagnostic report to Sentry. The report contains the error and stack trace, the device model, the OS version, the app version, and a short trail of the in-app actions that led up to it. It also samples a fraction of sessions for screen-load and network timing.</li>
             <li><strong>What it does not contain:</strong> No name, email, GitHub username, or account id. Your GitHub OAuth token and Personal Access Token are stripped from every report before it leaves the device. No repository contents. No session recording.</li>
+            <li><strong>API failures:</strong> When GitHub returns a 5xx or a status Shikai never expects, the report carries the HTTP status and a templated endpoint such as <code>GET /repos/{owner}/{repo}/issues</code>. The owner, repo, and username are removed, so the tag says which kind of request failed, not which account made it. Offline, cancelled, and ordinary 4xx answers are not reported, and the same failure is sent at most once a minute.</li>
             <li><strong>Why:</strong> Play Console's built-in crash reporting is aggregated, partial, and cannot tell which over-the-air update a device is running. Sentry provides the per-crash detail, the trail of actions, and the update version needed to actually fix issues.</li>
             <li><strong>Where:</strong> Sentry (Functional Software, Inc.), on servers in the European Union.</li>
             <li><strong>Turning it off:</strong> There is no in-app toggle. Reporting is disabled entirely in development builds and is only active in released builds.</li>
@@ -159,7 +160,7 @@
 
         <h2>Data Deletion</h2>
         <ul>
-            <li><strong>Sign Out:</strong> Signing out clears all locally cached data and tokens.</li>
+            <li><strong>Sign Out:</strong> Signing out clears locally cached data and tokens. Your theme choice is kept.</li>
             <li><strong>Uninstall:</strong> Uninstalling the app removes all local data.</li>
             <li><strong>PAT Removal:</strong> You can remove your Personal Access Token from Settings at any time.</li>
             <li><strong>Notification Alerts:</strong> Turning alerts off, removing your Personal Access Token, or signing out stops the background checks and deletes the stored check state.</li>

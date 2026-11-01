@@ -1,6 +1,6 @@
 # Terms of Service - Shikai
 
-**Last updated:** July 1, 2026
+**Last updated:** October 26, 2026
 
 ## Acceptance
 

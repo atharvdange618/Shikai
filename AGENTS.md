@@ -19,8 +19,8 @@ expo run:android
 # Regenerate native Android folder (gradle patches come from plugins/)
 npx expo prebuild --clean
 
-# Build release APKs for GitHub releases (after prebuild)
-cd android && gradlew.bat assembleRelease
+# Build release APKs for GitHub releases (after prebuild; skips Sentry upload)
+npm run android:assemble
 
 # Build release AAB (Play Store builds go through EAS, not local Gradle)
 eas build --platform android --profile production
@@ -57,7 +57,7 @@ Deeper docs: `notes/ARCHITECTURE.md` (data flow, token rules, background work) a
 
 **Android home screen widget**: `react-native-android-widget` renders `widgets/ContributionWidget.tsx` (a GitHub contribution graph) via `widgets/widget-task-handler.tsx` (imported from `index.ts`), registered as a native task outside the RN tree. `lib/widget-data.ts` fetches contribution data and `lib/widget-refresh.tsx` handles theme/color sync (reads the persisted theme straight from MMKV since the widget has no access to React context).
 
-**Error tracking**: `@sentry/react-native`, configured in `lib/sentry.ts`. Release builds upload source maps via `npm run sentry:sourcemaps`.
+**Error tracking**: `@sentry/react-native`, set up in `lib/sentry.ts` and initialized by `initSentry()` from `index.ts`, not the root layout, so a headless WorkManager run reports too. `reportApiError()` sends GitHub 5xx and statuses Shikai never expects, and the axios error interceptor calls it (D-030). EAS uploads native-build source maps; after an OTA, run `npm run sentry:sourcemaps`.
 
 **OTA updates**: `expo-updates`, handled in `lib/use-ota-updates.ts`.
 
@@ -68,7 +68,7 @@ Deeper docs: `notes/ARCHITECTURE.md` (data flow, token rules, background work) a
 | File | What it does |
 |---|---|
 | `app/_layout.tsx` | Root layout. Drives the boot-flow reducer and restores auth tokens on boot. |
-| `app/+native-intent.tsx` | Stops expo-router from navigating on the OAuth redirect (`shikai://?code=...`), which would push the blank index route over sign-in. `app/sign-in.tsx` reads the code through its own `Linking` listener. Also drops every github.com link, warm or cold, since `hooks/useDeepLinks.ts` routes them. |
+| `app/+native-intent.tsx` | Stops expo-router from navigating on the OAuth redirect (`shikai://?code=...`), which would push the blank index route over sign-in. `app/sign-in.tsx` reads the code through its own `Linking` listener. Also drops every github.com link, and any `shikai://` link that cold-started the app, since `hooks/useDeepLinks.ts` routes them once the boot replace has run. |
 | `lib/boot-flow.ts` | Boot state reducer: `checkingSecurity` → `restoringAuth` → `ready`, or `blocked`. |
 | `lib/axios.ts` | Configured axios instance: base URL, auth interceptor, rate-limit tracking. |
 | `lib/github-rest.ts` | All GitHub REST API functions, plus `patHeaders()` for PAT-based calls. |
@@ -77,7 +77,11 @@ Deeper docs: `notes/ARCHITECTURE.md` (data flow, token rules, background work) a
 | `lib/mmkv.ts` | MMKV instance and `clearAllMMKV()`. |
 | `lib/persister.ts` | React Query disk persister (MMKV-backed), defines cache max age. |
 | `lib/query-client.ts` | React Query client configuration. |
-| `lib/sentry.ts` | Sentry error tracking setup. |
+| `lib/sentry.ts` | Sentry setup, token scrubbing, and `reportApiError()` for GitHub failures. Initialized from `index.ts`. |
+| `lib/highlight.ts` | `highlightDiff()`: parses a unified patch and colors each hunk by language. Powers the diff screen and review-thread hunks. |
+| `lib/file-html.ts` | Builds the WebView page for the code and diff viewers (`buildCodeHtml`, `buildDiffHtml`). Pure functions, covered by Vitest. |
+| `app/(app)/repo/[repoId]/diff.tsx` | Full-screen diff for one changed file; reads the patch back from the PR, commit or compare query the previous screen cached. |
+| `components/shared/PullToRefresh.tsx` | The app's only `RefreshControl`; takes its arc and tray colors from the theme. |
 | `lib/use-ota-updates.ts` | `expo-updates` OTA check/apply hook. |
 | `lib/background-notifications.ts` | Background alerts task, `enableAlerts()`/`disableAlerts()`, and the auth store subscription that stops alerts on sign-out. |
 | `lib/notification-poller.ts` | One background poll: ETag request, marker, and which threads to alert on. No React or native imports, so Vitest covers it. |
@@ -105,6 +109,8 @@ Deeper docs: `notes/ARCHITECTURE.md` (data flow, token rules, background work) a
 - **Theme**: Use `useTheme()` from `contexts/ThemeContext` (or re-exported from `constants/theme.ts`). Colors live in `constants/themes.ts`. Never hardcode colors.
 - **Fonts**: Inter (body) and JetBrains Mono (code). Loaded in root layout via `@expo-google-fonts/*`.
 - **Lists**: Use `@shopify/flash-list` `FlashList`, not `FlatList`.
+- **Pull-to-refresh**: Use `PullToRefresh` from `components/shared/PullToRefresh`. A bare `RefreshControl` takes its tray color from the Android platform theme, so a dark app on a light-mode phone draws a white circle.
+- **Code and diffs**: Both render through `components/file/CodeViewer.tsx`, colored on device by `lib/highlight.ts` with the page built by `lib/file-html.ts`. Never send code or patches to GitHub's `/markdown` for coloring.
 - **Animations**: `react-native-reanimated` for all animations and gesture-driven interactions.
 - **No iOS**: Android-only app. The `ios` folder is gitignored.
 - **New Architecture**: Enabled (`newArchEnabled: true` in `app.config.ts`).

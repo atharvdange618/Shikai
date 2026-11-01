@@ -14,8 +14,8 @@ Shikai is a phone app that talks to GitHub directly. It has no backend of its ow
                  │  (screens)     (widget,    │
                  │                 alerts)    │
                  └──┬──────────┬───────────┬──┘
-     REST + GraphQL │          │ code →    │ crash reports
-     (Bearer token) │          │ token     │ (tokens scrubbed)
+     REST + GraphQL │          │ code →    │ crash + API
+     (Bearer token) │          │ token     │ failures
                     ▼          ▼           ▼
             api.github.com   OAuth proxy   Sentry
                              (Cloudflare
@@ -73,9 +73,13 @@ The reducer is a pure function with its own tests. Add new boot states there, no
 - **Local state** lives in Zustand stores (`stores/`). The watchlist and recent searches each persist to their own MMKV instance.
 - **Account switches wipe everything.** Sign-in and sign-out call `clearAllMMKV()`, which clears the cache and resets the persisted stores. Any new store that holds account data must join that function, or it leaks into the next account. The one exception is the theme: it's a device setting, not account data, so `clearAllMMKV()` saves and restores it (`THEME_KEY`).
 
+## Rendering code and diffs
+
+Code files and diffs never go to GitHub's `/markdown` renderer. `components/file/CodeViewer.tsx` builds a WebView page with `buildCodeHtml()` or `buildDiffHtml()` from `lib/file-html.ts`, and `highlightFile()` / `highlightDiff()` in `lib/highlight.ts` color it on device with `@tanstack/highlight`. The diff screen receives only the filename and its source; it reads the patch back from the PR, commit or compare query the previous screen cached, so a large patch never travels in route params. Markdown files still render through `MarkdownRenderer` and GitHub's API.
+
 ## Work outside the React tree
 
-Android can start the app with no screen to run a widget update or an alerts poll. In that case only `index.ts` and its imports run, so anything a background task needs must be set up at module load.
+Android can start the app with no screen to run a widget update or an alerts poll. In that case only `index.ts` and its imports run, so anything a background task needs must be set up at module load. Sentry starts there for the same reason (D-030), so a poller failure in a headless run still reports.
 
 - **Widget.** `react-native-android-widget` runs `widgets/widget-task-handler.tsx`. The handler can't use React context, so `lib/widget-refresh.tsx` reads the theme straight from MMKV.
 - **Alerts.** `lib/background-notifications.ts` defines an `expo-background-task` task. WorkManager runs it every 15 minutes or later, and Android decides the exact timing. Each run calls `pollNotifications()` once:

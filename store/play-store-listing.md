@@ -18,7 +18,7 @@ OVERVIEW
 Your personal GitHub dashboard with pinned repos, contribution graph with streaks, a live activity feed, and a following preview. Pushes, stars, forks, releases, PRs, and issues, all in one place. Tap any item to jump to the repo. Your work collects the review requests, assignments, and mentions that need you.
 
 REPOSITORIES
-Browse all your repos with smart filters by language, type, or sort order. Explore file trees, read code full screen with line numbers, a wrap toggle, and syntax colors that match your theme, browse commit history per branch, and track issues and pull requests. Tap a repo's stats to open its commit history, forks, or stargazers. Insights show a year of commit activity, top contributors, and the hours people commit. Health badges flag missing licenses, no topics, and stale repos. SVG and PDF files render inline alongside markdown.
+Browse all your repos with smart filters by language, type, or sort order. Explore file trees, read code full screen with line numbers, a wrap toggle, and syntax colors that match your theme, browse commit history per branch, and track issues and pull requests. Open any changed file in a pull request, commit, or comparison as a full-screen diff with old and new line numbers. Tap a repo's stats to open its commit history, forks, or stargazers. Insights show a year of commit activity, top contributors, and the hours people commit. Health badges flag missing licenses, no topics, and stale repos. SVG and PDF files render inline alongside markdown.
 
 SEARCH
 Global search across repos, users, issues, and topics. Issue results require a personal access token, because GitHub answers no issue search for the sign-in token. Tab switching between result types, debounced input, eager-load pagination. Navigate in-app to any repo, user profile, or issue detail.
@@ -48,7 +48,7 @@ OFFLINE SUPPORT
 Network state detection with disk persistence. Continue viewing cached data when offline. Automatic cache updates when connection restores.
 
 SECURITY
-Your token is handled via a secure Cloudflare Worker proxy and never leaves your device after the initial exchange. All subsequent API requests go directly from your phone to GitHub. The app detects rooted devices and debuggers to prevent usage on compromised environments.
+Your OAuth code is exchanged for a token through a Cloudflare Worker proxy, so the client secret never ships inside the app. The token is kept in Android's encrypted storage and sent only to GitHub. The app detects rooted devices and debuggers to prevent usage on compromised environments.
 
 READ-ONLY BY DESIGN
 Shikai requests only read-only access to your GitHub data. It cannot modify, create, or delete anything. This is your safe viewing space.

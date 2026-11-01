@@ -2,7 +2,7 @@
 
 ## v1.7.0 (unreleased)
 
-Needs a new store build: adds the `expo-store-review` native module.
+Needs a new store build: adds the `expo-store-review` native module, and the lockfile moves `expo` to 54.0.38.
 
 ### Features
 
@@ -11,6 +11,7 @@ Needs a new store build: adds the `expo-store-review` native module.
 - **Redesigned Settings** - Settings is four grouped cards: your account at the top, a strip of theme previews, Alerts, and Account with your access token, repo access and sign out. Your theme now survives Clear cache. ([#29](https://github.com/atharvdange618/Shikai/pull/29), [`476d220`](https://github.com/atharvdange618/Shikai/commit/476d220))
 - **Redesigned Profile** - Your profile and other people's profiles share one header, and yours lists your recently updated repos. ([#30](https://github.com/atharvdange618/Shikai/pull/30), [`21f9916`](https://github.com/atharvdange618/Shikai/commit/21f9916))
 - **Redesigned sign-in** - The sign-in buttons sit at the bottom, in reach of your thumb, with three lines above them on what Shikai does. In token mode the field stays above the keyboard, with a link that opens GitHub's token page with the right scopes ticked. ([#31](https://github.com/atharvdange618/Shikai/pull/31), [`5ea1ddb`](https://github.com/atharvdange618/Shikai/commit/5ea1ddb))
+- **Full-screen diffs** - Tapping a changed file in a pull request, commit or comparison opens the whole patch on its own screen, with old and new line numbers, the add and remove column, and the file viewer's Wrap and Copy controls. Shikai colors the patch on your phone instead of asking GitHub, and a review thread draws its hunks natively, so twenty threads no longer mean twenty web views. A large patch stays in memory rather than in the link. A file GitHub sends with no patch, like a binary or a diff over its size limit, says why. ([`792029f`](https://github.com/atharvdange618/Shikai/commit/792029f), [`12de349`](https://github.com/atharvdange618/Shikai/commit/12de349), [`0fdc3f2`](https://github.com/atharvdange618/Shikai/commit/0fdc3f2), [`32ec790`](https://github.com/atharvdange618/Shikai/commit/32ec790))
 
 ### Fixes
 
@@ -24,6 +25,39 @@ Needs a new store build: adds the `expo-store-review` native module.
 - **Issue search found nothing** - Your work showed "Nothing here right now" and the Issues tab in Search found nothing, because GitHub's issue search returns no results for the token Shikai gets at sign-in. Both now use your saved personal access token, and ask for one when none is saved. ([#33](https://github.com/atharvdange618/Shikai/pull/33), [`ebad522`](https://github.com/atharvdange618/Shikai/commit/ebad522))
 - **Activity out of order** - Recent Activity and the Following feed showed events out of order, because GitHub doesn't send them by date. They now read newest first. ([#34](https://github.com/atharvdange618/Shikai/pull/34), [`d6ad488`](https://github.com/atharvdange618/Shikai/commit/d6ad488))
 - **Mark all read offline** - Mark all read while offline left every thread looking read. It now puts them back when the request fails. Lists also show a spinner while the next page loads, and the contribution info icon is easier to tap. ([#32](https://github.com/atharvdange618/Shikai/pull/32), [`82cb261`](https://github.com/atharvdange618/Shikai/commit/82cb261))
+- **Pull requests over 30 files** - The changed-files list only ever asked GitHub for one page of 30, so a bigger pull request hid the rest from both the list and the diff screen. It now loads 100 files a page with a "Load more files (N of M)" row, and the header counts come from the pull request itself instead of the pages that have loaded. ([`eb86031`](https://github.com/atharvdange618/Shikai/commit/eb86031))
+- **Diff links into big pull requests** - A link to a changed file past the first 100 said "File not found in this diff" on a cold start. It now keeps loading pages until the file turns up, or the pages run out. ([`6a6b99d`](https://github.com/atharvdange618/Shikai/commit/6a6b99d))
+- **Cold-start `shikai://` links** - A `shikai://` link that started Shikai landed on Overview, because expo-router made the link the first screen and boot replaced it. It now opens the linked screen with Overview behind it, so Back works, and a link opened while signed out waits for sign-in. ([`dc674fe`](https://github.com/atharvdange618/Shikai/commit/dc674fe))
+- **Pale column behind dialogs** - The alert dialog and the release asset menu cast a full-height column through the dimmed backdrop. A modal already draws above the app, so the elevation that caused it is gone. ([`126a254`](https://github.com/atharvdange618/Shikai/commit/126a254))
+- **Release asset menu** - The asset sheet floated above the bottom edge with the app showing underneath, because the slide-in animation kept the modal's first frame. It now slides from the bottom edge and replays each time the menu opens. ([`8d2f657`](https://github.com/atharvdange618/Shikai/commit/8d2f657))
+
+### Changes
+
+- **Themed pull-to-refresh** - The refresh spinner takes its arc and tray from your theme. On a phone in light mode, a dark theme used to draw a white circle behind it. One shared control replaces the 19 copies that could drift, and the repo screen now refreshes its header, stats, activity, languages, contributors, README, releases and latest workflow run from one pull. ([`96673d3`](https://github.com/atharvdange618/Shikai/commit/96673d3))
+- **Code is the primary action on a repo** - Code is the filled button and Commits is outlined, as on GitHub. The Commits stat above the bar already opens that list, so two filled buttons competed. ([`31241da`](https://github.com/atharvdange618/Shikai/commit/31241da))
+- **Overview header** - The GitHub mark next to your avatar is gone. It opened Shikai's own repo where a GitHub client user expects their profile or the current page, and About already links to it. ([`9c66ee6`](https://github.com/atharvdange618/Shikai/commit/9c66ee6))
+
+### Dependencies
+
+- **Diff highlighting** - `@tanstack/highlight` 1.2.0 parses patches and colors them in JavaScript, with the same palette as the file viewer. JS only. ([`8968fed`](https://github.com/atharvdange618/Shikai/commit/8968fed))
+- **Lockfile security fixes** - `npm audit fix` without `--force` brings in `expo` 54.0.38, `undici` 7.30.1, `node-forge` 1.4.2, `follow-redirects` 1.16.2, `wrangler` 4.156.0 and `workerd` 1.20261023.1, plus the ESLint and TypeScript ESLint patches. `expo` ships native code, so this needs a store build either way. ([`9299511`](https://github.com/atharvdange618/Shikai/commit/9299511))
+- **Install scripts for esbuild and workerd** - `allowScripts` pins `esbuild@0.28.2` and `workerd@1.20261023.1`, so npm runs their postinstall and fetches the native binaries. Without it, `wrangler dev` and `deploy` break after the audit bump. ([`ad8fe82`](https://github.com/atharvdange618/Shikai/commit/ad8fe82))
+- **Unused iOS-only packages** - `expo-blur`, `expo-status-bar` and `expo-symbols` are gone, with the iOS-only branches and dead hooks that came with them. ([`7123b2d`](https://github.com/atharvdange618/Shikai/commit/7123b2d))
+
+### Docs
+
+- **GitHub quirks catalogue** - `notes/GITHUB-QUIRKS.md` lists each API behavior that makes Shikai look broken, with the symptom, cause, a `gh api` command to confirm it and where Shikai handles it. AGENTS.md points there first when a list comes back empty or a call 4xxs. ([`7988dd4`](https://github.com/atharvdange618/Shikai/commit/7988dd4))
+- **Contributing and security** - `CONTRIBUTING.md` covers setup, PAT sign-in for dev builds, conventions and the CI checks, with a PR template and Android-specific issue templates. The bug template now points people to Settings for the version, instead of the Profile tab. `SECURITY.md` names the private channel, the scope and a reply window. ([`5ad0a8a`](https://github.com/atharvdange618/Shikai/commit/5ad0a8a), [`a24743e`](https://github.com/atharvdange618/Shikai/commit/a24743e), [`7b4acb4`](https://github.com/atharvdange618/Shikai/commit/7b4acb4))
+- **Sponsors** - A GitHub Sponsors link sits in the repo sidebar and the README. ([`70c72d0`](https://github.com/atharvdange618/Shikai/commit/70c72d0))
+- **Brand carve-out in the license** - The README and the terms of service say the MIT license does not cover the Shikai name or logo. ([`48e610a`](https://github.com/atharvdange618/Shikai/commit/48e610a), [`8355981`](https://github.com/atharvdange618/Shikai/commit/8355981))
+- **README, privacy policy and store listing** - They now match the 1.7.0 redesigns, say what the personal access token is used for, and stop claiming that signing out removes your theme. ([`d723da8`](https://github.com/atharvdange618/Shikai/commit/d723da8), [`591468f`](https://github.com/atharvdange618/Shikai/commit/591468f), [`501b452`](https://github.com/atharvdange618/Shikai/commit/501b452), [`748f559`](https://github.com/atharvdange618/Shikai/commit/748f559))
+- **Notes and roadmap** - Architecture, maintenance, roadmap and the PAT notes catch up on 1.6.0 OTA 2 and 1.7.0. ([`dd521cd`](https://github.com/atharvdange618/Shikai/commit/dd521cd), [`20c954e`](https://github.com/atharvdange618/Shikai/commit/20c954e), [`6967a53`](https://github.com/atharvdange618/Shikai/commit/6967a53))
+- **Decisions log** - D-029 through D-032 record the theme surviving Clear cache, GitHub API failures reaching Sentry, diffs opening full screen, and one themed pull-to-refresh. ([`f9558dd`](https://github.com/atharvdange618/Shikai/commit/f9558dd), [`30619f8`](https://github.com/atharvdange618/Shikai/commit/30619f8), [`24f17ec`](https://github.com/atharvdange618/Shikai/commit/24f17ec), [`96673d3`](https://github.com/atharvdange618/Shikai/commit/96673d3))
+- **OAuth proxy deploy** - A plain `wrangler deploy`, even from inside `oauth-proxy/`, reads the root `wrangler.jsonc` and deploys the empty web assets worker. The runbook now passes `-c oauth-proxy/wrangler.toml` for both `secret put` and `deploy`. ([`fe1cf02`](https://github.com/atharvdange618/Shikai/commit/fe1cf02))
+
+### Notes
+
+- **API failures in Sentry** - GitHub errors that point at a real problem now reach Sentry. React Query swallows request errors, so none did before, and the monthly check for failures by endpoint had nothing to read. Offline and cancelled requests, and the statuses GitHub sends for ordinary reasons (401, 403, 404, 409, 410, 422, 429, 451), are skipped, each failure is sent at most once a minute, and the endpoint tag drops owners, repos and usernames. Background alert polls and the home screen widget report through the same path. ([`5981501`](https://github.com/atharvdange618/Shikai/commit/5981501), [`e8e5cd2`](https://github.com/atharvdange618/Shikai/commit/e8e5cd2), [`ac3f0d7`](https://github.com/atharvdange618/Shikai/commit/ac3f0d7))
 
 ## v1.6.0 OTA update 2 (October 26, 2026)
 

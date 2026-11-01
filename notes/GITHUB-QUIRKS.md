@@ -63,3 +63,17 @@ Add an entry whenever a bug traces back to GitHub, in the same change as the fix
 - **Cause:** the contents API sends no body for files past 1 MB and sets `encoding` to `"none"`.
 - **Check:** `gh api /repos/<owner>/<repo>/contents/<path> -q '.size, .encoding'`.
 - **Handled:** `app/(app)/repo/[repoId]/file.tsx` shows the message instead of an empty viewer.
+
+## Pull request files stop at 3,000
+
+- **Symptom:** a very large pull request lists fewer changed files than its "N changed" count, with no way to reach the rest.
+- **Cause:** `/pulls/{number}/files` returns at most 3,000 files and 30 per page ([docs](https://docs.github.com/en/rest/pulls/pulls#list-pull-requests-files)). Past 3,000 the extra files don't exist in the API at all.
+- **Check:** `gh api "/repos/<owner>/<repo>/pulls/<number>/files?per_page=100" --paginate -q 'length'`, then compare with `.changed_files` on the pull request.
+- **Handled:** `usePullRequestFiles` in `hooks/usePullRequestDetail.ts` asks for 100 files a page and `DiffFileList` offers "Load more files (N of M)". The 3,000 cap itself can't be worked around; the header counts come from the pull request so they stay honest. D-031.
+
+## Some diffs come back with no `patch`
+
+- **Symptom:** a changed file opens to "No diff to show", or "File renamed, no content changes".
+- **Cause:** GitHub leaves `patch` out of the files response for binaries, for diffs past its size limit, and for a rename with no content change. No error is returned.
+- **Check:** `gh api "/repos/<owner>/<repo>/pulls/<number>/files" -q '.[] | select(.patch == null) | .filename'`.
+- **Handled:** `app/(app)/repo/[repoId]/diff.tsx` says why instead of showing an empty viewer, and names the rename case separately. D-031.
