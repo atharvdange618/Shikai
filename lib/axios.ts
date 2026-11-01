@@ -1,3 +1,4 @@
+import { reportApiError } from "@/lib/sentry";
 import { useAuthStore } from "@/stores/auth.store";
 import axios, {
   type AxiosError,
@@ -119,6 +120,8 @@ githubAxios.interceptors.response.use(
         rateLimit.remaining = 0;
       }
     }
+
+    reportApiError(status ?? 0, error.config?.method, error.config?.url);
 
     return Promise.reject(new GitHubApiError(status ?? 0, message));
   },

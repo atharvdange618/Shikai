@@ -13,6 +13,9 @@
  *     The app auths every GitHub call with a Bearer token or a PAT, and a
  *     crash payload could otherwise carry it in a header, an error message,
  *     or a breadcrumb.
+ *   - `reportApiError` sends GitHub API failures that point at a real problem
+ *     (5xx, or a status Shikai never expects). React Query swallows request
+ *     errors, so without this none of them reach Sentry. See D-030.
  *
  * The DSN is read from EXPO_PUBLIC_SENTRY_DSN so it stays out of the public
  * repo. Without it, init is a no-op.
@@ -94,5 +97,49 @@ export function initSentry(): void {
     sendDefaultPii: false,
     tracesSampleRate: 0.2,
     beforeSend: scrubEvent,
+  });
+}
+
+// Statuses GitHub sends for ordinary reasons: signed out (401), rate limit or
+// no access (403), private or deleted (404), empty repo (409), gone (410),
+// page cap (422), legal block (451). See notes/GITHUB-QUIRKS.md. 0 means no
+// response at all: offline, timeout, or cancelled.
+const EXPECTED_STATUSES = new Set([0, 401, 403, 404, 409, 410, 422, 451]);
+
+// Path segments safe to send as-is. Anything else (owner, repo, username, id,
+// branch, file path) becomes ":x", so the endpoint tag never names a person.
+const ENDPOINT_WORDS = new Set([
+  "actions", "annotations", "branches", "check-runs", "comments", "commits",
+  "compare", "contents", "contributors", "events", "files", "followers",
+  "following", "forks", "gists", "git", "graphql", "installations", "issues",
+  "jobs", "languages", "logs", "notifications", "pulls", "readme",
+  "received_events", "releases", "repos", "repositories", "requested_reviewers",
+  "reviews", "runs", "search", "social_accounts", "starred", "stargazers",
+  "stats", "status", "tags", "threads", "timeline", "trees", "user", "users",
+]);
+
+/** `/repos/octocat/hello/pulls/7?page=2` → `/repos/:x/:x/pulls/:x` */
+export function apiEndpoint(url: string): string {
+  const path = url.replace(/^https?:\/\/[^/]+/, "").split(/[?#]/)[0];
+  return path
+    .split("/")
+    .map((seg) => (seg === "" || ENDPOINT_WORDS.has(seg) ? seg : ":x"))
+    .join("/");
+}
+
+export function reportApiError(
+  status: number,
+  method: string | undefined,
+  url: string | undefined,
+): void {
+  if (EXPECTED_STATUSES.has(status)) return;
+
+  const verb = (method ?? "get").toUpperCase();
+  const endpoint = apiEndpoint(url ?? "");
+  Sentry.captureMessage(`GitHub ${status} on ${verb} ${endpoint}`, {
+    level: "error",
+    tags: { "http.status_code": String(status), endpoint },
+    // One issue per endpoint and status, not one per owner/repo.
+    fingerprint: ["github-api", verb, endpoint, String(status)],
   });
 }

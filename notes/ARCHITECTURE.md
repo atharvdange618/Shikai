@@ -26,7 +26,7 @@ Three services sit outside the app:
 
 - **GitHub** gets every data request. The app sends them straight from the phone.
 - **The OAuth proxy** (`oauth-proxy/worker.ts`) does one job: swap a sign-in code for a token. It exists because that swap needs the client secret, and a secret inside an APK is public. It checks the `client_id` and the `shikai://` redirect, then forwards to GitHub. It stores nothing.
-- **Sentry** gets crash reports. `scrubEvent()` in `lib/sentry.ts` strips anything shaped like a GitHub token first, and a self-test at startup throws if the scrubber stops working.
+- **Sentry** gets crash reports. `scrubEvent()` in `lib/sentry.ts` strips anything shaped like a GitHub token first, and a self-test at startup throws if the scrubber stops working. GitHub 5xx and unexpected statuses go there too, through `reportApiError()` in the axios error interceptor.
 
 Expo's update server serves OTA updates to EAS builds. Cloudflare also serves the static web export, which is separate from the proxy.
 

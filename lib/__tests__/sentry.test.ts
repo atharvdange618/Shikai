@@ -1,10 +1,10 @@
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
-// scrubEvent uses no Sentry runtime, only the Event type. Stub the native
-// package so importing lib/sentry works under Node.
-vi.mock("@sentry/react-native", () => ({}));
+// Stub the native package so importing lib/sentry works under Node.
+const { captureMessage } = vi.hoisted(() => ({ captureMessage: vi.fn() }));
+vi.mock("@sentry/react-native", () => ({ captureMessage }));
 
-import { scrubEvent } from "@/lib/sentry";
+import { apiEndpoint, reportApiError, scrubEvent } from "@/lib/sentry";
 
 const OAUTH = "gho_0123456789abcdefghijklmnopqrstuvwx";
 const FINE_PAT = "github_pat_0123456789abcdefghij0123456789";
@@ -50,4 +50,49 @@ describe("scrubEvent", () => {
     const event = { message: "hi" };
     expect(scrubEvent(event)).toBe(event);
   });
+});
+
+describe("apiEndpoint", () => {
+  it("replaces owner, repo and ids, and drops the query", () => {
+    expect(apiEndpoint("/repos/octocat/hello/pulls/7/files?page=2")).toBe(
+      "/repos/:x/:x/pulls/:x/files",
+    );
+  });
+
+  it("strips the origin from a full pagination URL", () => {
+    expect(apiEndpoint("https://api.github.com/users/octocat/repos")).toBe(
+      "/users/:x/repos",
+    );
+  });
+
+  it("keeps a path with no identifiers as-is", () => {
+    expect(apiEndpoint("/search/issues")).toBe("/search/issues");
+  });
+});
+
+describe("reportApiError", () => {
+  beforeEach(() => captureMessage.mockClear());
+
+  it("reports a 5xx tagged by status and endpoint", () => {
+    reportApiError(502, "get", "/repos/octocat/hello");
+    expect(captureMessage).toHaveBeenCalledWith(
+      "GitHub 502 on GET /repos/:x/:x",
+      expect.objectContaining({
+        tags: { "http.status_code": "502", endpoint: "/repos/:x/:x" },
+      }),
+    );
+  });
+
+  it("reports an unexpected 4xx", () => {
+    reportApiError(400, "post", "/graphql");
+    expect(captureMessage).toHaveBeenCalledOnce();
+  });
+
+  it.each([0, 401, 403, 404, 409, 410, 422, 451])(
+    "skips expected status %i",
+    (status) => {
+      reportApiError(status, "get", "/user");
+      expect(captureMessage).not.toHaveBeenCalled();
+    },
+  );
 });
