@@ -1,4 +1,4 @@
-import { isGitHubUrl } from "@/lib/github-url";
+import { appLinkPath, isGitHubUrl, isOAuthRedirect } from "@/lib/github-url";
 
 // The OAuth redirect (shikai://?code=...) maps to the blank index route. On a
 // warm start, letting the router navigate there buries the sign-in screen, so
@@ -11,6 +11,10 @@ import { isGitHubUrl } from "@/lib/github-url";
 // show +not-found. useDeepLinks maps them through parseGitHubUrl(), so the
 // router drops them on both warm and cold starts. Signed out, useDeepLinks
 // isn't listening: a cold-start link opens after sign-in, a warm one is dropped.
+//
+// Cold-start shikai:// links go the same way. Left to the router, they become
+// the first screen and AppStack's boot replace to overview throws them away.
+// Warm ones pass through, since the router opens those itself.
 export function redirectSystemPath({
   path,
   initial,
@@ -20,9 +24,6 @@ export function redirectSystemPath({
 }): string {
   if (isGitHubUrl(path)) return "";
   if (!initial && isOAuthRedirect(path)) return "";
+  if (initial && appLinkPath(path)) return "";
   return path;
-}
-
-function isOAuthRedirect(path: string): boolean {
-  return path.startsWith("shikai:") && /[?&]code=/.test(path);
 }

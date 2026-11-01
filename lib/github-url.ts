@@ -6,6 +6,20 @@ const GITHUB_HOST_RE = /^(?:https?:\/\/)?(?:www\.)?github\.com(?=\/|$)/i;
 
 export const isGitHubUrl = (url: string): boolean => GITHUB_HOST_RE.test(url.trim());
 
+export const isOAuthRedirect = (url: string): boolean =>
+  url.startsWith("shikai:") && /[?&]code=/.test(url);
+
+/**
+ * The router path for an in-app `shikai://` link, e.g.
+ * `shikai://repo/a~~b/diff?…` → `/repo/a~~b/diff?…`. Null for other URLs, the
+ * bare scheme, and the OAuth redirect, which sign-in handles itself.
+ */
+export function appLinkPath(url: string): string | null {
+  const rest = /^shikai:\/\/\/?(.+)$/.exec(url)?.[1];
+  if (!rest || isOAuthRedirect(url)) return null;
+  return `/${rest}`;
+}
+
 // First path segments that are github.com's own pages, not a user or org.
 const RESERVED_FIRST_SEGMENT = new Set([
   "orgs",

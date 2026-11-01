@@ -4,7 +4,7 @@ import { useRouter } from "expo-router";
 import { useShareIntentContext } from "expo-share-intent";
 import { useEffect, useRef } from "react";
 
-import { isGitHubUrl, parseGitHubUrl } from "@/lib/github-url";
+import { appLinkPath, isGitHubUrl, parseGitHubUrl } from "@/lib/github-url";
 
 /**
  * Sends github.com URLs to the right in-app screen, from two sources:
@@ -13,6 +13,9 @@ import { isGitHubUrl, parseGitHubUrl } from "@/lib/github-url";
  *   2. Links shared into the app from Gmail, a browser, etc. via the Android
  *      share sheet (expo-share-intent). This is the reliable path, since a
  *      plain tap on a github.com link goes to the GitHub app's verified links.
+ *
+ * Also opens the shikai:// link that cold-started the app, which
+ * +native-intent keeps from the router so the boot replace can't drop it.
  *
  * Unmatched github.com URLs fall back to the browser. No-ops until `enabled`
  * so nothing routes onto a gated screen before sign-in.
@@ -46,7 +49,11 @@ export function useDeepLinks(enabled: boolean) {
 
     if (!initialHandled.current) {
       initialHandled.current = true;
-      Linking.getInitialURL().then(handle);
+      Linking.getInitialURL().then((url) => {
+        const path = url ? appLinkPath(url) : null;
+        if (path) routerRef.current.push(path as Href);
+        else handle(url);
+      });
     }
     const sub = Linking.addEventListener("url", ({ url }) => handle(url));
     return () => sub.remove();

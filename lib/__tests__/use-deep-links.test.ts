@@ -4,6 +4,7 @@ const m = vi.hoisted(() => ({
   push: vi.fn(),
   openURL: vi.fn(),
   resetShareIntent: vi.fn(),
+  initialUrl: null as string | null,
   share: {
     hasShareIntent: false,
     shareIntent: {} as { webUrl?: string | null; text?: string | null },
@@ -17,7 +18,7 @@ vi.mock("react", () => ({
 }));
 vi.mock("expo-router", () => ({ useRouter: () => ({ push: m.push }) }));
 vi.mock("expo-linking", () => ({
-  getInitialURL: () => Promise.resolve(null),
+  getInitialURL: () => Promise.resolve(m.initialUrl),
   addEventListener: () => ({ remove: vi.fn() }),
   openURL: (url: string) => {
     m.openURL(url);
@@ -33,6 +34,39 @@ vi.mock("expo-share-intent", () => ({
 
 import { useDeepLinks } from "@/hooks/useDeepLinks";
 import { parseGitHubUrl } from "@/lib/github-url";
+
+describe("useDeepLinks cold-start links", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    m.share.hasShareIntent = false;
+  });
+
+  it("opens a cold-start shikai:// link once routing is enabled", async () => {
+    m.initialUrl =
+      "shikai://repo/facebook~~react/diff?filename=a%2Fb.js&source=pr&number=1";
+    useDeepLinks(false);
+    await Promise.resolve();
+    expect(m.push).not.toHaveBeenCalled();
+
+    useDeepLinks(true);
+    await vi.waitFor(() =>
+      expect(m.push).toHaveBeenCalledWith(
+        "/repo/facebook~~react/diff?filename=a%2Fb.js&source=pr&number=1",
+      ),
+    );
+  });
+
+  it.each(["shikai://?code=abc", "shikai://"])(
+    "leaves %s alone",
+    async (url) => {
+      m.initialUrl = url;
+      useDeepLinks(true);
+      await new Promise((r) => setTimeout(r, 0));
+      expect(m.push).not.toHaveBeenCalled();
+      expect(m.openURL).not.toHaveBeenCalled();
+    },
+  );
+});
 
 describe("useDeepLinks share intents", () => {
   beforeEach(() => {
