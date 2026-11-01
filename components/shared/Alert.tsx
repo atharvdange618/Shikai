@@ -14,7 +14,6 @@ import {
   Radius,
   Spacing,
   useTheme,
-  ZIndex,
 } from "@/constants/theme";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -215,8 +214,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    zIndex: ZIndex.modal,
-    elevation: ZIndex.modal,
   },
   backdropPress: {
     ...StyleSheet.absoluteFillObject,
@@ -227,8 +224,6 @@ const styles = StyleSheet.create({
     borderRadius: Radius.xl,
     borderWidth: 1,
     padding: Spacing.xl,
-    zIndex: ZIndex.modal + 1,
-    elevation: ZIndex.modal + 1,
   },
   iconRow: {
     alignItems: "center",

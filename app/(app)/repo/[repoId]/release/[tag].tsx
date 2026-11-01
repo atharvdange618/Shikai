@@ -9,7 +9,6 @@ import {
   Radius,
   Spacing,
   useTheme,
-  ZIndex,
 } from "@/constants/theme";
 import { useRelease, useReleases } from "@/hooks/useReleases";
 import { decodeRepoId, formatBytes, relativeTime } from "@/lib/utils";
@@ -512,8 +511,6 @@ const s = StyleSheet.create({
   menuBackdrop: {
     flex: 1,
     justifyContent: "flex-end",
-    zIndex: ZIndex.modal,
-    elevation: ZIndex.modal,
   },
   menuSheet: {
     borderTopWidth: 1,
@@ -521,8 +518,6 @@ const s = StyleSheet.create({
     borderTopRightRadius: Radius.xl,
     paddingTop: Spacing.md,
     paddingHorizontal: Spacing.sm,
-    zIndex: ZIndex.modal + 1,
-    elevation: ZIndex.modal + 1,
   },
   menuHeader: {
     fontFamily: FontFamily.medium,
