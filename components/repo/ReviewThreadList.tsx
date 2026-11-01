@@ -1,4 +1,4 @@
-import { MarkdownRenderer } from "@/components/shared/MarkdownRenderer";
+import { DiffHunk } from "@/components/repo/DiffHunk";
 import {
   type ColorTokens,
   FontFamily,
@@ -45,11 +45,9 @@ function buildThreads(comments: GitHubReviewComment[]): ReviewThread[] {
 export function ReviewThreadList({
   reviewComments,
   colors,
-  repoContext,
 }: {
   reviewComments: GitHubReviewComment[];
   colors: ColorTokens;
-  repoContext: string;
 }) {
   const s = useMemo(() => buildStyles(colors), [colors]);
   const threads = useMemo(
@@ -85,10 +83,7 @@ export function ReviewThreadList({
           </View>
 
           <View style={s.hunkWrapper}>
-            <MarkdownRenderer
-              markdown={`\`\`\`diff\n${thread.diffHunk}\n\`\`\``}
-              context={repoContext}
-            />
+            <DiffHunk hunk={thread.diffHunk} fileName={thread.path} />
           </View>
 
           <ThreadComment comment={thread.root} colors={colors} s={s} />

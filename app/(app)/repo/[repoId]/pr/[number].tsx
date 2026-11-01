@@ -267,7 +267,6 @@ function PullRequestDetailScreenContent() {
         <ReviewThreadList
           reviewComments={reviewComments}
           colors={colors}
-          repoContext={`${owner}/${repoName}`}
         />
       )}
 
