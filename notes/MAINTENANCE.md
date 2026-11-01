@@ -62,7 +62,7 @@ Google Play requires updates to target a recent Android API level and usually ra
 
 ## Other deployments
 
-- **OAuth proxy** (`oauth-proxy/`): a separate Cloudflare Worker. `GITHUB_CLIENT_SECRET` is a Wrangler secret. When you rotate the GitHub App's client secret, run `wrangler secret put GITHUB_CLIENT_SECRET` in `oauth-proxy/`. Deploy with `wrangler deploy` from that folder.
+- **OAuth proxy** (`oauth-proxy/`): a separate Cloudflare Worker. `GITHUB_CLIENT_SECRET` is a Wrangler secret. When you rotate the GitHub App's client secret, run `npx wrangler secret put GITHUB_CLIENT_SECRET -c oauth-proxy/wrangler.toml` from the repo root. Deploy with `npx wrangler deploy -c oauth-proxy/wrangler.toml`. Without `-c`, Wrangler reads the root `wrangler.jsonc`, even from inside `oauth-proxy/`, and targets the web worker.
 - **Web build:** `npm run deploy`.
 
 ## Things only you hold
