@@ -92,6 +92,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     ],
     "./plugins/withAndroidPackaging",
     "./plugins/withGradleProperties",
+    "./plugins/withLaunchIntent",
     "./plugins/withReleaseSigning",
     ["react-native-android-widget", widgetConfig],
     [
