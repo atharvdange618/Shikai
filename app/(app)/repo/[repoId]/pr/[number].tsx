@@ -259,7 +259,8 @@ function PullRequestDetailScreenContent() {
         <DiffFileList
           files={files}
           colors={colors}
-          repoContext={`${owner}/${repoName}`}
+          repoId={repoId ?? ""}
+          diffSource={{ source: "pr", number: String(prNumber) }}
         />
       )}
 

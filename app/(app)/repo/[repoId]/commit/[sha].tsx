@@ -158,7 +158,8 @@ function CommitDetailScreenContent() {
         <DiffFileList
           files={commit.files}
           colors={colors}
-          repoContext={`${owner}/${repoName}`}
+          repoId={repoId ?? ""}
+          diffSource={{ source: "commit", sha: sha ?? "" }}
         />
       )}
 

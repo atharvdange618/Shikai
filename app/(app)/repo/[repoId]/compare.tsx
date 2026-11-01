@@ -127,7 +127,8 @@ function CompareScreenContent() {
             <DiffFileList
               files={data.files}
               colors={colors}
-              repoContext={`${owner}/${repoName}`}
+              repoId={repoId ?? ""}
+              diffSource={{ source: "compare", base: base ?? "", head: head ?? "" }}
             />
           )}
         </>

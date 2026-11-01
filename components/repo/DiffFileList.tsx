@@ -1,4 +1,3 @@
-import { MarkdownRenderer } from "@/components/shared/MarkdownRenderer";
 import {
   type ColorTokens,
   FontFamily,
@@ -8,6 +7,7 @@ import {
 } from "@/constants/theme";
 import type { GitHubPullRequestFile } from "@/types/github.types";
 import { Octicons } from "@expo/vector-icons";
+import { router } from "expo-router";
 import { useMemo, useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
@@ -27,32 +27,37 @@ function getFileStatusDisplay(
   }
 }
 
+/** Which query holds the files; the diff screen reads it back from cache. */
+export type DiffSource =
+  | { source: "pr"; number: string }
+  | { source: "commit"; sha: string }
+  | { source: "compare"; base: string; head: string };
+
 /**
- * Collapsible "N files changed" card that renders each file's unified diff
- * through MarkdownRenderer.
+ * Collapsible "N files changed" card. Tapping a file opens its diff full
+ * screen (D-012).
  */
 export function DiffFileList({
   files,
   colors,
-  repoContext,
+  repoId,
+  diffSource,
 }: {
   files: GitHubPullRequestFile[];
   colors: ColorTokens;
-  repoContext: string;
+  repoId: string;
+  diffSource: DiffSource;
 }) {
   const s = useMemo(() => buildStyles(colors), [colors]);
   const [sectionExpanded, setSectionExpanded] = useState(false);
-  const [expandedFiles, setExpandedFiles] = useState<Set<string>>(new Set());
 
   const totalAdditions = files.reduce((sum, f) => sum + f.additions, 0);
   const totalDeletions = files.reduce((sum, f) => sum + f.deletions, 0);
 
-  const toggleFile = (filename: string) => {
-    setExpandedFiles((prev) => {
-      const next = new Set(prev);
-      if (next.has(filename)) next.delete(filename);
-      else next.add(filename);
-      return next;
+  const openFile = (filename: string) => {
+    router.push({
+      pathname: "/(app)/repo/[repoId]/diff",
+      params: { repoId, filename, ...diffSource },
     });
   };
 
@@ -84,45 +89,29 @@ export function DiffFileList({
 
       {sectionExpanded &&
         files.map((file) => {
-          const isExpanded = expandedFiles.has(file.filename);
           const display = getFileStatusDisplay(file.status, colors);
 
           return (
-            <View key={file.filename}>
-              <Pressable
-                style={({ pressed }) => [s.row, pressed && s.rowPressed]}
-                onPress={() => toggleFile(file.filename)}
+            <Pressable
+              key={file.filename}
+              style={({ pressed }) => [s.row, pressed && s.rowPressed]}
+              onPress={() => openFile(file.filename)}
+              accessibilityRole="button"
+              accessibilityLabel={`${file.filename}, ${file.additions} additions, ${file.deletions} deletions`}
+            >
+              <Octicons name={display.icon} size={14} color={display.color} />
+              <Text
+                style={[s.rowText, { color: colors.textPrimary }]}
+                numberOfLines={1}
               >
-                <Octicons name={display.icon} size={14} color={display.color} />
-                <Text
-                  style={[s.rowText, { color: colors.textPrimary }]}
-                  numberOfLines={1}
-                >
-                  {file.filename}
-                </Text>
-                <Text style={s.diffStat}>
-                  <Text style={{ color: colors.success }}>+{file.additions}</Text>{" "}
-                  <Text style={{ color: colors.danger }}>-{file.deletions}</Text>
-                </Text>
-              </Pressable>
-
-              {isExpanded && (
-                <View style={s.diffWrapper}>
-                  {file.patch ? (
-                    <MarkdownRenderer
-                      markdown={`\`\`\`diff\n${file.patch}\n\`\`\``}
-                      context={repoContext}
-                    />
-                  ) : (
-                    <Text style={s.emptyDiffText}>
-                      {file.status === "renamed"
-                        ? "File renamed, no content changes."
-                        : "Binary file or diff too large to display."}
-                    </Text>
-                  )}
-                </View>
-              )}
-            </View>
+                {file.filename}
+              </Text>
+              <Text style={s.diffStat}>
+                <Text style={{ color: colors.success }}>+{file.additions}</Text>{" "}
+                <Text style={{ color: colors.danger }}>-{file.deletions}</Text>
+              </Text>
+              <Octicons name="chevron-right" size={14} color={colors.textMuted} />
+            </Pressable>
           );
         })}
     </View>
@@ -167,19 +156,6 @@ function buildStyles(colors: ColorTokens) {
     diffStat: {
       fontFamily: FontFamily.mono,
       fontSize: 11,
-    },
-    diffWrapper: {
-      padding: Spacing.sm,
-      gap: Spacing.sm,
-      borderTopWidth: StyleSheet.hairlineWidth,
-      borderTopColor: colors.border,
-    },
-    emptyDiffText: {
-      fontFamily: FontFamily.regular,
-      fontSize: FontSize.caption,
-      color: colors.textMuted,
-      fontStyle: "italic",
-      padding: Spacing.sm,
     },
   });
 }

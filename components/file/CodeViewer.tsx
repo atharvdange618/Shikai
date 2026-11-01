@@ -19,22 +19,38 @@ import {
   type ColorTokens,
 } from "@/constants/theme";
 import { useCopyToClipboard } from "@/hooks/useCopyToClipboard";
-import { buildCodeHtml } from "@/lib/file-html";
-import { highlightFile, type HighlightedFile } from "@/lib/highlight";
+import { buildCodeHtml, buildDiffHtml } from "@/lib/file-html";
+import {
+  highlightDiff,
+  highlightFile,
+  type HighlightedDiff,
+  type HighlightedFile,
+} from "@/lib/highlight";
 
 import { FileError } from "./FileError";
 
 interface CodeViewerProps {
+  /** File contents, or a unified diff patch when `diff` is set. */
   content: string;
   fileName: string;
   targetLine?: number;
+  diff?: boolean;
 }
 
-export function CodeViewer({ content, fileName, targetLine }: CodeViewerProps) {
+type Highlighted =
+  | { kind: "file"; file: HighlightedFile }
+  | { kind: "diff"; diff: HighlightedDiff };
+
+export function CodeViewer({
+  content,
+  fileName,
+  targetLine,
+  diff = false,
+}: CodeViewerProps) {
   const { colors, syntaxTheme } = useTheme();
   const s = useMemo(() => buildStyles(colors), [colors]);
   const webViewRef = useRef<WebView>(null);
-  const [file, setFile] = useState<HighlightedFile | null>(null);
+  const [file, setFile] = useState<Highlighted | null>(null);
   const [failed, setFailed] = useState(false);
   const [wrap, setWrap] = useState(true);
   const { copied, copy } = useCopyToClipboard();
@@ -47,17 +63,26 @@ export function CodeViewer({ content, fileName, targetLine }: CodeViewerProps) {
     setFailed(false);
     const id = setTimeout(() => {
       try {
-        setFile(highlightFile(content, fileName, targetLine));
+        setFile(
+          diff
+            ? { kind: "diff", diff: highlightDiff(content, fileName) }
+            : { kind: "file", file: highlightFile(content, fileName, targetLine) },
+        );
       } catch (error) {
         console.error("Highlighting failed", error);
         setFailed(true);
       }
     }, 0);
     return () => clearTimeout(id);
-  }, [content, fileName, targetLine]);
+  }, [content, fileName, targetLine, diff]);
 
   const html = useMemo(
-    () => (file ? buildCodeHtml(file, colors, syntaxTheme, targetLine) : null),
+    () =>
+      file?.kind === "file"
+        ? buildCodeHtml(file.file, colors, syntaxTheme, targetLine)
+        : file?.kind === "diff"
+          ? buildDiffHtml(file.diff, colors, syntaxTheme)
+          : null,
     [file, colors, syntaxTheme, targetLine],
   );
 
@@ -80,9 +105,7 @@ export function CodeViewer({ content, fileName, targetLine }: CodeViewerProps) {
     <View style={s.container}>
       <View style={s.toolbar}>
         <Text style={s.meta} numberOfLines={1}>
-          {file
-            ? `${file.lineCount.toLocaleString()} ${file.lineCount === 1 ? "line" : "lines"} · ${file.lang}`
-            : " "}
+          {file ? metaText(file) : " "}
         </Text>
         <Pressable
           onPress={toggleWrap}
@@ -98,7 +121,7 @@ export function CodeViewer({ content, fileName, targetLine }: CodeViewerProps) {
           onPress={() => copy(content)}
           style={s.iconButton}
           accessibilityRole="button"
-          accessibilityLabel="Copy file"
+          accessibilityLabel={diff ? "Copy diff" : "Copy file"}
         >
           <Octicons
             name={copied ? "check" : "copy"}
@@ -127,6 +150,12 @@ export function CodeViewer({ content, fileName, targetLine }: CodeViewerProps) {
       )}
     </View>
   );
+}
+
+function metaText(h: Highlighted): string {
+  if (h.kind === "diff") return h.diff.lang;
+  const { lineCount, lang } = h.file;
+  return `${lineCount.toLocaleString()} ${lineCount === 1 ? "line" : "lines"} · ${lang}`;
 }
 
 function buildStyles(colors: ColorTokens) {
