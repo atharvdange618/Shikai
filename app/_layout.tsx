@@ -48,10 +48,6 @@ import { useAuthStore } from "@/stores/auth.store";
 import { runSecurityChecks } from "shikai-security";
 import * as Sentry from "@sentry/react-native";
 
-import { initSentry } from "@/lib/sentry";
-
-initSentry();
-
 SplashScreen.preventAutoHideAsync();
 
 setupFocusManager();
