@@ -97,7 +97,7 @@ Deeper docs: `notes/ARCHITECTURE.md` (data flow, token rules, background work) a
 | `widgets/widget-task-handler.tsx` | Native task entry point for the Android home screen widget. |
 | `widgets/ContributionWidget.tsx` | Widget UI: the contribution graph. |
 | `hooks/` | One React Query hook per GitHub resource (repos, issues, PRs, etc.). |
-| `plugins/` | Local config plugins that patch the generated gradle files on every prebuild: R8, resource shrinking, ABIs (`withGradleProperties`), META-INF exclusion and ABI splits (`withAndroidPackaging`), release signing (`withReleaseSigning`). |
+| `plugins/` | Local config plugins that patch the generated native files on every prebuild: R8, resource shrinking, ABIs (`withGradleProperties`), META-INF exclusion and ABI splits (`withAndroidPackaging`), clearing the restored launch intent in `MainActivity.onCreate` (`withLaunchIntent`), release signing (`withReleaseSigning`). |
 | `app.config.ts` | Expo app config: new architecture, React Compiler, typed routes. |
 | `contexts/ThemeContext.tsx` | Theme provider; exposes `useTheme()`. |
 | `constants/themes.ts` | Theme color definitions. |
