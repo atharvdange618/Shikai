@@ -5,11 +5,17 @@ GitHub client secret never ships in the app. See `worker.ts`.
 
 ## Deploy
 
+Run these from the repo root:
+
 ```
-cd oauth-proxy
-npx wrangler secret put GITHUB_CLIENT_SECRET
-npx wrangler deploy
+npx wrangler secret put GITHUB_CLIENT_SECRET -c oauth-proxy/wrangler.toml
+npx wrangler deploy -c oauth-proxy/wrangler.toml
 ```
+
+Always pass `-c`. Without it, Wrangler reads the root `wrangler.jsonc`, even
+from inside this folder, and deploys the web assets worker instead. A
+`--dry-run` that lists the `GITHUB_CLIENT_ID` binding means you have the right
+config.
 
 `GITHUB_CLIENT_ID` is public and lives in `wrangler.toml`. The secret is set
 separately and is never committed.
