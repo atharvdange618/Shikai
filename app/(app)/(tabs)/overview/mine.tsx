@@ -3,7 +3,6 @@ import { type Href, useRouter } from "expo-router";
 import { useCallback, useMemo, useState } from "react";
 import {
   Pressable,
-  RefreshControl,
   ScrollView,
   StyleSheet,
   Text,
@@ -11,6 +10,7 @@ import {
 } from "react-native";
 
 import { IssueResultCard } from "@/components/shared/IssueResultCard";
+import { PullToRefresh } from "@/components/shared/PullToRefresh";
 import { type MyWorkSectionKey, useMyWork } from "@/hooks/useMyWork";
 
 import {
@@ -81,12 +81,7 @@ export default function MyWorkScreen() {
       style={s.container}
       contentContainerStyle={s.content}
       refreshControl={
-        <RefreshControl
-          refreshing={refreshing}
-          onRefresh={onRefresh}
-          tintColor={colors.accent}
-          colors={[colors.accent]}
-        />
+        <PullToRefresh refreshing={refreshing} onRefresh={onRefresh} />
       }
     >
       {sections.map((section) => {

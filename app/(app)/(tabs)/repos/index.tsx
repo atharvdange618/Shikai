@@ -5,7 +5,6 @@ import { useRouter } from "expo-router";
 import { useCallback, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
-  RefreshControl,
   StyleSheet,
   Text,
   View,
@@ -19,6 +18,7 @@ import { RepoFilters } from "@/components/repo/RepoFilters";
 import { FirstBookmarkNudge } from "@/components/FirstBookmarkNudge";
 import { KeyboardAvoid } from "@/components/shared/KeyboardAvoid";
 import { SearchBar } from "@/components/shared/SearchBar";
+import { PullToRefresh } from "@/components/shared/PullToRefresh";
 import { useFirstBookmarkNudge } from "@/hooks/useFirstBookmarkNudge";
 import { useInstallations } from "@/hooks/useInstallations";
 import { useRepos } from "@/hooks/useRepos";
@@ -266,12 +266,7 @@ export default function ReposScreen() {
         viewabilityConfig={{ itemVisiblePercentThreshold: 50 }}
         keyboardShouldPersistTaps="handled"
         refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            tintColor={colors.accent}
-            colors={[colors.accent]}
-          />
+          <PullToRefresh refreshing={refreshing} onRefresh={onRefresh} />
         }
         overrideItemLayout={overrideItemLayout}
         getItemType={getItemType}

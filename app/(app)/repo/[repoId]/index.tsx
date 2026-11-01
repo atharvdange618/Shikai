@@ -55,6 +55,7 @@ import { RepoContributors } from "@/components/repo/repo-detail/RepoContributors
 import { RepoHeader } from "@/components/repo/repo-detail/RepoHeader";
 import { RepoLanguages } from "@/components/repo/repo-detail/RepoLanguages";
 import { RepoStats } from "@/components/repo/repo-detail/RepoStats";
+import { PullToRefresh } from "@/components/shared/PullToRefresh";
 
 const ANIM_DELAYS = {
   hero: 0,
@@ -107,6 +108,20 @@ export default function RepoDetailsScreen() {
   const { releases } = useReleases(owner, repoName);
   const { runs } = useWorkflowRuns(owner, repoName);
   const latestRun = runs[0];
+
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = useCallback(async () => {
+    if (!owner || !repoName) return;
+    setRefreshing(true);
+    // The whole screen's queries share the ["repo", owner, repo] prefix, so one
+    // invalidate refreshes the header, stats, activity, languages, contributors,
+    // README, latest release and workflow runs. Only mounted queries refetch.
+    await queryClient.invalidateQueries({
+      queryKey: queryKeys.repo(owner, repoName),
+    });
+    setRefreshing(false);
+  }, [queryClient, owner, repoName]);
 
   const { data: checks = [] } = useChecks(owner, repoName, lastCommit?.sha ?? "");
 
@@ -333,7 +348,7 @@ export default function RepoDetailsScreen() {
         <Octicons name="alert" size={IconSize.xl} color={colors.danger} />
         <Text style={s.errorTitle}>Failed to load repository</Text>
         <Text style={s.errorSubtitle}>{(error as Error)?.message}</Text>
-        <Pressable style={s.retryButton} onPress={() => refetch()}>
+        <Pressable style={s.retryButton} onPress={onRefresh}>
           <Text style={s.retryText}>Try again</Text>
         </Pressable>
       </View>
@@ -349,6 +364,9 @@ export default function RepoDetailsScreen() {
         showsVerticalScrollIndicator={false}
         onScroll={handleScroll}
         scrollEventThrottle={16}
+        refreshControl={
+          <PullToRefresh refreshing={refreshing} onRefresh={onRefresh} />
+        }
       >
         <Animated.View
           entering={FadeInDown.duration(400).delay(ANIM_DELAYS.hero)}

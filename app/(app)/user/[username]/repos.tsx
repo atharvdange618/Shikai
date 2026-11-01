@@ -4,7 +4,6 @@ import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
-  RefreshControl,
   StyleSheet,
   Text,
   View,
@@ -12,6 +11,7 @@ import {
 
 import { RepoCard } from "@/components/repo/RepoCard";
 import { ListItemSeparator } from "@/components/shared/ListItemSeparator";
+import { PullToRefresh } from "@/components/shared/PullToRefresh";
 import { useUserAllRepos } from "@/hooks/useUserProfileRepos";
 import { prefetchRepoDetails, prefetchRoute } from "@/lib/prefetch";
 import { queryKeys } from "@/lib/query-client";
@@ -150,12 +150,7 @@ export default function UserReposScreen() {
         }}
         onEndReachedThreshold={0.5}
         refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            tintColor={colors.accent}
-            colors={[colors.accent]}
-          />
+          <PullToRefresh refreshing={refreshing} onRefresh={onRefresh} />
         }
         overrideItemLayout={overrideItemLayout}
         getItemType={getItemType}

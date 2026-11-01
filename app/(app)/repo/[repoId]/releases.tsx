@@ -1,4 +1,5 @@
 import { ListItemSeparator } from "@/components/shared/ListItemSeparator";
+import { PullToRefresh } from "@/components/shared/PullToRefresh";
 import { Octicons } from "@expo/vector-icons";
 import { FlashList } from "@shopify/flash-list";
 import { useQueryClient } from "@tanstack/react-query";
@@ -8,7 +9,6 @@ import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Pressable,
-  RefreshControl,
   StyleSheet,
   Text,
   View,
@@ -140,12 +140,7 @@ export default function ReleasesScreen() {
         }}
         onEndReachedThreshold={0.5}
         refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            tintColor={colors.accent}
-            colors={[colors.accent]}
-          />
+          <PullToRefresh refreshing={refreshing} onRefresh={onRefresh} />
         }
         removeClippedSubviews
         drawDistance={300}

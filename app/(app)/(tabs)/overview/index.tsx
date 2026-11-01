@@ -7,7 +7,6 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Pressable,
-  RefreshControl,
   ScrollView,
   StyleSheet,
   Text,
@@ -31,6 +30,7 @@ import type { GitHubEvent } from "@/types/github.types";
 import { ActivityFeed } from "@/components/overview/ActivityFeed";
 import { ContributionGraph } from "@/components/overview/ContributionGraph";
 import { PinnedRepoCard } from "@/components/overview/PinnedRepoCard";
+import { PullToRefresh } from "@/components/shared/PullToRefresh";
 
 import {
   BorderWidth,
@@ -367,12 +367,7 @@ export default function OverviewScreen() {
         contentContainerStyle={s.content}
         showsVerticalScrollIndicator={false}
         refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            tintColor={colors.accent}
-            colors={[colors.accent]}
-          />
+          <PullToRefresh refreshing={refreshing} onRefresh={onRefresh} />
         }
       >
         <FadeInView delay={0}>

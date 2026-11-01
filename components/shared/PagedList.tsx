@@ -2,13 +2,13 @@ import { FlashList, type FlashListProps } from "@shopify/flash-list";
 import { useCallback, useMemo, useState } from "react";
 import {
   ActivityIndicator,
-  RefreshControl,
   StyleSheet,
   Text,
   View,
 } from "react-native";
 
 import { ListItemSeparator } from "@/components/shared/ListItemSeparator";
+import { PullToRefresh } from "@/components/shared/PullToRefresh";
 
 import {
   type ColorTokens,
@@ -87,12 +87,7 @@ export function PagedList<T>({
         }}
         onEndReachedThreshold={0.5}
         refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            tintColor={colors.accent}
-            colors={[colors.accent]}
-          />
+          <PullToRefresh refreshing={refreshing} onRefresh={onRefresh} />
         }
       />
     </View>

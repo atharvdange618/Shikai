@@ -5,7 +5,6 @@ import { useCallback, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Pressable,
-  RefreshControl,
   StyleSheet,
   Text,
   View,
@@ -16,6 +15,7 @@ import { FlashList } from "@shopify/flash-list";
 import { RepoCard } from "@/components/repo/RepoCard";
 import { ListItemSeparator } from "@/components/shared/ListItemSeparator";
 import { SearchBar } from "@/components/shared/SearchBar";
+import { PullToRefresh } from "@/components/shared/PullToRefresh";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useSearchIndex } from "@/hooks/useSearchIndex";
 import { useStarred } from "@/hooks/useStarred";
@@ -228,12 +228,7 @@ export default function SavedScreen() {
         onEndReachedThreshold={0.5}
         keyboardShouldPersistTaps="handled"
         refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            tintColor={colors.accent}
-            colors={[colors.accent]}
-          />
+          <PullToRefresh refreshing={refreshing} onRefresh={onRefresh} />
         }
         removeClippedSubviews
         drawDistance={400}

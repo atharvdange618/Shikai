@@ -5,7 +5,6 @@ import { useCallback, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Pressable,
-  RefreshControl,
   StyleSheet,
   Text,
   View,
@@ -19,6 +18,7 @@ import { FlashList } from "@shopify/flash-list";
 
 import { useAlert } from "@/components/shared/Alert";
 import { ListItemSeparator } from "@/components/shared/ListItemSeparator";
+import { PullToRefresh } from "@/components/shared/PullToRefresh";
 import { useNotifications } from "@/hooks/useNotifications";
 import {
   type FetchNotificationsResult,
@@ -549,12 +549,7 @@ export default function NotificationsScreen() {
           removeClippedSubviews
           drawDistance={200}
           refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={onRefresh}
-              tintColor={colors.accent}
-              colors={[colors.accent]}
-            />
+            <PullToRefresh refreshing={refreshing} onRefresh={onRefresh} />
           }
           contentContainerStyle={s.listContent}
         />

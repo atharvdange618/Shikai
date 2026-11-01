@@ -7,7 +7,6 @@ import { type ReactNode, useCallback, useEffect, useMemo, useState } from "react
 import {
   ActivityIndicator,
   Pressable,
-  RefreshControl,
   ScrollView,
   StyleSheet,
   Text,
@@ -39,6 +38,7 @@ import {
 import { isStatsPending } from "@/lib/query-client";
 import { decodeRepoId, formatCount } from "@/lib/utils";
 import type { GitHubCommitActivityWeek } from "@/types/github.types";
+import { PullToRefresh } from "@/components/shared/PullToRefresh";
 
 const TOP_CONTRIBUTORS = 10;
 const BAR_CHART_HEIGHT = 96;
@@ -96,12 +96,7 @@ export default function InsightsScreen() {
       style={s.container}
       contentContainerStyle={s.content}
       refreshControl={
-        <RefreshControl
-          refreshing={refreshing}
-          onRefresh={onRefresh}
-          tintColor={colors.accent}
-          colors={[colors.accent]}
-        />
+        <PullToRefresh refreshing={refreshing} onRefresh={onRefresh} />
       }
     >
       <StatsSection title="Commit activity" query={activity} colors={colors}>

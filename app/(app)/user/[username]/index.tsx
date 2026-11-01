@@ -4,7 +4,6 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Linking,
   Pressable,
-  RefreshControl,
   ScrollView,
   StyleSheet,
   Text,
@@ -16,6 +15,7 @@ import {
   type ProfileLink,
 } from "@/components/shared/ProfileHeader";
 import { RecentRepos } from "@/components/shared/RecentRepos";
+import { PullToRefresh } from "@/components/shared/PullToRefresh";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { useUserProfileRepos } from "@/hooks/useUserProfileRepos";
 
@@ -140,12 +140,7 @@ export default function UserProfileScreen() {
       contentContainerStyle={s.content}
       showsVerticalScrollIndicator={false}
       refreshControl={
-        <RefreshControl
-          refreshing={refreshing}
-          onRefresh={onRefresh}
-          tintColor={colors.accent}
-          colors={[colors.accent]}
-        />
+        <PullToRefresh refreshing={refreshing} onRefresh={onRefresh} />
       }
     >
       <ProfileHeader

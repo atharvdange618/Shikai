@@ -6,13 +6,13 @@ import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Pressable,
-  RefreshControl,
   StyleSheet,
   Text,
   View,
 } from "react-native";
 
 import { ListItemSeparator } from "@/components/shared/ListItemSeparator";
+import { PullToRefresh } from "@/components/shared/PullToRefresh";
 import { useGists } from "@/hooks/useGists";
 import { queryKeys } from "@/lib/query-client";
 import { relativeTime } from "@/lib/utils";
@@ -117,12 +117,7 @@ export default function GistsScreen() {
         }}
         onEndReachedThreshold={0.5}
         refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            tintColor={colors.accent}
-            colors={[colors.accent]}
-          />
+          <PullToRefresh refreshing={refreshing} onRefresh={onRefresh} />
         }
         removeClippedSubviews
         drawDistance={300}

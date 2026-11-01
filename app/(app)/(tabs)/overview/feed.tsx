@@ -5,7 +5,6 @@ import { useCallback, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Pressable,
-  RefreshControl,
   StyleSheet,
   Text,
   View,
@@ -15,6 +14,7 @@ import { FlashList } from "@shopify/flash-list";
 import { Image } from "expo-image";
 
 import { ListItemSeparator } from "@/components/shared/ListItemSeparator";
+import { PullToRefresh } from "@/components/shared/PullToRefresh";
 import { useReceivedEvents } from "@/hooks/useReceivedEvents";
 import { getEventDisplay } from "@/lib/github-utils";
 import { queryKeys } from "@/lib/query-client";
@@ -241,12 +241,7 @@ export default function FollowingFeedScreen() {
           removeClippedSubviews
           drawDistance={400}
           refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={onRefresh}
-              tintColor={colors.accent}
-              colors={[colors.accent]}
-            />
+            <PullToRefresh refreshing={refreshing} onRefresh={onRefresh} />
           }
           contentContainerStyle={s.listContent}
         />

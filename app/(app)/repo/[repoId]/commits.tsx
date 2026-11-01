@@ -10,7 +10,6 @@ import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Pressable,
-  RefreshControl,
   StyleSheet,
   Text,
   View,
@@ -21,6 +20,7 @@ import { queryKeys } from "@/lib/query-client";
 import type { GitHubCommit } from "@/types/github.types";
 
 import { BranchSelector } from "@/components/repo/BranchSelector";
+import { PullToRefresh } from "@/components/shared/PullToRefresh";
 import {
   AvatarSize,
   type ColorTokens,
@@ -158,12 +158,7 @@ export default function CommitsScreen() {
         }}
         onEndReachedThreshold={0.5}
         refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            tintColor={colors.accent}
-            colors={[colors.accent]}
-          />
+          <PullToRefresh refreshing={refreshing} onRefresh={onRefresh} />
         }
         removeClippedSubviews
         drawDistance={200}
