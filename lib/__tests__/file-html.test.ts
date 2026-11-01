@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 
 import { themes } from "@/constants/themes";
-import { buildCodeHtml, buildSvgHtml } from "@/lib/file-html";
-import { highlightFile } from "@/lib/highlight";
+import { buildCodeHtml, buildDiffHtml, buildSvgHtml } from "@/lib/file-html";
+import { highlightDiff, highlightFile } from "@/lib/highlight";
 
 const { colors, syntaxTheme } = themes.dark;
 
@@ -43,6 +43,31 @@ describe("buildCodeHtml", () => {
   it("marks the target line with more than color", () => {
     expect(buildCodeHtml(file, colors, syntaxTheme, 2)).toMatch(
       /\.th-target \{[^}]*box-shadow: inset 3px 0 0/,
+    );
+  });
+});
+
+describe("buildDiffHtml", () => {
+  const diff = highlightDiff(
+    "@@ -9,2 +9,2 @@\n-old();\n+fresh();\n same();",
+    "a.ts",
+  );
+  const html = buildDiffHtml(diff, colors, syntaxTheme);
+
+  it("puts old and new numbers and the sign on each code line", () => {
+    expect(html).toContain('class="th-line th-del" data-old="9" data-new="" data-sign="-"');
+    expect(html).toContain('class="th-line th-add" data-old="" data-new="9" data-sign="+"');
+    expect(html).toContain('class="th-line th-context" data-old="10" data-new="10"');
+  });
+
+  it("leaves hunk headers without numbers", () => {
+    expect(html).toContain('<span class="th-line th-hunk">@@ -9,2 +9,2 @@</span>');
+  });
+
+  it("escapes patch content", () => {
+    const evil = highlightDiff('@@ -1 +1 @@\n+<script>alert(1)</script>', "a.txt");
+    expect(buildDiffHtml(evil, colors, syntaxTheme)).not.toContain(
+      "<script>alert",
     );
   });
 });

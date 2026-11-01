@@ -1,9 +1,13 @@
-import { escapeHtml } from "@tanstack/highlight/core";
+import { escapeHtml, renderNodesToHtml } from "@tanstack/highlight/core";
 import type { HighlightTheme } from "@tanstack/highlight/theme";
 import { createThemeRule, themeTokenClasses } from "@tanstack/highlight/theme";
 
 import type { ColorTokens } from "@/constants/themes";
-import type { HighlightedFile } from "@/lib/highlight";
+import type {
+  DiffLineKind,
+  HighlightedDiff,
+  HighlightedFile,
+} from "@/lib/highlight";
 
 // Page builders for the file viewers' WebViews. Kept out of the components so
 // Vitest can check them without React Native.
@@ -15,14 +19,111 @@ export function buildCodeHtml(
   targetLine: number | undefined,
 ): string {
   const gutter = `${String(file.lineCount).length}ch`;
-  const tokenRules = themeTokenClasses
-    .map((token) => `.th-${token} { color: var(--th-${token}); }`)
-    .join("\n");
   const scrollToTarget =
     targetLine !== undefined
       ? `var t = document.querySelector('[data-line="${targetLine}"]');
          if (t) t.scrollIntoView({ block: "center" });`
       : "";
+
+  return buildPage(
+    colors,
+    syntaxTheme,
+    `
+  /* Line numbers sit in a hanging gutter, so wrapped lines stay indented
+     under their own number. */
+  .th-line { padding: 0 16px 0 calc(${gutter} + 28px); }
+  .th-line::before {
+    content: attr(data-line);
+    position: absolute;
+    left: 0;
+    width: calc(${gutter} + 12px);
+    text-align: right;
+    color: ${colors.textMuted};
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  /* The inset bar marks the line without relying on color alone. */
+  .th-target {
+    background: ${colors.accentSubtle};
+    box-shadow: inset 3px 0 0 ${colors.accent};
+  }
+  .th-target::before { color: ${colors.accent}; }`,
+    file.html,
+    scrollToTarget,
+  );
+}
+
+const DIFF_SIGN: Partial<Record<DiffLineKind, string>> = {
+  add: "+",
+  del: "-",
+  context: " ",
+};
+
+export function buildDiffHtml(
+  diff: HighlightedDiff,
+  colors: ColorTokens,
+  syntaxTheme: HighlightTheme,
+): string {
+  const maxLine = diff.lines.reduce(
+    (max, l) => Math.max(max, l.oldLine ?? 0, l.newLine ?? 0),
+    0,
+  );
+  const col = `${String(maxLine).length}ch`;
+  const body = diff.lines
+    .map((line) => {
+      const sign = DIFF_SIGN[line.kind];
+      const attrs =
+        sign === undefined
+          ? ""
+          : ` data-old="${line.oldLine ?? ""}" data-new="${line.newLine ?? ""}" data-sign="${sign}"`;
+      return `<span class="th-line th-${line.kind}"${attrs}>${renderNodesToHtml(line.nodes)}</span>`;
+    })
+    .join("\n");
+
+  return buildPage(
+    colors,
+    syntaxTheme,
+    `
+  /* Old and new numbers sit in two hanging columns, then the sign. A line
+     that only exists on one side has an empty column, so adds and deletes
+     differ by more than color. */
+  .th-line { padding: 0 16px 0 calc(${col} * 2 + 2ch + 32px); }
+  .th-line[data-sign]::before,
+  .th-line[data-sign]::after {
+    position: absolute;
+    top: 0;
+    text-align: right;
+    color: ${colors.textMuted};
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  .th-line[data-sign]::before { content: attr(data-old); left: 8px; width: ${col}; }
+  .th-line[data-sign]::after {
+    content: attr(data-new) " " attr(data-sign);
+    left: calc(${col} + 16px);
+    width: calc(${col} + 2ch);
+  }
+  .th-add { background: ${colors.successSubtle}; box-shadow: inset 3px 0 0 ${colors.success}; }
+  .th-del { background: ${colors.dangerSubtle}; box-shadow: inset 3px 0 0 ${colors.danger}; }
+  .th-hunk, .th-meta { padding-left: 16px; color: ${colors.textMuted}; }
+  .th-hunk { background: ${colors.surfaceSecondary}; }
+  .th-meta { font-style: italic; }`,
+    `<pre class="th-code"><code>${body}</code></pre>`,
+    "",
+  );
+}
+
+/** The page around highlighted lines: theme colors, wrap toggle, layout. */
+function buildPage(
+  colors: ColorTokens,
+  syntaxTheme: HighlightTheme,
+  lineCss: string,
+  bodyHtml: string,
+  script: string,
+): string {
+  const tokenRules = themeTokenClasses
+    .map((token) => `.th-${token} { color: var(--th-${token}); }`)
+    .join("\n");
 
   return `<!DOCTYPE html>
 <html>
@@ -48,25 +149,12 @@ export function buildCodeHtml(
      white-space. */
   code { display: block; font: inherit; white-space: normal; }
 
-  /* Line numbers sit in a hanging gutter, so wrapped lines stay indented
-     under their own number. */
   .th-line {
     display: block;
     position: relative;
     min-height: 1.6em;
-    padding: 0 16px 0 calc(${gutter} + 28px);
     white-space: pre-wrap;
     overflow-wrap: anywhere;
-  }
-  .th-line::before {
-    content: attr(data-line);
-    position: absolute;
-    left: 0;
-    width: calc(${gutter} + 12px);
-    text-align: right;
-    color: ${colors.textMuted};
-    user-select: none;
-    -webkit-user-select: none;
   }
   /* ponytail: with wrap off the gutter scrolls away sideways with the code.
      A sticky gutter needs the numbers in their own column. */
@@ -77,16 +165,11 @@ export function buildCodeHtml(
     min-width: 100%;
     box-sizing: border-box;
   }
-  /* The inset bar marks the line without relying on color alone. */
-  .th-target {
-    background: ${colors.accentSubtle};
-    box-shadow: inset 3px 0 0 ${colors.accent};
-  }
-  .th-target::before { color: ${colors.accent}; }
+  ${lineCss}
 </style>
 </head>
 <body>
-${file.html}
+${bodyHtml}
 <script>
   function setWrap(on) {
     if (document.body.classList.contains('nowrap') !== on) return;
@@ -95,7 +178,7 @@ ${file.html}
     document.body.classList.toggle('nowrap', !on);
     if (anchor) anchor.scrollIntoView();
   }
-  ${scrollToTarget}
+  ${script}
 </script>
 </body>
 </html>`;
