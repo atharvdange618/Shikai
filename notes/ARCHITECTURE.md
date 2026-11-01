@@ -60,7 +60,7 @@ checkingSecurity ──pass──▶ restoringAuth ──▶ ready
 ```
 
 - `checkingSecurity` runs the native root and debugger checks in `modules/shikai-security/`. A rooted device stays blocked. A debugger or developer mode gets an "I'm a developer" override. The blocking screen runs the checks again every 10 seconds, so turning a setting off lets the user in without a restart.
-- `restoringAuth` loads the PAT and the session token from SecureStore. It then checks the token with `GET /user`. If that check fails, the app clears auth state and keeps the PAT. Routing then sends the user to sign-in.
+- `restoringAuth` loads the PAT and the session token from SecureStore in one `Promise.all`, then hands control to `ready` without waiting on GitHub. `revalidateSession()` in `lib/session.ts` checks the token with `GET /user` behind the app: a 401 clears auth state and keeps the PAT, so routing sends the user to sign-in, and anything else leaves the session alone. The profile for the first paint comes from the persisted query cache. A boot that waited on that call stalled for a network round trip (up to the 15s axios timeout) and cleared auth when it failed with no signal (D-034).
 - `ready` hands control to expo-router. `AppStack` then replaces the stack with Overview or sign-in. Hooks that open a screen at launch (`useDeepLinks`, `useNotificationTaps`) run after that replace and wait until `lastRoutedToken === token`. Otherwise the replace lands on top of the screen they opened.
 
 The reducer is a pure function with its own tests. Add new boot states there, not as effects in the layout.
