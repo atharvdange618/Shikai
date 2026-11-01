@@ -102,9 +102,16 @@ export function initSentry(): void {
 
 // Statuses GitHub sends for ordinary reasons: signed out (401), rate limit or
 // no access (403), private or deleted (404), empty repo (409), gone (410),
-// page cap (422), legal block (451). See notes/GITHUB-QUIRKS.md. 0 means no
-// response at all: offline, timeout, or cancelled.
-const EXPECTED_STATUSES = new Set([0, 401, 403, 404, 409, 410, 422, 451]);
+// page cap (422), secondary rate limit (429), legal block (451). See
+// notes/GITHUB-QUIRKS.md. 0 means no response at all: offline, timeout, or
+// cancelled.
+const EXPECTED_STATUSES = new Set([0, 401, 403, 404, 409, 410, 422, 429, 451]);
+
+// React Query retries a failed query, and several screens can share one, so a
+// single outage repeats the same failure. Send each one at most once a minute
+// to save the free event quota.
+const DEDUPE_MS = 60_000;
+const lastSent = new Map<string, number>();
 
 // Path segments safe to send as-is. Anything else (owner, repo, username, id,
 // branch, file path) becomes ":x", so the endpoint tag never names a person.
@@ -136,6 +143,13 @@ export function reportApiError(
 
   const verb = (method ?? "get").toUpperCase();
   const endpoint = apiEndpoint(url ?? "");
+
+  const key = `${verb} ${endpoint} ${status}`;
+  const now = Date.now();
+  const last = lastSent.get(key);
+  if (last !== undefined && now - last < DEDUPE_MS) return;
+  lastSent.set(key, now);
+
   Sentry.captureMessage(`GitHub ${status} on ${verb} ${endpoint}`, {
     level: "error",
     tags: { "http.status_code": String(status), endpoint },
