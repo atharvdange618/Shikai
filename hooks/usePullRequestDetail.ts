@@ -12,6 +12,7 @@ import { useInfinitePagedQuery } from "@/hooks/useInfinitePagedQuery";
 import { queryKeys } from "@/lib/query-client";
 import type { GitHubCheckConclusion } from "@/types/github.types";
 import { queryOptions, useQuery } from "@tanstack/react-query";
+import { useEffect } from "react";
 
 export function usePullRequestDetail(
   owner: string,
@@ -66,6 +67,30 @@ export function usePullRequestFiles(
   );
 
   return { files, ...rest };
+}
+
+/**
+ * One file from the PR's changed files. A diff link can name a file past the
+ * first page, so this keeps loading pages until the file turns up or the
+ * pages run out, and reports loading until then.
+ */
+export function usePullRequestFile(
+  owner: string,
+  repo: string,
+  number: number,
+  filename: string,
+) {
+  const query = usePullRequestFiles(owner, repo, number);
+  const { files, hasNextPage, isFetchingNextPage, isError, fetchNextPage } =
+    query;
+  const file = files.find((f) => f.filename === filename);
+  const searching = !file && hasNextPage && !isError;
+
+  useEffect(() => {
+    if (searching && !isFetchingNextPage) void fetchNextPage();
+  }, [searching, isFetchingNextPage, fetchNextPage]);
+
+  return { ...query, file, isLoading: query.isLoading || searching };
 }
 
 export function usePullRequestReviews(

@@ -11,7 +11,7 @@ import type { DiffSource } from "@/components/repo/DiffFileList";
 import { useTheme } from "@/constants/theme";
 import { useCommitDetail } from "@/hooks/useCommitDetail";
 import { useComparison } from "@/hooks/useComparison";
-import { usePullRequestFiles } from "@/hooks/usePullRequestDetail";
+import { usePullRequestFile } from "@/hooks/usePullRequestDetail";
 import { decodeRepoId } from "@/lib/utils";
 
 export default function DiffScreen() {
@@ -41,10 +41,11 @@ function DiffScreenContent() {
 
   // All three hooks run, but only the one matching the source is enabled. Each
   // query is already cached by the screen that pushed this one.
-  const pr = usePullRequestFiles(
+  const pr = usePullRequestFile(
     owner,
     repoName,
     params.source === "pr" ? Number(params.number) : 0,
+    filename,
   );
   const commit = useCommitDetail(
     owner,
@@ -59,13 +60,13 @@ function DiffScreenContent() {
   );
   const query =
     params.source === "pr" ? pr : params.source === "commit" ? commit : compare;
-  const files =
+  const file =
     params.source === "pr"
-      ? pr.files
-      : params.source === "commit"
-        ? commit.data?.files
-        : compare.data?.files;
-  const file = files?.find((f) => f.filename === filename);
+      ? pr.file
+      : (params.source === "commit"
+          ? commit.data?.files
+          : compare.data?.files
+        )?.find((f) => f.filename === filename);
 
   useEffect(() => {
     try {
