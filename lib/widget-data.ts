@@ -1,6 +1,7 @@
 import { getStoredToken } from "./secure-storage";
+import { reportApiError } from "./sentry";
 
-const GITHUB_API_BASE = "https://api.github.com";
+const GRAPHQL_URL = "https://api.github.com/graphql";
 
 const CONTRIBUTION_QUERY = `
   query ContributionGraph {
@@ -49,7 +50,7 @@ export async function fetchContributionsForWidget(): Promise<WidgetContributionD
   const token = await getStoredToken();
   if (!token) return null;
 
-  const response = await fetch(`${GITHUB_API_BASE}/graphql`, {
+  const response = await fetch(GRAPHQL_URL, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${token}`,
@@ -60,7 +61,12 @@ export async function fetchContributionsForWidget(): Promise<WidgetContributionD
     body: JSON.stringify({ query: CONTRIBUTION_QUERY }),
   });
 
-  if (!response.ok) return null;
+  if (!response.ok) {
+    // The widget uses fetch, not lib/axios, so the interceptor never sees
+    // this failure. See D-030.
+    reportApiError(response.status, "POST", GRAPHQL_URL);
+    return null;
+  }
 
   const json = await response.json();
 
