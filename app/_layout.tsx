@@ -38,13 +38,14 @@ import { useReviewPrompt } from "@/hooks/useReviewPrompt";
 import { useInAppUpdates } from "@/hooks/useInAppUpdates";
 import { setAuthReady } from "@/lib/axios";
 import { bootReducer, initialBootState, type BootAction } from "@/lib/boot-flow";
-import { fetchAuthenticatedUser } from "@/lib/github-rest";
 import { PERSISTENCE_MAX_AGE, mmkvPersister } from "@/lib/persister";
-import { queryClient, setupFocusManager } from "@/lib/query-client";
+import { queryClient, queryKeys, setupFocusManager } from "@/lib/query-client";
 import { getStoredPAT, getStoredToken } from "@/lib/secure-storage";
+import { revalidateSession } from "@/lib/session";
 import { useOnlineManager } from "@/lib/use-online-manager";
 import { useOTAUpdates } from "@/lib/use-ota-updates";
 import { useAuthStore } from "@/stores/auth.store";
+import type { GitHubUser } from "@/types/github.types";
 import { runSecurityChecks } from "shikai-security";
 import * as Sentry from "@sentry/react-native";
 
@@ -116,10 +117,11 @@ export default Sentry.wrap(function RootLayout() {
 
   const fontsReady = Boolean(fontsLoaded || fontError);
 
-  // Security check runs first, independent of auth boot, so a blocked
-  // device never gets its stored token restored or used.
+  // Runs on mount, independent of fonts and of auth boot, so a blocked device
+  // never gets its stored token restored or used. Fonts only decide when text
+  // can paint, so they must not sit in front of this.
   useEffect(() => {
-    if (!fontsReady || state.phase !== "checkingSecurity") return;
+    if (state.phase !== "checkingSecurity") return;
 
     runSecurityChecks().then((result) => {
       if (result.isBlocked) {
@@ -132,33 +134,44 @@ export default Sentry.wrap(function RootLayout() {
         dispatch({ type: "SECURITY_PASSED" });
       }
     });
-  }, [fontsReady, state.phase]);
+  }, [state.phase]);
 
   useEffect(() => {
     if (state.phase !== "restoringAuth") return;
 
     async function boot() {
+      let hasSession = false;
+
       try {
-        const storedPAT = await getStoredPAT();
+        // Both are Keystore round trips, so read them together.
+        const [storedPAT, storedToken] = await Promise.all([
+          getStoredPAT(),
+          getStoredToken(),
+        ]);
+
         if (storedPAT) setPat(storedPAT);
 
-        const storedToken = await getStoredToken();
         if (storedToken) {
-          try {
-            useAuthStore.getState().setToken(storedToken);
-            const user = await fetchAuthenticatedUser();
-            setUser(user);
-          } catch {
-            useAuthStore.getState().clearAuth();
-            if (storedPAT) setPat(storedPAT);
-          }
+          hasSession = true;
+          useAuthStore.getState().setToken(storedToken);
+
+          // Best effort: the persisted query cache may still be restoring. The
+          // profile only feeds the greeting; useUser() covers the rest.
+          const cached = queryClient.getQueryData<GitHubUser>(queryKeys.user());
+          if (cached) setUser(cached);
         }
       } catch {
-        // No stored token - routing handles sending user to sign-in
+        // Storage failed. Routing sends the user to sign-in.
       } finally {
+        // Boot ends here, not on a network round trip. GET /user can take up
+        // to the axios timeout, and a splash is the wrong place to wait.
         dispatch({ type: "AUTH_RESTORE_COMPLETE" });
         setAuthReady(true);
       }
+
+      // Checked after the app is already on screen. A 401 signs out, anything
+      // else leaves the session as restored.
+      if (hasSession) void revalidateSession(queryClient);
     }
 
     if (!useAuthStore.getState().token) {
@@ -170,12 +183,6 @@ export default Sentry.wrap(function RootLayout() {
   }, [state.phase, setPat, setUser]);
 
   const bootPhaseComplete = state.phase === "blocked" || state.phase === "ready";
-
-  useEffect(() => {
-    if (fontsReady && bootPhaseComplete) {
-      SplashScreen.hideAsync();
-    }
-  }, [fontsReady, bootPhaseComplete]);
 
   const appReady = fontsReady && bootPhaseComplete;
 

@@ -1,5 +1,6 @@
-import { useEffect } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { Image, StyleSheet, useColorScheme } from "react-native";
+import * as SplashScreen from "expo-splash-screen";
 import Animated, {
   Easing,
   runOnJS,
@@ -25,6 +26,16 @@ export function AnimatedSplashScreen({
   const logoOpacity = useSharedValue(0);
   const logoScale = useSharedValue(0.3);
   const containerOpacity = useSharedValue(1);
+
+  // The native splash is only there to cover the gap before this view paints.
+  // Handing over on the first layout means the logo animation runs while boot
+  // finishes, instead of a frozen image sitting on top of a static one.
+  const nativeSplashHidden = useRef(false);
+  const hideNativeSplash = useCallback(() => {
+    if (nativeSplashHidden.current) return;
+    nativeSplashHidden.current = true;
+    SplashScreen.hideAsync();
+  }, []);
 
   useEffect(() => {
     logoOpacity.value = withTiming(1, {
@@ -83,6 +94,7 @@ export function AnimatedSplashScreen({
 
   return (
     <Animated.View
+      onLayout={hideNativeSplash}
       style={[
         styles.container,
         { backgroundColor: isDark ? "#0D1117" : "#FAF9F6" },

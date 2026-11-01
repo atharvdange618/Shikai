@@ -6,7 +6,17 @@ const m = vi.hoisted(() => ({
   deletePAT: vi.fn(),
   getStoredPAT: vi.fn(),
   fetchPATOwner: vi.fn(),
+  fetchAuthenticatedUser: vi.fn(),
   clearAllMMKV: vi.fn(),
+  GitHubApiError: class GitHubApiError extends Error {
+    constructor(
+      public status: number,
+      message: string,
+    ) {
+      super(message);
+      this.name = "GitHubApiError";
+    }
+  },
 }));
 
 vi.mock("@/lib/secure-storage", () => ({
@@ -14,10 +24,15 @@ vi.mock("@/lib/secure-storage", () => ({
   deletePAT: m.deletePAT,
   getStoredPAT: m.getStoredPAT,
 }));
-vi.mock("@/lib/github-rest", () => ({ fetchPATOwner: m.fetchPATOwner }));
+vi.mock("@/lib/github-rest", () => ({
+  fetchPATOwner: m.fetchPATOwner,
+  fetchAuthenticatedUser: m.fetchAuthenticatedUser,
+}));
 vi.mock("@/lib/mmkv", () => ({ clearAllMMKV: m.clearAllMMKV }));
+vi.mock("@/lib/axios", () => ({ GitHubApiError: m.GitHubApiError }));
+vi.mock("@/lib/query-client", () => ({ queryKeys: { user: () => ["user"] } }));
 
-import { restorePATFor, signOut } from "@/lib/session";
+import { revalidateSession, restorePATFor, signOut } from "@/lib/session";
 import { useAuthStore } from "@/stores/auth.store";
 
 beforeEach(() => {
@@ -55,6 +70,49 @@ describe("signOut", () => {
     expect(useAuthStore.getState()).toMatchObject({ token: null, user: null, pat: null });
     expect(queryClient.clear).toHaveBeenCalled();
     expect(m.clearAllMMKV).toHaveBeenCalled();
+  });
+});
+
+describe("revalidateSession", () => {
+  const user = { login: "octocat" } as never;
+  const client = (fetchQuery: unknown) =>
+    ({ fetchQuery }) as unknown as QueryClient;
+
+  beforeEach(() => {
+    useAuthStore.setState({ token: "t", user: null, pat: null });
+  });
+
+  it("forces a round trip and stores the profile it returns", async () => {
+    const fetchQuery = vi.fn().mockResolvedValue(user);
+    await revalidateSession(client(fetchQuery));
+
+    expect(fetchQuery).toHaveBeenCalledWith(
+      expect.objectContaining({ queryKey: ["user"], staleTime: 0 }),
+    );
+    expect(useAuthStore.getState().user).toBe(user);
+  });
+
+  it("signs out when GitHub rejects the token", async () => {
+    const fetchQuery = vi
+      .fn()
+      .mockRejectedValue(new m.GitHubApiError(401, "Bad credentials"));
+
+    await revalidateSession(client(fetchQuery));
+
+    expect(useAuthStore.getState().token).toBeNull();
+  });
+
+  it("keeps the session when the check can't reach GitHub", async () => {
+    // Status 0 is offline, a timeout or a cancelled request (lib/sentry.ts).
+    // Boot used to clear auth on it, so opening the app without signal signed
+    // the user out.
+    const fetchQuery = vi
+      .fn()
+      .mockRejectedValue(new m.GitHubApiError(0, "Network Error"));
+
+    await revalidateSession(client(fetchQuery));
+
+    expect(useAuthStore.getState().token).toBe("t");
   });
 });
 
