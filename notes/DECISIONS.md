@@ -124,7 +124,7 @@ Entries D-001 to D-021 were backfilled on 2026-10-15 from commits, the changelog
 
 ## D-012: No @pierre/diffs or @pierre/trees
 
-**Date:** 2026-09-28 · **Status:** Accepted
+**Date:** 2026-09-28 · **Status:** Superseded by D-031
 
 **Context.** Both libraries look good, but they need `react-dom` and shadow DOM, so they only run inside a WebView.
 **Decision.** Keep the native diff view (a `diff` fence in `MarkdownRenderer`) and the `FlashList` file tree.
@@ -303,3 +303,12 @@ Entries D-001 to D-021 were backfilled on 2026-10-15 from commits, the changelog
 **Rejected.** Reporting every 4xx: a 404 on a private repo or a 403 on the rate limit happens daily and would bury real problems and spend the free event quota. Sending the raw URL: it carries usernames, against the no-PII rule in `lib/sentry.ts`. Reporting from `QueryCache.onError`, which fires once after retries: it doesn't see the method or URL, and it misses calls made outside React Query, such as the background poller.
 **Consequences.** A deprecation that answers with an expected status (say 404 or 410) stays invisible. A new endpoint whose path words are missing from `ENDPOINT_WORDS` groups less precisely but never leaks. Event counts undercount an outage: a minute of failures on one endpoint shows as one event. The dedupe lives in memory, so a restart clears it. `initSentry()` runs in `index.ts`, not `app/_layout.tsx`, because a headless WorkManager run never loads the layout; until 2026-11-01 that meant a 5xx from the poller went nowhere. The widget fetches with `fetch`, not the axios instance, so `lib/widget-data.ts` calls `reportApiError()` itself on a non-OK response; until 2026-11-01 a widget 5xx went nowhere. GraphQL errors inside a 200 still go unreported there.
 **Revisit if.** GitHub starts answering deprecated endpoints with a status in the skip list.
+
+## D-031: Diffs highlight on device and open full screen
+
+**Date:** 2026-11-01 · **Status:** Accepted
+
+**Context.** Testing showed PR, commit and compare diffs still used the old `MarkdownRenderer` code card after D-025 moved code files to `CodeViewer`, and each expanded file cost a GitHub `/markdown` round trip. This is the complaint D-012 said would reopen diffs.
+**Decision.** `highlightDiff()` in `lib/highlight.ts` parses a patch, strips the signs and highlights each hunk in the file's language. A file row in `DiffFileList` opens `repo/[repoId]/diff`, which shows the patch in `CodeViewer`'s diff mode (`buildDiffHtml`): old and new line numbers, a sign column, and Wrap and Copy. The screen gets only the file name and source in its params and reads the patch back from the cached PR, commit or compare query, so a large patch never goes through the URL. Review thread hunks render natively in `components/repo/DiffHunk.tsx`, so a long thread list doesn't open one WebView per thread.
+**Rejected.** Inline diffs with one auto-height WebView per file: cramped width and nested scrolling. `@pierre/diffs` stays rejected for D-012's reasons.
+**Consequences.** Diff colors now match code files. A diff over 5000 lines or 200,000 characters loses colors, same as files. The PR diff list still shows only the first 30 files GitHub returns.
