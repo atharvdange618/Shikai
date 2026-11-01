@@ -21,6 +21,14 @@ describe("redirectSystemPath", () => {
     expect(redirectSystemPath({ path, initial: true })).toBe("");
   });
 
+  // The dev client loads the bundle itself and the path is not a route, so
+  // routing it showed "Page not found".
+  it.each([true, false])("drops the dev client link (initial: %s)", (initial) => {
+    const path =
+      "shikai://expo-development-client/?url=http%3A%2F%2F10.0.0.2%3A8081";
+    expect(redirectSystemPath({ path, initial })).toBe("");
+  });
+
   const githubLinks = [
     "https://github.com/facebook/react/blob/main/README.md#L10",
     "https://www.github.com/facebook/react?code=1",

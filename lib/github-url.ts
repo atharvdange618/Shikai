@@ -10,13 +10,22 @@ export const isOAuthRedirect = (url: string): boolean =>
   url.startsWith("shikai:") && /[?&]code=/.test(url);
 
 /**
+ * The dev client opens the app with `shikai://expo-development-client/?url=…`.
+ * It loads the bundle natively and is not a route, so the router must not
+ * navigate to it.
+ */
+export const isDevClientUrl = (url: string): boolean =>
+  url.startsWith("shikai://expo-development-client");
+
+/**
  * The router path for an in-app `shikai://` link, e.g.
  * `shikai://repo/a~~b/diff?…` → `/repo/a~~b/diff?…`. Null for other URLs, the
- * bare scheme, and the OAuth redirect, which sign-in handles itself.
+ * bare scheme, the OAuth redirect, which sign-in handles itself, and the dev
+ * client link, which has no route.
  */
 export function appLinkPath(url: string): string | null {
   const rest = /^shikai:\/\/\/?(.+)$/.exec(url)?.[1];
-  if (!rest || isOAuthRedirect(url)) return null;
+  if (!rest || isOAuthRedirect(url) || isDevClientUrl(url)) return null;
   return `/${rest}`;
 }
 

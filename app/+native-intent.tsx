@@ -1,4 +1,9 @@
-import { appLinkPath, isGitHubUrl, isOAuthRedirect } from "@/lib/github-url";
+import {
+  appLinkPath,
+  isDevClientUrl,
+  isGitHubUrl,
+  isOAuthRedirect,
+} from "@/lib/github-url";
 
 // The OAuth redirect (shikai://?code=...) maps to the blank index route. On a
 // warm start, letting the router navigate there buries the sign-in screen, so
@@ -14,7 +19,9 @@ import { appLinkPath, isGitHubUrl, isOAuthRedirect } from "@/lib/github-url";
 //
 // Cold-start shikai:// links go the same way. Left to the router, they become
 // the first screen and AppStack's boot replace to overview throws them away.
-// Warm ones pass through, since the router opens those itself.
+// Warm ones pass through, since the router opens those itself. The dev client's
+// `shikai://expo-development-client/?url=…` is not a route at all: navigating
+// to it showed "Page not found", on warm and cold starts alike.
 export function redirectSystemPath({
   path,
   initial,
@@ -23,6 +30,7 @@ export function redirectSystemPath({
   initial: boolean;
 }): string {
   if (isGitHubUrl(path)) return "";
+  if (isDevClientUrl(path)) return "";
   if (!initial && isOAuthRedirect(path)) return "";
   if (initial && appLinkPath(path)) return "";
   return path;
