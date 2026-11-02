@@ -112,6 +112,7 @@ Deeper docs: `notes/ARCHITECTURE.md` (data flow, token rules, background work) a
 - **Pull-to-refresh**: Use `PullToRefresh` from `components/shared/PullToRefresh`. A bare `RefreshControl` takes its tray color from the Android platform theme, so a dark app on a light-mode phone draws a white circle.
 - **Code and diffs**: Both render through `components/file/CodeViewer.tsx`, colored on device by `lib/highlight.ts` with the page built by `lib/file-html.ts`. Never send code or patches to GitHub's `/markdown` for coloring.
 - **Animations**: `react-native-reanimated` for all animations and gesture-driven interactions.
+- **Android Modals**: No `zIndex` or `elevation` inside a `Modal`: the shadow shows through the dimmed backdrop as a pale column (`126a254`). Don't slide a bottom sheet in with a Reanimated `entering` animation either: the Modal lays out short and then grows, the animation keeps the first frame, and the sheet floats above the bottom edge. Drive `translateY` with a shared value instead (`8d2f657`). `navigationBarTranslucent` and `statusBarTranslucent` do nothing here, since RN forces both on under edge-to-edge.
 - **No iOS**: Android-only app. The `ios` folder is gitignored.
 - **New Architecture**: Enabled (`newArchEnabled: true` in `app.config.ts`).
 - **React Compiler**: Enabled (`reactCompiler: true` in `app.config.ts` experiments).
@@ -133,7 +134,7 @@ See `notes/MAINTENANCE.md` for the upgrade schedule, the release steps, and the 
 
 ## Token & Auth Flow
 
-OAuth uses PKCE flow. Tokens are stored in `expo-secure-store` (Keychain/Keystore) via `lib/secure-storage.ts`. PATs (optional, for notifications, alerts, issue search, Your work, and stargazers) use the same storage. Signing out from Settings (`signOut()` in `lib/session.ts`) deletes both. A 401 mid-session or a failed token check at boot only clears auth state and keeps the PAT, so sign-in restores it through `restorePATFor()`, which checks the PAT's `/user` login against the account signing in and deletes it on a mismatch or when it can't confirm the owner. Auth state is managed in `stores/auth.store.ts`. On boot, `app/_layout.tsx` restores tokens from SecureStore and validates them. On 401, the axios interceptor calls `clearAuth()`.
+OAuth uses PKCE flow. Tokens are stored in `expo-secure-store` (Keychain/Keystore) via `lib/secure-storage.ts`. PATs (optional, for notifications, alerts, issue search, Your work, and stargazers) use the same storage. Signing out from Settings (`signOut()` in `lib/session.ts`) deletes both. A 401 mid-session or from the boot token check only clears auth state and keeps the PAT, so sign-in restores it through `restorePATFor()`, which checks the PAT's `/user` login against the account signing in and deletes it on a mismatch or when it can't confirm the owner. Auth state is managed in `stores/auth.store.ts`. On boot, `app/_layout.tsx` restores tokens from SecureStore and finishes without waiting on GitHub; `revalidateSession()` in `lib/session.ts` then checks the token with `GET /user` in the background, and only a 401 signs the user out (D-034). On 401, the axios interceptor calls `clearAuth()`.
 
 ## Caching
 
