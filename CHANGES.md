@@ -1,6 +1,6 @@
 # Changelog
 
-## v1.7.0 (unreleased)
+## v1.7.0 (November 2, 2026)
 
 Needs a new store build: adds the `expo-store-review` native module, and the lockfile moves `expo` to 54.0.38.
 
