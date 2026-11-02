@@ -28,7 +28,6 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   icon: "./assets/images/icon.png",
   scheme: "shikai",
   userInterfaceStyle: "automatic",
-  newArchEnabled: true,
   ios: {
     supportsTablet: true,
     bundleIdentifier: "com.atharvdange618.Shikai",
@@ -38,7 +37,6 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       backgroundColor: "#FAF9F6",
       foregroundImage: "./assets/images/adaptive-icon.png",
     },
-    edgeToEdgeEnabled: true,
     predictiveBackGestureEnabled: false,
     package: "com.atharvdange618.Shikai",
     versionCode: 11,
