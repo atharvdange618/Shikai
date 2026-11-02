@@ -1,5 +1,5 @@
 import { Octicons } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation } from "expo-router/react-navigation";
 import React, {
   createContext,
   useCallback,
@@ -289,7 +289,7 @@ export function InfoDot({
 
 const s = StyleSheet.create({
   overlay: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     zIndex: ZIndex.tooltip - 1,
   },
   container: {

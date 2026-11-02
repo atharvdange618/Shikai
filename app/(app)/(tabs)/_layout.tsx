@@ -1,7 +1,7 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { Tabs } from "expo-router";
 import { useEffect, useMemo } from "react";
-import { View } from "react-native";
+import { type ColorValue, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ErrorBoundary } from "@/components/ErrorBoundary";
@@ -24,7 +24,7 @@ const renderOverviewIcon = ({
   size,
   focused,
 }: {
-  color: string;
+  color: ColorValue;
   size: number;
   focused: boolean;
 }) => (
@@ -42,7 +42,7 @@ const renderReposIcon = ({
   size,
   focused,
 }: {
-  color: string;
+  color: ColorValue;
   size: number;
   focused: boolean;
 }) => <TabBarIcon name="repo" color={color} size={size} focused={focused} />;
@@ -52,7 +52,7 @@ const renderSearchIcon = ({
   size,
   focused,
 }: {
-  color: string;
+  color: ColorValue;
   size: number;
   focused: boolean;
 }) => <TabBarIcon name="search" color={color} size={size} focused={focused} />;
@@ -62,7 +62,7 @@ const renderNotificationsIcon = ({
   size,
   focused,
 }: {
-  color: string;
+  color: ColorValue;
   size: number;
   focused: boolean;
 }) => (
@@ -80,7 +80,7 @@ const renderProfileIcon = ({
   size,
   focused,
 }: {
-  color: string;
+  color: ColorValue;
   size: number;
   focused: boolean;
 }) => (
