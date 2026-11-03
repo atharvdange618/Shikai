@@ -73,7 +73,7 @@
     "expo-web-browser": "~58.0.7",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
-    "react-native": "^0.88.1",
+    "react-native": "0.88.1",
     "react-native-android-widget": "^0.20.3",
     "react-native-blob-util": "^0.24.10",
     "react-native-gesture-handler": "~3.3.0",
@@ -99,6 +99,9 @@
     "wrangler": "^4.88.0"
   },
   "private": true,
+  "overrides": {
+    "react-native": "0.88.1"
+  },
   "allowScripts": {
     "@sentry/cli@2.55.0": true,
     "@sentry/cli@2.58.4": true,
