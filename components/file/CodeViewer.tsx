@@ -75,11 +75,12 @@ export function CodeViewer({
 
   // Highlighting blocks the JS thread, so let the loading state paint first.
   // It runs outside render, where the screen's ErrorBoundary can't catch a
-  // throw, so catch it here.
+  // throw, so catch it here. The reset runs inside the timeout, not in the
+  // effect body, so highlighting a new file never cascades an extra render.
   useEffect(() => {
-    setFile(null);
-    setFailed(false);
     const id = setTimeout(() => {
+      setFile(null);
+      setFailed(false);
       try {
         setFile(
           diff

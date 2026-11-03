@@ -1,7 +1,7 @@
 import { Tooltip } from "@/components/shared/Tooltip";
 import { Octicons } from "@expo/vector-icons";
 import { useMemo } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 
 import {
   type ColorTokens,
@@ -58,9 +58,7 @@ export function ContributionStatsRow({ stats }: Props) {
         <View style={s.labelRow}>
           <Text style={s.label}>Day streak</Text>
           <Tooltip content={STAT_INFO.streak} align="left">
-            <Pressable hitSlop={19}>
-              <Octicons name="info" size={10} color={colors.textMuted} />
-            </Pressable>
+            <Octicons name="info" size={10} color={colors.textMuted} />
           </Tooltip>
         </View>
         {stats.longestStreak > 0 && (
@@ -91,9 +89,7 @@ export function ContributionStatsRow({ stats }: Props) {
         <View style={s.labelRow}>
           <Text style={s.label}>Best streak</Text>
           <Tooltip content={STAT_INFO.best} align="center">
-            <Pressable hitSlop={19}>
-              <Octicons name="info" size={10} color={colors.textMuted} />
-            </Pressable>
+            <Octicons name="info" size={10} color={colors.textMuted} />
           </Tooltip>
         </View>
       </View>
@@ -109,9 +105,7 @@ export function ContributionStatsRow({ stats }: Props) {
         <View style={s.labelRow}>
           <Text style={s.label}>Most active</Text>
           <Tooltip content={STAT_INFO.active} align="right">
-            <Pressable hitSlop={19}>
-              <Octicons name="info" size={10} color={colors.textMuted} />
-            </Pressable>
+            <Octicons name="info" size={10} color={colors.textMuted} />
           </Tooltip>
         </View>
       </View>

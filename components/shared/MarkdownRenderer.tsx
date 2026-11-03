@@ -4,7 +4,7 @@ import { parseGitHubUrl } from "@/lib/github-url";
 import { resolveMarkdownLink } from "@/lib/markdown-links";
 import * as Clipboard from "expo-clipboard";
 import { useRouter, type Href } from "expo-router";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   Animated,
   Linking,
@@ -508,7 +508,7 @@ export function MarkdownRenderer({
   const router = useRouter();
   const [html, setHtml] = useState<string | null>(null);
   const [height, setHeight] = useState(300);
-  const opacity = useRef(new Animated.Value(0)).current;
+  const [opacity] = useState(() => new Animated.Value(0));
 
   useEffect(() => {
     let cancelled = false;

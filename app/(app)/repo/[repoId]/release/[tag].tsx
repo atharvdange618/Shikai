@@ -308,8 +308,8 @@ function AssetActionMenu({
 
   useEffect(() => {
     if (!target) return;
-    slide.value = 400;
-    slide.value = withTiming(0, { duration: 220 });
+    slide.set(400);
+    slide.set(withTiming(0, { duration: 220 }));
   }, [target, slide]);
 
   if (!target) return null;

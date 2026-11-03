@@ -5,6 +5,7 @@ import React, {
   useCallback,
   useContext,
   useEffect,
+  useId,
   useRef,
   useState,
 } from "react";
@@ -35,8 +36,6 @@ interface TooltipContextValue {
 }
 
 const TooltipContext = createContext<TooltipContextValue | null>(null);
-
-let nextId = 0;
 
 export function TooltipProvider({ children }: { children: React.ReactNode }) {
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -71,16 +70,16 @@ export function TooltipProvider({ children }: { children: React.ReactNode }) {
 
 interface TooltipProps {
   content: string;
-  children: React.ReactElement<any>;
+  children: React.ReactNode;
   align?: "left" | "center" | "right";
 }
 
 export function Tooltip({ content, children, align = "left" }: TooltipProps) {
   const { colors, isDark } = useTheme();
   const shadows = isDark ? {} : Shadows.light.md;
-  const idRef = useRef(`tooltip-${++nextId}`);
+  const id = useId();
   const ctx = useContext(TooltipContext);
-  const visible = ctx ? ctx.activeId === idRef.current : false;
+  const visible = ctx ? ctx.activeId === id : false;
   const { width: screenWidth } = useWindowDimensions();
 
   const containerRef = useRef<ViewInstance>(null);
@@ -102,11 +101,11 @@ export function Tooltip({ content, children, align = "left" }: TooltipProps) {
   const toggle = useCallback(() => {
     if (!ctx) return;
     if (visible) {
-      ctx.unregister(idRef.current);
+      ctx.unregister(id);
     } else {
-      ctx.register(idRef.current);
+      ctx.register(id);
     }
-  }, [ctx, visible]);
+  }, [ctx, visible, id]);
 
   const tooltipWidth = 250;
   const padding = 16;
@@ -140,9 +139,9 @@ export function Tooltip({ content, children, align = "left" }: TooltipProps) {
 
   return (
     <View ref={containerRef} style={s.container}>
-      {React.cloneElement(children, {
-        onPress: toggle,
-      })}
+      <Pressable onPress={toggle} hitSlop={19}>
+        {children}
+      </Pressable>
       {visible && (
         <View
           style={[
@@ -176,9 +175,9 @@ export function InfoDot({
 }: InfoDotProps) {
   const { colors, isDark } = useTheme();
   const shadows = isDark ? {} : Shadows.light.md;
-  const idRef = useRef(`infodot-${++nextId}`);
+  const id = useId();
   const ctx = useContext(TooltipContext);
-  const visible = ctx ? ctx.activeId === idRef.current : false;
+  const visible = ctx ? ctx.activeId === id : false;
   const { width: screenWidth } = useWindowDimensions();
 
   const containerRef = useRef<ViewInstance>(null);
@@ -256,9 +255,9 @@ export function InfoDot({
         onPress={() => {
           if (!ctx) return;
           if (visible) {
-            ctx.unregister(idRef.current);
+            ctx.unregister(id);
           } else {
-            ctx.register(idRef.current);
+            ctx.register(id);
           }
         }}
       >

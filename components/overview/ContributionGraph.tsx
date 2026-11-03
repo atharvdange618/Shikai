@@ -1,5 +1,5 @@
 import { Octicons } from "@expo/vector-icons";
-import { useCallback, useMemo, useRef } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import {
   ScrollView,
   StyleSheet,
@@ -102,6 +102,12 @@ export function ContributionGraph({
 
   const s = useMemo(() => buildStyles(colors), [colors]);
 
+  // Captured once on mount: the staleness label only needs to know whether
+  // the data was already old when this screen opened.
+  const [mountedAt] = useState(() => Date.now());
+  const isStale =
+    dataUpdatedAt != null && mountedAt - dataUpdatedAt > 1000 * 60 * 5;
+
   if (isLoading) {
     return <ContributionGraphSkeleton colors={colors} />;
   }
@@ -158,12 +164,11 @@ export function ContributionGraph({
           <Text style={s.totalCount}>
             {totalContributions.toLocaleString()} this year
           </Text>
-          {dataUpdatedAt != null &&
-            Date.now() - dataUpdatedAt > 1000 * 60 * 5 && (
-              <Text style={s.updatedAgo}>
-                Updated {formatRelativeTime(dataUpdatedAt)}
-              </Text>
-            )}
+          {dataUpdatedAt != null && isStale && (
+            <Text style={s.updatedAgo}>
+              Updated {formatRelativeTime(dataUpdatedAt)}
+            </Text>
+          )}
         </View>
       </View>
 

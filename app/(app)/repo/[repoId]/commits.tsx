@@ -58,11 +58,11 @@ export default function CommitsScreen() {
     repoName,
   );
 
-  useEffect(() => {
-    if (repo?.default_branch && !selectedBranch) {
-      setSelectedBranch(repo.default_branch);
-    }
-  }, [repo?.default_branch, selectedBranch]);
+  // Default to the repo's default branch until the user picks one. Set
+  // during render, not in an effect, so it never cascades an extra render.
+  if (repo?.default_branch && !selectedBranch) {
+    setSelectedBranch(repo.default_branch);
+  }
 
   useEffect(() => {
     if (!isFileHistory) return;

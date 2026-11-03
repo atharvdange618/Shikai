@@ -72,9 +72,14 @@ function OTAUpdateEffects() {
   const { updateReady, reload } = useOTAUpdates();
 
   const alertRef = useRef(alert);
-  alertRef.current = alert;
   const reloadRef = useRef(reload);
-  reloadRef.current = reload;
+
+  useEffect(() => {
+    alertRef.current = alert;
+  }, [alert]);
+  useEffect(() => {
+    reloadRef.current = reload;
+  }, [reload]);
 
   useEffect(() => {
     if (!updateReady) return;

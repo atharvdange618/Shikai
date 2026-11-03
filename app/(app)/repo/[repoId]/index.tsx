@@ -168,7 +168,7 @@ export default function RepoDetailsScreen() {
     await Clipboard.setStringAsync(lastCommit.sha);
     setCopiedHash(true);
     setTimeout(() => setCopiedHash(false), 2000);
-  }, [lastCommit?.sha]);
+  }, [lastCommit, setCopiedHash]);
 
   const handleCommitsPress = useCallback(() => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -226,7 +226,7 @@ export default function RepoDetailsScreen() {
     await Clipboard.setStringAsync(repo.html_url);
     setCopiedUrl(true);
     setTimeout(() => setCopiedUrl(false), 2000);
-  }, [repo?.html_url]);
+  }, [repo]);
 
   const handleIssuesPress = useCallback(() => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -329,10 +329,10 @@ export default function RepoDetailsScreen() {
       const y = e.nativeEvent.contentOffset.y;
       if (y > 300 && !hasScrolledPast.current) {
         hasScrolledPast.current = true;
-        chevronOpacity.value = withTiming(0, { duration: 300 });
+        chevronOpacity.set(withTiming(0, { duration: 300 }));
       } else if (y <= 50 && hasScrolledPast.current) {
         hasScrolledPast.current = false;
-        chevronOpacity.value = withTiming(1, { duration: 300 });
+        chevronOpacity.set(withTiming(1, { duration: 300 }));
       }
     },
     [chevronOpacity],

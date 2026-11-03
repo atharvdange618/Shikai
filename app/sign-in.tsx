@@ -267,10 +267,10 @@ export default function SignInScreen() {
   }));
 
   function handlePressIn() {
-    buttonScale.value = withSpring(0.97, { damping: 15, stiffness: 400 });
+    buttonScale.set(withSpring(0.97, { damping: 15, stiffness: 400 }));
   }
   function handlePressOut() {
-    buttonScale.value = withSpring(1.0, { damping: 15, stiffness: 400 });
+    buttonScale.set(withSpring(1.0, { damping: 15, stiffness: 400 }));
   }
 
   const handleSignIn = useCallback(async () => {

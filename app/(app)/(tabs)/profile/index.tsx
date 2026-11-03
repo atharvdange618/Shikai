@@ -107,6 +107,7 @@ export default function ProfileScreen() {
   const { data: recentRepos, isLoading: reposLoading } = useUserProfileRepos(
     user?.login ?? "",
   );
+  const login = user?.login;
 
   const links = buildLinks(
     user,
@@ -132,13 +133,13 @@ export default function ProfileScreen() {
 
   const openUserList = useCallback(
     (list: "followers" | "following") => {
-      if (!user?.login) return;
+      if (!login) return;
       router.push({
         pathname: `/(app)/user/[username]/${list}`,
-        params: { username: user.login },
+        params: { username: login },
       });
     },
-    [router, user?.login],
+    [router, login],
   );
 
   const s = useMemo(() => buildStyles(colors, shadows), [colors, shadows]);
