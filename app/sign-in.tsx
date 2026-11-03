@@ -8,6 +8,7 @@ import {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ComponentProps,
 } from "react";
@@ -82,6 +83,10 @@ const FEATURES: {
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
+// Completes any lingering auth session when the app returns from the browser
+// (Android cold start). Must run at module load for openAuthSessionAsync.
+WebBrowser.maybeCompleteAuthSession();
+
 export default function SignInScreen() {
   const { colors, isDark } = useTheme();
   const shadows = useMemo(() => (isDark ? {} : Shadows.light.md), [isDark]);
@@ -107,6 +112,19 @@ export default function SignInScreen() {
   }, []);
 
   const redirectUri = makeRedirectUri({ scheme: "shikai" });
+
+  // The OAuth redirect fires both as a Linking event and as the
+  // openAuthSessionAsync result. Without this guard the code gets exchanged
+  // twice and the second exchange fails because GitHub codes are single-use.
+  const processingCodeRef = useRef<string | null>(null);
+
+  // Warm the Custom Tab so the GitHub page opens fast.
+  useEffect(() => {
+    WebBrowser.warmUpAsync().catch(() => {});
+    return () => {
+      WebBrowser.coolDownAsync().catch(() => {});
+    };
+  }, []);
 
   // Shared tail for every sign-in path: persist the token, restore any stored
   // PAT, seed the caches, and refresh the widget.
@@ -160,6 +178,8 @@ export default function SignInScreen() {
 
   const completeAuth = useCallback(
     async (code: string, codeVerifier: string) => {
+      if (processingCodeRef.current === code) return;
+      processingCodeRef.current = code;
       const { setLoading, setError, setNeedsInstall, setPendingToken } =
         useSignInStore.getState();
 
@@ -226,6 +246,8 @@ export default function SignInScreen() {
         setError("Something went wrong. Check your connection and try again.");
         setLoading(false);
         await clearPendingAuth();
+      } finally {
+        processingCodeRef.current = null;
       }
     },
     [redirectUri, finalizeSession],
@@ -311,13 +333,40 @@ export default function SignInScreen() {
         `&code_challenge=${codeChallenge}` +
         `&code_challenge_method=S256`;
 
-      await Linking.openURL(authUrl);
+      // Auth session (Custom Tab) dismisses itself on redirect, unlike
+      // Linking.openURL which left the Chrome tab open behind the app.
+      const result = await WebBrowser.openAuthSessionAsync(
+        authUrl,
+        redirectUri,
+      );
+
+      if (result.type !== "success") {
+        setLoading(false);
+        await clearPendingAuth();
+        return;
+      }
+
+      const parsed = Linking.parse(result.url);
+      const rawCode = parsed.queryParams?.code;
+      const receivedCode = Array.isArray(rawCode) ? rawCode[0] : rawCode;
+      if (!receivedCode || typeof receivedCode !== "string") {
+        // The Linking listener may already be handling this redirect; if it
+        // cleared the pending auth, it owns the exchange.
+        const stillPending = await getPendingAuth();
+        if (!stillPending) return;
+        setError("Could not get access token. Please try again.");
+        setLoading(false);
+        await clearPendingAuth();
+        return;
+      }
+
+      await completeAuth(receivedCode, codeVerifier);
     } catch {
       setError("Something went wrong. Check your connection and try again.");
       setLoading(false);
       await clearPendingAuth();
     }
-  }, [redirectUri]);
+  }, [redirectUri, completeAuth]);
 
   const handleInstall = useCallback(async () => {
     const { setLoading, setError, setNeedsInstall, setPendingToken } =
