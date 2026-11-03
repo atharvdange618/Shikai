@@ -2,7 +2,7 @@
 
 # Shikai - Agent Guide
 
-Read-only GitHub companion for Android. React Native + Expo SDK 54, expo-router, TypeScript strict mode.
+Read-only GitHub companion for Android. React Native + Expo SDK 58, expo-router, TypeScript strict mode.
 
 ## Commands
 
@@ -114,7 +114,7 @@ Deeper docs: `notes/ARCHITECTURE.md` (data flow, token rules, background work) a
 - **Animations**: `react-native-reanimated` for all animations and gesture-driven interactions.
 - **Android Modals**: No `zIndex` or `elevation` inside a `Modal`: the shadow shows through the dimmed backdrop as a pale column (`126a254`). Don't slide a bottom sheet in with a Reanimated `entering` animation either: the Modal lays out short and then grows, the animation keeps the first frame, and the sheet floats above the bottom edge. Drive `translateY` with a shared value instead (`8d2f657`). `navigationBarTranslucent` and `statusBarTranslucent` do nothing here, since RN forces both on under edge-to-edge.
 - **No iOS**: Android-only app. The `ios` folder is gitignored.
-- **New Architecture**: Enabled (`newArchEnabled: true` in `app.config.ts`).
+- **New Architecture**: The only option since SDK 55; there is no flag to turn it off.
 - **React Compiler**: Enabled (`reactCompiler: true` in `app.config.ts` experiments).
 - **Typed Routes**: Enabled (`typedRoutes: true` in `app.config.ts` experiments).
 
@@ -125,7 +125,7 @@ See `notes/MAINTENANCE.md` for the upgrade schedule, the release steps, and the 
 - Custom gradle changes belong in a config plugin under `plugins/`, never in hand edits to `android/`, which prebuild regenerates. A plugin that can't find its anchor in Expo's template throws during prebuild; update the plugin's regex after an SDK upgrade.
 - Local release builds (`assembleRelease`/`bundleRelease`) sign with `keystore/release.keystore` (gitignored) and read the password from `SHIKAI_KEYSTORE_PASSWORD` at Gradle time, so it must be set in the shell running Gradle. Without it, the build fails at signing validation. The password is never written to disk.
 - `withReleaseSigning` and the ABI splits skip when `EAS_BUILD` is set: EAS signs with its own credentials and expects a single APK.
-- `react-native` is pinned to `0.81.5` via `overrides` in package.json - do not upgrade without testing.
+- `react-native` is pinned to `0.88.1` in the dependency and under `overrides` in package.json - do not upgrade without testing. Re-pin after every SDK hop: an npm override must match the direct dependency's spec exactly.
 - `.env` contains `EXPO_PUBLIC_*` variables (GitHub client ID, OAuth proxy URL). These are baked in at build time.
 - `dist/` is the web build output (Cloudflare Workers serves from there).
 - `wrangler.jsonc` configures the web deployment; `oauth-proxy/wrangler.toml` is separate.

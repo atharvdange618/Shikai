@@ -84,7 +84,7 @@ Entries D-001 to D-021 were backfilled on 2026-10-15 from commits, the changelog
 
 **Context.** The pin came in through `overrides` in `package.json`. The commit doesn't say why.
 **Decision.** Keep it until the next SDK upgrade. `notes/MAINTENANCE.md` says to remove it during each SDK upgrade, and to pin again only if a patch release causes trouble.
-**Consequences.** If you find the real reason, write it here.
+**Consequences.** If you find the real reason, write it here. Pin moved to 0.88.1 in the SDK 58 upgrade, and `notes/MAINTENANCE.md` now says to re-pin after every SDK hop, not only after a bad patch release.
 
 ## D-008: Boot runs through one reducer
 
@@ -345,6 +345,16 @@ Entries D-001 to D-021 were backfilled on 2026-10-15 from commits, the changelog
 **Decision.** Boot restores the PAT and token, dispatches `AUTH_RESTORE_COMPLETE` in `finally`, and only then calls `revalidateSession()` (`lib/session.ts`), which runs `GET /user` behind the app. Only a 401 signs the user out; status 0, 403 and 5xx leave the session as restored. The first paint takes the profile from the persisted query cache, and the check writes the fresh one into `queryKeys.user()` with `staleTime: 0`, so `useUser()` doesn't repeat the request. Two smaller ordering fixes came with it: the security check no longer waits for fonts, and the native splash hands over to `AnimatedSplashScreen` on that view's first layout instead of waiting for `ready`.
 **Rejected.** Keeping the check on the critical path behind a shorter timeout: startup would still depend on the network. Trusting the stored token with no check: a revoked token would fail on every screen instead of landing on sign-in once.
 **Consequences.** A token revoked between sessions shows the app for as long as its first request takes, then signs out. `setAuthReady(true)` now arms the 401 interceptor before the check rather than after, so any request can end the session during boot. Do not read a dev-build startup time as this app's startup time: on the same device a cold start spent 5.7 s in native init and Metro (`isMetroRunning`, dev bundle download, Hermes parsing an unminified bundle) before any app code ran, against 1.3 s of actual boot. Measure on a preview or release build.
+
+## D-035: SDK 56 is skipped on the way to 58
+
+**Date:** 2026-11-03 · **Status:** Accepted
+
+**Context.** Shikai went 54 → 55 → 57 → 58 and never ran SDK 56. Hermes V1 became the default engine in SDK 56, and in apps that load reanimated or worklets it has a memory regression that Expo fixed in expo 57.0.9; Expo's own upgrade advice was to skip 56. Shikai loads both, and Issue #37 was a worklets crash, so 56 was the one hop most likely to land back there. The alternative was to take 56, confirm the regression and roll forward, which buys a day of QA for a runtime that ships two SDKs later anyway.
+**Decision.** Skip SDK 56. Every other hop keeps its own commit, so a later bug still traces to one SDK (D-036 relies on the same rule).
+**Rejected.** Taking 56 with Expo's memory workaround and re-testing: worklets and reanimated are on the path of almost every screen here, so the QA would be the whole list twice for no shipped difference.
+**Consequences.** Never roll the branch back below expo `57.0.17`: 56 and early 57 carry the regression. `notes/MAINTENANCE.md` now allows skipping an SDK when the release notes say to, instead of "one at a time" as an absolute.
+**Revisit if.** A future SDK needs a change that only landed between 55 and 56, or Expo publishes a fix that makes 56/early-57 safe and someone wants the intermediate hops for a bisect.
 
 ## D-036: React Compiler lint rules are warnings until a follow-up fixes them
 

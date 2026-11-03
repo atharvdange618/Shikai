@@ -1,5 +1,17 @@
 # Changelog
 
+## v1.8.0 (unreleased)
+
+Needs a new store build: an Expo SDK upgrade changes native code, so no OTA update can reach a 1.7.0 install. No new features; this release moves the platform under the app.
+
+### Changes
+
+- **Expo SDK 58** - Shikai moves from Expo SDK 54 to 58 and from React Native 0.81 to 0.88, in three hops (54 → 55, 55 → 57, 57 → 58); SDK 56 was skipped on Expo's advice. Nothing in the app's behaviour is meant to change. Cold start on a release build dropped from 911 ms to 667 ms, and memory (PSS) from 266 MB to 236 MB. ([`1bd6e1e`](https://github.com/atharvdange618/Shikai/commit/1bd6e1e), [`30b1ebb`](https://github.com/atharvdange618/Shikai/commit/30b1ebb), [`2601df9`](https://github.com/atharvdange618/Shikai/commit/2601df9), [`de41829`](https://github.com/atharvdange618/Shikai/commit/de41829))
+
+### Fixes
+
+- **Repo health badges did nothing** - The info dots next to "No license", "No topics" and "No README" on a repository header opened no tooltip: the shared tooltip provider was left behind when repo screens moved out of the tab group in June, so those dots had nothing to talk to. They now open their explanation, and only one tooltip is open at a time across the tabs and every detail screen. ([`1067d43`](https://github.com/atharvdange618/Shikai/commit/1067d43))
+
 ## v1.7.0 (November 2, 2026)
 
 Needs a new store build: adds the `expo-store-review` native module, and the lockfile moves `expo` to 54.0.38.
