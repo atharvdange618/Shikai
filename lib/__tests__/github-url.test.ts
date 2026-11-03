@@ -1,6 +1,37 @@
 import { describe, expect, it } from "vitest";
 
-import { parseGitHubApiUrl, parseGitHubUrl } from "@/lib/github-url";
+import {
+  appLinkPath,
+  isDevClientUrl,
+  parseGitHubApiUrl,
+  parseGitHubUrl,
+} from "@/lib/github-url";
+
+describe("dev client links", () => {
+  it.each([
+    "shikai://expo-development-client/?url=http%3A%2F%2Flocalhost%3A8081",
+    "shikai://?__expo_url=http%3A%2F%2Flocalhost%3A8081",
+    "shikai:///?__expo_url=http%3A%2F%2Flocalhost%3A8081",
+    "shikai://?other=1&__expo_url=http%3A%2F%2Flocalhost%3A8081",
+  ])("excludes %s from initial-link replay", (url) => {
+    expect(isDevClientUrl(url)).toBe(true);
+    expect(appLinkPath(url)).toBeNull();
+  });
+
+  it.each([
+    "https://example.com/?__expo_url=http%3A%2F%2Flocalhost%3A8081",
+    "shikai://repo/a~~b?filename=__expo_url=value",
+    "shikai://repo/a~~b#section?__expo_url=value",
+    "shikai://?code=abc123",
+  ])("does not classify %s as a dev client link", (url) => {
+    expect(isDevClientUrl(url)).toBe(false);
+  });
+
+  it("preserves ordinary app links and excludes OAuth callbacks", () => {
+    expect(appLinkPath("shikai://repo/a~~b")).toBe("/repo/a~~b");
+    expect(appLinkPath("shikai://?code=abc123")).toBeNull();
+  });
+});
 
 describe("parseGitHubUrl", () => {
   it("rejects non-github hosts and github subdomains", () => {

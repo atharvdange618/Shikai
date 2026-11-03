@@ -4,6 +4,12 @@
 
 Read-only GitHub companion for Android. React Native + Expo SDK 58, expo-router, TypeScript strict mode.
 
+## Current progress (November 3, 2026)
+
+- v1.8.0 shipped as a GitHub APK; Play remains on 1.7.0. Compiler cleanup (`276b580`), browser auth sessions (`8c1fdcb`) and env-template cleanup (`d947b51`) follow that tag.
+- The critical black-screen report traced to SDK 58's `shikai://?__expo_url=…` pushing the blank index over Overview. `isDevClientUrl()` now rejects both launcher URL formats for native routing and initial-link replay. Phone replay and app restart show Overview; fresh GitHub OAuth and release-build checks remain pending. See D-038 and `notes/ROADMAP.md`.
+- Use Git Bash for commands on this machine. Exported build variables live there, not in Command Prompt or PowerShell.
+
 ## Commands
 
 ```bash
@@ -68,7 +74,7 @@ Deeper docs: `notes/ARCHITECTURE.md` (data flow, token rules, background work) a
 | File | What it does |
 |---|---|
 | `app/_layout.tsx` | Root layout. Drives the boot-flow reducer and restores auth tokens on boot. |
-| `app/+native-intent.tsx` | Stops expo-router from navigating on the OAuth redirect (`shikai://?code=...`), which would push the blank index route over sign-in. `app/sign-in.tsx` reads the code through its own `Linking` listener. Also drops every github.com link, and any `shikai://` link that cold-started the app, since `hooks/useDeepLinks.ts` routes them once the boot replace has run. |
+| `app/+native-intent.tsx` | Drops warm OAuth redirects that would cover sign-in with the blank index. `app/sign-in.tsx` handles the code through its Linking listener or browser auth-session result. Also drops dev-client launch URLs (legacy host and SDK 58 `__expo_url`), github.com links, and cold-start app links that `hooks/useDeepLinks.ts` replays after boot routing. |
 | `lib/boot-flow.ts` | Boot state reducer: `checkingSecurity` → `restoringAuth` → `ready`, or `blocked`. |
 | `lib/axios.ts` | Configured axios instance: base URL, auth interceptor, rate-limit tracking. |
 | `lib/github-rest.ts` | All GitHub REST API functions, plus `patHeaders()` for PAT-based calls. |

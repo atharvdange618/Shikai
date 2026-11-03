@@ -1,5 +1,16 @@
 # Changelog
 
+## Unreleased
+
+These changes follow the `v1.8.0` tag and are not in its published GitHub APK. Play remains on 1.7.0.
+
+### Fixes
+
+- **Black screen after returning to the dev client** - SDK 58 launcher links with `__expo_url` could push the blank index route over Overview. The shared link filter now drops both old and new launcher URLs, including initial-link replay. Reproduced on a physical Android phone; replaying the failing URL after the fix keeps Overview visible without a Metro reload. A fresh end-to-end GitHub sign-in and release-build check still need confirmation.
+- **OAuth browser closure** - GitHub sign-in now uses `WebBrowser.openAuthSessionAsync`, with a guard against exchanging the same code concurrently (`8c1fdcb`). Browser closure alone did not fix the blank-route issue.
+- **React Compiler rules** - Fixed all 25 warnings and restored the five rules to errors (`276b580`, D-036).
+- **Environment template** - Removed `NODE_ENV` from `.env.example`; Expo sets it for each command (`d947b51`).
+
 ## v1.8.0 (November 3, 2026)
 
 Ships as a GitHub APK, not a Play release: this moves the platform under the app and adds no features, so Play stays on 1.7.0. Install it over 1.7.0 the normal way. It can't go out as an OTA update, since an Expo SDK upgrade changes native code.

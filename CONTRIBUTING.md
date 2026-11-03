@@ -36,6 +36,7 @@ Add `notifications` to the token's scopes if you're working on notifications or 
 
 - Root, debugger, and developer-options checks pass automatically, so emulators work.
 - Sentry stays off when `EXPO_PUBLIC_SENTRY_DSN` is blank.
+- Dev-client launch URLs are not app routes. Keep both `shikai://expo-development-client/?url=…` and SDK 58's `shikai://?__expo_url=…` out of native routing and initial-link replay. A missed launch URL can cover Overview with a blank index screen; see D-038 and the current QA status in [`notes/ROADMAP.md`](notes/ROADMAP.md).
 - You don't need `keystore/` or `SHIKAI_KEYSTORE_PASSWORD`. Those only matter for release builds, which the maintainer makes.
 
 ## Where things live

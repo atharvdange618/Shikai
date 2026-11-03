@@ -30,6 +30,8 @@ Google Play requires updates to target a recent Android API level and usually ra
 
 ## Releasing
 
+**Current auth verification gate (November 3, 2026):** the SDK 58 dev-launch return bug has a shared-filter fix, regression coverage, and phone replay evidence (D-038). Before the next release, complete GitHub sign-in from the browser and verify that Overview appears without Back or a Metro reload. Repeat on a release build. Do not treat a mounted Overview component as proof that it is visible; inspect the native screen and active root route.
+
 1. Bump `version` in `package.json` and `app.config.ts`, and bump `android.versionCode` in `app.config.ts`. Play rejects a versionCode it has seen before.
 2. Update `CHANGES.md`.
 3. **Play Store:** build on EAS. First check that the `production` environment has the full variable set (`eas env:list --environment production`). `preview` and `production` don't share variables.

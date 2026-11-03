@@ -20,8 +20,8 @@ import {
 // Cold-start shikai:// links go the same way. Left to the router, they become
 // the first screen and AppStack's boot replace to overview throws them away.
 // Warm ones pass through, since the router opens those itself. The dev client's
-// `shikai://expo-development-client/?url=…` is not a route at all: navigating
-// to it showed "Page not found", on warm and cold starts alike.
+// launch URLs are not routes: the legacy host showed "Page not found", while
+// SDK 58's `shikai://?__expo_url=…` pushed a blank index over Overview.
 export function redirectSystemPath({
   path,
   initial,

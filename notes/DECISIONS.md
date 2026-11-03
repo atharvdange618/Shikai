@@ -32,12 +32,13 @@ Entries D-001 to D-021 were backfilled on 2026-10-15 from commits, the changelog
 **Consequences.** Tokens only need read scopes, plus `notifications`. Any feature idea that needs a write is out of scope unless this entry changes.
 **Open.** `DELETE /notifications/threads/{id}/subscription` (unsubscribe from a thread) is undecided. It's useful for triage, but it's a new kind of write. We lean toward stopping at mark as read.
 
-## D-002: Sign in through a GitHub App, PKCE, an external browser and a token proxy
+## D-002: Sign in through a GitHub App, PKCE, a browser auth session and a token proxy
 
 **Date:** 2026-05-07 (`bfb25d0`), external browser on 2026-07-05 (`c07206d`) · **Status:** Accepted
 
 **Context.** Shikai started with PAT-only sign-in, and making users generate a token was a bad first run. OAuth needs a client secret to swap the code for a token, and anything shipped in an APK is public. Sign-in inside an in-app view also broke on GitHub's 2FA and device checks. Later, Google Play rejected a release because its reviewer's sandbox couldn't finish the browser redirect.
 **Decision.** Shikai is a GitHub App. Sign-in uses PKCE in the phone's real browser and comes back through `shikai://`. A Cloudflare Worker (`oauth-proxy/worker.ts`) holds the secret and does the swap. It checks the `client_id` and the redirect, and it stores nothing. A Cloudflare dashboard rule rate limits it per IP. "Sign in with a token" lets reviewers and anyone stuck on GitHub's checks paste a PAT instead (`b31dd0e`).
+**Update, November 3, 2026.** `8c1fdcb` replaced `Linking.openURL` with `WebBrowser.openAuthSessionAsync` so the browser closes on return. The browser result and the Linking listener both reach the same completion function, with a guard against concurrent exchanges of one code. This follows the v1.8.0 tag. D-038 covers the separate blank-route bug found during phone testing.
 **Rejected.** Keeping PAT-only sign-in. Putting the secret in the app. Running a full backend that holds tokens.
 **Consequences.** A GitHub App only sees the repos its installation covers. Users who picked "Only select repositories" miss the rest, so Settings links to the installation page (`a62a1e8`). The proxy deploys on its own and has its own `wrangler.toml`.
 
@@ -356,14 +357,15 @@ Entries D-001 to D-021 were backfilled on 2026-10-15 from commits, the changelog
 **Consequences.** Never roll the branch back below expo `57.0.17`: 56 and early 57 carry the regression. `notes/MAINTENANCE.md` now allows skipping an SDK when the release notes say to, instead of "one at a time" as an absolute.
 **Revisit if.** A future SDK needs a change that only landed between 55 and 56, or Expo publishes a fix that makes 56/early-57 safe and someone wants the intermediate hops for a bisect.
 
-## D-036: React Compiler lint rules are warnings until a follow-up fixes them
+## D-036: Defer React Compiler cleanup until after the SDK upgrade
 
 **Date:** 2026-11-03 · **Status:** Accepted
 
 **Context.** The SDK 57 hop brought eslint-config-expo 57 with eslint-plugin-react-hooks 7, which turns on the React Compiler rules `refs`, `set-state-in-effect`, `immutability`, `preserve-manual-memoization` and `purity`. They flagged 25 places in 13 files, all written before the rules existed. Lint is a lint change here, not a runtime one: when the compiler meets one of these patterns it skips that component and leaves it as written, which is what it already did on SDK 55.
-**Decision.** `eslint.config.js` sets the five rules to `warn`. The SDK hop commit stays an upgrade with no behaviour changes, so a break still traces to one SDK.
+**Decision at the SDK hop.** Set the five rules to `warn` for the upgrade commit, then fix them separately. The SDK hop stays an upgrade with no behaviour changes, so a break still traces to one SDK.
 **Rejected.** Fixing all 25 inside the hop: it rewrites effects, refs and Reanimated writes across 13 screens, so a bug found in QA could come from the SDK or from the rewrite. Disabling the rules: the warnings would vanish and nobody would come back to them.
-**Consequences.** Follow-up after 1.8.0 ships: fix the warnings on main, then set the rules back to `error`. The Reanimated ones (`sv.value = ...` in `repo/[repoId]/index.tsx`, `release/[tag].tsx`, `sign-in.tsx`) move to `sv.set(...)`, which Reanimated 4 gives for React Compiler code. `react-hooks/refs` in `Tooltip.tsx` and `MarkdownRenderer.tsx` keeps those components out of the compiler until fixed.
+**Consequences.** The upgrade deferred the 25 warnings to a separate change after 1.8.0.
+**Completed, November 3, 2026.** `276b580` fixed the warnings and restored all five rules to `error`. This cleanup follows the v1.8.0 tag; warnings are no longer the current policy.
 
 ## D-037: The tooltip provider sits above the tabs, not inside them
 
@@ -374,3 +376,12 @@ Entries D-001 to D-021 were backfilled on 2026-10-15 from commits, the changelog
 **Rejected.** A second provider inside `repo/_layout.tsx`: two contexts, so two tooltips can be open at once, and the next new route group would forget it again. Making `InfoDot` render its own tooltip without a provider: loses the mutual-exclusivity the provider exists for.
 **Consequences.** Anything that renders `Tooltip` or `InfoDot` must be below `app/(app)/`; screens outside that group (sign-in) have no tooltip context by design. `grep -r "TooltipProvider" app/` should only hit `app/(app)/_layout.tsx`.
 **Revisit if.** A tooltip is needed on a screen outside `(app)`, or the provider's `useNavigation()` call is replaced by expo-router's imperative API.
+
+## D-038: Drop both dev-client launch URL formats before app routing
+
+**Date:** 2026-11-03 · **Status:** Accepted; full OAuth and release-build verification pending
+
+**Context.** After GitHub sign-in, the phone showed a black screen despite Overview being mounted. Native navigation had a second root `index` route with `__expo_url` above `(app)`. Back removed it and restored Overview without a reload. SDK 58 uses `shikai://?__expo_url=…`; the existing helper only recognized `shikai://expo-development-client/?url=…`.
+**Decision.** Extend `isDevClientUrl` in `lib/github-url.ts`, which both `redirectSystemPath` and `appLinkPath` already use. Drop launcher links before warm navigation and cold-start replay. Keep OAuth callbacks and ordinary app links on their existing paths.
+**Rejected.** A timer, forced reload, or another Overview redirect: each hides the wrong route instead of rejecting the non-route URL that created it.
+**Evidence.** The warm-link regression test failed before the change. After it, the routing tests pass and replaying the failing URL leaves Overview visible on the physical Android phone. Restarting the app also restores Overview. A fresh browser OAuth flow and a release-build check remain required.

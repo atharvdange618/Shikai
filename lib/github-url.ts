@@ -10,12 +10,15 @@ export const isOAuthRedirect = (url: string): boolean =>
   url.startsWith("shikai:") && /[?&]code=/.test(url);
 
 /**
- * The dev client opens the app with `shikai://expo-development-client/?url=…`.
+ * The dev client uses `shikai://?__expo_url=…` on SDK 58 and
+ * `shikai://expo-development-client/?url=…` on older builds.
  * It loads the bundle natively and is not a route, so the router must not
  * navigate to it.
  */
 export const isDevClientUrl = (url: string): boolean =>
-  url.startsWith("shikai://expo-development-client");
+  url.startsWith("shikai:") &&
+  (url.startsWith("shikai://expo-development-client") ||
+    /[?&]__expo_url=/.test(url.split("#")[0]));
 
 /**
  * The router path for an in-app `shikai://` link, e.g.

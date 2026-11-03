@@ -29,6 +29,14 @@ describe("redirectSystemPath", () => {
     expect(redirectSystemPath({ path, initial })).toBe("");
   });
 
+  it.each([true, false])(
+    "drops the SDK 58 dev launcher return (initial: %s)",
+    (initial) => {
+      const path = "shikai://?__expo_url=http%3A%2F%2F10.0.0.2%3A8081";
+      expect(redirectSystemPath({ path, initial })).toBe("");
+    },
+  );
+
   const githubLinks = [
     "https://github.com/facebook/react/blob/main/README.md#L10",
     "https://www.github.com/facebook/react?code=1",
