@@ -1,5 +1,14 @@
 import { Octicons } from "@expo/vector-icons";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  type ComponentProps,
+  type ComponentType,
+  type Ref,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   ActivityIndicator,
   Pressable,
@@ -29,6 +38,15 @@ import {
 
 import { FileError } from "./FileError";
 
+// react-native-webview 14 publishes type stubs that drop the imperative handle
+// its runtime forwards (see its src/WebView.android.tsx), so the ref is typed
+// here to match what a mounted WebView actually exposes.
+type WebViewHandle = { injectJavaScript: (script: string) => void };
+
+const RefWebView = WebView as unknown as ComponentType<
+  ComponentProps<typeof WebView> & { ref?: Ref<WebViewHandle> }
+>;
+
 interface CodeViewerProps {
   /** File contents, or a unified diff patch when `diff` is set. */
   content: string;
@@ -49,7 +67,7 @@ export function CodeViewer({
 }: CodeViewerProps) {
   const { colors, syntaxTheme } = useTheme();
   const s = useMemo(() => buildStyles(colors), [colors]);
-  const webViewRef = useRef<WebView>(null);
+  const webViewRef = useRef<WebViewHandle>(null);
   const [file, setFile] = useState<Highlighted | null>(null);
   const [failed, setFailed] = useState(false);
   const [wrap, setWrap] = useState(true);
@@ -132,7 +150,7 @@ export function CodeViewer({
       </View>
 
       {html ? (
-        <WebView
+        <RefWebView
           ref={webViewRef}
           source={{ html }}
           style={s.webview}

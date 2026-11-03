@@ -1,6 +1,12 @@
 import { Octicons } from "@expo/vector-icons";
 import { useCallback, useMemo, useRef } from "react";
-import { Pressable, ScrollView, StyleSheet, View } from "react-native";
+import {
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  View,
+  type ScrollViewInstance,
+} from "react-native";
 
 import { MarkdownRenderer } from "@/components/shared/MarkdownRenderer";
 import {
@@ -32,7 +38,7 @@ export function MarkdownViewer({
   const s = useMemo(() => buildStyles(colors), [colors]);
   const { copied, copy } = useCopyToClipboard();
 
-  const contentScrollRef = useRef<ScrollView>(null);
+  const contentScrollRef = useRef<ScrollViewInstance>(null);
   const hasScrolledToLineRef = useRef(false);
 
   const rendererY = useRef(0);

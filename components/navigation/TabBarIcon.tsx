@@ -1,6 +1,7 @@
 import { Octicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { useEffect } from "react";
+import type { ColorValue } from "react-native";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -26,7 +27,7 @@ export type TabIconName =
 interface TabBarIconProps {
   name: TabIconName;
   filledName?: TabIconName;
-  color: string;
+  color: ColorValue;
   size: number;
   focused: boolean;
 }
@@ -62,7 +63,8 @@ export function TabBarIcon({
 
   return (
     <Animated.View style={animatedStyle}>
-      <Octicons name={iconName} size={size} color={color} />
+      {/* RN 0.88 types ColorValue as an opaque internal type; icons still take a string. */}
+      <Octicons name={iconName} size={size} color={color as string} />
     </Animated.View>
   );
 }

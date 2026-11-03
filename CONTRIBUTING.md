@@ -1,6 +1,6 @@
 # Contributing to Shikai
 
-Thanks for helping out. Shikai is an Android-only, read-only GitHub client built with Expo SDK 54 and React Native 0.81. This guide gets you from a fresh clone to an open PR.
+Thanks for helping out. Shikai is an Android-only, read-only GitHub client built with Expo SDK 58 and React Native 0.88. This guide gets you from a fresh clone to an open PR.
 
 ## Before you start
 

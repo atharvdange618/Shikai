@@ -23,12 +23,11 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
   name: "Shikai",
   slug: "shikai",
-  version: "1.7.0",
+  version: "1.8.0",
   orientation: "portrait",
   icon: "./assets/images/icon.png",
   scheme: "shikai",
   userInterfaceStyle: "automatic",
-  newArchEnabled: true,
   ios: {
     supportsTablet: true,
     bundleIdentifier: "com.atharvdange618.Shikai",
@@ -38,10 +37,9 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       backgroundColor: "#FAF9F6",
       foregroundImage: "./assets/images/adaptive-icon.png",
     },
-    edgeToEdgeEnabled: true,
     predictiveBackGestureEnabled: false,
     package: "com.atharvdange618.Shikai",
-    versionCode: 10,
+    versionCode: 11,
     // No autoVerify: Shikai just shows up in the chooser for github.com links.
     intentFilters: [
       {

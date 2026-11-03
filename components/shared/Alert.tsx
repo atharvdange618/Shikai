@@ -216,7 +216,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   backdropPress: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
   },
   dialog: {
     width: "80%",

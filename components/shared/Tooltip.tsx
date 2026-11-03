@@ -1,5 +1,5 @@
 import { Octicons } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation } from "expo-router/react-navigation";
 import React, {
   createContext,
   useCallback,
@@ -14,6 +14,7 @@ import {
   Text,
   useWindowDimensions,
   View,
+  type ViewInstance,
   type ViewStyle,
 } from "react-native";
 
@@ -82,7 +83,7 @@ export function Tooltip({ content, children, align = "left" }: TooltipProps) {
   const visible = ctx ? ctx.activeId === idRef.current : false;
   const { width: screenWidth } = useWindowDimensions();
 
-  const containerRef = useRef<View>(null);
+  const containerRef = useRef<ViewInstance>(null);
   const [layoutInfo, setLayoutInfo] = useState<{
     pageX: number;
     width: number;
@@ -180,7 +181,7 @@ export function InfoDot({
   const visible = ctx ? ctx.activeId === idRef.current : false;
   const { width: screenWidth } = useWindowDimensions();
 
-  const containerRef = useRef<View>(null);
+  const containerRef = useRef<ViewInstance>(null);
   const [layoutInfo, setLayoutInfo] = useState<{
     pageX: number;
     width: number;
@@ -289,7 +290,7 @@ export function InfoDot({
 
 const s = StyleSheet.create({
   overlay: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     zIndex: ZIndex.tooltip - 1,
   },
   container: {

@@ -1,12 +1,11 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { Tabs } from "expo-router";
 import { useEffect, useMemo } from "react";
-import { View } from "react-native";
+import { type ColorValue, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { TabBarIcon } from "@/components/navigation/TabBarIcon";
-import { TooltipProvider } from "@/components/shared/Tooltip";
 import {
   BorderWidth,
   FontFamily,
@@ -24,7 +23,7 @@ const renderOverviewIcon = ({
   size,
   focused,
 }: {
-  color: string;
+  color: ColorValue;
   size: number;
   focused: boolean;
 }) => (
@@ -42,7 +41,7 @@ const renderReposIcon = ({
   size,
   focused,
 }: {
-  color: string;
+  color: ColorValue;
   size: number;
   focused: boolean;
 }) => <TabBarIcon name="repo" color={color} size={size} focused={focused} />;
@@ -52,7 +51,7 @@ const renderSearchIcon = ({
   size,
   focused,
 }: {
-  color: string;
+  color: ColorValue;
   size: number;
   focused: boolean;
 }) => <TabBarIcon name="search" color={color} size={size} focused={focused} />;
@@ -62,7 +61,7 @@ const renderNotificationsIcon = ({
   size,
   focused,
 }: {
-  color: string;
+  color: ColorValue;
   size: number;
   focused: boolean;
 }) => (
@@ -80,7 +79,7 @@ const renderProfileIcon = ({
   size,
   focused,
 }: {
-  color: string;
+  color: ColorValue;
   size: number;
   focused: boolean;
 }) => (
@@ -113,86 +112,84 @@ export default function TabsLayout() {
   }, [queryClient, user?.login]);
 
   return (
-    <TooltipProvider>
-      <ErrorBoundary>
-        <View style={{ flex: 1, backgroundColor: colors.background }}>
-          <Tabs
-            screenOptions={{
-              headerShown: false,
+    <ErrorBoundary>
+      <View style={{ flex: 1, backgroundColor: colors.background }}>
+        <Tabs
+          screenOptions={{
+            headerShown: false,
 
-              tabBarActiveTintColor: colors.tabBarActive,
-              tabBarInactiveTintColor: colors.tabBarInactive,
+            tabBarActiveTintColor: colors.tabBarActive,
+            tabBarInactiveTintColor: colors.tabBarInactive,
 
-              tabBarLabelStyle: {
-                fontFamily: FontFamily.medium,
-                fontSize: 12,
-                marginTop: -2,
-                marginBottom: 4,
-              },
+            tabBarLabelStyle: {
+              fontFamily: FontFamily.medium,
+              fontSize: 12,
+              marginTop: -2,
+              marginBottom: 4,
+            },
 
-              tabBarStyle: {
-                height: Layout.tabBarHeight + insets.bottom,
-                paddingBottom: insets.bottom,
-                backgroundColor: colors.tabBarBackground,
-                borderTopWidth: BorderWidth.thin,
-                borderTopColor: colors.border,
-                elevation: 0,
-              },
+            tabBarStyle: {
+              height: Layout.tabBarHeight + insets.bottom,
+              paddingBottom: insets.bottom,
+              backgroundColor: colors.tabBarBackground,
+              borderTopWidth: BorderWidth.thin,
+              borderTopColor: colors.border,
+              elevation: 0,
+            },
 
-              tabBarIconStyle: {
-                marginTop: Spacing.xs,
-              },
+            tabBarIconStyle: {
+              marginTop: Spacing.xs,
+            },
+          }}
+        >
+          <Tabs.Screen
+            name="overview"
+            options={{
+              title: "Overview",
+              tabBarIcon: renderOverviewIcon,
             }}
-          >
-            <Tabs.Screen
-              name="overview"
-              options={{
-                title: "Overview",
-                tabBarIcon: renderOverviewIcon,
-              }}
-            />
+          />
 
-            <Tabs.Screen
-              name="repos"
-              options={{
-                title: "Repos",
-                tabBarIcon: renderReposIcon,
-              }}
-            />
+          <Tabs.Screen
+            name="repos"
+            options={{
+              title: "Repos",
+              tabBarIcon: renderReposIcon,
+            }}
+          />
 
-            <Tabs.Screen
-              name="search"
-              options={{
-                title: "Search",
-                tabBarIcon: renderSearchIcon,
-              }}
-            />
+          <Tabs.Screen
+            name="search"
+            options={{
+              title: "Search",
+              tabBarIcon: renderSearchIcon,
+            }}
+          />
 
-            <Tabs.Screen
-              name="notifications"
-              options={{
-                title: "Notifications",
-                tabBarIcon: renderNotificationsIcon,
-                tabBarBadge:
-                  unreadCount > 0
-                    ? unreadCount > 99
-                      ? "99+"
-                      : unreadCount
-                    : undefined,
-                href: pat ? undefined : null,
-              }}
-            />
+          <Tabs.Screen
+            name="notifications"
+            options={{
+              title: "Notifications",
+              tabBarIcon: renderNotificationsIcon,
+              tabBarBadge:
+                unreadCount > 0
+                  ? unreadCount > 99
+                    ? "99+"
+                    : unreadCount
+                  : undefined,
+              href: pat ? undefined : null,
+            }}
+          />
 
-            <Tabs.Screen
-              name="profile"
-              options={{
-                title: "Profile",
-                tabBarIcon: renderProfileIcon,
-              }}
-            />
-          </Tabs>
-        </View>
-      </ErrorBoundary>
-    </TooltipProvider>
+          <Tabs.Screen
+            name="profile"
+            options={{
+              title: "Profile",
+              tabBarIcon: renderProfileIcon,
+            }}
+          />
+        </Tabs>
+      </View>
+    </ErrorBoundary>
   );
 }

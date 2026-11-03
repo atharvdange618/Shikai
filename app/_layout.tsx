@@ -61,11 +61,7 @@ function ThemeEffects() {
   }, [theme.colors.background]);
 
   return (
-    <StatusBar
-      barStyle={theme.isDark ? "light-content" : "dark-content"}
-      backgroundColor="transparent"
-      translucent
-    />
+    <StatusBar barStyle={theme.isDark ? "light-content" : "dark-content"} />
   );
 }
 

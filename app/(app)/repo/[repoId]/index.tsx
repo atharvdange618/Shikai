@@ -35,6 +35,7 @@ import {
   View,
   type NativeScrollEvent,
   type NativeSyntheticEvent,
+  type ScrollViewInstance,
 } from "react-native";
 import Animated, {
   Easing,
@@ -300,7 +301,7 @@ export default function RepoDetailsScreen() {
   const chevronTranslateY = useSharedValue(0);
   const hasScrolledPast = useRef(false);
 
-  const scrollRef = useRef<ScrollView>(null);
+  const scrollRef = useRef<ScrollViewInstance>(null);
   const readmeY = useRef(0);
   const handleReadmeAnchor = useCallback((y: number) => {
     scrollRef.current?.scrollTo({

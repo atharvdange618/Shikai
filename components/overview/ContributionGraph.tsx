@@ -1,6 +1,12 @@
 import { Octicons } from "@expo/vector-icons";
 import { useCallback, useMemo, useRef } from "react";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import {
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+  type ScrollViewInstance,
+} from "react-native";
 import Svg, { Rect, Text as SvgText } from "react-native-svg";
 
 import {
@@ -88,7 +94,7 @@ export function ContributionGraph({
   dataUpdatedAt,
 }: ContributionGraphProps) {
   const { colors } = useTheme();
-  const scrollRef = useRef<ScrollView>(null);
+  const scrollRef = useRef<ScrollViewInstance>(null);
 
   const handleContentSizeChange = useCallback(() => {
     scrollRef.current?.scrollToEnd({ animated: false });
