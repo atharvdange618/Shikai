@@ -1,6 +1,6 @@
 # Changelog
 
-## v1.8.0 (unreleased)
+## v1.8.0 (November 3, 2026)
 
 Ships as a GitHub APK, not a Play release: this moves the platform under the app and adds no features, so Play stays on 1.7.0. Install it over 1.7.0 the normal way. It can't go out as an OTA update, since an Expo SDK upgrade changes native code.
 
