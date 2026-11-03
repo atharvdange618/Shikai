@@ -11,6 +11,7 @@ import {
   Text,
   TextInput,
   View,
+  type TextInputInstance,
 } from "react-native";
 
 import { FlashList } from "@shopify/flash-list";
@@ -50,7 +51,7 @@ export default function SearchScreen() {
   const { colors, isDark } = useTheme();
   const router = useRouter();
   const queryClient = useQueryClient();
-  const searchInputRef = useRef<TextInput>(null);
+  const searchInputRef = useRef<TextInputInstance>(null);
   const params = useLocalSearchParams<{ q?: string }>();
 
   const [search, setSearch] = useState(params.q ?? "");

@@ -8,6 +8,11 @@ version = '1.3.0'
 
 android {
   namespace "expo.modules.shikaisecurity"
+  // The checkers read BuildConfig.DEBUG to skip themselves in debug builds.
+  // AGP generates BuildConfig only when asked (off by default since AGP 8).
+  buildFeatures {
+    buildConfig true
+  }
   defaultConfig {
     versionCode 2
     versionName '1.3.0'
