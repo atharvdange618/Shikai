@@ -350,7 +350,7 @@ Entries D-001 to D-021 were backfilled on 2026-10-15 from commits, the changelog
 
 **Date:** 2026-11-03 · **Status:** Accepted
 
-**Context.** Shikai went 54 → 55 → 57 → 58 and never ran SDK 56. Hermes V1 became the default engine in SDK 56, and in apps that load reanimated or worklets it has a memory regression that Expo fixed in expo 57.0.9; Expo's own upgrade advice was to skip 56. Shikai loads both, and Issue #37 was a worklets crash, so 56 was the one hop most likely to land back there. The alternative was to take 56, confirm the regression and roll forward, which buys a day of QA for a runtime that ships two SDKs later anyway.
+**Context.** Shikai went 54 → 55 → 57 → 58 and never ran SDK 56. Hermes V1 became the default engine in SDK 56, and in apps that load reanimated or worklets it has a memory regression that Expo fixed in expo 57.0.9; Expo's own upgrade advice was to skip 56. Shikai loads both, and the one crash still open in #37 is a `SIGSEGV` inside `libworklets.so`, so 56 was the hop most likely to land back there. The alternative was to take 56, confirm the regression and roll forward, which buys a day of QA for a runtime that ships two SDKs later anyway.
 **Decision.** Skip SDK 56. Every other hop keeps its own commit, so a later bug still traces to one SDK (D-036 relies on the same rule).
 **Rejected.** Taking 56 with Expo's memory workaround and re-testing: worklets and reanimated are on the path of almost every screen here, so the QA would be the whole list twice for no shipped difference.
 **Consequences.** Never roll the branch back below expo `57.0.17`: 56 and early 57 carry the regression. `notes/MAINTENANCE.md` now allows skipping an SDK when the release notes say to, instead of "one at a time" as an absolute.
