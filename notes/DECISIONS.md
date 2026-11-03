@@ -354,3 +354,13 @@ Entries D-001 to D-021 were backfilled on 2026-10-15 from commits, the changelog
 **Decision.** `eslint.config.js` sets the five rules to `warn`. The SDK hop commit stays an upgrade with no behaviour changes, so a break still traces to one SDK.
 **Rejected.** Fixing all 25 inside the hop: it rewrites effects, refs and Reanimated writes across 13 screens, so a bug found in QA could come from the SDK or from the rewrite. Disabling the rules: the warnings would vanish and nobody would come back to them.
 **Consequences.** Follow-up after 1.8.0 ships: fix the warnings on main, then set the rules back to `error`. The Reanimated ones (`sv.value = ...` in `repo/[repoId]/index.tsx`, `release/[tag].tsx`, `sign-in.tsx`) move to `sv.set(...)`, which Reanimated 4 gives for React Compiler code. `react-hooks/refs` in `Tooltip.tsx` and `MarkdownRenderer.tsx` keeps those components out of the compiler until fixed.
+
+## D-037: The tooltip provider sits above the tabs, not inside them
+
+**Date:** 2026-11-03 · **Status:** Accepted
+
+**Context.** `5da3870` put `TooltipProvider` in `app/(app)/(tabs)/_layout.tsx`, which was enough while repo detail lived at `(tabs)/repos/[repoId]`. `9a71e5a` then moved repo and user screens to standalone routes under `app/(app)/`, and the provider stayed behind, so every `InfoDot` in `RepoHeader` read a null context. `InfoDot` renders nothing when the context is missing (`ctx ? ctx.activeId === id : false`), so the health badges drew but tapping them did nothing — no crash, no warning. It survived three releases because only repo headers use `InfoDot` outside the tabs; the Overview stats tooltips (Q4) kept working. Found in SDK 58 QA (Q5).
+**Decision.** Render `TooltipProvider` in `app/(app)/_layout.tsx`, wrapping the `Stack` that owns `(tabs)`, `repo` and `user`. One provider covers every screen that can show a tooltip, so "only one tooltip open at a time" holds across the tabs-and-detail boundary too. It still sits inside a navigator, which `useNavigation()` in the provider needs to dismiss on navigation.
+**Rejected.** A second provider inside `repo/_layout.tsx`: two contexts, so two tooltips can be open at once, and the next new route group would forget it again. Making `InfoDot` render its own tooltip without a provider: loses the mutual-exclusivity the provider exists for.
+**Consequences.** Anything that renders `Tooltip` or `InfoDot` must be below `app/(app)/`; screens outside that group (sign-in) have no tooltip context by design. `grep -r "TooltipProvider" app/` should only hit `app/(app)/_layout.tsx`.
+**Revisit if.** A tooltip is needed on a screen outside `(app)`, or the provider's `useNavigation()` call is replaced by expo-router's imperative API.
