@@ -32,6 +32,11 @@ interface MarkdownRendererProps {
   filePath?: string;
   /** A #link was tapped; y is the target's offset from the WebView's top. */
   onAnchorOffset?: (y: number) => void;
+  /**
+   * Padding around the rendered content, in px. Defaults to 16. Pass 0 to
+   * align the content with a sibling (a comment's author row, say).
+   */
+  bodyPadding?: number;
 }
 
 function resolveImageUrls(html: string, context?: string): string {
@@ -48,8 +53,7 @@ function resolveImageUrls(html: string, context?: string): string {
   );
 }
 
-function buildHtml(html: string, isDark: boolean): string {
-  const bg = isDark ? "#0D1117" : "#FAF9F6";
+function buildHtml(html: string, isDark: boolean, bodyPadding: number): string {
   const text = isDark ? "#E6EDF3" : "#1A2332";
   const textSecondary = isDark ? "#8B949E" : "#5A6B7B";
   const border = isDark ? "#30363D" : "#D9D3C7";
@@ -86,8 +90,10 @@ function buildHtml(html: string, isDark: boolean): string {
     font-size: 15px;
     line-height: 1.6;
     color: ${text};
-    background: ${bg};
-    padding: 16px;
+    /* Transparent so the markdown sits on whatever surface its container
+       provides; an opaque body painted a second background inside cards. */
+    background: transparent;
+    padding: ${bodyPadding}px;
     -webkit-text-size-adjust: 100%;
     word-wrap: break-word;
   }
@@ -503,6 +509,7 @@ export function MarkdownRenderer({
   onHeightChange,
   filePath,
   onAnchorOffset,
+  bodyPadding = 16,
 }: MarkdownRendererProps) {
   const { colors, isDark } = useTheme();
   const router = useRouter();
@@ -530,7 +537,7 @@ export function MarkdownRenderer({
         );
 
         if (!cancelled) {
-          setHtml(buildHtml(resolveImageUrls(data, context), isDark));
+          setHtml(buildHtml(resolveImageUrls(data, context), isDark, bodyPadding));
         }
       } catch {
         if (!cancelled) {
@@ -539,7 +546,7 @@ export function MarkdownRenderer({
             .replace(/</g, "&lt;")
             .replace(/>/g, "&gt;")
             .replace(/\n/g, "<br>");
-          setHtml(buildHtml(`<pre>${escaped}</pre>`, isDark));
+          setHtml(buildHtml(`<pre>${escaped}</pre>`, isDark, bodyPadding));
         }
       }
     }
@@ -548,7 +555,7 @@ export function MarkdownRenderer({
     return () => {
       cancelled = true;
     };
-  }, [markdown, isDark, context, filePath]);
+  }, [markdown, isDark, context, filePath, bodyPadding]);
 
   // Hide the WebView until its content has painted and reported a height. A new
   // html string means a reload, so drop back to hidden and wait for that one.
@@ -612,7 +619,7 @@ export function MarkdownRenderer({
 
   if (!html) {
     return (
-      <View style={[s.loading, style]}>
+      <View style={[s.loading, { padding: bodyPadding }, style]}>
         <View
           style={[s.skeletonLine, { backgroundColor: colors.surfaceSecondary }]}
         />
@@ -631,7 +638,7 @@ export function MarkdownRenderer({
   }
 
   return (
-    <Animated.View style={[{ opacity, backgroundColor: colors.surface }, style]}>
+    <Animated.View style={[{ opacity }, style]}>
       <WebView
         source={{ html }}
         style={[s.webview, { height }]}

@@ -168,15 +168,7 @@ function IssueDetailScreenContent() {
       </View>
 
       {issue.body && (
-        <View
-          style={[
-            s.bodySection,
-            {
-              backgroundColor: colors.surface,
-              borderColor: colors.border,
-            },
-          ]}
-        >
+        <View>
           <MarkdownRenderer markdown={issue.body} />
           <ReactionsRow reactions={issue.reactions} colors={colors} />
         </View>
@@ -188,23 +180,24 @@ function IssueDetailScreenContent() {
 
       {timeline.map((item, index) =>
         item.kind === "comment" ? (
-          <View key={`comment-${item.comment.id}`}>
-            <View
-              style={[
-                s.commentCard,
-                {
-                  backgroundColor: colors.surface,
-                  borderColor: colors.border,
-                },
-              ]}
-            >
+          <View
+            key={`comment-${item.comment.id}`}
+            style={[
+              s.commentCard,
+              {
+                backgroundColor: colors.surface,
+                borderColor: colors.border,
+              },
+            ]}
+          >
+            <Image
+              source={{ uri: item.comment.user.avatar_url }}
+              style={s.commentAvatar}
+              contentFit="cover"
+              transition={100}
+            />
+            <View style={s.commentBody}>
               <View style={s.commentHeader}>
-                <Image
-                  source={{ uri: item.comment.user.avatar_url }}
-                  style={s.commentAvatar}
-                  contentFit="cover"
-                  transition={100}
-                />
                 <Text style={[s.commentAuthor, { color: colors.textPrimary }]}>
                   {item.comment.user.login}
                 </Text>
@@ -212,7 +205,10 @@ function IssueDetailScreenContent() {
                   {relativeTime(item.comment.created_at)}
                 </Text>
               </View>
-              <MarkdownRenderer markdown={item.comment.body} />
+              <MarkdownRenderer
+                markdown={item.comment.body}
+                bodyPadding={0}
+              />
               <ReactionsRow reactions={item.comment.reactions} colors={colors} />
             </View>
           </View>
@@ -307,23 +303,21 @@ const s = StyleSheet.create({
     fontSize: FontSize.caption,
   },
 
-  bodySection: {
-    marginTop: Spacing.xs,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderRadius: Radius.lg,
-    padding: Spacing.md,
-  },
-
   separator: {
     height: StyleSheet.hairlineWidth,
     marginVertical: Spacing.sm,
   },
 
   commentCard: {
+    flexDirection: "row",
     borderWidth: StyleSheet.hairlineWidth,
     borderRadius: Radius.lg,
     padding: Spacing.md,
-    gap: Spacing.md,
+    gap: Spacing.sm,
+  },
+  commentBody: {
+    flex: 1,
+    gap: 2,
   },
   commentHeader: {
     flexDirection: "row",
@@ -334,6 +328,7 @@ const s = StyleSheet.create({
     width: 24,
     height: 24,
     borderRadius: 12,
+    marginTop: 2,
   },
   commentAuthor: {
     fontFamily: FontFamily.medium,
