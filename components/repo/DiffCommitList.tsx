@@ -80,6 +80,8 @@ function CommitRow({
   return (
     <Pressable
       style={({ pressed }) => [s.row, pressed && s.rowPressed]}
+      accessibilityRole="button"
+      accessibilityLabel={`${commit.commit.message.split("\n")[0]}, ${commit.commit.author.name}`}
       onPress={() =>
         router.push({
           pathname: "/(app)/repo/[repoId]/commit/[sha]",
@@ -99,7 +101,13 @@ function CommitRow({
           {commit.commit.author.name} · {relativeTime(commit.commit.author.date)}
         </Text>
       </View>
-      <Pressable onPress={handleCopy} hitSlop={8} style={s.shaBadge}>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={`Copy commit SHA ${commit.sha}`}
+        onPress={handleCopy}
+        hitSlop={8}
+        style={s.shaBadge}
+      >
         <Text style={[s.shaText, copied && { color: colors.success }]}>
           {copied ? "Copied" : commit.sha.slice(0, 7)}
         </Text>
