@@ -4,6 +4,7 @@ import { StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { PRHeader } from "@/components/repo/PRHeader";
 import { CodeViewer } from "@/components/file/CodeViewer";
 import { FileError } from "@/components/file/FileError";
 import { FileLoading } from "@/components/file/FileLoading";
@@ -31,6 +32,7 @@ function DiffScreenContent() {
     sha?: string;
     base?: string;
     head?: string;
+    prNumber?: string;
   }>();
   const navigation = useNavigation();
   const { colors } = useTheme();
@@ -38,6 +40,8 @@ function DiffScreenContent() {
   const [owner, repoName] = decodeRepoId(params.repoId ?? "");
   const filename = params.filename ?? "";
   const baseName = filename.split("/").pop() ?? filename;
+  // PR diffs carry the PR as `number`; a commit opened from a PR passes `prNumber`.
+  const prContext = params.source === "pr" ? params.number : params.prNumber;
 
   // All three hooks run, but only the one matching the source is enabled. Each
   // query is already cached by the screen that pushed this one.
@@ -81,6 +85,9 @@ function DiffScreenContent() {
       style={[s.container, { backgroundColor: colors.background }]}
       edges={["bottom"]}
     >
+      {prContext && (
+        <PRHeader title={baseName} repoId={params.repoId} number={prContext} />
+      )}
       <FileLoading isLoading={query.isLoading} fileName={baseName} />
       {query.isError && (
         <FileError title="Failed to load diff" message={query.error?.message} />

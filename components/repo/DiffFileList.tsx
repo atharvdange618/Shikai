@@ -38,6 +38,7 @@ export function DiffFileList({
   hasMore = false,
   isLoadingMore = false,
   onLoadMore,
+  prNumber,
 }: {
   files: GitHubPullRequestFile[];
   colors: ColorTokens;
@@ -48,6 +49,7 @@ export function DiffFileList({
   hasMore?: boolean;
   isLoadingMore?: boolean;
   onLoadMore?: () => void;
+  prNumber?: string;
 }) {
   const s = useMemo(() => buildStyles(colors), [colors]);
   const [sectionExpanded, setSectionExpanded] = useState(false);
@@ -61,7 +63,12 @@ export function DiffFileList({
   const openFile = (filename: string) => {
     router.push({
       pathname: "/(app)/repo/[repoId]/diff",
-      params: { repoId, filename, ...diffSource },
+      params: {
+        repoId,
+        filename,
+        ...diffSource,
+        ...(prNumber ? { prNumber } : {}),
+      },
     });
   };
 

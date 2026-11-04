@@ -3,6 +3,7 @@ import type { ComponentProps } from "react";
 
 import type { ColorTokens } from "@/constants/themes";
 import type {
+  GitHubCheckConclusion,
   GitHubWorkflowRunConclusion,
   GitHubWorkflowRunStatus,
 } from "@/types/github.types";
@@ -11,6 +12,21 @@ export interface RunDisplay {
   icon: ComponentProps<typeof Octicons>["name"];
   color: string;
   label: string;
+}
+
+/**
+ * Display for a row of the merged PR check list, which carries two
+ * pseudo-conclusions GitHub itself never reports: `pending` for a run in flight
+ * and `error` for a legacy status that failed.
+ */
+export function getCheckDisplay(
+  status: GitHubWorkflowRunStatus,
+  conclusion: GitHubCheckConclusion | "pending" | "error",
+  colors: ColorTokens,
+): RunDisplay {
+  if (conclusion === "pending") return getRunDisplay(status, null, colors);
+  if (conclusion === "error") return getRunDisplay(status, "failure", colors);
+  return getRunDisplay(status, conclusion, colors);
 }
 
 // Shared by check runs, workflow runs and workflow jobs: the check types are

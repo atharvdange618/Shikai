@@ -1,4 +1,5 @@
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { PRHeader } from "@/components/repo/PRHeader";
 import { MarkdownRenderer } from "@/components/shared/MarkdownRenderer";
 import {
   type ColorTokens,
@@ -41,9 +42,10 @@ export default function CheckRunScreen() {
 }
 
 function CheckRunScreenContent() {
-  const { repoId, runId } = useLocalSearchParams<{
+  const { repoId, runId, prNumber } = useLocalSearchParams<{
     repoId: string;
     runId: string;
+    prNumber?: string;
   }>();
   const navigation = useNavigation();
   const { colors } = useTheme();
@@ -108,7 +110,11 @@ function CheckRunScreenContent() {
     .join("\n\n");
 
   return (
-    <ScrollView
+    <>
+      {prNumber && (
+        <PRHeader title={run.name} repoId={repoId} number={prNumber} />
+      )}
+      <ScrollView
       style={[s.scroll, { backgroundColor: colors.background }]}
       contentContainerStyle={s.content}
       showsVerticalScrollIndicator={false}
@@ -254,7 +260,8 @@ function CheckRunScreenContent() {
       </Pressable>
 
       <View style={{ height: Spacing.xxl + 60 + Spacing.lg }} />
-    </ScrollView>
+      </ScrollView>
+    </>
   );
 }
 

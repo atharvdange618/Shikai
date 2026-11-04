@@ -1,4 +1,5 @@
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { PRHeader } from "@/components/repo/PRHeader";
 import { DiffFileList } from "@/components/repo/DiffFileList";
 import {
   FontFamily,
@@ -34,7 +35,11 @@ export default function CommitDetailScreen() {
 }
 
 function CommitDetailScreenContent() {
-  const { repoId, sha } = useLocalSearchParams<{ repoId: string; sha: string }>();
+  const { repoId, sha, prNumber } = useLocalSearchParams<{
+    repoId: string;
+    sha: string;
+    prNumber?: string;
+  }>();
   const navigation = useNavigation();
   const { colors } = useTheme();
 
@@ -84,7 +89,11 @@ function CommitDetailScreenContent() {
   };
 
   return (
-    <ScrollView
+    <>
+      {prNumber && (
+        <PRHeader title={sha.slice(0, 7)} repoId={repoId} number={prNumber} />
+      )}
+      <ScrollView
       style={[s.scroll, { backgroundColor: colors.background }]}
       contentContainerStyle={s.content}
       showsVerticalScrollIndicator={false}
@@ -160,11 +169,13 @@ function CommitDetailScreenContent() {
           colors={colors}
           repoId={repoId ?? ""}
           diffSource={{ source: "commit", sha: sha ?? "" }}
+          prNumber={prNumber}
         />
       )}
 
       <View style={{ height: Spacing.xxl + 60 + Spacing.lg }} />
-    </ScrollView>
+      </ScrollView>
+    </>
   );
 }
 
