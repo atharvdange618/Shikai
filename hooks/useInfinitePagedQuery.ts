@@ -47,6 +47,7 @@ export function useInfinitePagedQuery<
 
   return {
     items: flatten(query.data),
+    data: query.data,
     fetchNextPage: query.fetchNextPage,
     hasNextPage: query.hasNextPage,
     isFetchingNextPage: query.isFetchingNextPage,

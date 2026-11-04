@@ -716,11 +716,20 @@ export async function fetchIssueTimeline(
   repo: string,
   issueNumber: number,
 ): Promise<GitHubTimelineEvent[]> {
-  const { data } = await githubAxios.get<GitHubTimelineEvent[]>(
+  return (await fetchIssueTimelinePage(owner, repo, issueNumber)).events;
+}
+
+export async function fetchIssueTimelinePage(
+  owner: string,
+  repo: string,
+  issueNumber: number,
+  page: number = 1,
+): Promise<{ events: GitHubTimelineEvent[]; pagination: GitHubPagination }> {
+  const { data, headers } = await githubAxios.get<GitHubTimelineEvent[]>(
     `/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/issues/${issueNumber}/timeline`,
-    { params: { per_page: 100 } },
+    { params: { page, per_page: 100 } },
   );
-  return data;
+  return { events: data, pagination: parseLinkHeader(headers["link"]) };
 }
 
 export async function fetchIssueComments(
@@ -891,12 +900,13 @@ export async function fetchPullRequestReviews(
   owner: string,
   repo: string,
   prNumber: number,
-): Promise<GitHubReview[]> {
-  const { data } = await githubAxios.get<GitHubReview[]>(
+  page: number = 1,
+): Promise<{ reviews: GitHubReview[]; pagination: GitHubPagination }> {
+  const { data, headers } = await githubAxios.get<GitHubReview[]>(
     `/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/pulls/${prNumber}/reviews`,
-    { params: { per_page: 100 } },
+    { params: { page, per_page: 100 } },
   );
-  return data;
+  return { reviews: data, pagination: parseLinkHeader(headers["link"]) };
 }
 
 export async function fetchRequestedReviewers(
@@ -914,24 +924,43 @@ export async function fetchPullRequestCommits(
   owner: string,
   repo: string,
   prNumber: number,
-): Promise<GitHubCommit[]> {
-  const { data } = await githubAxios.get<GitHubCommit[]>(
+  page: number = 1,
+): Promise<{ commits: GitHubCommit[]; pagination: GitHubPagination }> {
+  const { data, headers } = await githubAxios.get<GitHubCommit[]>(
     `/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/pulls/${prNumber}/commits`,
-    { params: { per_page: 100 } },
+    { params: { page, per_page: 100 } },
   );
-  return data;
+  const pagination = parseLinkHeader(headers["link"]);
+  // GitHub only exposes the first 250 PR commits through this endpoint.
+  if (page >= 3) delete pagination.next;
+  return {
+    commits: data.slice(0, Math.max(0, 250 - (page - 1) * 100)),
+    pagination,
+  };
 }
 
 export async function fetchCheckRuns(
   owner: string,
   repo: string,
   ref: string,
-): Promise<GitHubCheckRun[]> {
-  const { data } = await githubAxios.get<{ check_runs: GitHubCheckRun[] }>(
+  page: number = 1,
+): Promise<{
+  runs: GitHubCheckRun[];
+  total: number;
+  pagination: GitHubPagination;
+}> {
+  const { data, headers } = await githubAxios.get<{
+    check_runs: GitHubCheckRun[];
+    total_count: number;
+  }>(
     `/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/commits/${encodeURIComponent(ref)}/check-runs`,
-    { params: { per_page: 100 } },
+    { params: { page, per_page: 100, filter: "latest" } },
   );
-  return data.check_runs;
+  return {
+    runs: data.check_runs,
+    total: data.total_count,
+    pagination: parseLinkHeader(headers["link"]),
+  };
 }
 
 export async function fetchCheckRun(
@@ -1038,9 +1067,11 @@ export async function fetchCombinedStatus(
   owner: string,
   repo: string,
   ref: string,
-): Promise<GitHubCombinedStatus> {
-  const { data } = await githubAxios.get<GitHubCombinedStatus>(
+  page: number = 1,
+): Promise<GitHubCombinedStatus & { pagination: GitHubPagination }> {
+  const { data, headers } = await githubAxios.get<GitHubCombinedStatus>(
     `/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/commits/${encodeURIComponent(ref)}/status`,
+    { params: { page, per_page: 100 } },
   );
-  return data;
+  return { ...data, pagination: parseLinkHeader(headers["link"]) };
 }

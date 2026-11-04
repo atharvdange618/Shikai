@@ -76,6 +76,7 @@ export interface GitHubUserSummary {
   login: string;
   avatar_url: string;
   html_url: string;
+  type?: string;
 }
 
 export type GitHubLanguages = Record<string, number>;
@@ -375,6 +376,7 @@ export interface GitHubPullRequest {
 
 /** The single-PR endpoint adds totals the list endpoint leaves out. */
 export interface GitHubPullRequestDetail extends GitHubPullRequest {
+  commits: number;
   additions: number;
   deletions: number;
   changed_files: number;
@@ -530,7 +532,13 @@ export interface GitHubComparison {
   files: GitHubPullRequestFile[];
 }
 
-export type GitHubCheckStatus = "queued" | "in_progress" | "completed";
+export type GitHubCheckStatus =
+  | "queued"
+  | "in_progress"
+  | "completed"
+  | "waiting"
+  | "requested"
+  | "pending";
 
 export type GitHubCheckConclusion =
   | "success"
@@ -540,6 +548,7 @@ export type GitHubCheckConclusion =
   | "skipped"
   | "timed_out"
   | "action_required"
+  | "stale"
   | null;
 
 export interface GitHubCheckRun {
@@ -550,6 +559,8 @@ export interface GitHubCheckRun {
   html_url: string;
   started_at: string;
   completed_at: string | null;
+  /** The app that reported the run (`GitHub Actions`, `GitGuardian`, …). */
+  app: { name: string; slug: string } | null;
 }
 
 export interface GitHubCheckRunDetail extends GitHubCheckRun {
@@ -624,6 +635,8 @@ export interface GitHubCombinedStatus {
     state: GitHubCombinedStatusState;
     description: string | null;
     target_url: string | null;
+    created_at: string;
+    updated_at: string;
   }[];
 }
 

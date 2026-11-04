@@ -87,12 +87,11 @@ function PullRequestDetailScreenContent() {
     [comments, timelineEvents],
   );
 
-  const { data: reviewCommentsData } = usePullRequestReviewComments(
+  const { comments: reviewComments } = usePullRequestReviewComments(
     owner,
     repoName,
     prNumber,
   );
-  const reviewComments = reviewCommentsData?.comments ?? [];
 
   const {
     files,
@@ -101,22 +100,14 @@ function PullRequestDetailScreenContent() {
     isFetchingNextPage: isFetchingMoreFiles,
   } = usePullRequestFiles(owner, repoName, prNumber);
 
-  const { data: reviews = [] } = usePullRequestReviews(
-    owner,
-    repoName,
-    prNumber,
-  );
+  const { reviews } = usePullRequestReviews(owner, repoName, prNumber);
   const { data: requestedReviewers } = useRequestedReviewers(
     owner,
     repoName,
     prNumber,
   );
 
-  const { data: commits = [] } = usePullRequestCommits(
-    owner,
-    repoName,
-    prNumber,
-  );
+  const { commits } = usePullRequestCommits(owner, repoName, prNumber);
 
   const { data: checks = [] } = useChecks(owner, repoName, pr?.head.sha ?? "");
 

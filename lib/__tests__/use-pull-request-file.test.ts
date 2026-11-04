@@ -91,4 +91,12 @@ describe("usePullRequestFile", () => {
     expect(render("later.ts").isLoading).toBe(false);
     expect(m.fetchNextPage).not.toHaveBeenCalled();
   });
+  it("keeps a loaded file readable when a later page fails", () => {
+    m.state.isError = true;
+    const r = render("a.ts");
+    expect(r.file?.filename).toBe("a.ts");
+    expect(r.isError).toBe(false);
+    expect(r.isLoading).toBe(false);
+    expect(m.fetchNextPage).not.toHaveBeenCalled();
+  });
 });

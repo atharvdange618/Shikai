@@ -124,7 +124,12 @@ export default function RepoDetailsScreen() {
     setRefreshing(false);
   }, [queryClient, owner, repoName]);
 
-  const { data: checks = [] } = useChecks(owner, repoName, lastCommit?.sha ?? "");
+  const {
+    data: checks,
+    isLoading: checksLoading,
+    isError: checksError,
+    hasNextPage: moreChecks,
+  } = useChecks(owner, repoName, lastCommit?.sha ?? "");
 
   const checksState = useMemo(() => {
     if (checks.length === 0) return null;
@@ -138,11 +143,14 @@ export default function RepoDetailsScreen() {
       )
     )
       return "failure" as const;
-    if (checks.some((c) => c.conclusion === "pending")) return "pending" as const;
-    if (checks.some((c) => c.conclusion === "success"))
+    if (checks.some((c) => c.conclusion === "pending"))
+      return "pending" as const;
+    // Missing or unloaded results can hide a failure, so claim nothing.
+    if (checksLoading || checksError || moreChecks) return null;
+    if (checks.every((c) => c.conclusion === "success"))
       return "success" as const;
     return null;
-  }, [checks]);
+  }, [checks, checksLoading, checksError, moreChecks]);
 
   useEffect(() => {
     if (repo?.name) {
