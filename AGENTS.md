@@ -86,6 +86,10 @@ Deeper docs: `notes/ARCHITECTURE.md` (data flow, token rules, background work) a
 | `lib/sentry.ts` | Sentry setup, token scrubbing, and `reportApiError()` for GitHub failures. Initialized from `index.ts`. |
 | `lib/highlight.ts` | `highlightDiff()`: parses a unified patch and colors each hunk by language. Powers the diff screen and review-thread hunks. |
 | `lib/file-html.ts` | Builds the WebView page for the code and diff viewers (`buildCodeHtml`, `buildDiffHtml`). Pure functions, covered by Vitest. |
+| `app/(app)/repo/[repoId]/pr/[number].tsx` | PR overview: state, compact check and review status, links to the four section screens, description and conversation. D-039. |
+| `app/(app)/repo/[repoId]/pr/[number]/` | PR section screens (`files`, `reviews`, `commits`, `checks`) and `thread/[threadId]` for one review thread. Each pages its data and keeps loaded rows on a page error. |
+| `lib/pr-review.ts` | Pure PR logic: review threads from comments, check grouping and summaries, each reviewer's latest decision. Covered by Vitest. |
+| `components/repo/PRHeader.tsx`, `components/repo/PRList.tsx` | PR screen header (title plus `owner / repo · PR #n`), and the shared FlashList, page state and GitHub link for the section screens. |
 | `app/(app)/repo/[repoId]/diff.tsx` | Full-screen diff for one changed file; reads the patch back from the PR, commit or compare query the previous screen cached. |
 | `components/shared/PullToRefresh.tsx` | The app's only `RefreshControl`; takes its arc and tray colors from the theme. |
 | `lib/use-ota-updates.ts` | `expo-updates` OTA check/apply hook. |

@@ -385,3 +385,29 @@ Entries D-001 to D-021 were backfilled on 2026-10-15 from commits, the changelog
 **Decision.** Extend `isDevClientUrl` in `lib/github-url.ts`, which both `redirectSystemPath` and `appLinkPath` already use. Drop launcher links before warm navigation and cold-start replay. Keep OAuth callbacks and ordinary app links on their existing paths.
 **Rejected.** A timer, forced reload, or another Overview redirect: each hides the wrong route instead of rejecting the non-route URL that created it.
 **Evidence.** The warm-link regression test failed before the change. After it, the routing tests pass and replaying the failing URL leaves Overview visible on the physical Android phone. Restarting the app also restores Overview. A fresh browser OAuth flow and a release-build check remain required.
+
+## D-039: PR overview with separate reading screens
+
+**Date:** 2026-11-04 · **Status:** Accepted
+
+**Context.** Expanded CI jobs pushed descriptions, files, commits and code comments far down the PR page. Issue #42 approves an overview with four section links, using the same navigation for small and large PRs.
+
+**Decision.** Keep title, state, branches, compact status, description and conversation on the existing PR route. Files, review threads, commits and checks each have a separate route in the repo stack. Files open the existing diff viewer; threads open their own view with code context and ordered replies. Commit and check details accept optional PR context. Native stack screens stay mounted under their children, retaining list positions and expansion state on Back; React Query retains loaded pages.
+
+**Data.** Page files, commits, submitted reviews, inline comments, conversation, activity, check runs and legacy statuses. A summary cannot report success while either check source loads, fails or has more pages. Count threads from root comments, never from all comment records. Review summaries load every submitted-review page because later decisions can replace earlier ones. A comment-only review never replaces a reviewer's approval or change request, matching GitHub. Page errors retain loaded rows and offer retry. Bot reports start collapsed.
+
+**Limits.** GitHub exposes at most 250 PR commits and 3,000 files. The section screens keep PR totals separate from loaded counts and link to GitHub for the remainder. The checks screen explains the API's limit of the 1,000 most recent check suites.
+
+**Rejected.** Expanding all four lists on the overview recreates the long page. Repo-wide commit history cannot substitute for PR-scoped commits.
+
+## D-040: The PR section screens reuse the app's existing row and card designs
+
+**Date:** 2026-11-04 · **Status:** Accepted
+
+**Context.** The first cut of the issue #42 section screens invented their own rows: diff counts printed as plain text, review threads as a flat wall of blocks, PR commits as the compact row meant for the collapsible commit card, and checks as a name plus a bare conclusion string. Every one of those already had a better-looking implementation elsewhere in the app.
+
+**Decision.** Reuse, don't redraw. `components/repo/DiffStat.tsx` owns the colored `+N / −M` and the per-file status icon, and `DiffFileList` uses it too. Reviews are light thread cards (file group header, line, two-line body, author, reply count) that open the existing thread screen, which keeps the hunk and every reply. `components/repo/CommitCard.tsx` is the repo commits card, used unchanged by the repo list and by the PR commits screen. Checks rows copy the repo Actions anatomy: status icon from `getRunDisplay`, name, reporting app, branch pill, duration and age.
+
+**Data.** A check row needs more than a conclusion, so `CheckSummaryItem` now carries `status`, `app`, `startedAt` and `completedAt` from the check-run and legacy-status responses. `getCheckDisplay` maps the merged list's two pseudo-conclusions (`pending`, `error`) onto the shared run display.
+
+**Consequence.** A visual change to commits, diff counts or check rows now happens in one place, so the repo screens and the PR screens cannot drift apart.

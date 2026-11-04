@@ -77,3 +77,17 @@ Add an entry whenever a bug traces back to GitHub, in the same change as the fix
 - **Cause:** GitHub leaves `patch` out of the files response for binaries, for diffs past its size limit, and for a rename with no content change. No error is returned.
 - **Check:** `gh api "/repos/<owner>/<repo>/pulls/<number>/files" -q '.[] | select(.patch == null) | .filename'`.
 - **Handled:** `app/(app)/repo/[repoId]/diff.tsx` says why instead of showing an empty viewer, and names the rename case separately. D-031.
+
+## Pull request commits stop at 250
+
+- **Symptom:** a PR reports more commits than its commit list can load.
+- **Cause:** the PR commits endpoint exposes at most 250 commits, even with paging ([docs](https://docs.github.com/en/rest/pulls/pulls#list-commits-on-a-pull-request), checked 2026-11-04).
+- **Check:** compare `.commits` on `/repos/<owner>/<repo>/pulls/<number>` with the paged `/pulls/<number>/commits` response.
+- **Handled:** `fetchPullRequestCommits` stops at 250; the PR commit screen shows the PR total, the loaded count and a GitHub link. D-039.
+
+## Check runs cover only the most recent 1,000 suites
+
+- **Symptom:** an exceptionally busy commit can have check runs on GitHub that do not appear in the ref's check-run list.
+- **Cause:** `/commits/{ref}/check-runs` limits results to the 1,000 most recent check suites ([docs](https://docs.github.com/en/rest/checks/runs#list-check-runs-for-a-git-reference), checked 2026-11-04). This is a suite limit, not a 1,000-run limit.
+- **Check:** compare the ref's paged check runs with runs fetched by individual check-suite ID.
+- **Handled:** the PR Checks screen pages available runs, explains the limit and links to GitHub. D-039.
