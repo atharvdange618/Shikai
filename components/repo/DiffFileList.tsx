@@ -17,21 +17,7 @@ import {
   View,
 } from "react-native";
 
-function getFileStatusDisplay(
-  status: GitHubPullRequestFile["status"],
-  colors: ColorTokens,
-): { icon: React.ComponentProps<typeof Octicons>["name"]; color: string } {
-  switch (status) {
-    case "added":
-      return { icon: "diff-added", color: colors.success };
-    case "removed":
-      return { icon: "diff-removed", color: colors.danger };
-    case "renamed":
-      return { icon: "diff-renamed", color: colors.textMuted };
-    default:
-      return { icon: "diff-modified", color: colors.warning };
-  }
-}
+import { DiffStat, getFileStatusDisplay } from "@/components/repo/DiffStat";
 
 /** Which query holds the files; the diff screen reads it back from cache. */
 export type DiffSource =
@@ -93,10 +79,7 @@ export function DiffFileList({
         <View
           style={{ flexDirection: "row", alignItems: "center", gap: Spacing.sm }}
         >
-          <Text style={s.diffStat}>
-            <Text style={{ color: colors.success }}>+{totalAdditions}</Text>{" "}
-            <Text style={{ color: colors.danger }}>-{totalDeletions}</Text>
-          </Text>
+          <DiffStat additions={totalAdditions} deletions={totalDeletions} />
           <Octicons
             name={sectionExpanded ? "chevron-up" : "chevron-down"}
             size={14}
@@ -124,10 +107,7 @@ export function DiffFileList({
               >
                 {file.filename}
               </Text>
-              <Text style={s.diffStat}>
-                <Text style={{ color: colors.success }}>+{file.additions}</Text>{" "}
-                <Text style={{ color: colors.danger }}>-{file.deletions}</Text>
-              </Text>
+              <DiffStat additions={file.additions} deletions={file.deletions} />
               <Octicons name="chevron-right" size={14} color={colors.textMuted} />
             </Pressable>
           );
@@ -189,10 +169,6 @@ function buildStyles(colors: ColorTokens) {
       flex: 1,
       fontFamily: FontFamily.regular,
       fontSize: FontSize.caption,
-    },
-    diffStat: {
-      fontFamily: FontFamily.mono,
-      fontSize: 11,
     },
     loadMore: {
       flex: 1,
