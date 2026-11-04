@@ -56,6 +56,8 @@ const RESERVED_FIRST_SEGMENT = new Set([
   "codespaces",
 ]);
 
+const PR_TABS = new Set(["files", "commits", "checks"]);
+
 /**
  * Maps a github.com web URL to an in-app route string, or returns null when the
  * app has no screen for it (the caller should then open the URL in the browser).
@@ -88,8 +90,14 @@ export function parseGitHubUrl(url: string): string | null {
   if (!kind) return repoBase;
 
   switch (kind) {
-    case "pull":
-      return a ? `${repoBase}/pr/${a}` : `${repoBase}/pull-requests`;
+    case "pull": {
+      if (!a) return `${repoBase}/pull-requests`;
+      // GitHub's PR tabs map to the PR section screens; other tabs land on Overview.
+      const tab = seg[4];
+      return tab && PR_TABS.has(tab)
+        ? `${repoBase}/pr/${a}/${tab}`
+        : `${repoBase}/pr/${a}`;
+    }
     case "pulls":
       return `${repoBase}/pull-requests`;
     case "issues":

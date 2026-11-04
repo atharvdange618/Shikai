@@ -70,6 +70,17 @@ describe("parseGitHubUrl", () => {
     );
   });
 
+  it("opens a PR's files, commits and checks tabs on their own screens", () => {
+    const base = "/(app)/repo/facebook~~react/pr/123";
+    for (const tab of ["files", "commits", "checks"])
+      expect(
+        parseGitHubUrl(`https://github.com/facebook/react/pull/123/${tab}`),
+      ).toBe(`${base}/${tab}`);
+    expect(
+      parseGitHubUrl("https://github.com/facebook/react/pull/123/unknown"),
+    ).toBe(base);
+  });
+
   it("routes pull requests and issues", () => {
     const base = "/(app)/repo/facebook~~react";
     expect(parseGitHubUrl("https://github.com/facebook/react/pull/123")).toBe(
