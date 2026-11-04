@@ -7,35 +7,12 @@ import {
   Spacing,
 } from "@/constants/theme";
 import { relativeTime } from "@/lib/utils";
+import { buildThreads } from "@/lib/pr-review";
 import type { GitHubReviewComment } from "@/types/github.types";
 import { Octicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { useMemo } from "react";
 import { StyleSheet, Text, View } from "react-native";
-
-interface ReviewThread {
-  path: string;
-  line: number | null;
-  diffHunk: string;
-  root: GitHubReviewComment;
-  replies: GitHubReviewComment[];
-}
-
-function buildThreads(comments: GitHubReviewComment[]): ReviewThread[] {
-  const roots = comments
-    .filter((c) => !c.in_reply_to_id)
-    .sort((a, b) => a.created_at.localeCompare(b.created_at));
-
-  return roots.map((root) => ({
-    path: root.path,
-    line: root.line ?? root.original_line,
-    diffHunk: root.diff_hunk,
-    root,
-    replies: comments
-      .filter((c) => c.in_reply_to_id === root.id)
-      .sort((a, b) => a.created_at.localeCompare(b.created_at)),
-  }));
-}
 
 /**
  * Flat, chronological list of PR review threads. Each thread carries its own
@@ -75,7 +52,6 @@ export function ReviewThreadList({
             <Octicons name="diff" size={12} color={colors.textMuted} />
             <Text
               style={[s.pathText, { color: colors.textMuted }]}
-              numberOfLines={1}
             >
               {thread.path}
               {thread.line ? `:${thread.line}` : ""}
