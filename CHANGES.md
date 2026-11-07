@@ -1,15 +1,24 @@
 # Changelog
 
-## Unreleased
+## v1.9.0 (November 7, 2026)
 
-These changes follow the `v1.8.0` tag and are not in its published GitHub APK. Play remains on 1.7.0.
+The first Play release since 1.7.0, so Play users also get everything in 1.8.0. No native changes since 1.8.0.
+
+### Features
+
+- **Pull request overview** - A pull request opens on an overview: state, branches, a short check and review summary, the description and the conversation. Files, review threads, commits and checks each open on their own screen, page through large PRs, and show how many items are loaded out of GitHub's total. Back returns to the same scroll position, and an expanded check group stays expanded. A review thread opens on its own screen with its hunk and every reply. A commit's SHA badge copies the full SHA. ([`7e2f36c`](https://github.com/atharvdange618/Shikai/commit/7e2f36c), [`a528c03`](https://github.com/atharvdange618/Shikai/commit/a528c03), [`971a6c2`](https://github.com/atharvdange618/Shikai/commit/971a6c2), D-039)
+- **PR tab links** - A github.com link to a PR's files, commits or checks tab opens that screen instead of the overview. ([`675aa2e`](https://github.com/atharvdange618/Shikai/commit/675aa2e))
 
 ### Fixes
 
-- **Black screen after returning to the dev client** - SDK 58 launcher links with `__expo_url` could push the blank index route over Overview. The shared link filter now drops both old and new launcher URLs, including initial-link replay. Reproduced on a physical Android phone; replaying the failing URL after the fix keeps Overview visible without a Metro reload. A fresh end-to-end GitHub sign-in and release-build check still need confirmation.
-- **OAuth browser closure** - GitHub sign-in now uses `WebBrowser.openAuthSessionAsync`, with a guard against exchanging the same code concurrently (`8c1fdcb`). Browser closure alone did not fix the blank-route issue.
-- **React Compiler rules** - Fixed all 25 warnings and restored the five rules to errors (`276b580`, D-036).
-- **Environment template** - Removed `NODE_ENV` from `.env.example`; Expo sets it for each command (`d947b51`).
+- **Approvals kept** - A reviewer who approved and later left a comment-only review still shows as approved, as on GitHub. ([`b56d952`](https://github.com/atharvdange618/Shikai/commit/b56d952))
+- **Markdown box in a box** - Issue descriptions and comments drew a dark box inside their card. Markdown now takes its card's color, and issue comments use the same layout as review threads. ([`44c7547`](https://github.com/atharvdange618/Shikai/commit/44c7547))
+- **Sign-in tab stays open** - After GitHub sign-in, the browser tab now closes on its own. ([`8c1fdcb`](https://github.com/atharvdange618/Shikai/commit/8c1fdcb))
+
+### Under the Hood
+
+- Development builds no longer show a black screen when the dev client opens an SDK 58 launcher link. Release builds were never affected. ([`066a297`](https://github.com/atharvdange618/Shikai/commit/066a297), D-038)
+- All 25 React Compiler warnings fixed, and the five rules are errors again. ([`276b580`](https://github.com/atharvdange618/Shikai/commit/276b580), D-036)
 
 ## v1.8.0 (November 3, 2026)
 
