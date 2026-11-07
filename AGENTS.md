@@ -7,7 +7,7 @@ Read-only GitHub companion for Android. React Native + Expo SDK 58, expo-router,
 ## Current progress (November 3, 2026)
 
 - v1.8.0 shipped as a GitHub APK; Play remains on 1.7.0. Compiler cleanup (`276b580`), browser auth sessions (`8c1fdcb`) and env-template cleanup (`d947b51`) follow that tag.
-- The critical black-screen report traced to SDK 58's `shikai://?__expo_url=…` pushing the blank index over Overview. `isDevClientUrl()` now rejects both launcher URL formats for native routing and initial-link replay. Phone replay and app restart show Overview; fresh GitHub OAuth and release-build checks remain pending. See D-038 and `notes/ROADMAP.md`.
+- The critical black-screen report traced to SDK 58's `shikai://?__expo_url=…` pushing the blank index over Overview. `isDevClientUrl()` now rejects both launcher URL formats for native routing and initial-link replay. Phone replay, app restart and a fresh GitHub OAuth sign-in (debug build on the emulator, release build on the phone, 2026-11-07) all land on Overview. See D-038 and `notes/ROADMAP.md`.
 - Use Git Bash for commands on this machine. Exported build variables live there, not in Command Prompt or PowerShell.
 
 ## Commands

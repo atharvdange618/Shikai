@@ -10,7 +10,7 @@ This document tracks the feature backlog and development progress for Shikai.
 - **After the release tag:** React Compiler cleanup is complete and the five rules are errors again (`276b580`). OAuth now uses a browser auth session (`8c1fdcb`); `.env.example` no longer sets `NODE_ENV` (`d947b51`). These changes are not in the tagged APK.
 - **Critical auth-return report:** GitHub authentication works, but the user saw a black screen until a Metro reload. On the phone, a dev-launch link carrying `__expo_url` pushed the blank root index over the mounted Overview. Back restored Overview without reloading.
 - **Fix and evidence:** the shared dev-client link filter now handles both launcher URL formats. Replaying the failing URL, restarting the app, and replaying again keep Overview visible on the physical Android phone. Lint, TypeScript, all 287 tests across 27 files, and `git diff --check` pass.
-- **Still required:** a fresh GitHub browser sign-in must reach Overview without Back or Metro reload, followed by a release-build check. Do not mark the full auth flow verified based only on the launcher replay.
+- **Verified 2026-11-07:** a fresh GitHub browser sign-in reaches Overview with no Back press or Metro reload, on the emulator debug build (twice) and on a release build on the phone. Back from Overview leaves the app, and a cold restart opens Overview.
 - **Deferred:** the Sentry bump remains tied to Expo's supported version; see [Maintenance](MAINTENANCE.md).
 
 ---
@@ -22,7 +22,7 @@ This document tracks the feature backlog and development progress for Shikai.
 | GitHub Contribution Streak Widget | Android home screen widget displaying current streak, longest streak, and recent activity. Syncs with app theme and updates on data refresh.    | Done   |
 | OTA Updates                       | Over-the-air updates via `expo-updates` with EAS build profiles. App checks for updates on launch, downloads them, and asks before restarting to apply. | Done   |
 | SVG and PDF Rendering | File previews use `ImageViewer` for images and SVG, `PdfViewer` for PDF, `MarkdownViewer` for markdown, and `CodeViewer` for code. | Done |
-| OAuth browser flow | Browser auth sessions close on return. The SDK 58 blank-route fix passes phone launcher replay; fresh OAuth and release-build verification remain open above. | QA pending |
+| OAuth browser flow | Browser auth sessions close on return. The SDK 58 blank-route fix passes launcher replay and a fresh sign-in on debug and release builds (2026-11-07). | Done |
 | Tooltip Behavior Fix              | Tooltips close on outside press and tab change for cleaner UX.                                                                                  | Done   |
 | Mermaid Diagram Improvements      | Improved loading with fetch API and loading placeholders.                                                                                       | Done   |
 | Repo Detail Decomposition         | Decomposed repo detail screen into focused sub-components for better maintainability.                                                           | Done   |

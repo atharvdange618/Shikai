@@ -379,7 +379,7 @@ Entries D-001 to D-021 were backfilled on 2026-10-15 from commits, the changelog
 
 ## D-038: Drop both dev-client launch URL formats before app routing
 
-**Date:** 2026-11-03 · **Status:** Accepted; full OAuth and release-build verification pending
+**Date:** 2026-11-03 · **Status:** Accepted; fresh OAuth verified on a debug and a release build (2026-11-07)
 
 **Context.** After GitHub sign-in, the phone showed a black screen despite Overview being mounted. Native navigation had a second root `index` route with `__expo_url` above `(app)`. Back removed it and restored Overview without a reload. SDK 58 uses `shikai://?__expo_url=…`; the existing helper only recognized `shikai://expo-development-client/?url=…`.
 **Decision.** Extend `isDevClientUrl` in `lib/github-url.ts`, which both `redirectSystemPath` and `appLinkPath` already use. Drop launcher links before warm navigation and cold-start replay. Keep OAuth callbacks and ordinary app links on their existing paths.
