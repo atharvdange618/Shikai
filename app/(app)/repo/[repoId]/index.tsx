@@ -86,7 +86,7 @@ export default function RepoDetailsScreen() {
   const pat = useAuthStore((s) => s.pat);
 
   const handleBookmarkToggle = useCallback(() => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
     toggleWatchlist(repoIdEncoded);
   }, [toggleWatchlist, repoIdEncoded]);
 
@@ -163,7 +163,7 @@ export default function RepoDetailsScreen() {
 
   useEffect(() => {
     if (!isLoading.core) return;
-    const timer = setTimeout(() => refetch(), 10_000);
+    const timer = setTimeout(() => void refetch(), 10_000);
     return () => clearTimeout(timer);
   }, [isLoading.core, refetch]);
 
@@ -175,17 +175,17 @@ export default function RepoDetailsScreen() {
   }, [lastCommit, setCopiedHash]);
 
   const handleCommitsPress = useCallback(() => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
     router.push(`/(app)/repo/${repoId}/commits`);
   }, [router, repoId]);
 
   const handleStarsPress = useCallback(() => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
     router.push(`/(app)/repo/${repoId}/stargazers`);
   }, [router, repoId]);
 
   const handleForksPress = useCallback(() => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
     router.push(`/(app)/repo/${repoId}/forks`);
   }, [router, repoId]);
 
@@ -195,7 +195,7 @@ export default function RepoDetailsScreen() {
   }, [queryClient, owner, repoName]);
 
   const handleCodePress = useCallback(() => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
     router.push(`/(app)/repo/${repoId}/files`);
   }, [router, repoId]);
 
@@ -208,7 +208,7 @@ export default function RepoDetailsScreen() {
 
   const handleShare = useCallback(async () => {
     if (!repo) return;
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
     try {
       const parts: string[] = [`📦 ${repo.full_name}`];
       if (repo.description) parts.push(repo.description);
@@ -225,20 +225,20 @@ export default function RepoDetailsScreen() {
 
   const handleShareLongPress = useCallback(async () => {
     if (!repo?.html_url) return;
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
     await Clipboard.setStringAsync(repo.html_url);
     setCopiedUrl(true);
     setTimeout(() => setCopiedUrl(false), 2000);
   }, [repo]);
 
   const handleIssuesPress = useCallback(() => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
     router.push(`/(app)/repo/${repoId}/issues`);
   }, [router, repoId]);
 
   const handleIssuesPressIn = useCallback(() => {
     if (!owner || !repoName) return;
-    queryClient.prefetchInfiniteQuery({
+    void queryClient.prefetchInfiniteQuery({
       queryKey: queryKeys.repoIssues(owner, repoName, "open"),
       queryFn: ({ pageParam }) => fetchIssues(owner, repoName, pageParam, 10, "open"),
       initialPageParam: 1,
@@ -249,13 +249,13 @@ export default function RepoDetailsScreen() {
   }, [owner, repoName, queryClient]);
 
   const handlePRsPress = useCallback(() => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
     router.push(`/(app)/repo/${repoId}/pull-requests`);
   }, [router, repoId]);
 
   const handlePRsPressIn = useCallback(() => {
     if (!owner || !repoName) return;
-    queryClient.prefetchInfiniteQuery({
+    void queryClient.prefetchInfiniteQuery({
       queryKey: queryKeys.repoPullRequests(owner, repoName, "open"),
       queryFn: ({ pageParam }) => fetchPullRequests(owner, repoName, pageParam, 10, "open"),
       initialPageParam: 1,
@@ -266,22 +266,22 @@ export default function RepoDetailsScreen() {
   }, [owner, repoName, queryClient]);
 
   const handleReleasesPress = useCallback(() => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
     router.push(`/(app)/repo/${repoId}/releases`);
   }, [router, repoId]);
 
   const handleActionsPress = useCallback(() => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
     router.push(`/(app)/repo/${repoId}/actions`);
   }, [router, repoId]);
 
   const handleDiscussionsPress = useCallback(() => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
     router.push(`/(app)/repo/${repoId}/discussions`);
   }, [router, repoId]);
 
   const handleInsightsPress = useCallback(() => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
     router.push(`/(app)/repo/${repoId}/insights`);
   }, [router, repoId]);
 
@@ -428,8 +428,10 @@ export default function RepoDetailsScreen() {
             onCodePressIn={handleCodePressIn}
             onCommitsPress={handleCommitsPress}
             onCommitsPressIn={handleCommitsPressIn}
-            onShare={handleShare}
-            onShareLongPress={handleShareLongPress}
+            onShare={() => void handleShare()}
+            onShareLongPress={() => {
+              handleShareLongPress().catch(() => console.error("Could not copy repository link"));
+            }}
             onBookmarkToggle={handleBookmarkToggle}
           />
         </Animated.View>
@@ -441,7 +443,9 @@ export default function RepoDetailsScreen() {
             copiedHash={copiedHash}
             colors={colors}
             checksState={checksState}
-            onCopyHash={handleCopyHash}
+            onCopyHash={() => {
+              handleCopyHash().catch(() => console.error("Could not copy commit hash"));
+            }}
             onPress={
               lastCommit
                 ? () =>

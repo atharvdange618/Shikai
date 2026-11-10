@@ -17,6 +17,6 @@ export function useInAppUpdates() {
       }
     };
 
-    check();
+    void check();
   }, []);
 }

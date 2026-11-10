@@ -174,7 +174,7 @@ export default function FollowingFeedScreen() {
       return;
     }
     if (hasNextPage && !isFetchingNextPage) {
-      fetchNextPage();
+      void fetchNextPage();
     }
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 

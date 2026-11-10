@@ -265,7 +265,9 @@ export default function FileExplorerScreen() {
     if (!pendingScrollPath) return;
     const index = displayTree.findIndex((item) => item.node.path === pendingScrollPath);
     if (index === -1) return;
-    listRef.current?.scrollToIndex({ index, animated: true, viewPosition: 0.3 });
+    listRef.current
+      ?.scrollToIndex({ index, animated: true, viewPosition: 0.3 })
+      .catch(() => console.error("Could not scroll to file"));
     const id = setTimeout(() => setPendingScrollPath(undefined), 0);
     return () => clearTimeout(id);
   }, [pendingScrollPath, displayTree]);

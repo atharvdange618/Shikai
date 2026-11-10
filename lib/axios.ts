@@ -61,24 +61,19 @@ function usedSessionToken(config: InternalAxiosRequestConfig | undefined): boole
   return usedAuth === sessionAuth;
 }
 
-githubAxios.interceptors.request.use(
-  (config: InternalAxiosRequestConfig) => {
-    // A request that already set its own Authorization header (e.g. to
-    // validate a token that isn't the active session's) keeps it as-is.
-    if (!config.headers.has("Authorization")) {
-      const token = useAuthStore.getState().token;
+githubAxios.interceptors.request.use((config: InternalAxiosRequestConfig) => {
+  // A request that already set its own Authorization header (e.g. to
+  // validate a token that isn't the active session's) keeps it as-is.
+  if (!config.headers.has("Authorization")) {
+    const token = useAuthStore.getState().token;
 
-      if (token) {
-        config.headers.set("Authorization", `Bearer ${token}`);
-      }
+    if (token) {
+      config.headers.set("Authorization", `Bearer ${token}`);
     }
+  }
 
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  },
-);
+  return config;
+});
 
 githubAxios.interceptors.response.use(
   (response) => {

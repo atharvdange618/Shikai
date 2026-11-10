@@ -330,7 +330,7 @@ export default function SearchScreen() {
           ListEmptyComponent={ListEmpty}
           ListFooterComponent={ListFooter}
           onEndReached={() => {
-            if (hasNextPage) fetchNextPage();
+            if (hasNextPage) void fetchNextPage();
           }}
           onEndReachedThreshold={0.5}
           keyboardShouldPersistTaps="handled"

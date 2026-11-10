@@ -118,11 +118,7 @@ export function RepoHeader({
         <Pressable
           style={s.websiteRow}
           onPress={() => {
-            try {
-              Linking.openURL(repo.homepage!);
-            } catch {
-              /* suppressed */
-            }
+            Linking.openURL(repo.homepage!).catch(() => console.error("Could not open homepage"));
           }}
         >
           <Octicons name="link" size={IconSize.xs} color={colors.textLink} />

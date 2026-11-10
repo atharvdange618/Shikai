@@ -112,7 +112,7 @@ export default function ProfileScreen() {
       }),
     ]);
     setRefreshing(false);
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
   }, [queryClient, user?.login]);
 
   const openUserList = useCallback(

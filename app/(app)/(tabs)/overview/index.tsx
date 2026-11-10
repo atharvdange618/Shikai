@@ -278,14 +278,14 @@ export default function OverviewScreen() {
       });
     }
     setRefreshing(false);
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
   }, [queryClient, user?.login, storeUser?.login]);
 
   const s = useMemo(() => buildStyles(colors), [colors]);
 
   const handleLoadMore = useCallback(() => {
     if (hasNextPage && !isFetchingNextPage) {
-      fetchNextPage();
+      void fetchNextPage();
     }
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 

@@ -86,7 +86,9 @@ function WorkflowRunScreenContent() {
         params: { repoId: repoId ?? "", runId: String(checkRunId) },
       });
     } else if (job.html_url) {
-      WebBrowser.openBrowserAsync(job.html_url);
+      WebBrowser.openBrowserAsync(job.html_url).catch(() =>
+        console.error("Could not open browser"),
+      );
     }
   };
 

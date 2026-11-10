@@ -5,6 +5,7 @@ const m = vi.hoisted(() => ({
   openURL: vi.fn(),
   resetShareIntent: vi.fn(),
   initialUrl: null as string | null,
+  getInitialURL: vi.fn<() => Promise<string | null>>(),
   storage: new Map<string, string>(),
   share: {
     hasShareIntent: false,
@@ -21,7 +22,7 @@ vi.mock("react", () => ({
 }));
 vi.mock("expo-router", () => ({ useRouter: () => ({ push: m.push }) }));
 vi.mock("expo-linking", () => ({
-  getInitialURL: () => Promise.resolve(m.initialUrl),
+  getInitialURL: m.getInitialURL,
   addEventListener: () => ({ remove: vi.fn() }),
   openURL: (url: string) => {
     m.openURL(url);
@@ -52,6 +53,7 @@ import { parseGitHubUrl } from "@/lib/github-url";
 describe("useDeepLinks cold-start links", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    m.getInitialURL.mockImplementation(() => Promise.resolve(m.initialUrl));
     m.storage.clear();
     m.share.hasShareIntent = false;
   });
@@ -68,6 +70,18 @@ describe("useDeepLinks cold-start links", () => {
         "/repo/facebook~~react/diff?filename=a%2Fb.js&source=pr&number=1",
       ),
     );
+  });
+
+  it("handles an initial URL lookup failure without routing", async () => {
+    m.getInitialURL.mockRejectedValueOnce(new Error("Linking unavailable"));
+    const log = vi.spyOn(console, "error").mockImplementation(() => {});
+    try {
+      useDeepLinks(true);
+      await vi.waitFor(() => expect(log).toHaveBeenCalledWith("Could not handle the initial link"));
+      expect(m.push).not.toHaveBeenCalled();
+    } finally {
+      log.mockRestore();
+    }
   });
 
   // Android hands back the intent that created the task on every start, so the

@@ -42,7 +42,7 @@ import type { GitHubUser } from "@/types/github.types";
 import { runSecurityChecks } from "shikai-security";
 import * as Sentry from "@sentry/react-native";
 
-SplashScreen.preventAutoHideAsync();
+SplashScreen.preventAutoHideAsync().catch(() => {});
 
 setupFocusManager();
 
@@ -50,7 +50,7 @@ function ThemeEffects() {
   const theme = useTheme();
 
   useEffect(() => {
-    SystemUI.setBackgroundColorAsync(theme.colors.background);
+    SystemUI.setBackgroundColorAsync(theme.colors.background).catch(() => {});
   }, [theme.colors.background]);
 
   return <StatusBar barStyle={theme.isDark ? "light-content" : "dark-content"} />;
@@ -80,7 +80,18 @@ function OTAUpdateEffects() {
       message: "Restart the app to get the latest version.",
       actions: [
         { text: "Later", style: "cancel" },
-        { text: "Restart", onPress: () => reloadRef.current() },
+        {
+          text: "Restart",
+          onPress: () => {
+            reloadRef.current().catch(() => {
+              alertRef.current.show({
+                variant: "danger",
+                title: "Could not restart",
+                message: "Close and reopen Shikai to apply the update.",
+              });
+            });
+          },
+        },
       ],
     });
   }, [updateReady]);
@@ -115,7 +126,7 @@ export default Sentry.wrap(function RootLayout() {
   useEffect(() => {
     if (state.phase !== "checkingSecurity") return;
 
-    runSecurityChecks().then((result) => {
+    void runSecurityChecks().then((result) => {
       if (result.isBlocked) {
         dispatch({
           type: "SECURITY_BLOCKED",
@@ -164,7 +175,7 @@ export default Sentry.wrap(function RootLayout() {
     }
 
     if (!useAuthStore.getState().token) {
-      boot();
+      void boot();
     } else {
       dispatch({ type: "AUTH_RESTORE_COMPLETE" });
       setAuthReady(true);
@@ -192,7 +203,7 @@ export default Sentry.wrap(function RootLayout() {
     if (state.phase !== "blocked") return;
 
     const interval = setInterval(() => {
-      handleRecheck();
+      void handleRecheck();
     }, 10000);
 
     return () => clearInterval(interval);
@@ -227,7 +238,7 @@ export default Sentry.wrap(function RootLayout() {
                 <BlockingScreen
                   reasons={state.reasons}
                   devModeBlocked={state.devModeBlocked}
-                  onOverride={handleRecheck}
+                  onOverride={() => void handleRecheck()}
                 />
               )}
               {!showSplash && state.phase === "ready" && (
