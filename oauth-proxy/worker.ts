@@ -49,6 +49,9 @@ export default {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 30000);
 
+    // GitHub answers bad codes with a 200 and an `error` field, so only a
+    // failed call, a non-2xx (a 5xx HTML page) or a non-JSON body lands here.
+    let data: unknown = null;
     try {
       const response = await fetch("https://github.com/login/oauth/access_token", {
         signal: controller.signal,
@@ -59,16 +62,22 @@ export default {
         },
         body: params.toString(),
       });
-
-      const data = (await response.json()) as Record<string, unknown>;
-      const safe: Record<string, unknown> = {};
-      if (typeof data.access_token === "string") safe.access_token = data.access_token;
-      if (typeof data.token_type === "string") safe.token_type = data.token_type;
-      if (typeof data.scope === "string") safe.scope = data.scope;
-      if (data.error) safe.error = data.error;
-      return Response.json(safe, { status: response.status });
+      if (response.ok) data = await response.json();
+    } catch {
+      // Timeout, network failure or a non-JSON body: answered below.
     } finally {
       clearTimeout(timeoutId);
     }
+
+    if (typeof data !== "object" || data === null) {
+      return Response.json({ error: "github_unavailable" }, { status: 502 });
+    }
+    const { access_token, token_type, scope, error } = data as Record<string, unknown>;
+    const safe: Record<string, unknown> = {};
+    if (typeof access_token === "string") safe.access_token = access_token;
+    if (typeof token_type === "string") safe.token_type = token_type;
+    if (typeof scope === "string") safe.scope = scope;
+    if (error) safe.error = error;
+    return Response.json(safe);
   },
 };
