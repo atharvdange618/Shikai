@@ -28,8 +28,8 @@
         "varsIgnorePattern": "^_"
       }
     ],
-    "import/no-cycle": "warn",
-    "import/no-duplicates": "warn",
+    "import/no-cycle": "error",
+    "import/no-duplicates": "error",
     "import/no-self-import": "error",
     "unicorn/no-thenable": "off",
     "typescript/ban-ts-comment": "error",
@@ -40,7 +40,7 @@
     "typescript/no-unnecessary-type-constraint": "error",
     "typescript/no-unsafe-function-type": "error",
     "typescript/no-misused-promises": "error",
-    "typescript/no-unnecessary-type-assertion": "warn",
+    "typescript/no-unnecessary-type-assertion": "error",
     "typescript/no-unsafe-argument": "warn",
     "typescript/no-unsafe-assignment": "warn",
     "typescript/no-unsafe-call": "warn",
@@ -61,9 +61,9 @@
     "typescript/no-floating-promises": "error",
     "typescript/unbound-method": "warn",
     "typescript/no-base-to-string": "warn",
-    "eslint/no-useless-escape": "warn",
+    "eslint/no-useless-escape": "error",
     "eslint/no-control-regex": "warn",
-    "unicorn/no-single-promise-in-promise-methods": "warn",
+    "unicorn/no-single-promise-in-promise-methods": "error",
     "unicorn/no-new-array": "warn"
   },
   "overrides": [

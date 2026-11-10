@@ -19,6 +19,7 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
+      - run: npx expo customize tsconfig.json
       - run: npm run lint
       - run: npm run typecheck
       - run: npm run format:check
