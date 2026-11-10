@@ -1,16 +1,14 @@
 # Shikai Roadmap
 
-> **Version:** 1.8.0 · **Last Updated:** November 3, 2026 · **Status:** Active Development
+> **Version:** 1.9.0 · **Last Updated:** November 10, 2026 · **Status:** Active Development
 
 This document tracks the feature backlog and development progress for Shikai.
 
-## Current progress: November 3, 2026
+## Current progress: November 10, 2026
 
-- **Released:** v1.8.0 is the SDK 58 GitHub APK release. Play remains on 1.7.0. The SDK path was 54 → 55 → 57 → 58, with React Native pinned to 0.88.1.
-- **After the release tag:** React Compiler cleanup is complete and the five rules are errors again (`276b580`). OAuth now uses a browser auth session (`8c1fdcb`); `.env.example` no longer sets `NODE_ENV` (`d947b51`). These changes are not in the tagged APK.
-- **Critical auth-return report:** GitHub authentication works, but the user saw a black screen until a Metro reload. On the phone, a dev-launch link carrying `__expo_url` pushed the blank root index over the mounted Overview. Back restored Overview without reloading.
-- **Fix and evidence:** the shared dev-client link filter now handles both launcher URL formats. Replaying the failing URL, restarting the app, and replaying again keep Overview visible on the physical Android phone. Lint, TypeScript, all 287 tests across 27 files, and `git diff --check` pass.
-- **Verified 2026-11-07:** a fresh GitHub browser sign-in reaches Overview with no Back press or Metro reload, on the emulator debug build (twice) and on a release build on the phone. Back from Overview leaves the app, and a cold restart opens Overview.
+- **Released:** v1.9.0 (versionCode 12) is live on Play and is GitHub Latest. It is the first Play release since 1.7.0, so Play users also get 1.8.0's SDK 58 upgrade (54 → 55 → 57 → 58, React Native pinned to 0.88.1).
+- **In 1.9.0:** the PR overview and section screens (D-039), React Compiler cleanup with the five rules back to errors (`276b580`), browser auth sessions (`8c1fdcb`), and the fix for the black screen after GitHub sign-in (D-038).
+- **Black-screen fix:** a dev-launch link carrying `__expo_url` pushed the blank root index over Overview. The shared dev-client link filter now handles both launcher URL formats. A fresh browser sign-in reached Overview on the emulator debug build and a release build on the phone (2026-11-07).
 - **Deferred:** the Sentry bump remains tied to Expo's supported version; see [Maintenance](MAINTENANCE.md).
 
 ---

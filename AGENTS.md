@@ -4,9 +4,9 @@
 
 Read-only GitHub companion for Android. React Native + Expo SDK 58, expo-router, TypeScript strict mode.
 
-## Current progress (November 3, 2026)
+## Current progress (November 10, 2026)
 
-- v1.8.0 shipped as a GitHub APK; Play remains on 1.7.0. Compiler cleanup (`276b580`), browser auth sessions (`8c1fdcb`) and env-template cleanup (`d947b51`) follow that tag.
+- v1.9.0 (versionCode 12) is live on Play and is GitHub Latest, tag `v1.9.0` at `e91e7ba`. It is the first Play release since 1.7.0, so it carries the SDK 58 upgrade from 1.8.0, the PR overview screens (D-039) and the auth fix below.
 - The critical black-screen report traced to SDK 58's `shikai://?__expo_url=…` pushing the blank index over Overview. `isDevClientUrl()` now rejects both launcher URL formats for native routing and initial-link replay. Phone replay, app restart and a fresh GitHub OAuth sign-in (debug build on the emulator, release build on the phone, 2026-11-07) all land on Overview. See D-038 and `notes/ROADMAP.md`.
 - Use Git Bash for commands on this machine. Exported build variables live there, not in Command Prompt or PowerShell.
 
