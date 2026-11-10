@@ -57,8 +57,8 @@ export function useRepoLanguages(owner: string, repo: string) {
             bytes,
             percentage: Math.round((bytes / total) * 1000) / 10,
             color:
-              (languageColors as Record<string, { color: string | null }>)[name]
-                ?.color ?? "#8B949E",
+              (languageColors as Record<string, { color: string | null }>)[name]?.color ??
+              "#8B949E",
           }))
           .sort((a, b) => b.bytes - a.bytes);
       },
@@ -88,17 +88,11 @@ export function useLastCommit(owner: string, repo: string) {
   );
 }
 
-export function useCommits(
-  owner: string,
-  repo: string,
-  branch?: string,
-  path?: string,
-) {
+export function useCommits(owner: string, repo: string, branch?: string, path?: string) {
   const { items: commits, ...rest } = useInfinitePagedQuery(
     {
       queryKey: queryKeys.repoCommits(owner, repo, branch, path),
-      queryFn: ({ pageParam }) =>
-        fetchCommits(owner, repo, pageParam, PER_PAGE, branch, path),
+      queryFn: ({ pageParam }) => fetchCommits(owner, repo, pageParam, PER_PAGE, branch, path),
       enabled: Boolean(owner && repo),
       staleTime: 1000 * 60 * 2,
       meta: { persist: false },
@@ -120,12 +114,7 @@ export function useContributors(owner: string, repo: string) {
   );
 }
 
-export function useFileTree(
-  owner: string,
-  repo: string,
-  branch: string,
-  open: boolean,
-) {
+export function useFileTree(owner: string, repo: string, branch: string, open: boolean) {
   return useQuery(
     queryOptions({
       queryKey: queryKeys.repoFileTree(owner, repo, branch),
@@ -173,8 +162,7 @@ export function useReadme(owner: string, repo: string) {
       enabled: Boolean(owner && repo),
       staleTime: 1000 * 60 * 10,
       retry: (failureCount, error: unknown) => {
-        if (error instanceof Error && error.message.includes("404"))
-          return false;
+        if (error instanceof Error && error.message.includes("404")) return false;
         return failureCount < 2;
       },
       meta: { persist: false },
@@ -192,9 +180,7 @@ export function useRepoDetailsScreen(owner: string, repo: string) {
   const readmeQuery = useReadme(owner, repo);
 
   const isCoreLoading =
-    repoQuery.isLoading ||
-    languagesQuery.isLoading ||
-    lastCommitQuery.isLoading;
+    repoQuery.isLoading || languagesQuery.isLoading || lastCommitQuery.isLoading;
 
   return {
     repo: repoQuery.data,

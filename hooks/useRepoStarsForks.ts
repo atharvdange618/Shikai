@@ -13,8 +13,7 @@ export function useStargazers(owner: string, repo: string) {
   const { items: users, ...rest } = useInfinitePagedQuery(
     {
       queryKey: queryKeys.repoStargazers(owner, repo),
-      queryFn: ({ pageParam }) =>
-        fetchStargazers(owner, repo, pageParam, pat),
+      queryFn: ({ pageParam }) => fetchStargazers(owner, repo, pageParam, pat),
       enabled: Boolean(owner && repo && pat),
       staleTime: PAGED_LIST_STALE_TIME,
       meta: { persist: false },

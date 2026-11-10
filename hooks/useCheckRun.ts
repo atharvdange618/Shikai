@@ -1,8 +1,4 @@
-import {
-  fetchCheckRun,
-  fetchCheckRunAnnotations,
-  fetchCheckRunJobLog,
-} from "@/lib/github-rest";
+import { fetchCheckRun, fetchCheckRunAnnotations, fetchCheckRunJobLog } from "@/lib/github-rest";
 import { queryKeys } from "@/lib/query-client";
 import { queryOptions, useQuery } from "@tanstack/react-query";
 

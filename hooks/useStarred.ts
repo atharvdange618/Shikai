@@ -16,8 +16,7 @@ export function useStarred(filters: StarredFilters = {}) {
 
   const languageFilter = useMemo(() => {
     if (!language) return undefined;
-    return (repo: GitHubRepo) =>
-      repo.language?.toLowerCase() === language.toLowerCase();
+    return (repo: GitHubRepo) => repo.language?.toLowerCase() === language.toLowerCase();
   }, [language]);
 
   return useFilterableRepoList({

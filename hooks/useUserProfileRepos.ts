@@ -19,8 +19,7 @@ export function useUserAllRepos(username: string) {
   const { items: repos, ...rest } = useInfinitePagedQuery(
     {
       queryKey: queryKeys.userAllRepos(username),
-      queryFn: ({ pageParam }) =>
-        fetchUserRepos(username, pageParam, PER_PAGE, "pushed"),
+      queryFn: ({ pageParam }) => fetchUserRepos(username, pageParam, PER_PAGE, "pushed"),
       enabled: Boolean(username),
       staleTime: 1000 * 60 * 5,
     },

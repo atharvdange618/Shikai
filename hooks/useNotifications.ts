@@ -11,8 +11,7 @@ export function useNotifications(enabled: boolean = true) {
   const { items: notifications, ...rest } = useInfinitePagedQuery(
     {
       queryKey: [...queryKeys.notifications(), pat ? "pat" : "oauth"],
-      queryFn: ({ pageParam }) =>
-        fetchNotifications(pageParam, PER_PAGE, true, pat),
+      queryFn: ({ pageParam }) => fetchNotifications(pageParam, PER_PAGE, true, pat),
       staleTime: 1000 * 60 * 2,
       enabled,
     },

@@ -18,9 +18,7 @@ type PagedQueryOptions<TQueryFnData extends Paged, TData> = Omit<
 export const PAGED_LIST_STALE_TIME = 1000 * 60 * 5;
 
 /** The `flatten` for pages shaped `{ items }`: every page's items in order. */
-export function flattenItems<T>(
-  data: InfiniteData<{ items: T[] }> | undefined,
-): T[] {
+export function flattenItems<T>(data: InfiniteData<{ items: T[] }> | undefined): T[] {
   return data?.pages.flatMap((p) => p.items) ?? [];
 }
 
@@ -34,14 +32,10 @@ export function useInfinitePagedQuery<
   TQueryFnData extends Paged,
   TItem,
   TData = InfiniteData<TQueryFnData>,
->(
-  options: PagedQueryOptions<TQueryFnData, TData>,
-  flatten: (data: TData | undefined) => TItem[],
-) {
+>(options: PagedQueryOptions<TQueryFnData, TData>, flatten: (data: TData | undefined) => TItem[]) {
   const query = useInfiniteQuery({
     initialPageParam: 1,
-    getNextPageParam: (lastPage: TQueryFnData) =>
-      lastPage.pagination.next ?? undefined,
+    getNextPageParam: (lastPage: TQueryFnData) => lastPage.pagination.next ?? undefined,
     ...options,
   });
 

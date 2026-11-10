@@ -10,8 +10,7 @@ export function useGists(username: string, isSelf: boolean) {
   const { items: gists, ...rest } = useInfinitePagedQuery(
     {
       queryKey: queryKeys.gists(username),
-      queryFn: ({ pageParam }) =>
-        fetchGists(username, isSelf, pageParam, PER_PAGE),
+      queryFn: ({ pageParam }) => fetchGists(username, isSelf, pageParam, PER_PAGE),
       enabled: Boolean(username),
       staleTime: 1000 * 60 * 5,
     },

@@ -41,10 +41,7 @@ export function useFilterableRepoList({
   const isSearching = !!trimmedSearch;
   const username = useAuthStore((s) => s.user?.login ?? "");
 
-  const { items: listRepos, ...listRest } = useInfinitePagedQuery<
-    FetchListResult,
-    GitHubRepo
-  >(
+  const { items: listRepos, ...listRest } = useInfinitePagedQuery<FetchListResult, GitHubRepo>(
     {
       queryKey: listQueryKey,
       queryFn: ({ pageParam }) => fetchList(pageParam, perPage),

@@ -18,8 +18,7 @@ function getStoredThemeName(): ThemeName {
 }
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [themeName, setThemeNameState] =
-    useState<ThemeName>(getStoredThemeName);
+  const [themeName, setThemeNameState] = useState<ThemeName>(getStoredThemeName);
 
   const setThemeName = useCallback((name: ThemeName) => {
     mmkv.set(THEME_KEY, name);
@@ -37,8 +36,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
 export function useThemeContext(): ThemeContextValue {
   const ctx = useContext(ThemeContext);
-  if (!ctx)
-    throw new Error("useThemeContext must be used within ThemeProvider");
+  if (!ctx) throw new Error("useThemeContext must be used within ThemeProvider");
   return ctx;
 }
 

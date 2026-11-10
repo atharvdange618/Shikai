@@ -16,8 +16,7 @@ const recentSearchesStorage: PersistStorage<string[]> = {
       return { state: [] };
     }
   },
-  setItem: (name, value) =>
-    recentSearchesMMKV.set(name, JSON.stringify(value.state)),
+  setItem: (name, value) => recentSearchesMMKV.set(name, JSON.stringify(value.state)),
   removeItem: (name) => recentSearchesMMKV.remove(name),
 };
 
@@ -37,10 +36,7 @@ export const useRecentSearchesStore = create<RecentSearchesState>()(
         const trimmed = term.trim();
         if (!trimmed) return;
         const { terms } = get();
-        const next = [trimmed, ...terms.filter((t) => t !== trimmed)].slice(
-          0,
-          MAX_TERMS,
-        );
+        const next = [trimmed, ...terms.filter((t) => t !== trimmed)].slice(0, MAX_TERMS);
         set({ terms: next });
       },
 

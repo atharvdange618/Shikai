@@ -1,11 +1,7 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 
-import {
-  searchIssues,
-  searchRepos,
-  searchUsers,
-} from "@/lib/github-rest";
+import { searchIssues, searchRepos, searchUsers } from "@/lib/github-rest";
 import { queryKeys } from "@/lib/query-client";
 import { useAuthStore } from "@/stores/auth.store";
 
@@ -56,8 +52,7 @@ export function useGlobalSearch({ query, tab, enabled = true }: UseGlobalSearchO
 
   const topicsQuery = useInfiniteQuery({
     queryKey: queryKeys.searchRepos(`topic:${trimmedQuery}`),
-    queryFn: ({ pageParam }) =>
-      searchRepos(`topic:${trimmedQuery}`, pageParam, PER_PAGE),
+    queryFn: ({ pageParam }) => searchRepos(`topic:${trimmedQuery}`, pageParam, PER_PAGE),
     initialPageParam: 1,
     getNextPageParam: (lastPage) => lastPage.pagination.next ?? undefined,
     staleTime: 1000 * 60 * 5,
@@ -86,7 +81,7 @@ export function useGlobalSearch({ query, tab, enabled = true }: UseGlobalSearchO
 
   // A disabled query keeps its cache, so drop PAT results once the PAT is gone.
   const issues = useMemo(
-    () => (pat ? issuesQuery.data?.pages.flatMap((p) => p.issues) ?? [] : []),
+    () => (pat ? (issuesQuery.data?.pages.flatMap((p) => p.issues) ?? []) : []),
     [issuesQuery.data, pat],
   );
 

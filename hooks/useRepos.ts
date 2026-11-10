@@ -18,8 +18,7 @@ export function useRepos(filters: RepoFilters = {}) {
 
   const languageFilter = useMemo(() => {
     if (!language) return undefined;
-    return (repo: GitHubRepo) =>
-      repo.language?.toLowerCase() === language.toLowerCase();
+    return (repo: GitHubRepo) => repo.language?.toLowerCase() === language.toLowerCase();
   }, [language]);
 
   const typeFilter = useMemo(() => {
@@ -30,14 +29,12 @@ export function useRepos(filters: RepoFilters = {}) {
   const combinedFilter = useMemo(() => {
     if (!languageFilter && !typeFilter) return undefined;
     return (repo: GitHubRepo) =>
-      (!languageFilter || languageFilter(repo)) &&
-      (!typeFilter || typeFilter(repo));
+      (!languageFilter || languageFilter(repo)) && (!typeFilter || typeFilter(repo));
   }, [languageFilter, typeFilter]);
 
   return useFilterableRepoList({
     listQueryKey: [...queryKeys.repos(), { sort, type: apiType }] as const,
-    fetchList: (page, per_page) =>
-      fetchRepos({ page, per_page, sort, type: apiType }),
+    fetchList: (page, per_page) => fetchRepos({ page, per_page, sort, type: apiType }),
     search,
     filter: combinedFilter,
   });
