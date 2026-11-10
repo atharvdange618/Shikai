@@ -6,13 +6,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
-import {
-  ActivityIndicator,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
 
 import { useWorkflowRuns } from "@/hooks/useActions";
 import { queryKeys } from "@/lib/query-client";
@@ -41,15 +35,8 @@ export default function ActionsScreen() {
   const [owner, repoName] = decodeRepoId(repoId ?? "");
   const [refreshing, setRefreshing] = useState(false);
 
-  const {
-    runs,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-    isLoading,
-    isError,
-    refetch,
-  } = useWorkflowRuns(owner, repoName);
+  const { runs, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, isError, refetch } =
+    useWorkflowRuns(owner, repoName);
 
   useEffect(() => {
     try {
@@ -60,9 +47,7 @@ export default function ActionsScreen() {
             hitSlop={12}
             style={{ marginRight: Spacing.sm, padding: Spacing.xs }}
             onPress={() =>
-              WebBrowser.openBrowserAsync(
-                `https://github.com/${owner}/${repoName}/actions`,
-              )
+              WebBrowser.openBrowserAsync(`https://github.com/${owner}/${repoName}/actions`)
             }
           >
             <Octicons name="link-external" size={16} color={colors.accent} />
@@ -130,9 +115,7 @@ export default function ActionsScreen() {
           if (hasNextPage) fetchNextPage();
         }}
         onEndReachedThreshold={0.5}
-        refreshControl={
-          <PullToRefresh refreshing={refreshing} onRefresh={onRefresh} />
-        }
+        refreshControl={<PullToRefresh refreshing={refreshing} onRefresh={onRefresh} />}
         removeClippedSubviews
         drawDistance={300}
       />

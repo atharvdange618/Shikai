@@ -17,14 +17,7 @@ import * as Clipboard from "expo-clipboard";
 import { Image } from "expo-image";
 import { useLocalSearchParams, useNavigation } from "expo-router";
 import { useEffect, useState } from "react";
-import {
-  ActivityIndicator,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 export default function CommitDetailScreen() {
   return (
@@ -45,11 +38,7 @@ function CommitDetailScreenContent() {
 
   const [owner, repoName] = decodeRepoId(repoId ?? "");
 
-  const { data: commit, isLoading, isError } = useCommitDetail(
-    owner,
-    repoName,
-    sha ?? "",
-  );
+  const { data: commit, isLoading, isError } = useCommitDetail(owner, repoName, sha ?? "");
 
   const [copied, setCopied] = useState(false);
 
@@ -71,9 +60,7 @@ function CommitDetailScreenContent() {
     return (
       <View style={[s.centered, { backgroundColor: colors.background }]}>
         <Octicons name="alert" size={IconSize.xl} color={colors.danger} />
-        <Text style={[s.emptyTitle, { color: colors.textSecondary }]}>
-          Failed to load commit
-        </Text>
+        <Text style={[s.emptyTitle, { color: colors.textSecondary }]}>Failed to load commit</Text>
       </View>
     );
   }
@@ -90,90 +77,76 @@ function CommitDetailScreenContent() {
 
   return (
     <>
-      {prNumber && (
-        <PRHeader title={sha.slice(0, 7)} repoId={repoId} number={prNumber} />
-      )}
+      {prNumber && <PRHeader title={sha.slice(0, 7)} repoId={repoId} number={prNumber} />}
       <ScrollView
-      style={[s.scroll, { backgroundColor: colors.background }]}
-      contentContainerStyle={s.content}
-      showsVerticalScrollIndicator={false}
-    >
-      <View style={s.titleRow}>
-        <Octicons name="git-commit" size={22} color={colors.textMuted} />
-        <Text style={[s.title, { color: colors.textPrimary }]} numberOfLines={5}>
-          {subject}
-        </Text>
-      </View>
-
-      <View style={s.authorBar}>
-        {commit.author?.avatar_url ? (
-          <Image
-            source={{ uri: commit.author.avatar_url }}
-            style={s.authorAvatar}
-            contentFit="cover"
-            transition={100}
-          />
-        ) : (
-          <View style={[s.authorAvatar, { backgroundColor: colors.surfaceSecondary }]} />
-        )}
-        <Text style={[s.authorName, { color: colors.textPrimary }]}>
-          {authorName}
-        </Text>
-        <Text style={[s.authorTime, { color: colors.textMuted }]}>
-          committed {relativeTime(commit.commit.author.date)}
-        </Text>
-      </View>
-
-      <View style={s.metaRow}>
-        <Pressable
-          onPress={handleCopy}
-          hitSlop={8}
-          style={[s.shaBadge, { backgroundColor: colors.surfaceSecondary }]}
-        >
-          <Octicons
-            name={copied ? "check" : "copy"}
-            size={11}
-            color={copied ? colors.success : colors.textMuted}
-          />
-          <Text
-            style={[
-              s.shaText,
-              { color: copied ? colors.success : colors.textSecondary },
-            ]}
-          >
-            {copied ? "Copied" : commit.sha.slice(0, 7)}
-          </Text>
-        </Pressable>
-        <Text style={[s.diffStat, { color: colors.textMuted }]}>
-          <Text style={{ color: colors.success }}>+{commit.stats.additions}</Text>{" "}
-          <Text style={{ color: colors.danger }}>-{commit.stats.deletions}</Text>
-        </Text>
-      </View>
-
-      {bodyText.length > 0 && (
-        <View
-          style={[
-            s.bodySection,
-            { backgroundColor: colors.surface, borderColor: colors.border },
-          ]}
-        >
-          <Text style={[s.bodyText, { color: colors.textSecondary }]}>
-            {bodyText}
+        style={[s.scroll, { backgroundColor: colors.background }]}
+        contentContainerStyle={s.content}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={s.titleRow}>
+          <Octicons name="git-commit" size={22} color={colors.textMuted} />
+          <Text style={[s.title, { color: colors.textPrimary }]} numberOfLines={5}>
+            {subject}
           </Text>
         </View>
-      )}
 
-      {commit.files.length > 0 && (
-        <DiffFileList
-          files={commit.files}
-          colors={colors}
-          repoId={repoId ?? ""}
-          diffSource={{ source: "commit", sha: sha ?? "" }}
-          prNumber={prNumber}
-        />
-      )}
+        <View style={s.authorBar}>
+          {commit.author?.avatar_url ? (
+            <Image
+              source={{ uri: commit.author.avatar_url }}
+              style={s.authorAvatar}
+              contentFit="cover"
+              transition={100}
+            />
+          ) : (
+            <View style={[s.authorAvatar, { backgroundColor: colors.surfaceSecondary }]} />
+          )}
+          <Text style={[s.authorName, { color: colors.textPrimary }]}>{authorName}</Text>
+          <Text style={[s.authorTime, { color: colors.textMuted }]}>
+            committed {relativeTime(commit.commit.author.date)}
+          </Text>
+        </View>
 
-      <View style={{ height: Spacing.xxl + 60 + Spacing.lg }} />
+        <View style={s.metaRow}>
+          <Pressable
+            onPress={handleCopy}
+            hitSlop={8}
+            style={[s.shaBadge, { backgroundColor: colors.surfaceSecondary }]}
+          >
+            <Octicons
+              name={copied ? "check" : "copy"}
+              size={11}
+              color={copied ? colors.success : colors.textMuted}
+            />
+            <Text style={[s.shaText, { color: copied ? colors.success : colors.textSecondary }]}>
+              {copied ? "Copied" : commit.sha.slice(0, 7)}
+            </Text>
+          </Pressable>
+          <Text style={[s.diffStat, { color: colors.textMuted }]}>
+            <Text style={{ color: colors.success }}>+{commit.stats.additions}</Text>{" "}
+            <Text style={{ color: colors.danger }}>-{commit.stats.deletions}</Text>
+          </Text>
+        </View>
+
+        {bodyText.length > 0 && (
+          <View
+            style={[s.bodySection, { backgroundColor: colors.surface, borderColor: colors.border }]}
+          >
+            <Text style={[s.bodyText, { color: colors.textSecondary }]}>{bodyText}</Text>
+          </View>
+        )}
+
+        {commit.files.length > 0 && (
+          <DiffFileList
+            files={commit.files}
+            colors={colors}
+            repoId={repoId ?? ""}
+            diffSource={{ source: "commit", sha: sha ?? "" }}
+            prNumber={prNumber}
+          />
+        )}
+
+        <View style={{ height: Spacing.xxl + 60 + Spacing.lg }} />
       </ScrollView>
     </>
   );

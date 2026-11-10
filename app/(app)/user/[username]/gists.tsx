@@ -3,13 +3,7 @@ import { FlashList } from "@shopify/flash-list";
 import { useQueryClient } from "@tanstack/react-query";
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
-import {
-  ActivityIndicator,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
 
 import { ListItemSeparator } from "@/components/shared/ListItemSeparator";
 import { PullToRefresh } from "@/components/shared/PullToRefresh";
@@ -42,15 +36,8 @@ export default function GistsScreen() {
 
   const [refreshing, setRefreshing] = useState(false);
 
-  const {
-    gists,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-    isLoading,
-    isError,
-    refetch,
-  } = useGists(username ?? "", isSelf);
+  const { gists, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, isError, refetch } =
+    useGists(username ?? "", isSelf);
 
   useEffect(() => {
     try {
@@ -116,9 +103,7 @@ export default function GistsScreen() {
           if (hasNextPage) fetchNextPage();
         }}
         onEndReachedThreshold={0.5}
-        refreshControl={
-          <PullToRefresh refreshing={refreshing} onRefresh={onRefresh} />
-        }
+        refreshControl={<PullToRefresh refreshing={refreshing} onRefresh={onRefresh} />}
         removeClippedSubviews
         drawDistance={300}
       />
@@ -149,16 +134,9 @@ const GistItem = memo(function GistItem({
   }, [router, username, gist.id]);
 
   return (
-    <Pressable
-      style={({ pressed }) => [s.item, pressed && s.itemPressed]}
-      onPress={handlePress}
-    >
+    <Pressable style={({ pressed }) => [s.item, pressed && s.itemPressed]} onPress={handlePress}>
       <View style={s.itemIcon}>
-        <Octicons
-          name={gist.public ? "code" : "lock"}
-          size={16}
-          color={colors.textMuted}
-        />
+        <Octicons name={gist.public ? "code" : "lock"} size={16} color={colors.textMuted} />
       </View>
       <View style={s.itemBody}>
         <Text style={s.itemTitle} numberOfLines={2}>

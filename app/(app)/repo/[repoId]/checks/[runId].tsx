@@ -11,11 +11,7 @@ import {
   Spacing,
   useTheme,
 } from "@/constants/theme";
-import {
-  useCheckRun,
-  useCheckRunAnnotations,
-  useCheckRunJobLog,
-} from "@/hooks/useCheckRun";
+import { useCheckRun, useCheckRunAnnotations, useCheckRunJobLog } from "@/hooks/useCheckRun";
 import { parseActionsJobId } from "@/lib/github-rest";
 import { getRunDisplay } from "@/lib/run-display";
 import { decodeRepoId, relativeTime } from "@/lib/utils";
@@ -97,9 +93,7 @@ function CheckRunScreenContent() {
     return (
       <View style={[s.centered, { backgroundColor: colors.background }]}>
         <Octicons name="alert" size={IconSize.xl} color={colors.danger} />
-        <Text style={[s.emptyTitle, { color: colors.textSecondary }]}>
-          Failed to load check
-        </Text>
+        <Text style={[s.emptyTitle, { color: colors.textSecondary }]}>Failed to load check</Text>
       </View>
     );
   }
@@ -111,155 +105,135 @@ function CheckRunScreenContent() {
 
   return (
     <>
-      {prNumber && (
-        <PRHeader title={run.name} repoId={repoId} number={prNumber} />
-      )}
+      {prNumber && <PRHeader title={run.name} repoId={repoId} number={prNumber} />}
       <ScrollView
-      style={[s.scroll, { backgroundColor: colors.background }]}
-      contentContainerStyle={s.content}
-      showsVerticalScrollIndicator={false}
-    >
-      <View style={s.titleRow}>
-        <Octicons name={status.icon} size={22} color={status.color} />
-        <Text style={[s.title, { color: colors.textPrimary }]} numberOfLines={4}>
-          {run.name}
-        </Text>
-      </View>
-
-      <Text style={[s.statusLine, { color: colors.textMuted }]}>
-        <Text style={{ color: status.color }}>{status.label}</Text>
-        {run.completed_at
-          ? ` · finished ${relativeTime(run.completed_at)}`
-          : ` · started ${relativeTime(run.started_at)}`}
-      </Text>
-
-      {summaryText.length > 0 && (
-        <View
-          style={[
-            s.bodySection,
-            { backgroundColor: colors.surface, borderColor: colors.border },
-          ]}
-        >
-          <MarkdownRenderer
-            markdown={summaryText}
-            context={`${owner}/${repoName}`}
-          />
-        </View>
-      )}
-
-      {annotations.length > 0 && (
-        <View style={s.annotations}>
-          <Text style={[s.sectionTitle, { color: colors.textPrimary }]}>
-            Annotations ({annotations.length})
+        style={[s.scroll, { backgroundColor: colors.background }]}
+        contentContainerStyle={s.content}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={s.titleRow}>
+          <Octicons name={status.icon} size={22} color={status.color} />
+          <Text style={[s.title, { color: colors.textPrimary }]} numberOfLines={4}>
+            {run.name}
           </Text>
-          {annotations.map((a, index) => {
-            const level = getLevelDisplay(a.annotation_level, colors);
-            const lineLabel =
-              a.start_line === a.end_line
-                ? `${a.path}:${a.start_line}`
-                : `${a.path}:${a.start_line}-${a.end_line}`;
-            return (
+        </View>
+
+        <Text style={[s.statusLine, { color: colors.textMuted }]}>
+          <Text style={{ color: status.color }}>{status.label}</Text>
+          {run.completed_at
+            ? ` · finished ${relativeTime(run.completed_at)}`
+            : ` · started ${relativeTime(run.started_at)}`}
+        </Text>
+
+        {summaryText.length > 0 && (
+          <View
+            style={[s.bodySection, { backgroundColor: colors.surface, borderColor: colors.border }]}
+          >
+            <MarkdownRenderer markdown={summaryText} context={`${owner}/${repoName}`} />
+          </View>
+        )}
+
+        {annotations.length > 0 && (
+          <View style={s.annotations}>
+            <Text style={[s.sectionTitle, { color: colors.textPrimary }]}>
+              Annotations ({annotations.length})
+            </Text>
+            {annotations.map((a, index) => {
+              const level = getLevelDisplay(a.annotation_level, colors);
+              const lineLabel =
+                a.start_line === a.end_line
+                  ? `${a.path}:${a.start_line}`
+                  : `${a.path}:${a.start_line}-${a.end_line}`;
+              return (
+                <View
+                  key={`${a.path}-${a.start_line}-${index}`}
+                  style={[
+                    s.annotationCard,
+                    { backgroundColor: colors.surface, borderColor: colors.border },
+                  ]}
+                >
+                  <View style={s.annotationHeader}>
+                    <Octicons name={level.icon} size={13} color={level.color} />
+                    <Text
+                      style={[s.annotationPath, { color: colors.textSecondary }]}
+                      numberOfLines={1}
+                    >
+                      {lineLabel}
+                    </Text>
+                  </View>
+                  {a.title ? (
+                    <Text style={[s.annotationTitle, { color: colors.textPrimary }]}>
+                      {a.title}
+                    </Text>
+                  ) : null}
+                  <Text style={[s.annotationMessage, { color: colors.textSecondary }]}>
+                    {a.message}
+                  </Text>
+                  {a.raw_details ? (
+                    <Text style={[s.annotationRaw, { color: colors.textMuted }]}>
+                      {a.raw_details}
+                    </Text>
+                  ) : null}
+                </View>
+              );
+            })}
+          </View>
+        )}
+
+        {jobId !== null && (
+          <View style={s.jobLogSection}>
+            <Pressable
+              onPress={() => setLogExpanded((v) => !v)}
+              style={({ pressed }) => [s.jobLogHeader, { opacity: pressed ? 0.7 : 1 }]}
+            >
+              <Octicons
+                name={logExpanded ? "chevron-down" : "chevron-right"}
+                size={13}
+                color={colors.textSecondary}
+              />
+              <Text style={[s.sectionTitle, { color: colors.textPrimary }]}>Job log</Text>
+            </Pressable>
+
+            {logExpanded && (
               <View
-                key={`${a.path}-${a.start_line}-${index}`}
                 style={[
-                  s.annotationCard,
+                  s.jobLogBox,
                   { backgroundColor: colors.surface, borderColor: colors.border },
                 ]}
               >
-                <View style={s.annotationHeader}>
-                  <Octicons name={level.icon} size={13} color={level.color} />
-                  <Text
-                    style={[s.annotationPath, { color: colors.textSecondary }]}
-                    numberOfLines={1}
-                  >
-                    {lineLabel}
+                {isLogLoading ? (
+                  <ActivityIndicator size="small" color={colors.accent} />
+                ) : isLogError || !logTail ? (
+                  <Text style={[s.annotationMessage, { color: colors.textMuted }]}>
+                    Log not available. Open on GitHub instead.
                   </Text>
-                </View>
-                {a.title ? (
-                  <Text
-                    style={[s.annotationTitle, { color: colors.textPrimary }]}
-                  >
-                    {a.title}
+                ) : (
+                  <Text style={[s.jobLogText, { color: colors.textSecondary }]} selectable>
+                    {logTail}
                   </Text>
-                ) : null}
-                <Text style={[s.annotationMessage, { color: colors.textSecondary }]}>
-                  {a.message}
-                </Text>
-                {a.raw_details ? (
-                  <Text style={[s.annotationRaw, { color: colors.textMuted }]}>
-                    {a.raw_details}
-                  </Text>
-                ) : null}
+                )}
               </View>
-            );
-          })}
-        </View>
-      )}
+            )}
+          </View>
+        )}
 
-      {jobId !== null && (
-        <View style={s.jobLogSection}>
-          <Pressable
-            onPress={() => setLogExpanded((v) => !v)}
-            style={({ pressed }) => [
-              s.jobLogHeader,
-              { opacity: pressed ? 0.7 : 1 },
-            ]}
-          >
-            <Octicons
-              name={logExpanded ? "chevron-down" : "chevron-right"}
-              size={13}
-              color={colors.textSecondary}
-            />
-            <Text style={[s.sectionTitle, { color: colors.textPrimary }]}>
-              Job log
-            </Text>
-          </Pressable>
+        <Pressable
+          onPress={() => Linking.openURL(run.details_url ?? run.html_url)}
+          style={({ pressed }) => [
+            s.linkButton,
+            {
+              backgroundColor: colors.surfaceSecondary,
+              opacity: pressed ? 0.7 : 1,
+            },
+          ]}
+        >
+          <Octicons name="link-external" size={13} color={colors.textSecondary} />
+          <Text style={[s.linkButtonText, { color: colors.textSecondary }]}>
+            Open full logs on GitHub
+          </Text>
+        </Pressable>
 
-          {logExpanded && (
-            <View
-              style={[
-                s.jobLogBox,
-                { backgroundColor: colors.surface, borderColor: colors.border },
-              ]}
-            >
-              {isLogLoading ? (
-                <ActivityIndicator size="small" color={colors.accent} />
-              ) : isLogError || !logTail ? (
-                <Text
-                  style={[s.annotationMessage, { color: colors.textMuted }]}
-                >
-                  Log not available. Open on GitHub instead.
-                </Text>
-              ) : (
-                <Text
-                  style={[s.jobLogText, { color: colors.textSecondary }]}
-                  selectable
-                >
-                  {logTail}
-                </Text>
-              )}
-            </View>
-          )}
-        </View>
-      )}
-
-      <Pressable
-        onPress={() => Linking.openURL(run.details_url ?? run.html_url)}
-        style={({ pressed }) => [
-          s.linkButton,
-          {
-            backgroundColor: colors.surfaceSecondary,
-            opacity: pressed ? 0.7 : 1,
-          },
-        ]}
-      >
-        <Octicons name="link-external" size={13} color={colors.textSecondary} />
-        <Text style={[s.linkButtonText, { color: colors.textSecondary }]}>
-          Open full logs on GitHub
-        </Text>
-      </Pressable>
-
-      <View style={{ height: Spacing.xxl + 60 + Spacing.lg }} />
+        <View style={{ height: Spacing.xxl + 60 + Spacing.lg }} />
       </ScrollView>
     </>
   );

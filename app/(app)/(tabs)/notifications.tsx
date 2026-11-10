@@ -2,16 +2,8 @@ import { Octicons } from "@expo/vector-icons";
 import { type InfiniteData, useQueryClient } from "@tanstack/react-query";
 import { Href, useRouter } from "expo-router";
 import { useCallback, useMemo, useRef, useState } from "react";
-import {
-  ActivityIndicator,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
-import Swipeable, {
-  type SwipeableMethods,
-} from "react-native-gesture-handler/ReanimatedSwipeable";
+import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
+import Swipeable, { type SwipeableMethods } from "react-native-gesture-handler/ReanimatedSwipeable";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { FlashList } from "@shopify/flash-list";
@@ -94,18 +86,13 @@ function NotificationItem({
   const swipeableRef = useRef<SwipeableMethods>(null);
 
   const row = (
-    <Pressable
-      onPress={onPress}
-      style={({ pressed }) => [s.container, pressed && s.pressed]}
-    >
+    <Pressable onPress={onPress} style={({ pressed }) => [s.container, pressed && s.pressed]}>
       <View style={s.iconColumn}>
         <View
           style={[
             s.typeBadge,
             {
-              backgroundColor: isAttention
-                ? colors.accent + "20"
-                : colors.surfaceSecondary,
+              backgroundColor: isAttention ? colors.accent + "20" : colors.surfaceSecondary,
             },
           ]}
         >
@@ -119,19 +106,11 @@ function NotificationItem({
       </View>
 
       <View style={s.content}>
-        <Text
-          style={[s.title, !notification.unread && s.titleRead]}
-          numberOfLines={2}
-        >
+        <Text style={[s.title, !notification.unread && s.titleRead]} numberOfLines={2}>
           {notification.subject.title}
         </Text>
         <View style={s.meta}>
-          <Octicons
-            name={reasonIcon}
-            size={10}
-            color={colors.textMuted}
-            style={s.reasonIcon}
-          />
+          <Octicons name={reasonIcon} size={10} color={colors.textMuted} style={s.reasonIcon} />
           <Text style={s.repoName} numberOfLines={1}>
             {extractRepoName(notification.repository.full_name)}
           </Text>
@@ -140,9 +119,7 @@ function NotificationItem({
         </View>
       </View>
 
-      {isAttention && (
-        <View style={[s.attentionDot, { backgroundColor: colors.accent }]} />
-      )}
+      {isAttention && <View style={[s.attentionDot, { backgroundColor: colors.accent }]} />}
     </Pressable>
   );
 
@@ -263,9 +240,7 @@ type Filter = (typeof FILTERS)[number];
 
 // Unread items that need a decision (review/mention/assign) float above
 // everything else, so they aren't buried under routine activity noise.
-function sortByAttention(
-  notifications: GitHubNotification[],
-): GitHubNotification[] {
+function sortByAttention(notifications: GitHubNotification[]): GitHubNotification[] {
   return [...notifications].sort((a, b) => {
     const aAttention = a.unread && ATTENTION_REASONS.has(a.reason) ? 1 : 0;
     const bAttention = b.unread && ATTENTION_REASONS.has(b.reason) ? 1 : 0;
@@ -283,9 +258,7 @@ function getFilteredNotifications(
       return sortByAttention(notifications.filter((n) => n.unread));
     case "attention":
       return sortByAttention(
-        notifications.filter(
-          (n) => n.unread && ATTENTION_REASONS.has(n.reason),
-        ),
+        notifications.filter((n) => n.unread && ATTENTION_REASONS.has(n.reason)),
       );
     case "all":
     default:
@@ -317,15 +290,10 @@ export default function NotificationsScreen() {
     [notifications, filter],
   );
 
-  const unreadCount = useMemo(
-    () => notifications.filter((n) => n.unread).length,
-    [notifications],
-  );
+  const unreadCount = useMemo(() => notifications.filter((n) => n.unread).length, [notifications]);
 
   const attentionCount = useMemo(
-    () =>
-      notifications.filter((n) => n.unread && ATTENTION_REASONS.has(n.reason))
-        .length,
+    () => notifications.filter((n) => n.unread && ATTENTION_REASONS.has(n.reason)).length,
     [notifications],
   );
 
@@ -378,9 +346,7 @@ export default function NotificationsScreen() {
 
   const handleMarkAllRead = useCallback(() => {
     const previous =
-      queryClient.getQueryData<InfiniteData<FetchNotificationsResult>>(
-        notificationsQueryKey,
-      );
+      queryClient.getQueryData<InfiniteData<FetchNotificationsResult>>(notificationsQueryKey);
     queryClient.setQueryData<InfiniteData<FetchNotificationsResult>>(
       notificationsQueryKey,
       (old) =>
@@ -404,8 +370,7 @@ export default function NotificationsScreen() {
       alert.show({
         variant: "danger",
         title: "Couldn't mark all as read",
-        message:
-          "Nothing changed on GitHub. Check your connection and try again.",
+        message: "Nothing changed on GitHub. Check your connection and try again.",
       });
     });
   }, [queryClient, notificationsQueryKey, pat, alert]);
@@ -440,9 +405,7 @@ export default function NotificationsScreen() {
             {unreadCount > 0 && (
               <Text style={s.subtitle}>
                 {unreadCount} unread
-                {attentionCount > 0
-                  ? ` \u00B7 ${attentionCount} attention`
-                  : ""}
+                {attentionCount > 0 ? ` \u00B7 ${attentionCount} attention` : ""}
               </Text>
             )}
           </View>
@@ -467,21 +430,12 @@ export default function NotificationsScreen() {
                 onPress={() => setFilter(f)}
                 style={[s.filterPill, filter === f && s.filterPillActive]}
               >
-                <Text
-                  style={[s.filterText, filter === f && s.filterTextActive]}
-                >
+                <Text style={[s.filterText, filter === f && s.filterTextActive]}>
                   {f.charAt(0).toUpperCase() + f.slice(1)}
                 </Text>
                 {count > 0 && (
-                  <View
-                    style={[s.filterBadge, filter === f && s.filterBadgeActive]}
-                  >
-                    <Text
-                      style={[
-                        s.filterBadgeText,
-                        filter === f && s.filterBadgeTextActive,
-                      ]}
-                    >
+                  <View style={[s.filterBadge, filter === f && s.filterBadgeActive]}>
+                    <Text style={[s.filterBadgeText, filter === f && s.filterBadgeTextActive]}>
                       {count}
                     </Text>
                   </View>
@@ -548,9 +502,7 @@ export default function NotificationsScreen() {
           onEndReachedThreshold={0.5}
           removeClippedSubviews
           drawDistance={200}
-          refreshControl={
-            <PullToRefresh refreshing={refreshing} onRefresh={onRefresh} />
-          }
+          refreshControl={<PullToRefresh refreshing={refreshing} onRefresh={onRefresh} />}
           contentContainerStyle={s.listContent}
         />
       )}

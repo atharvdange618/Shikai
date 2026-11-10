@@ -16,14 +16,7 @@ import { Octicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
-import {
-  ActivityIndicator,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 export default function DiscussionDetailScreen() {
   return (
@@ -55,10 +48,7 @@ function DiscussionDetailScreenContent() {
 
   const handleLoadMoreReplies = (commentId: string, after: string | null) => {
     setLoadingReplyFor(commentId);
-    loadMoreReplies.mutate(
-      { commentId, after },
-      { onSettled: () => setLoadingReplyFor(null) },
-    );
+    loadMoreReplies.mutate({ commentId, after }, { onSettled: () => setLoadingReplyFor(null) });
   };
 
   useEffect(() => {
@@ -101,10 +91,7 @@ function DiscussionDetailScreenContent() {
           size={22}
           color={discussion.isAnswered ? colors.success : colors.textMuted}
         />
-        <Text
-          style={[s.title, { color: colors.textPrimary }]}
-          numberOfLines={5}
-        >
+        <Text style={[s.title, { color: colors.textPrimary }]} numberOfLines={5}>
           {discussion.title}
         </Text>
       </View>
@@ -122,24 +109,15 @@ function DiscussionDetailScreenContent() {
       </Pressable>
 
       <View style={s.badgeRow}>
-        <View
-          style={[s.categoryPill, { backgroundColor: colors.surfaceSecondary }]}
-        >
+        <View style={[s.categoryPill, { backgroundColor: colors.surfaceSecondary }]}>
           <Text style={[s.categoryText, { color: colors.textSecondary }]}>
             {discussion.category.emoji} {discussion.category.name}
           </Text>
         </View>
         {discussion.isAnswered && (
-          <View
-            style={[
-              s.answeredPill,
-              { backgroundColor: `${colors.success}20` },
-            ]}
-          >
+          <View style={[s.answeredPill, { backgroundColor: `${colors.success}20` }]}>
             <Octicons name="check" size={11} color={colors.success} />
-            <Text style={[s.answeredText, { color: colors.success }]}>
-              Answered
-            </Text>
+            <Text style={[s.answeredText, { color: colors.success }]}>Answered</Text>
           </View>
         )}
       </View>
@@ -175,9 +153,7 @@ function DiscussionDetailScreenContent() {
         </View>
       )}
 
-      {comments.length > 0 && (
-        <View style={[s.separator, { backgroundColor: colors.border }]} />
-      )}
+      {comments.length > 0 && <View style={[s.separator, { backgroundColor: colors.border }]} />}
 
       {comments.map((comment: DiscussionComment) => (
         <View key={comment.id} style={s.commentGroup}>
@@ -206,16 +182,9 @@ function DiscussionDetailScreenContent() {
                 {relativeTime(comment.createdAt)}
               </Text>
               {comment.isAnswer && (
-                <View
-                  style={[
-                    s.answerBadge,
-                    { backgroundColor: `${colors.success}20` },
-                  ]}
-                >
+                <View style={[s.answerBadge, { backgroundColor: `${colors.success}20` }]}>
                   <Octicons name="check" size={10} color={colors.success} />
-                  <Text style={[s.answerBadgeText, { color: colors.success }]}>
-                    Answer
-                  </Text>
+                  <Text style={[s.answerBadgeText, { color: colors.success }]}>Answer</Text>
                 </View>
               )}
             </View>
@@ -255,27 +224,16 @@ function DiscussionDetailScreenContent() {
 
           {comment.replies.pageInfo.hasNextPage && (
             <Pressable
-              onPress={() =>
-                handleLoadMoreReplies(
-                  comment.id,
-                  comment.replies.pageInfo.endCursor,
-                )
-              }
+              onPress={() => handleLoadMoreReplies(comment.id, comment.replies.pageInfo.endCursor)}
               disabled={loadingReplyFor === comment.id}
-              style={({ pressed }) => [
-                s.loadMoreReplies,
-                { opacity: pressed ? 0.6 : 1 },
-              ]}
+              style={({ pressed }) => [s.loadMoreReplies, { opacity: pressed ? 0.6 : 1 }]}
             >
               {loadingReplyFor === comment.id ? (
                 <ActivityIndicator size="small" color={colors.accent} />
               ) : (
                 <Text style={[s.loadMoreRepliesText, { color: colors.accent }]}>
-                  Show{" "}
-                  {comment.replies.totalCount - comment.replies.nodes.length}{" "}
-                  more{" "}
-                  {comment.replies.totalCount - comment.replies.nodes.length ===
-                  1
+                  Show {comment.replies.totalCount - comment.replies.nodes.length} more{" "}
+                  {comment.replies.totalCount - comment.replies.nodes.length === 1
                     ? "reply"
                     : "replies"}
                 </Text>

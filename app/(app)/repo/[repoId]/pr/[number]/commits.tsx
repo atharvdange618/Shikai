@@ -1,17 +1,9 @@
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { CommitCard } from "@/components/repo/CommitCard";
 import { PRHeader } from "@/components/repo/PRHeader";
-import {
-  PRGitHubLink,
-  PRList,
-  PRPageState,
-  prStyles as s,
-} from "@/components/repo/PRList";
+import { PRGitHubLink, PRList, PRPageState, prStyles as s } from "@/components/repo/PRList";
 import { Layout, Spacing, useTheme } from "@/constants/theme";
-import {
-  usePullRequestCommits,
-  usePullRequestDetail,
-} from "@/hooks/usePullRequestDetail";
+import { usePullRequestCommits, usePullRequestDetail } from "@/hooks/usePullRequestDetail";
 import { decodeRepoId } from "@/lib/utils";
 import { useLocalSearchParams } from "expo-router";
 import { Text, View } from "react-native";
@@ -56,22 +48,13 @@ function Commits() {
         )}
         footer={
           <>
-            <PRPageState
-              {...query}
-              count={query.commits.length}
-              emptyText="No commits"
-            />
+            <PRPageState {...query} count={query.commits.length} emptyText="No commits" />
             {(detail.data?.commits ?? 0) > 250 && (
               <>
-                <Text
-                  style={[s.text, { padding: 16, color: colors.textSecondary }]}
-                >
-                  GitHub’s PR API exposes at most 250 commits. Open GitHub for
-                  the full history.
+                <Text style={[s.text, { padding: 16, color: colors.textSecondary }]}>
+                  GitHub’s PR API exposes at most 250 commits. Open GitHub for the full history.
                 </Text>
-                <PRGitHubLink
-                  url={`https://github.com/${owner}/${repo}/pull/${number}/commits`}
-                />
+                <PRGitHubLink url={`https://github.com/${owner}/${repo}/pull/${number}/commits`} />
               </>
             )}
           </>

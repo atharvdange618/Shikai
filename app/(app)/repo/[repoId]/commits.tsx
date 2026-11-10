@@ -6,13 +6,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
-import {
-  ActivityIndicator,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
 
 import { useBranches, useCommits, useRepo } from "@/hooks/useRepoDetails";
 import { queryKeys } from "@/lib/query-client";
@@ -49,10 +43,7 @@ export default function CommitsScreen() {
   const [selectedBranch, setSelectedBranch] = useState("");
 
   const { data: repo } = useRepo(owner, repoName);
-  const { data: branches, isLoading: branchesLoading } = useBranches(
-    owner,
-    repoName,
-  );
+  const { data: branches, isLoading: branchesLoading } = useBranches(owner, repoName);
 
   // Default to the repo's default branch until the user picks one. Set
   // during render, not in an effect, so it never cascades an extra render.
@@ -67,15 +58,8 @@ export default function CommitsScreen() {
     } catch {}
   }, [navigation, isFileHistory, fileName]);
 
-  const {
-    commits,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-    isLoading,
-    isError,
-    refetch,
-  } = useCommits(owner, repoName, selectedBranch, path);
+  const { commits, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, isError, refetch } =
+    useCommits(owner, repoName, selectedBranch, path);
 
   const [refreshing, setRefreshing] = useState(false);
 
@@ -88,9 +72,7 @@ export default function CommitsScreen() {
   }, [queryClient, owner, repoName]);
 
   const renderItem = useCallback(
-    ({ item }: { item: GitHubCommit }) => (
-      <CommitCard commit={item} repoId={repoId ?? ""} />
-    ),
+    ({ item }: { item: GitHubCommit }) => <CommitCard commit={item} repoId={repoId ?? ""} />,
     [repoId],
   );
 
@@ -148,9 +130,7 @@ export default function CommitsScreen() {
           if (hasNextPage) fetchNextPage();
         }}
         onEndReachedThreshold={0.5}
-        refreshControl={
-          <PullToRefresh refreshing={refreshing} onRefresh={onRefresh} />
-        }
+        refreshControl={<PullToRefresh refreshing={refreshing} onRefresh={onRefresh} />}
         removeClippedSubviews
         drawDistance={200}
       />

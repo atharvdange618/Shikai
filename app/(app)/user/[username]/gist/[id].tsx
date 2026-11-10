@@ -2,14 +2,7 @@ import { Octicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useNavigation } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
 import { useEffect, useMemo } from "react";
-import {
-  ActivityIndicator,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { MarkdownRenderer } from "@/components/shared/MarkdownRenderer";
 import { useGist } from "@/hooks/useGists";
@@ -31,10 +24,7 @@ const MARKDOWN_EXT = /\.(md|markdown)$/i;
 function toMarkdown(file: GitHubGistFile): string {
   const content = file.content ?? "";
   if (MARKDOWN_EXT.test(file.filename)) return content;
-  const lang =
-    file.language?.toLowerCase() ??
-    file.filename.split(".").pop()?.toLowerCase() ??
-    "";
+  const lang = file.language?.toLowerCase() ?? file.filename.split(".").pop()?.toLowerCase() ?? "";
   const fence = "```";
   return `${fence}${lang}\n${content}\n${fence}`;
 }
@@ -47,10 +37,7 @@ export default function GistDetailScreen() {
 
   const s = useMemo(() => buildStyles(colors), [colors]);
 
-  const files = useMemo(
-    () => (gist ? Object.values(gist.files) : []),
-    [gist],
-  );
+  const files = useMemo(() => (gist ? Object.values(gist.files) : []), [gist]);
 
   useEffect(() => {
     try {
@@ -88,9 +75,7 @@ export default function GistDetailScreen() {
       contentContainerStyle={s.content}
       showsVerticalScrollIndicator={false}
     >
-      {gist.description ? (
-        <Text style={s.description}>{gist.description}</Text>
-      ) : null}
+      {gist.description ? <Text style={s.description}>{gist.description}</Text> : null}
       <Text style={s.meta}>
         {gist.owner.login} · updated {relativeTime(gist.updated_at)}
       </Text>
@@ -109,14 +94,8 @@ export default function GistDetailScreen() {
               style={s.truncated}
               onPress={() => WebBrowser.openBrowserAsync(file.raw_url)}
             >
-              <Text style={s.truncatedText}>
-                File too large to preview. Open raw file
-              </Text>
-              <Octicons
-                name="link-external"
-                size={12}
-                color={colors.accent}
-              />
+              <Text style={s.truncatedText}>File too large to preview. Open raw file</Text>
+              <Octicons name="link-external" size={12} color={colors.accent} />
             </Pressable>
           ) : (
             <MarkdownRenderer markdown={toMarkdown(file)} />

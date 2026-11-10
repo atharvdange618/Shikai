@@ -1,12 +1,7 @@
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { PRHeader } from "@/components/repo/PRHeader";
 import { PRList, PRPageState, prStyles as s } from "@/components/repo/PRList";
-import {
-  FontSize,
-  Layout,
-  Spacing,
-  useTheme,
-} from "@/constants/theme";
+import { FontSize, Layout, Spacing, useTheme } from "@/constants/theme";
 import { usePullRequestReviewComments } from "@/hooks/usePullRequestDetail";
 import { buildThreads } from "@/lib/pr-review";
 import { decodeRepoId, relativeTime } from "@/lib/utils";
@@ -40,24 +35,17 @@ function Reviews() {
         header={
           <Text style={[s.text, { color: colors.textSecondary }]}>
             {threads.length} threads
-            {query.hasNextPage ? " loaded · more comments available" : ""} ·
-            Grouped by file
+            {query.hasNextPage ? " loaded · more comments available" : ""} · Grouped by file
           </Text>
         }
         renderItem={({ item: thread, index }) => {
-          const showFile =
-            index === 0 || threads[index - 1].path !== thread.path;
+          const showFile = index === 0 || threads[index - 1].path !== thread.path;
           const replies = thread.replies.length;
           const replyLabel = `${replies} ${replies === 1 ? "reply" : "replies"}`;
           return (
             <View style={styles.item}>
               {showFile && (
-                <View
-                  style={[
-                    styles.fileHeader,
-                    index === 0 && styles.fileHeaderFirst,
-                  ]}
-                >
+                <View style={[styles.fileHeader, index === 0 && styles.fileHeaderFirst]}>
                   <Octicons name="file" size={12} color={colors.textMuted} />
                   <Text
                     accessibilityRole="header"
@@ -74,8 +62,7 @@ function Reviews() {
                 accessibilityLabel={`${thread.path}${thread.line ? ` line ${thread.line}` : ""}, ${thread.root.user.login}, ${replyLabel}`}
                 onPress={() =>
                   router.push({
-                    pathname:
-                      "/(app)/repo/[repoId]/pr/[number]/thread/[threadId]",
+                    pathname: "/(app)/repo/[repoId]/pr/[number]/thread/[threadId]",
                     params: {
                       repoId,
                       number,
@@ -88,9 +75,7 @@ function Reviews() {
                   styles.card,
                   {
                     borderColor: colors.border,
-                    backgroundColor: pressed
-                      ? colors.surfaceSecondary
-                      : colors.surface,
+                    backgroundColor: pressed ? colors.surfaceSecondary : colors.surface,
                   },
                 ]}
               >
@@ -102,26 +87,13 @@ function Reviews() {
                   <View style={{ flex: 1 }} />
                   {replies > 0 && (
                     <>
-                      <Octicons
-                        name="comment"
-                        size={12}
-                        color={colors.textMuted}
-                      />
-                      <Text style={[s.meta, { color: colors.textMuted }]}>
-                        {replies}
-                      </Text>
+                      <Octicons name="comment" size={12} color={colors.textMuted} />
+                      <Text style={[s.meta, { color: colors.textMuted }]}>{replies}</Text>
                     </>
                   )}
-                  <Octicons
-                    name="chevron-right"
-                    size={14}
-                    color={colors.textMuted}
-                  />
+                  <Octicons name="chevron-right" size={14} color={colors.textMuted} />
                 </View>
-                <Text
-                  numberOfLines={2}
-                  style={[styles.body, { color: colors.textPrimary }]}
-                >
+                <Text numberOfLines={2} style={[styles.body, { color: colors.textPrimary }]}>
                   {thread.root.body}
                 </Text>
                 <View style={styles.authorRow}>
@@ -143,11 +115,7 @@ function Reviews() {
           );
         }}
         footer={
-          <PRPageState
-            {...query}
-            count={threads.length}
-            emptyText="No code review threads"
-          />
+          <PRPageState {...query} count={threads.length} emptyText="No code review threads" />
         }
       />
     </>

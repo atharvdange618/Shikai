@@ -4,22 +4,8 @@ import * as Crypto from "expo-crypto";
 import { Image } from "expo-image";
 import * as Linking from "expo-linking";
 import * as WebBrowser from "expo-web-browser";
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type ComponentProps,
-} from "react";
-import {
-  ActivityIndicator,
-  Pressable,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from "react-native";
+import { useCallback, useEffect, useMemo, useRef, useState, type ComponentProps } from "react";
+import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import Animated, {
   FadeInDown,
   useAnimatedStyle,
@@ -51,12 +37,7 @@ import { clearAllMMKV } from "@/lib/mmkv";
 import { prefetchOverview } from "@/lib/prefetch";
 import { queryClient, queryKeys } from "@/lib/query-client";
 import { restorePATFor } from "@/lib/session";
-import {
-  clearPendingAuth,
-  getPendingAuth,
-  savePendingAuth,
-  saveToken,
-} from "@/lib/secure-storage";
+import { clearPendingAuth, getPendingAuth, savePendingAuth, saveToken } from "@/lib/secure-storage";
 import { useAuthStore } from "@/stores/auth.store";
 import { useSignInStore } from "@/stores/signin.store";
 import { requestWidgetUpdate } from "react-native-android-widget";
@@ -64,9 +45,7 @@ import { requestWidgetUpdate } from "react-native-android-widget";
 const CLIENT_ID = process.env.EXPO_PUBLIC_GITHUB_CLIENT_ID!;
 const APP_SLUG = process.env.EXPO_PUBLIC_GITHUB_APP_SLUG!;
 const OAUTH_PROXY_URL = process.env.EXPO_PUBLIC_OAUTH_PROXY_URL!;
-const SCOPES = ["read:user", "user:email", "repo:status", "read:repo"].join(
-  ",",
-);
+const SCOPES = ["read:user", "user:email", "repo:status", "read:repo"].join(",");
 
 // Classic-token scopes that cover every read path in the app.
 const NEW_TOKEN_URL =
@@ -145,12 +124,8 @@ export default function SignInScreen() {
       requestWidgetUpdate({
         widgetName: "ContributionGraph",
         renderWidget: async () => {
-          const { fetchContributionsForWidget } = await import(
-            "@/lib/widget-data"
-          );
-          const { ContributionWidget } = await import(
-            "@/widgets/ContributionWidget"
-          );
+          const { fetchContributionsForWidget } = await import("@/lib/widget-data");
+          const { ContributionWidget } = await import("@/widgets/ContributionWidget");
           const data = await fetchContributionsForWidget();
           if (data) {
             return (
@@ -180,8 +155,7 @@ export default function SignInScreen() {
     async (code: string, codeVerifier: string) => {
       if (processingCodeRef.current === code) return;
       processingCodeRef.current = code;
-      const { setLoading, setError, setNeedsInstall, setPendingToken } =
-        useSignInStore.getState();
+      const { setLoading, setError, setNeedsInstall, setPendingToken } = useSignInStore.getState();
 
       setLoading(true);
       setError(null);
@@ -224,8 +198,7 @@ export default function SignInScreen() {
 
         await clearPendingAuth();
 
-        githubAxios.defaults.headers.common["Authorization"] =
-          `Bearer ${accessToken}`;
+        githubAxios.defaults.headers.common["Authorization"] = `Bearer ${accessToken}`;
 
         const [installations, user] = await Promise.all([
           fetchUserInstallations(),
@@ -303,9 +276,7 @@ export default function SignInScreen() {
     setNeedsInstall(false);
 
     try {
-      const codeVerifier = btoa(
-        String.fromCharCode(...Crypto.getRandomBytes(32)),
-      )
+      const codeVerifier = btoa(String.fromCharCode(...Crypto.getRandomBytes(32)))
         .replace(/=/g, "")
         .replace(/\+/g, "-")
         .replace(/\//g, "_");
@@ -335,10 +306,7 @@ export default function SignInScreen() {
 
       // Auth session (Custom Tab) dismisses itself on redirect, unlike
       // Linking.openURL which left the Chrome tab open behind the app.
-      const result = await WebBrowser.openAuthSessionAsync(
-        authUrl,
-        redirectUri,
-      );
+      const result = await WebBrowser.openAuthSessionAsync(authUrl, redirectUri);
 
       if (result.type !== "success") {
         setLoading(false);
@@ -369,8 +337,7 @@ export default function SignInScreen() {
   }, [redirectUri, completeAuth]);
 
   const handleInstall = useCallback(async () => {
-    const { setLoading, setError, setNeedsInstall, setPendingToken } =
-      useSignInStore.getState();
+    const { setLoading, setError, setNeedsInstall, setPendingToken } = useSignInStore.getState();
 
     setLoading(true);
     setError(null);
@@ -378,10 +345,7 @@ export default function SignInScreen() {
     try {
       const installUrl = `https://github.com/apps/${APP_SLUG}/installations/new`;
 
-      const result = await WebBrowser.openAuthSessionAsync(
-        installUrl,
-        redirectUri,
-      );
+      const result = await WebBrowser.openAuthSessionAsync(installUrl, redirectUri);
 
       if (result.type !== "success") {
         setLoading(false);
@@ -389,10 +353,7 @@ export default function SignInScreen() {
       }
 
       const { pendingToken, pendingTokenExpiry } = useSignInStore.getState();
-      if (
-        !pendingToken ||
-        (pendingTokenExpiry && Date.now() > pendingTokenExpiry)
-      ) {
+      if (!pendingToken || (pendingTokenExpiry && Date.now() > pendingTokenExpiry)) {
         setPendingToken(null);
         setLoading(false);
         setNeedsInstall(false);
@@ -400,13 +361,9 @@ export default function SignInScreen() {
       }
       setPendingToken(null);
 
-      githubAxios.defaults.headers.common["Authorization"] =
-        `Bearer ${pendingToken}`;
+      githubAxios.defaults.headers.common["Authorization"] = `Bearer ${pendingToken}`;
 
-      const [, user] = await Promise.all([
-        saveToken(pendingToken),
-        fetchAuthenticatedUser(),
-      ]);
+      const [, user] = await Promise.all([saveToken(pendingToken), fetchAuthenticatedUser()]);
 
       const storedPAT = await restorePATFor(user.login);
       if (storedPAT) setPat(storedPAT);
@@ -441,10 +398,7 @@ export default function SignInScreen() {
 
     setPendingToken(null);
     setNeedsInstall(false);
-    if (
-      !pendingToken ||
-      (pendingTokenExpiry && Date.now() > pendingTokenExpiry)
-    ) {
+    if (!pendingToken || (pendingTokenExpiry && Date.now() > pendingTokenExpiry)) {
       return;
     }
 
@@ -476,9 +430,7 @@ export default function SignInScreen() {
       await finalizeSession(trimmed, user);
       setTokenInput("");
     } catch {
-      setTokenError(
-        "That token didn't work. Check it has the repo and read:user scopes.",
-      );
+      setTokenError("That token didn't work. Check it has the repo and read:user scopes.");
       setTokenLoading(false);
     }
   }, [tokenInput, finalizeSession]);
@@ -521,11 +473,7 @@ export default function SignInScreen() {
               {FEATURES.map((feature) => (
                 <View key={feature.text} style={s.featureRow}>
                   <View style={s.featureIcon}>
-                    <Octicons
-                      name={feature.icon}
-                      size={IconSize.sm}
-                      color={colors.accent}
-                    />
+                    <Octicons name={feature.icon} size={IconSize.sm} color={colors.accent} />
                   </View>
                   <Text style={s.featureText}>{feature.text}</Text>
                 </View>
@@ -566,10 +514,7 @@ export default function SignInScreen() {
               <Text style={s.tokenHint}>
                 The token needs the <Text style={s.bold}>repo</Text> and{" "}
                 <Text style={s.bold}>read:user</Text> scopes.{" "}
-                <Text
-                  style={s.link}
-                  onPress={() => Linking.openURL(NEW_TOKEN_URL)}
-                >
+                <Text style={s.link} onPress={() => Linking.openURL(NEW_TOKEN_URL)}>
                   Create a token
                 </Text>
               </Text>
@@ -644,10 +589,7 @@ export default function SignInScreen() {
                   </>
                 )}
               </AnimatedPressable>
-              <Pressable
-                onPress={() => setShowTokenInput(true)}
-                disabled={isLoading}
-              >
+              <Pressable onPress={() => setShowTokenInput(true)} disabled={isLoading}>
                 <Text style={s.secondaryLink}>Sign in with a token</Text>
               </Pressable>
             </>
@@ -659,9 +601,7 @@ export default function SignInScreen() {
             </Animated.View>
           )}
 
-          <Text style={s.footerNote}>
-            Read-only. Shikai never changes your GitHub data.
-          </Text>
+          <Text style={s.footerNote}>Read-only. Shikai never changes your GitHub data.</Text>
         </Animated.View>
       </View>
     </KeyboardAvoid>

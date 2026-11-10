@@ -81,9 +81,7 @@ export default function RepoDetailsScreen() {
   const [copiedHash, setCopiedHash] = useState(false);
 
   const repoIdEncoded = encodeRepoId(owner, repoName);
-  const isWatchlisted = useWatchlistStore((s) =>
-    s.isWatchlisted(repoIdEncoded),
-  );
+  const isWatchlisted = useWatchlistStore((s) => s.isWatchlisted(repoIdEncoded));
   const toggleWatchlist = useWatchlistStore((s) => s.toggleWatchlist);
   const pat = useAuthStore((s) => s.pat);
 
@@ -143,12 +141,10 @@ export default function RepoDetailsScreen() {
       )
     )
       return "failure" as const;
-    if (checks.some((c) => c.conclusion === "pending"))
-      return "pending" as const;
+    if (checks.some((c) => c.conclusion === "pending")) return "pending" as const;
     // Missing or unloaded results can hide a failure, so claim nothing.
     if (checksLoading || checksError || moreChecks) return null;
-    if (checks.every((c) => c.conclusion === "success"))
-      return "success" as const;
+    if (checks.every((c) => c.conclusion === "success")) return "success" as const;
     return null;
   }, [checks, checksLoading, checksError, moreChecks]);
 
@@ -217,8 +213,7 @@ export default function RepoDetailsScreen() {
       const parts: string[] = [`📦 ${repo.full_name}`];
       if (repo.description) parts.push(repo.description);
       const meta: string[] = [];
-      if (repo.stargazers_count > 0)
-        meta.push(`⭐ ${formatCount(repo.stargazers_count)} stars`);
+      if (repo.stargazers_count > 0) meta.push(`⭐ ${formatCount(repo.stargazers_count)} stars`);
       if (repo.language) meta.push(`🔧 ${repo.language}`);
       if (meta.length > 0) parts.push(meta.join("  ·  "));
       parts.push(repo.html_url);
@@ -245,8 +240,7 @@ export default function RepoDetailsScreen() {
     if (!owner || !repoName) return;
     queryClient.prefetchInfiniteQuery({
       queryKey: queryKeys.repoIssues(owner, repoName, "open"),
-      queryFn: ({ pageParam }) =>
-        fetchIssues(owner, repoName, pageParam, 10, "open"),
+      queryFn: ({ pageParam }) => fetchIssues(owner, repoName, pageParam, 10, "open"),
       initialPageParam: 1,
       getNextPageParam: (lastPage) => lastPage.pagination.next ?? undefined,
       pages: 1,
@@ -263,8 +257,7 @@ export default function RepoDetailsScreen() {
     if (!owner || !repoName) return;
     queryClient.prefetchInfiniteQuery({
       queryKey: queryKeys.repoPullRequests(owner, repoName, "open"),
-      queryFn: ({ pageParam }) =>
-        fetchPullRequests(owner, repoName, pageParam, 10, "open"),
+      queryFn: ({ pageParam }) => fetchPullRequests(owner, repoName, pageParam, 10, "open"),
       initialPageParam: 1,
       getNextPageParam: (lastPage) => lastPage.pagination.next ?? undefined,
       pages: 1,
@@ -300,10 +293,7 @@ export default function RepoDetailsScreen() {
   }, [router, owner]);
 
   const insets = useSafeAreaInsets();
-  const s = useMemo(
-    () => buildStyles(colors, insets.bottom),
-    [colors, insets.bottom],
-  );
+  const s = useMemo(() => buildStyles(colors, insets.bottom), [colors, insets.bottom]);
 
   const chevronOpacity = useSharedValue(1);
   const chevronTranslateY = useSharedValue(0);
@@ -373,13 +363,9 @@ export default function RepoDetailsScreen() {
         showsVerticalScrollIndicator={false}
         onScroll={handleScroll}
         scrollEventThrottle={16}
-        refreshControl={
-          <PullToRefresh refreshing={refreshing} onRefresh={onRefresh} />
-        }
+        refreshControl={<PullToRefresh refreshing={refreshing} onRefresh={onRefresh} />}
       >
-        <Animated.View
-          entering={FadeInDown.duration(400).delay(ANIM_DELAYS.hero)}
-        >
+        <Animated.View entering={FadeInDown.duration(400).delay(ANIM_DELAYS.hero)}>
           <RepoHeader
             repo={repo}
             owner={owner}
@@ -390,9 +376,7 @@ export default function RepoDetailsScreen() {
           />
         </Animated.View>
 
-        <Animated.View
-          entering={FadeInDown.duration(400).delay(ANIM_DELAYS.stats)}
-        >
+        <Animated.View entering={FadeInDown.duration(400).delay(ANIM_DELAYS.stats)}>
           <RepoStats
             stars={repo?.stargazers_count ?? 0}
             forks={repo?.forks_count ?? 0}
@@ -412,9 +396,7 @@ export default function RepoDetailsScreen() {
           />
         </Animated.View>
 
-        <Animated.View
-          entering={FadeInDown.duration(400).delay(ANIM_DELAYS.activity)}
-        >
+        <Animated.View entering={FadeInDown.duration(400).delay(ANIM_DELAYS.activity)}>
           <RepoActivity
             openIssues={issuesPRStats?.openIssues ?? 0}
             openPRs={issuesPRStats?.openPullRequests ?? 0}
@@ -430,18 +412,14 @@ export default function RepoDetailsScreen() {
             showDiscussions={repo?.has_discussions}
             onDiscussionsPress={handleDiscussionsPress}
             latestRunStatus={
-              latestRun
-                ? getRunDisplay(latestRun.status, latestRun.conclusion, colors)
-                : undefined
+              latestRun ? getRunDisplay(latestRun.status, latestRun.conclusion, colors) : undefined
             }
             onActionsPress={handleActionsPress}
             onInsightsPress={handleInsightsPress}
           />
         </Animated.View>
 
-        <Animated.View
-          entering={FadeInDown.duration(400).delay(ANIM_DELAYS.actionBar)}
-        >
+        <Animated.View entering={FadeInDown.duration(400).delay(ANIM_DELAYS.actionBar)}>
           <RepoActionBar
             isWatchlisted={isWatchlisted}
             copiedUrl={copiedUrl}
@@ -456,9 +434,7 @@ export default function RepoDetailsScreen() {
           />
         </Animated.View>
 
-        <Animated.View
-          entering={FadeInDown.duration(400).delay(ANIM_DELAYS.commitSpotlight)}
-        >
+        <Animated.View entering={FadeInDown.duration(400).delay(ANIM_DELAYS.commitSpotlight)}>
           <CommitSpotlight
             commit={lastCommit ?? undefined}
             isLoading={isLoading.core}
@@ -479,20 +455,12 @@ export default function RepoDetailsScreen() {
         </Animated.View>
 
         {!(languages.length === 0 && !isLoading.core) && (
-          <Animated.View
-            entering={FadeInDown.duration(400).delay(ANIM_DELAYS.languages)}
-          >
-            <RepoLanguages
-              languages={languages}
-              isLoading={isLoading.core}
-              colors={colors}
-            />
+          <Animated.View entering={FadeInDown.duration(400).delay(ANIM_DELAYS.languages)}>
+            <RepoLanguages languages={languages} isLoading={isLoading.core} colors={colors} />
           </Animated.View>
         )}
 
-        <Animated.View
-          entering={FadeInDown.duration(400).delay(ANIM_DELAYS.contributors)}
-        >
+        <Animated.View entering={FadeInDown.duration(400).delay(ANIM_DELAYS.contributors)}>
           <RepoContributors
             contributors={contributors}
             isLoading={isLoading.contributors}

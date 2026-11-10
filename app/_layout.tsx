@@ -15,14 +15,7 @@ import { Stack, useRouter } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import * as SystemUI from "expo-system-ui";
 import { ShareIntentProvider } from "expo-share-intent";
-import {
-  useCallback,
-  useEffect,
-  useReducer,
-  useRef,
-  useState,
-  type Dispatch,
-} from "react";
+import { useCallback, useEffect, useReducer, useRef, useState, type Dispatch } from "react";
 import { StatusBar } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 
@@ -60,9 +53,7 @@ function ThemeEffects() {
     SystemUI.setBackgroundColorAsync(theme.colors.background);
   }, [theme.colors.background]);
 
-  return (
-    <StatusBar barStyle={theme.isDark ? "light-content" : "dark-content"} />
-  );
+  return <StatusBar barStyle={theme.isDark ? "light-content" : "dark-content"} />;
 }
 
 // Rendered inside AlertProvider so it can prompt the user instead of
@@ -145,10 +136,7 @@ export default Sentry.wrap(function RootLayout() {
 
       try {
         // Both are Keystore round trips, so read them together.
-        const [storedPAT, storedToken] = await Promise.all([
-          getStoredPAT(),
-          getStoredToken(),
-        ]);
+        const [storedPAT, storedToken] = await Promise.all([getStoredPAT(), getStoredToken()]);
 
         if (storedPAT) setPat(storedPAT);
 
@@ -224,8 +212,7 @@ export default Sentry.wrap(function RootLayout() {
               maxAge: PERSISTENCE_MAX_AGE,
               dehydrateOptions: {
                 shouldDehydrateQuery: (query: Query) =>
-                  query.state.status === "success" &&
-                  query.meta?.persist !== false,
+                  query.state.status === "success" && query.meta?.persist !== false,
               },
             }}
           >
@@ -234,10 +221,7 @@ export default Sentry.wrap(function RootLayout() {
               <ThemeEffects />
               <OTAUpdateEffects />
               {showSplash && (
-                <AnimatedSplashScreen
-                  isReady={allReady}
-                  onComplete={() => setShowSplash(false)}
-                />
+                <AnimatedSplashScreen isReady={allReady} onComplete={() => setShowSplash(false)} />
               )}
               {!showSplash && state.phase === "blocked" && (
                 <BlockingScreen

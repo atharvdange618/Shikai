@@ -7,13 +7,7 @@ import { Image } from "expo-image";
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
-import {
-  ActivityIndicator,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
 
 import { useDiscussions } from "@/hooks/useDiscussions";
 import { queryKeys } from "@/lib/query-client";
@@ -61,9 +55,7 @@ export default function DiscussionsScreen() {
             hitSlop={12}
             style={{ marginRight: Spacing.sm, padding: Spacing.xs }}
             onPress={() =>
-              WebBrowser.openBrowserAsync(
-                `https://github.com/${owner}/${repoName}/discussions`,
-              )
+              WebBrowser.openBrowserAsync(`https://github.com/${owner}/${repoName}/discussions`)
             }
           >
             <Octicons name="link-external" size={16} color={colors.accent} />
@@ -106,11 +98,7 @@ export default function DiscussionsScreen() {
     </View>
   ) : (
     <View style={s.centered}>
-      <Octicons
-        name="comment-discussion"
-        size={32}
-        color={colors.textMuted}
-      />
+      <Octicons name="comment-discussion" size={32} color={colors.textMuted} />
       <Text style={s.emptyTitle}>No discussions</Text>
     </View>
   );
@@ -135,9 +123,7 @@ export default function DiscussionsScreen() {
           if (hasNextPage) fetchNextPage();
         }}
         onEndReachedThreshold={0.5}
-        refreshControl={
-          <PullToRefresh refreshing={refreshing} onRefresh={onRefresh} />
-        }
+        refreshControl={<PullToRefresh refreshing={refreshing} onRefresh={onRefresh} />}
         removeClippedSubviews
         drawDistance={300}
       />
@@ -166,10 +152,7 @@ const DiscussionItem = memo(function DiscussionItem({
   const s = useMemo(() => buildStyles(colors), [colors]);
 
   return (
-    <Pressable
-      style={({ pressed }) => [s.item, pressed && s.itemPressed]}
-      onPress={handlePress}
-    >
+    <Pressable style={({ pressed }) => [s.item, pressed && s.itemPressed]} onPress={handlePress}>
       <View style={s.itemIcon}>
         <Octicons
           name="comment-discussion"

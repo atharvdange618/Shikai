@@ -1,21 +1,10 @@
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { PRHeader } from "@/components/repo/PRHeader";
-import {
-  PRGitHubLink,
-  PRPageState,
-  prStyles as s,
-} from "@/components/repo/PRList";
+import { PRGitHubLink, PRPageState, prStyles as s } from "@/components/repo/PRList";
 import { ReactionsRow } from "@/components/repo/ReactionsRow";
 import { TimelineEventRow } from "@/components/repo/TimelineEventRow";
 import { MarkdownRenderer } from "@/components/shared/MarkdownRenderer";
-import {
-  BorderWidth,
-  FontFamily,
-  FontSize,
-  Radius,
-  Spacing,
-  useTheme,
-} from "@/constants/theme";
+import { BorderWidth, FontFamily, FontSize, Radius, Spacing, useTheme } from "@/constants/theme";
 import {
   useChecks,
   usePullRequestConversation,
@@ -25,12 +14,7 @@ import {
   usePullRequestReviews,
   useRequestedReviewers,
 } from "@/hooks/usePullRequestDetail";
-import {
-  buildThreads,
-  checksSummary,
-  checksIcon,
-  latestReviews,
-} from "@/lib/pr-review";
+import { buildThreads, checksSummary, checksIcon, latestReviews } from "@/lib/pr-review";
 import { mergeCommentsWithTimeline } from "@/lib/timeline";
 import { decodeRepoId, relativeTime } from "@/lib/utils";
 import type { GitHubComment } from "@/types/github.types";
@@ -38,13 +22,7 @@ import { Octicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
-import {
-  ActivityIndicator,
-  Pressable,
-  ScrollView,
-  Text,
-  View,
-} from "react-native";
+import { ActivityIndicator, Pressable, ScrollView, Text, View } from "react-native";
 
 export default function PullRequestDetailScreen() {
   return (
@@ -75,12 +53,8 @@ function Overview() {
     if (hasNextPage && !isFetchingNextPage && !isError) void fetchNextPage();
   }, [hasNextPage, isFetchingNextPage, isError, fetchNextPage]);
   const reviewStates = latestReviews(reviews.reviews);
-  const approvals = reviewStates.filter(
-    (review) => review.state === "APPROVED",
-  ).length;
-  const changes = reviewStates.filter(
-    (review) => review.state === "CHANGES_REQUESTED",
-  ).length;
+  const approvals = reviewStates.filter((review) => review.state === "APPROVED").length;
+  const changes = reviewStates.filter((review) => review.state === "CHANGES_REQUESTED").length;
   const pendingReviewers =
     (requested.data?.users.length ?? 0) + (requested.data?.teams.length ?? 0);
   const reviewSummary =
@@ -129,15 +103,8 @@ function Overview() {
         />
       ) : (
         <ScrollView contentContainerStyle={s.content}>
-          <Text style={[s.meta, { color: stateColor }]}>
-            {state} pull request
-          </Text>
-          <Text
-            style={[
-              s.title,
-              { color: colors.textPrimary, fontSize: FontSize.heading },
-            ]}
-          >
+          <Text style={[s.meta, { color: stateColor }]}>{state} pull request</Text>
+          <Text style={[s.title, { color: colors.textPrimary, fontSize: FontSize.heading }]}>
             {pr.title}
           </Text>
           <View
@@ -159,18 +126,9 @@ function Overview() {
           <Text style={[s.mono, { color: colors.textSecondary }]}>
             {pr.base.ref} ← {pr.head.ref}
           </Text>
-          <View
-            style={[
-              s.card,
-              { backgroundColor: colors.surface, borderColor: colors.border },
-            ]}
-          >
-            <Text style={[s.text, { color: colors.textPrimary }]}>
-              {checkSummary}
-            </Text>
-            <Text style={[s.text, { color: colors.textSecondary }]}>
-              {reviewSummary}
-            </Text>
+          <View style={[s.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+            <Text style={[s.text, { color: colors.textPrimary }]}>{checkSummary}</Text>
+            <Text style={[s.text, { color: colors.textSecondary }]}>{reviewSummary}</Text>
             {(reviews.isError || requested.isError) && (
               <Pressable
                 accessibilityRole="button"
@@ -180,15 +138,11 @@ function Overview() {
                   void requested.refetch();
                 }}
               >
-                <Text style={[s.text, { color: colors.accent }]}>
-                  Retry review status
-                </Text>
+                <Text style={[s.text, { color: colors.accent }]}>Retry review status</Text>
               </Pressable>
             )}
           </View>
-          <Text style={[s.title, { color: colors.textPrimary }]}>
-            Explore this pull request
-          </Text>
+          <Text style={[s.title, { color: colors.textPrimary }]}>Explore this pull request</Text>
           <View
             style={{
               borderWidth: BorderWidth.normal,
@@ -203,13 +157,9 @@ function Overview() {
               subtitle={`+${pr.additions.toLocaleString()} additions · −${pr.deletions.toLocaleString()} deletions`}
               subtitleNode={
                 <>
-                  <Text style={{ color: colors.success }}>
-                    +{pr.additions.toLocaleString()}
-                  </Text>
+                  <Text style={{ color: colors.success }}>+{pr.additions.toLocaleString()}</Text>
                   {" additions · "}
-                  <Text style={{ color: colors.danger }}>
-                    −{pr.deletions.toLocaleString()}
-                  </Text>
+                  <Text style={{ color: colors.danger }}>−{pr.deletions.toLocaleString()}</Text>
                   {" deletions"}
                 </>
               }
@@ -299,19 +249,13 @@ function Overview() {
               ))}
             </View>
           )}
-          <Text style={[s.title, { color: colors.textPrimary }]}>
-            Description
-          </Text>
+          <Text style={[s.title, { color: colors.textPrimary }]}>Description</Text>
           {pr.body ? (
             <MarkdownRenderer markdown={pr.body} context={`${owner}/${repo}`} />
           ) : (
-            <Text style={[s.text, { color: colors.textSecondary }]}>
-              No description provided.
-            </Text>
+            <Text style={[s.text, { color: colors.textSecondary }]}>No description provided.</Text>
           )}
-          <Text style={[s.title, { color: colors.textPrimary }]}>
-            Conversation &amp; activity
-          </Text>
+          <Text style={[s.title, { color: colors.textPrimary }]}>Conversation &amp; activity</Text>
           {(comments.isLoading || activity.isLoading) && (
             <ActivityIndicator color={colors.accent} />
           )}
@@ -349,9 +293,7 @@ function Overview() {
             <Pressable
               accessibilityRole="button"
               style={s.button}
-              disabled={
-                comments.isFetchingNextPage || activity.isFetchingNextPage
-              }
+              disabled={comments.isFetchingNextPage || activity.isFetchingNextPage}
               onPress={() => {
                 if (comments.hasNextPage) void comments.fetchNextPage();
                 if (activity.hasNextPage) void activity.fetchNextPage();
@@ -400,41 +342,26 @@ function SectionRow({
           alignItems: "center",
           gap: Spacing.md,
           borderColor: colors.border,
-          backgroundColor: pressed
-            ? colors.surfaceSecondary
-            : colors.background,
+          backgroundColor: pressed ? colors.surfaceSecondary : colors.background,
         },
       ]}
     >
       <Octicons name={icon} size={20} color={colors.textSecondary} />
       <View style={{ flex: 1, gap: Spacing.xs }}>
         <Text style={[s.text, { color: colors.textPrimary }]}>{title}</Text>
-        <Text style={[s.meta, { color: colors.textSecondary }]}>
-          {subtitleNode ?? subtitle}
-        </Text>
+        <Text style={[s.meta, { color: colors.textSecondary }]}>{subtitleNode ?? subtitle}</Text>
       </View>
       {count && (
-        <Text
-          style={[s.meta, { color: colors.textSecondary, maxWidth: "30%" }]}
-        >
-          {count}
-        </Text>
+        <Text style={[s.meta, { color: colors.textSecondary, maxWidth: "30%" }]}>{count}</Text>
       )}
       <Octicons name="chevron-right" size={16} color={colors.textMuted} />
     </Pressable>
   );
 }
 
-function ConversationComment({
-  comment,
-  context,
-}: {
-  comment: GitHubComment;
-  context: string;
-}) {
+function ConversationComment({ comment, context }: { comment: GitHubComment; context: string }) {
   const { colors } = useTheme();
-  const bot =
-    comment.user.type === "Bot" || comment.user.login.endsWith("[bot]");
+  const bot = comment.user.type === "Bot" || comment.user.login.endsWith("[bot]");
   const [expanded, setExpanded] = useState(!bot);
   const title =
     comment.body
@@ -443,12 +370,7 @@ function ConversationComment({
       ?.replace(/^#+\s*/, "")
       .slice(0, 160) ?? "Bot report";
   return (
-    <View
-      style={[
-        s.card,
-        { backgroundColor: colors.surface, borderColor: colors.border },
-      ]}
-    >
+    <View style={[s.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
       <Text style={[s.text, { color: colors.textPrimary }]}>
         {comment.user.login} · {relativeTime(comment.created_at)}
       </Text>
@@ -464,9 +386,7 @@ function ConversationComment({
           </Text>
         </Pressable>
       )}
-      {expanded && (
-        <MarkdownRenderer markdown={comment.body} context={context} />
-      )}
+      {expanded && <MarkdownRenderer markdown={comment.body} context={context} />}
       <ReactionsRow reactions={comment.reactions} colors={colors} />
     </View>
   );

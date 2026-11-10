@@ -2,12 +2,7 @@ import { FlashList } from "@shopify/flash-list";
 import { useQueryClient } from "@tanstack/react-query";
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import {
-  ActivityIndicator,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 
 import { RepoCard } from "@/components/repo/RepoCard";
 import { ListItemSeparator } from "@/components/shared/ListItemSeparator";
@@ -29,18 +24,14 @@ import {
 
 const keyExtractor = (item: GitHubRepo) => String(item.id);
 
-const overrideItemLayout = (
-  layout: { span?: number; size?: number },
-  item: GitHubRepo,
-) => {
+const overrideItemLayout = (layout: { span?: number; size?: number }, item: GitHubRepo) => {
   let size = 96;
   if (item.description) size += 36;
   if (item.topics && item.topics.length > 0) size += 34;
   layout.size = size;
 };
 
-const getItemType = (item: GitHubRepo) =>
-  item.topics.length > 0 ? 2 : item.description ? 1 : 0;
+const getItemType = (item: GitHubRepo) => (item.topics.length > 0 ? 2 : item.description ? 1 : 0);
 
 export default function UserReposScreen() {
   const { username } = useLocalSearchParams<{ username: string }>();
@@ -51,14 +42,8 @@ export default function UserReposScreen() {
 
   const [refreshing, setRefreshing] = useState(false);
 
-  const {
-    repos,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-    isLoading,
-    isError,
-  } = useUserAllRepos(username ?? "");
+  const { repos, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, isError } =
+    useUserAllRepos(username ?? "");
 
   useEffect(() => {
     try {
@@ -149,9 +134,7 @@ export default function UserReposScreen() {
           if (hasNextPage) fetchNextPage();
         }}
         onEndReachedThreshold={0.5}
-        refreshControl={
-          <PullToRefresh refreshing={refreshing} onRefresh={onRefresh} />
-        }
+        refreshControl={<PullToRefresh refreshing={refreshing} onRefresh={onRefresh} />}
         overrideItemLayout={overrideItemLayout}
         getItemType={getItemType}
         removeClippedSubviews

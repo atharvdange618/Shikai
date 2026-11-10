@@ -18,14 +18,7 @@ import { Octicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
 import { useEffect } from "react";
-import {
-  ActivityIndicator,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 export default function WorkflowRunScreen() {
   return (
@@ -117,12 +110,7 @@ function WorkflowRunScreenContent() {
           : ` · started ${relativeTime(startedAt)}`}
       </Text>
 
-      <View
-        style={[
-          s.metaCard,
-          { backgroundColor: colors.surface, borderColor: colors.border },
-        ]}
-      >
+      <View style={[s.metaCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
         {run.head_branch && (
           <MetaRow icon="git-branch" colors={colors} mono>
             {run.head_branch}
@@ -155,13 +143,9 @@ function WorkflowRunScreenContent() {
         {isJobsLoading ? (
           <ActivityIndicator size="small" color={colors.accent} />
         ) : isJobsError ? (
-          <Text style={[s.statusLine, { color: colors.danger }]}>
-            Failed to load jobs
-          </Text>
+          <Text style={[s.statusLine, { color: colors.danger }]}>Failed to load jobs</Text>
         ) : jobs.length === 0 ? (
-          <Text style={[s.statusLine, { color: colors.textMuted }]}>
-            No jobs yet
-          </Text>
+          <Text style={[s.statusLine, { color: colors.textMuted }]}>No jobs yet</Text>
         ) : (
           jobs.map((job) => {
             const jobStatus = getRunDisplay(job.status, job.conclusion, colors);
@@ -177,10 +161,7 @@ function WorkflowRunScreenContent() {
                 ]}
               >
                 <Octicons name={jobStatus.icon} size={16} color={jobStatus.color} />
-                <Text
-                  style={[s.jobName, { color: colors.textPrimary }]}
-                  numberOfLines={2}
-                >
+                <Text style={[s.jobName, { color: colors.textPrimary }]} numberOfLines={2}>
                   {job.name}
                 </Text>
                 {job.status !== "queued" && (
@@ -200,9 +181,7 @@ function WorkflowRunScreenContent() {
         style={({ pressed }) => [s.linkButton, pressed && { opacity: 0.6 }]}
       >
         <Octicons name="link-external" size={14} color={colors.accent} />
-        <Text style={[s.linkButtonText, { color: colors.accent }]}>
-          View on GitHub
-        </Text>
+        <Text style={[s.linkButtonText, { color: colors.accent }]}>View on GitHub</Text>
       </Pressable>
     </ScrollView>
   );

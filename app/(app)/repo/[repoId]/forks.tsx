@@ -13,8 +13,7 @@ import { useTheme } from "@/constants/theme";
 
 const keyExtractor = (item: GitHubRepo) => String(item.id);
 
-const getItemType = (item: GitHubRepo) =>
-  item.topics.length > 0 ? 2 : item.description ? 1 : 0;
+const getItemType = (item: GitHubRepo) => (item.topics.length > 0 ? 2 : item.description ? 1 : 0);
 
 export default function ForksScreen() {
   const { repoId } = useLocalSearchParams<{ repoId: string }>();
@@ -23,15 +22,8 @@ export default function ForksScreen() {
   const queryClient = useQueryClient();
   const { colors, isDark } = useTheme();
 
-  const {
-    forks,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-    isLoading,
-    isError,
-    refetch,
-  } = useForks(owner, repoName);
+  const { forks, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, isError, refetch } =
+    useForks(owner, repoName);
 
   const handleRepoPress = useCallback(
     (repo: GitHubRepo) => {

@@ -62,15 +62,13 @@ function DiffScreenContent() {
     params.source === "compare" ? (params.base ?? "") : "",
     params.source === "compare" ? (params.head ?? "") : "",
   );
-  const query =
-    params.source === "pr" ? pr : params.source === "commit" ? commit : compare;
+  const query = params.source === "pr" ? pr : params.source === "commit" ? commit : compare;
   const file =
     params.source === "pr"
       ? pr.file
-      : (params.source === "commit"
-          ? commit.data?.files
-          : compare.data?.files
-        )?.find((f) => f.filename === filename);
+      : (params.source === "commit" ? commit.data?.files : compare.data?.files)?.find(
+          (f) => f.filename === filename,
+        );
 
   useEffect(() => {
     try {
@@ -81,17 +79,10 @@ function DiffScreenContent() {
   }, [navigation, baseName]);
 
   return (
-    <SafeAreaView
-      style={[s.container, { backgroundColor: colors.background }]}
-      edges={["bottom"]}
-    >
-      {prContext && (
-        <PRHeader title={baseName} repoId={params.repoId} number={prContext} />
-      )}
+    <SafeAreaView style={[s.container, { backgroundColor: colors.background }]} edges={["bottom"]}>
+      {prContext && <PRHeader title={baseName} repoId={params.repoId} number={prContext} />}
       <FileLoading isLoading={query.isLoading} fileName={baseName} />
-      {query.isError && (
-        <FileError title="Failed to load diff" message={query.error?.message} />
-      )}
+      {query.isError && <FileError title="Failed to load diff" message={query.error?.message} />}
       {!query.isLoading && !query.isError && renderDiff()}
     </SafeAreaView>
   );
@@ -103,11 +94,7 @@ function DiffScreenContent() {
     if (!file.patch) {
       return (
         <FileError
-          title={
-            file.status === "renamed"
-              ? "File renamed, no content changes"
-              : "No diff to show"
-          }
+          title={file.status === "renamed" ? "File renamed, no content changes" : "No diff to show"}
           message={
             file.status === "renamed"
               ? undefined
@@ -116,9 +103,7 @@ function DiffScreenContent() {
         />
       );
     }
-    return (
-      <CodeViewer key={filename} content={file.patch} fileName={filename} diff />
-    );
+    return <CodeViewer key={filename} content={file.patch} fileName={filename} diff />;
   }
 }
 

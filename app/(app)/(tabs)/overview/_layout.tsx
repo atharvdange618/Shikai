@@ -8,9 +8,7 @@ export default function OverviewLayout() {
   const { colors } = theme;
 
   return (
-    <Stack
-      screenOptions={{ contentStyle: { backgroundColor: colors.background } }}
-    >
+    <Stack screenOptions={{ contentStyle: { backgroundColor: colors.background } }}>
       <Stack.Screen
         name="index"
         options={{
