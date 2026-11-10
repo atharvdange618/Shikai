@@ -121,7 +121,7 @@ export function BranchSelector({
   );
 }
 
-function buildStyles(colors: ColorTokens, shadows: Record<string, any>) {
+function buildStyles(colors: ColorTokens, shadows: Partial<typeof Shadows.light.sm>) {
   return StyleSheet.create({
     wrapper: {
       paddingHorizontal: Spacing.md,

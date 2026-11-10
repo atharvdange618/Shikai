@@ -30,6 +30,12 @@ export function isRateLimited(): boolean {
   );
 }
 
+function parseRateLimitHeader(value: unknown): number | undefined {
+  if (typeof value !== "string" && typeof value !== "number") return undefined;
+  const parsed = parseInt(String(value), 10);
+  return Number.isFinite(parsed) ? parsed : undefined;
+}
+
 export class GitHubApiError extends Error {
   status: number;
 
@@ -79,15 +85,15 @@ githubAxios.interceptors.response.use(
   (response) => {
     const h = response.headers;
 
-    const limitVal = h["x-ratelimit-limit"];
-    const remainingVal = h["x-ratelimit-remaining"];
-    const resetVal = h["x-ratelimit-reset"];
-    const usedVal = h["x-ratelimit-used"];
+    const limitVal = parseRateLimitHeader(h["x-ratelimit-limit"]);
+    const remainingVal = parseRateLimitHeader(h["x-ratelimit-remaining"]);
+    const resetVal = parseRateLimitHeader(h["x-ratelimit-reset"]);
+    const usedVal = parseRateLimitHeader(h["x-ratelimit-used"]);
 
-    if (limitVal) rateLimit.limit = parseInt(limitVal, 10);
-    if (remainingVal) rateLimit.remaining = parseInt(remainingVal, 10);
-    if (resetVal) rateLimit.reset = new Date(parseInt(resetVal, 10) * 1000);
-    if (usedVal) rateLimit.used = parseInt(usedVal, 10);
+    if (limitVal !== undefined) rateLimit.limit = limitVal;
+    if (remainingVal !== undefined) rateLimit.remaining = remainingVal;
+    if (resetVal !== undefined) rateLimit.reset = new Date(resetVal * 1000);
+    if (usedVal !== undefined) rateLimit.used = usedVal;
 
     return response;
   },
@@ -102,9 +108,9 @@ githubAxios.interceptors.response.use(
     }
 
     if (status === 403) {
-      const retryAfter = error.response?.headers["x-ratelimit-reset"];
-      if (retryAfter) {
-        rateLimit.reset = new Date(parseInt(retryAfter, 10) * 1000);
+      const retryAfter = parseRateLimitHeader(error.response?.headers["x-ratelimit-reset"]);
+      if (retryAfter !== undefined) {
+        rateLimit.reset = new Date(retryAfter * 1000);
         rateLimit.remaining = 0;
       }
     }

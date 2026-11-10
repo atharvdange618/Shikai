@@ -64,15 +64,25 @@ export async function fetchContributionsForWidget(): Promise<WidgetContributionD
     return null;
   }
 
-  const json = await response.json();
+  const json = (await response.json()) as {
+    errors?: unknown[];
+    data?: {
+      viewer?: {
+        contributionsCollection?: {
+          contributionCalendar?: Pick<WidgetContributionData, "totalContributions" | "weeks">;
+        };
+      };
+    };
+  } | null;
 
-  if (Array.isArray(json.errors) && json.errors.length > 0) {
+  if (!json || (Array.isArray(json.errors) && json.errors.length > 0)) {
     return null;
   }
 
-  const calendar = json.data.viewer.contributionsCollection.contributionCalendar;
+  const calendar = json.data?.viewer?.contributionsCollection?.contributionCalendar;
+  if (!calendar) return null;
 
-  const allDays = calendar.weeks.flatMap((w: WidgetContributionWeek) => w.contributionDays);
+  const allDays = calendar.weeks.flatMap((week) => week.contributionDays);
 
   const now = new Date();
   const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;

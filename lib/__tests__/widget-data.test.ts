@@ -36,4 +36,9 @@ describe("fetchContributionsForWidget", () => {
     expect(data?.totalContributions).toBe(0);
     expect(reportApiError).not.toHaveBeenCalled();
   });
+
+  it("returns no widget data when the response has no calendar", async () => {
+    stubFetch(200, { data: { viewer: null } });
+    await expect(fetchContributionsForWidget()).resolves.toBeNull();
+  });
 });

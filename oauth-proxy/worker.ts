@@ -13,14 +13,17 @@ export default {
       return new Response("Method not allowed", { status: 405 });
     }
 
-    let body: Record<string, unknown>;
+    let body: unknown;
     try {
       body = await request.json();
     } catch {
       return Response.json({ error: "Invalid JSON body" }, { status: 400 });
     }
 
-    const { code, code_verifier, redirect_uri, client_id } = body;
+    if (typeof body !== "object" || body === null || Array.isArray(body)) {
+      return Response.json({ error: "Invalid JSON body" }, { status: 400 });
+    }
+    const { code, code_verifier, redirect_uri, client_id } = body as Record<string, unknown>;
 
     if (typeof code !== "string" || !code) {
       return Response.json({ error: "Missing or invalid code" }, { status: 400 });

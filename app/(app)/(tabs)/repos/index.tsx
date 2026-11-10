@@ -33,7 +33,7 @@ import {
   Spacing,
   useTheme,
 } from "@/constants/theme";
-import { FlashList } from "@shopify/flash-list";
+import { FlashList, type FlashListRef } from "@shopify/flash-list";
 
 const keyExtractor = (item: GitHubRepo) => String(item.id);
 
@@ -54,7 +54,7 @@ export default function ReposScreen() {
   const { colors, isDark } = useTheme();
   const router = useRouter();
   const queryClient = useQueryClient();
-  const flashListRef = useRef<any>(null);
+  const flashListRef = useRef<FlashListRef<GitHubRepo>>(null);
 
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState<SortOption>("pushed");
