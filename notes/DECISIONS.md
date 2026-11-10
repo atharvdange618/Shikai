@@ -417,13 +417,13 @@ Entries D-001 to D-021 were backfilled on 2026-10-15 from commits, the changelog
 
 ## D-041: Lint with oxlint through @atharvdange/toolchain
 
-**Date:** 2026-11-10 · **Status:** Accepted; warnings to fix in a follow-up
+**Date:** 2026-11-10 · **Status:** Accepted; warnings fixed in PRs #45 to #50 (last: `7dd61f2`), every rule is `error` and `npm run lint:strict` passes
 
 **Context.** `expo lint` ran eslint-config-expo, which has no type information. Toolchain 2.0.1 sets up oxlint with type-aware rules (oxlint-tsgolint), Prettier, Husky, lint-staged, commitlint and TypeScript 7. Expo pins TypeScript 6.0, but Babel compiles the app, so TypeScript 7 only affects `npm run typecheck`, which passed with no changes.
 **Decision.** Run `toolchain init` and keep the D-036 React Compiler rules as `react/*` rules in `.oxlintrc.json`. The 261 findings from rules ESLint never ran (mostly `no-floating-promises` and `no-unsafe-*`, plus four React Compiler hits where oxlint and ESLint disagree) are set to `warn`, so the migration changes no app code. `no-require-imports` is off, since `require()` is how React Native loads images, and `rules-of-hooks` is off under `__tests__`. Prettier keeps double quotes to match the code.
 **Rejected.** Fixing all 261 in the migration: it touches most screens, and a QA bug could come from the tooling or the rewrite (the D-036 reasoning). Turning type-aware linting off: it drops the main thing oxlint adds.
 **Consequences.** lint-staged's `oxlint --fix` also applies fixes for `warn` rules, so a commit can pick up small autofixes in files it touches; read the staged diff. `npx expo install --check` reports TypeScript 7 as outside Expo's range; ignore that one. The one-time format commits are listed in `.git-blame-ignore-revs`. The new lint found a real bug: the injected WebView script in `MarkdownRenderer.tsx` matches `language-([w+]+)`, because `\w` inside a template string becomes `w`.
-**Revisit when.** The follow-up fixes the warnings and sets each rule back to `error`.
+**Revisit when.** A Toolchain release changes the lint defaults, as 2.1.0 did (D-042). The first condition, every rule back to `error`, was met on 2026-11-10.
 
 ## D-042: Type the config plugins with checkJs, not a lint override
 
