@@ -151,9 +151,7 @@ export function Tooltip({ content, children, align = "left" }: TooltipProps) {
             { backgroundColor: colors.surface, borderColor: colors.border },
           ]}
         >
-          <Text style={[s.text, { color: colors.textSecondary }]}>
-            {content}
-          </Text>
+          <Text style={[s.text, { color: colors.textSecondary }]}>{content}</Text>
         </View>
       )}
     </View>
@@ -167,12 +165,7 @@ interface InfoDotProps {
   align?: "left" | "center" | "right";
 }
 
-export function InfoDot({
-  label,
-  description,
-  color = "accent",
-  align = "left",
-}: InfoDotProps) {
+export function InfoDot({ label, description, color = "accent", align = "left" }: InfoDotProps) {
   const { colors, isDark } = useTheme();
   const shadows = isDark ? {} : Shadows.light.md;
   const id = useId();
@@ -205,11 +198,7 @@ export function InfoDot({
   }, [visible]);
 
   const dotColor =
-    color === "danger"
-      ? colors.danger
-      : color === "warning"
-        ? colors.warning
-        : colors.accent;
+    color === "danger" ? colors.danger : color === "warning" ? colors.warning : colors.accent;
 
   const bgColor =
     color === "danger"
@@ -262,12 +251,7 @@ export function InfoDot({
         }}
       >
         <Text style={[s.infoDotLabel, { color: dotColor }]}>{label}</Text>
-        <Octicons
-          name="info"
-          size={10}
-          color={dotColor}
-          style={{ opacity: 0.6 }}
-        />
+        <Octicons name="info" size={10} color={dotColor} style={{ opacity: 0.6 }} />
       </Pressable>
       {visible && (
         <View
@@ -278,9 +262,7 @@ export function InfoDot({
             { backgroundColor: colors.surface, borderColor: colors.border },
           ]}
         >
-          <Text style={[s.text, { color: colors.textSecondary }]}>
-            {description}
-          </Text>
+          <Text style={[s.text, { color: colors.textSecondary }]}>{description}</Text>
         </View>
       )}
     </View>

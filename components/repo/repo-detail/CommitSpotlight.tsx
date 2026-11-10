@@ -59,9 +59,7 @@ export function CommitSpotlight({
       {isLoading ? (
         <View style={s.commitSpotlightContent}>
           <View style={[s.skeleton, { width: "80%", height: 15 }]} />
-          <View
-            style={[s.skeleton, { width: "50%", height: 12, marginTop: 4 }]}
-          />
+          <View style={[s.skeleton, { width: "50%", height: 12, marginTop: 4 }]} />
         </View>
       ) : (
         <View style={s.commitSpotlightContent}>
@@ -77,14 +75,11 @@ export function CommitSpotlight({
               />
             )}
             <Text style={s.commitMeta} selectable>
-              {commit?.commit.author.name} ·{" "}
-              {relativeTime(commit?.commit.author.date ?? "")}
+              {commit?.commit.author.name} · {relativeTime(commit?.commit.author.date ?? "")}
             </Text>
             {commit && (
               <Pressable onPress={onCopyHash} hitSlop={8} style={s.hashButton}>
-                <Text style={s.hashText}>
-                  {copiedHash ? "Copied!" : commit.sha.slice(0, 7)}
-                </Text>
+                <Text style={s.hashText}>{copiedHash ? "Copied!" : commit.sha.slice(0, 7)}</Text>
               </Pressable>
             )}
           </View>

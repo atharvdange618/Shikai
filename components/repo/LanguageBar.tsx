@@ -19,10 +19,7 @@ interface LanguageBarProps {
   isLoading?: boolean;
 }
 
-export function LanguageBar({
-  languages,
-  isLoading = false,
-}: LanguageBarProps) {
+export function LanguageBar({ languages, isLoading = false }: LanguageBarProps) {
   const { colors } = useTheme();
   const s = useMemo(() => buildStyles(colors), [colors]);
 
@@ -38,15 +35,11 @@ export function LanguageBar({
   if (!languages.length) return null;
 
   const shown = languages.slice(0, MAX_SHOWN);
-  const otherPct = languages
-    .slice(MAX_SHOWN)
-    .reduce((sum, l) => sum + l.percentage, 0);
+  const otherPct = languages.slice(MAX_SHOWN).reduce((sum, l) => sum + l.percentage, 0);
 
   const segments: { name: string; percentage: number; color: string }[] = [
     ...shown,
-    ...(otherPct > 0
-      ? [{ name: "Other", percentage: otherPct, color: colors.border }]
-      : []),
+    ...(otherPct > 0 ? [{ name: "Other", percentage: otherPct, color: colors.border }] : []),
   ];
 
   return (
@@ -62,8 +55,7 @@ export function LanguageBar({
               borderTopLeftRadius: i === 0 ? Radius.full : 0,
               borderBottomLeftRadius: i === 0 ? Radius.full : 0,
               borderTopRightRadius: i === segments.length - 1 ? Radius.full : 0,
-              borderBottomRightRadius:
-                i === segments.length - 1 ? Radius.full : 0,
+              borderBottomRightRadius: i === segments.length - 1 ? Radius.full : 0,
             }}
           />
         ))}

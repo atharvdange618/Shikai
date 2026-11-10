@@ -10,20 +10,12 @@ interface StatBlockProps {
 }
 
 /** A profile count (repos, followers, following); tappable when onPress is set. */
-export function StatBlock({
-  value,
-  label,
-  isLoading,
-  onPress,
-}: StatBlockProps) {
+export function StatBlock({ value, label, isLoading, onPress }: StatBlockProps) {
   const { colors } = useTheme();
 
   return (
     <Pressable
-      style={({ pressed }) => [
-        styles.container,
-        pressed && onPress && { opacity: 0.6 },
-      ]}
+      style={({ pressed }) => [styles.container, pressed && onPress && { opacity: 0.6 }]}
       onPress={onPress}
       disabled={!onPress}
       accessibilityRole={onPress ? "button" : undefined}
@@ -56,9 +48,7 @@ export function StatBlock({
           <Text style={[styles.value, { color: colors.textPrimary }]}>
             {value.toLocaleString()}
           </Text>
-          <Text style={[styles.label, { color: colors.textMuted }]}>
-            {label}
-          </Text>
+          <Text style={[styles.label, { color: colors.textMuted }]}>{label}</Text>
         </>
       )}
     </Pressable>

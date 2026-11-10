@@ -19,13 +19,7 @@ import { Octicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { type Href, useRouter } from "expo-router";
 import { useMemo, useState } from "react";
-import {
-  ActivityIndicator,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
 
 import {
   type ColorTokens,
@@ -70,10 +64,7 @@ function getGroupKey(event: GitHubEvent): string {
   }
 }
 
-function groupEvents(
-  events: GitHubEvent[],
-  colors: ColorTokens,
-): GroupedEvent[] {
+function groupEvents(events: GitHubEvent[], colors: ColorTokens): GroupedEvent[] {
   const grouped: GroupedEvent[] = [];
   let currentGroup: GitHubEvent[] = [];
   let currentKey: string | null = null;
@@ -252,17 +243,8 @@ export function ActivityFeed({
             }
           }}
         >
-          <View
-            style={[
-              s.iconWrap,
-              { backgroundColor: `${group.display.iconColor}18` },
-            ]}
-          >
-            <Octicons
-              name={group.display.icon}
-              size={14}
-              color={group.display.iconColor}
-            />
+          <View style={[s.iconWrap, { backgroundColor: `${group.display.iconColor}18` }]}>
+            <Octicons name={group.display.icon} size={14} color={group.display.iconColor} />
           </View>
 
           <View style={s.itemText}>
@@ -274,12 +256,7 @@ export function ActivityFeed({
                 {group.display.secondaryText}
               </Text>
               {group.events[0].public === false && (
-                <Octicons
-                  name="lock"
-                  size={10}
-                  color={colors.textMuted}
-                  style={s.lockIcon}
-                />
+                <Octicons name="lock" size={10} color={colors.textMuted} style={s.lockIcon} />
               )}
             </View>
           </View>
@@ -308,10 +285,8 @@ export function ActivityFeed({
               if (event.type === "PushEvent") {
                 const payload = event.payload;
                 const commitSha =
-                  payload.head?.substring(0, 7) ??
-                  payload.commits?.[0]?.sha?.substring(0, 7);
-                const commitMessage =
-                  payload.commits?.[0]?.message?.split("\n")[0];
+                  payload.head?.substring(0, 7) ?? payload.commits?.[0]?.sha?.substring(0, 7);
+                const commitMessage = payload.commits?.[0]?.message?.split("\n")[0];
                 itemText = commitSha
                   ? `${commitSha}${commitMessage ? `: ${commitMessage}` : ""}`
                   : (commitMessage ?? display.primaryText);
@@ -320,10 +295,7 @@ export function ActivityFeed({
               return (
                 <Pressable
                   key={event.id}
-                  style={({ pressed }) => [
-                    s.expandedItem,
-                    pressed && s.itemPressed,
-                  ]}
+                  style={({ pressed }) => [s.expandedItem, pressed && s.itemPressed]}
                   onPress={() => handleEventPress(display.url)}
                 >
                   <View style={s.expandedItemContent}>

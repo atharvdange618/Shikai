@@ -1,22 +1,9 @@
 import { Octicons } from "@expo/vector-icons";
 import { useCallback, useMemo, useRef } from "react";
-import {
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  View,
-  type ScrollViewInstance,
-} from "react-native";
+import { Pressable, ScrollView, StyleSheet, View, type ScrollViewInstance } from "react-native";
 
 import { MarkdownRenderer } from "@/components/shared/MarkdownRenderer";
-import {
-  IconSize,
-  Layout,
-  Radius,
-  Spacing,
-  useTheme,
-  type ColorTokens,
-} from "@/constants/theme";
+import { IconSize, Layout, Radius, Spacing, useTheme, type ColorTokens } from "@/constants/theme";
 import { useCopyToClipboard } from "@/hooks/useCopyToClipboard";
 
 interface MarkdownViewerProps {
@@ -28,12 +15,7 @@ interface MarkdownViewerProps {
   targetLine?: number;
 }
 
-export function MarkdownViewer({
-  content,
-  path,
-  repoContext,
-  targetLine,
-}: MarkdownViewerProps) {
+export function MarkdownViewer({ content, path, repoContext, targetLine }: MarkdownViewerProps) {
   const { colors } = useTheme();
   const s = useMemo(() => buildStyles(colors), [colors]);
   const { copied, copy } = useCopyToClipboard();
@@ -62,10 +44,7 @@ export function MarkdownViewer({
       }
       const totalLines = content.split("\n").length;
       const fraction = Math.min((targetLine - 1) / totalLines, 1);
-      pendingOffsetRef.current = Math.max(
-        fraction * height - Spacing.xxl * 2,
-        0,
-      );
+      pendingOffsetRef.current = Math.max(fraction * height - Spacing.xxl * 2, 0);
       hasScrolledToLineRef.current = true;
     },
     [targetLine, content],

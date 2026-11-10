@@ -36,15 +36,8 @@ export function DiffStat({
 }) {
   const { colors } = useTheme();
   return (
-    <Text
-      style={[
-        { fontFamily: FontFamily.mono, fontSize: FontSize.caption },
-        style,
-      ]}
-    >
-      <Text style={{ color: colors.success }}>
-        +{additions.toLocaleString()}
-      </Text>
+    <Text style={[{ fontFamily: FontFamily.mono, fontSize: FontSize.caption }, style]}>
+      <Text style={{ color: colors.success }}>+{additions.toLocaleString()}</Text>
       <Text style={{ color: colors.textMuted }}> / </Text>
       <Text style={{ color: colors.danger }}>−{deletions.toLocaleString()}</Text>
     </Text>

@@ -1,10 +1,4 @@
-import {
-  type ColorTokens,
-  FontFamily,
-  FontSize,
-  Radius,
-  Spacing,
-} from "@/constants/theme";
+import { type ColorTokens, FontFamily, FontSize, Radius, Spacing } from "@/constants/theme";
 import type { GitHubReactions } from "@/types/github.types";
 import { StyleSheet, Text, View } from "react-native";
 
@@ -41,14 +35,9 @@ export function ReactionsRow({
   return (
     <View style={s.row}>
       {entries.map((entry) => (
-        <View
-          key={entry.key}
-          style={[s.pill, { backgroundColor: colors.surfaceSecondary }]}
-        >
+        <View key={entry.key} style={[s.pill, { backgroundColor: colors.surfaceSecondary }]}>
           <Text style={s.emoji}>{entry.emoji}</Text>
-          <Text style={[s.count, { color: colors.textSecondary }]}>
-            {entry.count}
-          </Text>
+          <Text style={[s.count, { color: colors.textSecondary }]}>{entry.count}</Text>
         </View>
       ))}
     </View>

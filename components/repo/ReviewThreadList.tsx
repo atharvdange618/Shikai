@@ -1,11 +1,5 @@
 import { DiffHunk } from "@/components/repo/DiffHunk";
-import {
-  type ColorTokens,
-  FontFamily,
-  FontSize,
-  Radius,
-  Spacing,
-} from "@/constants/theme";
+import { type ColorTokens, FontFamily, FontSize, Radius, Spacing } from "@/constants/theme";
 import { relativeTime } from "@/lib/utils";
 import { buildThreads } from "@/lib/pr-review";
 import type { GitHubReviewComment } from "@/types/github.types";
@@ -27,32 +21,22 @@ export function ReviewThreadList({
   colors: ColorTokens;
 }) {
   const s = useMemo(() => buildStyles(colors), [colors]);
-  const threads = useMemo(
-    () => buildThreads(reviewComments),
-    [reviewComments],
-  );
+  const threads = useMemo(() => buildThreads(reviewComments), [reviewComments]);
 
   if (threads.length === 0) return null;
 
   return (
     <View style={s.container}>
-      <Text style={[s.sectionTitle, { color: colors.textPrimary }]}>
-        Review comments
-      </Text>
+      <Text style={[s.sectionTitle, { color: colors.textPrimary }]}>Review comments</Text>
 
       {threads.map((thread) => (
         <View
           key={thread.root.id}
-          style={[
-            s.threadCard,
-            { backgroundColor: colors.surface, borderColor: colors.border },
-          ]}
+          style={[s.threadCard, { backgroundColor: colors.surface, borderColor: colors.border }]}
         >
           <View style={s.pathRow}>
             <Octicons name="diff" size={12} color={colors.textMuted} />
-            <Text
-              style={[s.pathText, { color: colors.textMuted }]}
-            >
+            <Text style={[s.pathText, { color: colors.textMuted }]}>
               {thread.path}
               {thread.line ? `:${thread.line}` : ""}
             </Text>
@@ -93,16 +77,12 @@ function ThreadComment({
       />
       <View style={{ flex: 1, gap: 2 }}>
         <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
-          <Text style={[s.commentAuthor, { color: colors.textPrimary }]}>
-            {comment.user.login}
-          </Text>
+          <Text style={[s.commentAuthor, { color: colors.textPrimary }]}>{comment.user.login}</Text>
           <Text style={[s.commentTime, { color: colors.textMuted }]}>
             {relativeTime(comment.created_at)}
           </Text>
         </View>
-        <Text style={[s.commentBody, { color: colors.textSecondary }]}>
-          {comment.body}
-        </Text>
+        <Text style={[s.commentBody, { color: colors.textSecondary }]}>{comment.body}</Text>
       </View>
     </View>
   );

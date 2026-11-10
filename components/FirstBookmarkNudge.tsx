@@ -30,9 +30,7 @@ export const FirstBookmarkNudge = memo(function FirstBookmarkNudge({
     <View style={s.container}>
       <View style={s.content}>
         <Octicons name="bookmark" size={14} color={colors.accent} />
-        <Text style={s.text}>
-          Nice! Check your saved repos anytime from the Profile tab.
-        </Text>
+        <Text style={s.text}>Nice! Check your saved repos anytime from the Profile tab.</Text>
       </View>
       <Pressable onPress={onDismiss} hitSlop={8}>
         <Octicons name="x" size={12} color={colors.textMuted} />

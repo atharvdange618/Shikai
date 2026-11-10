@@ -1,13 +1,6 @@
 import { Octicons } from "@expo/vector-icons";
 import React, { useMemo, useState } from "react";
-import {
-  ActivityIndicator,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import {
   BorderWidth,
@@ -40,10 +33,7 @@ export function BranchSelector({
   onCompare,
 }: BranchSelectorProps) {
   const { colors, isDark } = useTheme();
-  const s = useMemo(
-    () => buildStyles(colors, isDark ? {} : Shadows.light.sm),
-    [colors, isDark],
-  );
+  const s = useMemo(() => buildStyles(colors, isDark ? {} : Shadows.light.sm), [colors, isDark]);
   const [open, setOpen] = useState(false);
 
   if (isLoading) {
@@ -69,11 +59,7 @@ export function BranchSelector({
         accessibilityState={{ expanded: open }}
         accessibilityLabel={`Branch: ${selectedBranch || "Select branch"}`}
       >
-        <Octicons
-          name="git-branch"
-          size={IconSize.xs}
-          color={colors.textMuted}
-        />
+        <Octicons name="git-branch" size={IconSize.xs} color={colors.textMuted} />
         <Text style={s.triggerText} numberOfLines={1}>
           {selectedBranch || "Select branch"}
         </Text>
@@ -86,10 +72,7 @@ export function BranchSelector({
 
       {open && (
         <View style={s.dropdown}>
-          <ScrollView
-            style={s.dropdownScroll}
-            showsVerticalScrollIndicator={false}
-          >
+          <ScrollView style={s.dropdownScroll} showsVerticalScrollIndicator={false}>
             {branches.map((branch) => {
               const active = branch.name === selectedBranch;
               return (
@@ -106,20 +89,13 @@ export function BranchSelector({
                   ]}
                 >
                   <Text
-                    style={[
-                      s.optionText,
-                      { color: active ? colors.accent : colors.textPrimary },
-                    ]}
+                    style={[s.optionText, { color: active ? colors.accent : colors.textPrimary }]}
                     numberOfLines={1}
                   >
                     {branch.name}
                   </Text>
                   {active ? (
-                    <Octicons
-                      name="check"
-                      size={IconSize.xs}
-                      color={colors.accent}
-                    />
+                    <Octicons name="check" size={IconSize.xs} color={colors.accent} />
                   ) : (
                     onCompare && (
                       <Pressable
@@ -131,11 +107,7 @@ export function BranchSelector({
                         accessibilityRole="button"
                         accessibilityLabel={`Compare ${selectedBranch} with ${branch.name}`}
                       >
-                        <Octicons
-                          name="git-compare"
-                          size={IconSize.xs}
-                          color={colors.textMuted}
-                        />
+                        <Octicons name="git-compare" size={IconSize.xs} color={colors.textMuted} />
                       </Pressable>
                     )
                   )}

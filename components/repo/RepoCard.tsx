@@ -37,15 +37,10 @@ export const RepoCard = memo(function RepoCard({
   onPressIn,
   onTopicPress,
 }: RepoCardProps) {
-  const s = useMemo(
-    () => buildStyles(colors, isDark ? {} : Shadows.light.sm),
-    [colors, isDark],
-  );
+  const s = useMemo(() => buildStyles(colors, isDark ? {} : Shadows.light.sm), [colors, isDark]);
 
   const repoId = encodeRepoId(repo.owner.login, repo.name);
-  const isWatchlisted = useWatchlistStore((state) =>
-    state.watchlistIds.includes(repoId),
-  );
+  const isWatchlisted = useWatchlistStore((state) => state.watchlistIds.includes(repoId));
   const toggleWatchlist = useWatchlistStore((state) => state.toggleWatchlist);
 
   const handleBookmarkPress = useCallback(
@@ -58,19 +53,13 @@ export const RepoCard = memo(function RepoCard({
   );
 
   const langColor = repo.language
-    ? ((languageColors as Record<string, { color: string | null }>)[
-        repo.language
-      ]?.color ?? colors.textMuted)
+    ? ((languageColors as Record<string, { color: string | null }>)[repo.language]?.color ??
+      colors.textMuted)
     : null;
 
-  const timestampLabel =
-    sort === "pushed" ? "Pushed" : sort === "created" ? "Created" : "Updated";
+  const timestampLabel = sort === "pushed" ? "Pushed" : sort === "created" ? "Created" : "Updated";
   const timestampValue =
-    sort === "pushed"
-      ? repo.pushed_at
-      : sort === "created"
-        ? repo.created_at
-        : repo.updated_at;
+    sort === "pushed" ? repo.pushed_at : sort === "created" ? repo.created_at : repo.updated_at;
 
   const timeAgo = useMemo(() => relativeTime(timestampValue), [timestampValue]);
 
@@ -81,12 +70,7 @@ export const RepoCard = memo(function RepoCard({
       onPressIn={onPressIn ? () => onPressIn(repo) : undefined}
     >
       <View style={s.titleRow}>
-        <Octicons
-          name="repo"
-          size={14}
-          color={colors.textSecondary}
-          style={s.repoIcon}
-        />
+        <Octicons name="repo" size={14} color={colors.textSecondary} style={s.repoIcon} />
         <Text style={s.repoName} numberOfLines={1}>
           {showOwner && (
             <>
@@ -102,9 +86,7 @@ export const RepoCard = memo(function RepoCard({
           onPress={handleBookmarkPress}
           hitSlop={8}
           style={s.bookmarkButton}
-          accessibilityLabel={
-            isWatchlisted ? "Remove from watchlist" : "Add to watchlist"
-          }
+          accessibilityLabel={isWatchlisted ? "Remove from watchlist" : "Add to watchlist"}
           accessibilityRole="button"
         >
           <Octicons
@@ -125,10 +107,7 @@ export const RepoCard = memo(function RepoCard({
         {repo.language ? (
           <View style={s.metaItem}>
             <View
-              style={[
-                s.langDot,
-                langColor ? { backgroundColor: langColor } : s.langDotDefault,
-              ]}
+              style={[s.langDot, langColor ? { backgroundColor: langColor } : s.langDotDefault]}
             />
             <Text style={s.metaText}>{repo.language}</Text>
           </View>
@@ -151,9 +130,7 @@ export const RepoCard = memo(function RepoCard({
         {repo.open_issues_count > 0 && (
           <View style={s.metaItem}>
             <Octicons name="issue-opened" size={11} color={colors.textMuted} />
-            <Text style={s.metaText}>
-              {formatCount(repo.open_issues_count)}
-            </Text>
+            <Text style={s.metaText}>{formatCount(repo.open_issues_count)}</Text>
           </View>
         )}
 
@@ -216,19 +193,11 @@ function ForkBadge({ colors }: { colors: ColorTokens }) {
   );
 }
 
-function VisibilityBadge({
-  isPrivate,
-  colors,
-}: {
-  isPrivate: boolean;
-  colors: ColorTokens;
-}) {
+function VisibilityBadge({ isPrivate, colors }: { isPrivate: boolean; colors: ColorTokens }) {
   return (
     <View
       style={{
-        backgroundColor: isPrivate
-          ? colors.badgePrivateBg
-          : colors.badgePublicBg,
+        backgroundColor: isPrivate ? colors.badgePrivateBg : colors.badgePublicBg,
         borderRadius: Radius.full,
         paddingHorizontal: 7,
         paddingVertical: 2,

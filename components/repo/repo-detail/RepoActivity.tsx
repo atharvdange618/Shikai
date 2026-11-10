@@ -1,12 +1,7 @@
 import { Octicons } from "@expo/vector-icons";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
-import {
-  FontFamily,
-  FontSize,
-  Spacing,
-  type ColorTokens,
-} from "@/constants/theme";
+import { FontFamily, FontSize, Spacing, type ColorTokens } from "@/constants/theme";
 import type { RunDisplay } from "@/lib/run-display";
 
 interface RepoActivityProps {
@@ -69,10 +64,7 @@ export function RepoActivity({
       ) : (
         <>
           <Pressable
-            style={({ pressed }) => [
-              s.activityRow,
-              pressed && { opacity: 0.6 },
-            ]}
+            style={({ pressed }) => [s.activityRow, pressed && { opacity: 0.6 }]}
             onPress={onIssuesPress}
             onPressIn={onIssuesPressIn}
           >
@@ -94,10 +86,7 @@ export function RepoActivity({
           <View style={s.activityDivider} />
 
           <Pressable
-            style={({ pressed }) => [
-              s.activityRow,
-              pressed && { opacity: 0.6 },
-            ]}
+            style={({ pressed }) => [s.activityRow, pressed && { opacity: 0.6 }]}
             onPress={onPRsPress}
             onPressIn={onPRsPressIn}
           >
@@ -121,10 +110,7 @@ export function RepoActivity({
               <View style={s.activityDivider} />
 
               <Pressable
-                style={({ pressed }) => [
-                  s.activityRow,
-                  pressed && { opacity: 0.6 },
-                ]}
+                style={({ pressed }) => [s.activityRow, pressed && { opacity: 0.6 }]}
                 onPress={onReleasesPress}
                 onPressIn={onReleasesPressIn}
               >
@@ -146,18 +132,11 @@ export function RepoActivity({
               <View style={s.activityDivider} />
 
               <Pressable
-                style={({ pressed }) => [
-                  s.activityRow,
-                  pressed && { opacity: 0.6 },
-                ]}
+                style={({ pressed }) => [s.activityRow, pressed && { opacity: 0.6 }]}
                 onPress={onActionsPress}
                 accessibilityLabel={`Actions, latest run ${latestRunStatus.label}`}
               >
-                <Octicons
-                  name={latestRunStatus.icon}
-                  size={14}
-                  color={latestRunStatus.color}
-                />
+                <Octicons name={latestRunStatus.icon} size={14} color={latestRunStatus.color} />
                 <Text style={s.activityLabel}>Actions</Text>
                 <Octicons
                   name="chevron-right"
@@ -174,17 +153,10 @@ export function RepoActivity({
               <View style={s.activityDivider} />
 
               <Pressable
-                style={({ pressed }) => [
-                  s.activityRow,
-                  pressed && { opacity: 0.6 },
-                ]}
+                style={({ pressed }) => [s.activityRow, pressed && { opacity: 0.6 }]}
                 onPress={onDiscussionsPress}
               >
-                <Octicons
-                  name="comment-discussion"
-                  size={14}
-                  color={colors.textMuted}
-                />
+                <Octicons name="comment-discussion" size={14} color={colors.textMuted} />
                 <Text style={s.activityLabel}>Discussions</Text>
                 <Octicons
                   name="chevron-right"
@@ -199,10 +171,7 @@ export function RepoActivity({
           <View style={s.activityDivider} />
 
           <Pressable
-            style={({ pressed }) => [
-              s.activityRow,
-              pressed && { opacity: 0.6 },
-            ]}
+            style={({ pressed }) => [s.activityRow, pressed && { opacity: 0.6 }]}
             onPress={onInsightsPress}
           >
             <Octicons name="graph" size={14} color={colors.textMuted} />

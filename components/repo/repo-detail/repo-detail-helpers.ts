@@ -14,10 +14,10 @@ export type HealthBadge = {
 export function getHealthBadges(
   repo:
     | {
-      license: { spdx_id: string } | null;
-      topics: string[];
-      pushed_at: string;
-    }
+        license: { spdx_id: string } | null;
+        topics: string[];
+        pushed_at: string;
+      }
     | undefined,
   readme: string | undefined,
   isLoading: boolean,
@@ -53,8 +53,7 @@ export function getHealthBadges(
     });
   }
 
-  const daysSincePush =
-    (Date.now() - new Date(repo.pushed_at).getTime()) / 86_400_000;
+  const daysSincePush = (Date.now() - new Date(repo.pushed_at).getTime()) / 86_400_000;
   if (daysSincePush > 90) {
     badges.push({
       label: "Stale",

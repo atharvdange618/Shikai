@@ -71,12 +71,7 @@ export const CommitCard = memo(function CommitCard({
     >
       <View style={s.avatarWrap}>
         {avatarUrl ? (
-          <Image
-            source={{ uri: avatarUrl }}
-            style={s.avatar}
-            contentFit="cover"
-            transition={150}
-          />
+          <Image source={{ uri: avatarUrl }} style={s.avatar} contentFit="cover" transition={150} />
         ) : (
           <View style={[s.avatar, s.avatarFallback]}>
             <Octicons name="person" size={12} color={colors.textMuted} />

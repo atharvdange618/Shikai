@@ -1,13 +1,7 @@
 import { useMemo } from "react";
 import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 
-import {
-  FontFamily,
-  FontSize,
-  Spacing,
-  useTheme,
-  type ColorTokens,
-} from "@/constants/theme";
+import { FontFamily, FontSize, Spacing, useTheme, type ColorTokens } from "@/constants/theme";
 
 interface FileLoadingProps {
   isLoading: boolean;

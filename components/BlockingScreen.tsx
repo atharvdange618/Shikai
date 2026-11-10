@@ -2,14 +2,7 @@ import { useAlert } from "@/components/shared/Alert";
 import { Spacing, TextStyles, useTheme } from "@/constants/theme";
 import { useFocusEffect } from "expo-router";
 import { useCallback, useState } from "react";
-import {
-  ActivityIndicator,
-  BackHandler,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { ActivityIndicator, BackHandler, Pressable, StyleSheet, Text, View } from "react-native";
 import { setDevModeOverride } from "shikai-security";
 
 interface BlockingScreenProps {
@@ -18,11 +11,7 @@ interface BlockingScreenProps {
   onOverride?: () => void;
 }
 
-export function BlockingScreen({
-  reasons,
-  devModeBlocked,
-  onOverride,
-}: BlockingScreenProps) {
+export function BlockingScreen({ reasons, devModeBlocked, onOverride }: BlockingScreenProps) {
   const { colors } = useTheme();
   const [loading, setLoading] = useState(false);
   const alert = useAlert();
@@ -61,12 +50,7 @@ export function BlockingScreen({
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <View style={styles.content}>
-        <Text
-          style={[
-            TextStyles.display,
-            { color: colors.textPrimary, textAlign: "center" },
-          ]}
-        >
+        <Text style={[TextStyles.display, { color: colors.textPrimary, textAlign: "center" }]}>
           Security Blocked
         </Text>
 
@@ -88,10 +72,7 @@ export function BlockingScreen({
             {reasons.map((reason, i) => (
               <Text
                 key={i}
-                style={[
-                  TextStyles.label,
-                  { color: colors.textMuted, textAlign: "center" },
-                ]}
+                style={[TextStyles.label, { color: colors.textMuted, textAlign: "center" }]}
               >
                 {reason}
               </Text>

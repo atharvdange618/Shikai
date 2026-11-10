@@ -16,11 +16,7 @@ import { useTheme } from "@/constants/theme";
  * RefreshControl. The token props stay after the spread so a caller can never
  * put an off-theme colour back.
  */
-export function PullToRefresh({
-  refreshing,
-  onRefresh,
-  ...rest
-}: RefreshControlProps) {
+export function PullToRefresh({ refreshing, onRefresh, ...rest }: RefreshControlProps) {
   const { colors } = useTheme();
 
   return (

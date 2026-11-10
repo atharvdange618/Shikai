@@ -1,20 +1,9 @@
 import { Octicons } from "@expo/vector-icons";
 import React, { createContext, useCallback, useContext, useState } from "react";
 import { Modal, Pressable, StyleSheet, Text, View } from "react-native";
-import Animated, {
-  FadeIn,
-  FadeOut,
-  SlideInDown,
-  SlideOutDown,
-} from "react-native-reanimated";
+import Animated, { FadeIn, FadeOut, SlideInDown, SlideOutDown } from "react-native-reanimated";
 
-import {
-  FontFamily,
-  FontSize,
-  Radius,
-  Spacing,
-  useTheme,
-} from "@/constants/theme";
+import { FontFamily, FontSize, Radius, Spacing, useTheme } from "@/constants/theme";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 type AlertVariant = "info" | "success" | "warning" | "danger";
@@ -66,20 +55,13 @@ export function useAlert() {
   return ctx;
 }
 
-function AlertDialog({
-  config,
-  onClose,
-}: {
-  config: AlertConfig;
-  onClose: () => void;
-}) {
+function AlertDialog({ config, onClose }: { config: AlertConfig; onClose: () => void }) {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
 
   const variant = config.variant ?? "info";
   const actions = config.actions ?? [{ text: "OK", style: "default" }];
-  const shouldStack =
-    actions.some((action) => action.text.length > 8) || actions.length > 2;
+  const shouldStack = actions.some((action) => action.text.length > 8) || actions.length > 2;
 
   const variantColor = {
     info: colors.accent,
@@ -101,13 +83,7 @@ function AlertDialog({
   };
 
   return (
-    <Modal
-      visible
-      transparent
-      animationType="none"
-      statusBarTranslucent
-      onRequestClose={onClose}
-    >
+    <Modal visible transparent animationType="none" statusBarTranslucent onRequestClose={onClose}>
       <Animated.View
         entering={FadeIn.duration(200)}
         exiting={FadeOut.duration(150)}
@@ -127,29 +103,18 @@ function AlertDialog({
           ]}
         >
           <View style={styles.iconRow}>
-            <View
-              style={[
-                styles.iconContainer,
-                { backgroundColor: `${variantColor}18` },
-              ]}
-            >
+            <View style={[styles.iconContainer, { backgroundColor: `${variantColor}18` }]}>
               <Octicons name={variantIcon} size={22} color={variantColor} />
             </View>
           </View>
 
-          <Text style={[styles.title, { color: colors.textPrimary }]}>
-            {config.title}
-          </Text>
+          <Text style={[styles.title, { color: colors.textPrimary }]}>{config.title}</Text>
 
           {config.message && (
-            <Text style={[styles.message, { color: colors.textSecondary }]}>
-              {config.message}
-            </Text>
+            <Text style={[styles.message, { color: colors.textSecondary }]}>{config.message}</Text>
           )}
 
-          <View
-            style={[styles.actions, shouldStack && { flexDirection: "column" }]}
-          >
+          <View style={[styles.actions, shouldStack && { flexDirection: "column" }]}>
             {actions.map((action, i) => {
               const isDestructive = action.style === "destructive";
               const isCancel = action.style === "cancel";
@@ -174,10 +139,7 @@ function AlertDialog({
                         borderColor: colors.accent,
                       },
                     shouldStack
-                      ? [
-                          { flex: 0, width: "100%" },
-                          !isLast && { marginBottom: Spacing.sm },
-                        ]
+                      ? [{ flex: 0, width: "100%" }, !isLast && { marginBottom: Spacing.sm }]
                       : !isLast && { marginRight: Spacing.sm },
                     pressed && { opacity: 0.7 },
                   ]}

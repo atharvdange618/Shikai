@@ -34,12 +34,7 @@ const TYPE_OPTIONS: { label: string; value: TypeOption }[] = [
   { label: "Forks", value: "forks" },
 ];
 
-export function RepoFilters({
-  sort,
-  type,
-  onSortChange,
-  onTypeChange,
-}: RepoFiltersProps) {
+export function RepoFilters({ sort, type, onSortChange, onTypeChange }: RepoFiltersProps) {
   const { colors } = useTheme();
   const s = useMemo(() => buildStyles(colors), [colors]);
 
@@ -134,11 +129,7 @@ function FilterPill({
       onPress={onPress}
       style={({ pressed }) => [
         pillStyles.base,
-        active
-          ? pillStyles.active
-          : pressed
-            ? pillStyles.pressed
-            : pillStyles.inactive,
+        active ? pillStyles.active : pressed ? pillStyles.pressed : pillStyles.inactive,
       ]}
       accessibilityRole="button"
       accessibilityState={{ selected: active }}

@@ -16,11 +16,7 @@ interface RepoContributorsProps {
   colors: ColorTokens;
 }
 
-export function RepoContributors({
-  contributors,
-  isLoading,
-  colors,
-}: RepoContributorsProps) {
+export function RepoContributors({ contributors, isLoading, colors }: RepoContributorsProps) {
   const s = buildStyles(colors);
 
   return (
@@ -48,9 +44,7 @@ export function RepoContributors({
         <>
           <ContributorRow contributors={contributors} />
           <Text style={s.contributorCount}>
-            {contributors.length === 1
-              ? "1 contributor"
-              : `${contributors.length} contributors`}
+            {contributors.length === 1 ? "1 contributor" : `${contributors.length} contributors`}
           </Text>
         </>
       )}

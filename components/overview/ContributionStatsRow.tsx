@@ -21,8 +21,7 @@ const STAT_INFO: Record<string, string> = {
   streak:
     "Consecutive days with at least one contribution. A higher streak means more consistent activity.",
   best: "Your longest ever streak of consecutive contribution days.",
-  active:
-    "The day of the week when you contribute the most, based on your recent activity.",
+  active: "The day of the week when you contribute the most, based on your recent activity.",
 };
 
 export function ContributionStatsRow({ stats }: Props) {
@@ -30,29 +29,18 @@ export function ContributionStatsRow({ stats }: Props) {
   const s = useMemo(() => buildStyles(colors), [colors]);
 
   const streakProgress =
-    stats.longestStreak > 0
-      ? Math.min(stats.currentStreak / stats.longestStreak, 1)
-      : 0;
+    stats.longestStreak > 0 ? Math.min(stats.currentStreak / stats.longestStreak, 1) : 0;
   const isStreakActive = stats.currentStreak > 0;
 
   return (
     <View style={s.row}>
-      <View
-        style={s.item}
-        accessibilityLabel={`${stats.currentStreak} day streak`}
-      >
+      <View style={s.item} accessibilityLabel={`${stats.currentStreak} day streak`}>
         <Octicons
           name="flame"
           size={16}
           color={isStreakActive ? colors.success : colors.textMuted}
         />
-        <Text
-          style={[
-            s.value,
-            s.streakValue,
-            isStreakActive && { color: colors.success },
-          ]}
-        >
+        <Text style={[s.value, s.streakValue, isStreakActive && { color: colors.success }]}>
           {stats.currentStreak}
         </Text>
         <View style={s.labelRow}>
@@ -68,9 +56,7 @@ export function ContributionStatsRow({ stats }: Props) {
                 s.progressFill,
                 {
                   width: `${streakProgress * 100}%`,
-                  backgroundColor: isStreakActive
-                    ? colors.success
-                    : colors.textMuted,
+                  backgroundColor: isStreakActive ? colors.success : colors.textMuted,
                 },
               ]}
             />
@@ -80,10 +66,7 @@ export function ContributionStatsRow({ stats }: Props) {
 
       <View style={s.divider} />
 
-      <View
-        style={s.item}
-        accessibilityLabel={`${stats.longestStreak} day best streak`}
-      >
+      <View style={s.item} accessibilityLabel={`${stats.longestStreak} day best streak`}>
         <Octicons name="flame" size={14} color={colors.star} />
         <Text style={s.value}>{stats.longestStreak}</Text>
         <View style={s.labelRow}>
@@ -96,10 +79,7 @@ export function ContributionStatsRow({ stats }: Props) {
 
       <View style={s.divider} />
 
-      <View
-        style={s.item}
-        accessibilityLabel={`Most active day: ${stats.mostActiveDay}`}
-      >
+      <View style={s.item} accessibilityLabel={`Most active day: ${stats.mostActiveDay}`}>
         <Octicons name="calendar" size={14} color={colors.accent} />
         <Text style={s.value}>{stats.mostActiveDay}</Text>
         <View style={s.labelRow}>
