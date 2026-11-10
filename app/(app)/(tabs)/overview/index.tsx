@@ -55,7 +55,7 @@ function FadeInView({ children, delay = 0 }: { children: React.ReactNode; delay?
 
   useEffect(() => {
     if (mounted && !reducedMotion) {
-      opacity.value = withTiming(1, { duration: 300 });
+      opacity.set(withTiming(1, { duration: 300 }));
     }
   }, [mounted, opacity, reducedMotion]);
 

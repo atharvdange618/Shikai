@@ -3,13 +3,13 @@ import { Image, StyleSheet, useColorScheme } from "react-native";
 import * as SplashScreen from "expo-splash-screen";
 import Animated, {
   Easing,
-  runOnJS,
   useAnimatedStyle,
   useSharedValue,
   withRepeat,
   withSequence,
   withTiming,
 } from "react-native-reanimated";
+import { scheduleOnRN } from "react-native-worklets";
 
 interface AnimatedSplashScreenProps {
   onComplete?: () => void;
@@ -35,26 +35,19 @@ export function AnimatedSplashScreen({ onComplete, isReady }: AnimatedSplashScre
   }, []);
 
   useEffect(() => {
-    logoOpacity.value = withTiming(1, {
-      duration: 800,
-      easing: Easing.out(Easing.cubic),
-    });
+    logoOpacity.set(withTiming(1, { duration: 800, easing: Easing.out(Easing.cubic) }));
 
-    logoScale.value = withSequence(
-      withTiming(1.05, {
-        duration: 800,
-        easing: Easing.out(Easing.cubic),
-      }),
-      withRepeat(
-        withSequence(
-          withTiming(1, { duration: 1000, easing: Easing.inOut(Easing.ease) }),
-          withTiming(1.05, {
-            duration: 1000,
-            easing: Easing.inOut(Easing.ease),
-          }),
+    logoScale.set(
+      withSequence(
+        withTiming(1.05, { duration: 800, easing: Easing.out(Easing.cubic) }),
+        withRepeat(
+          withSequence(
+            withTiming(1, { duration: 1000, easing: Easing.inOut(Easing.ease) }),
+            withTiming(1.05, { duration: 1000, easing: Easing.inOut(Easing.ease) }),
+          ),
+          -1,
+          true,
         ),
-        -1,
-        true,
       ),
     );
   }, [logoOpacity, logoScale]);
@@ -62,17 +55,12 @@ export function AnimatedSplashScreen({ onComplete, isReady }: AnimatedSplashScre
   useEffect(() => {
     if (isReady) {
       const timer = setTimeout(() => {
-        containerOpacity.value = withTiming(
-          0,
-          {
-            duration: 400,
-            easing: Easing.in(Easing.cubic),
-          },
-          () => {
+        containerOpacity.set(
+          withTiming(0, { duration: 400, easing: Easing.in(Easing.cubic) }, () => {
             if (onComplete) {
-              runOnJS(onComplete)();
+              scheduleOnRN(onComplete);
             }
-          },
+          }),
         );
       }, 500);
 

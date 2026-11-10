@@ -36,15 +36,10 @@ export function TabBarIcon({ name, filledName, color, size, focused }: TabBarIco
     if (focused) {
       Haptics.selectionAsync().catch(() => {});
     }
-    scale.value = reducedMotion
-      ? focused
-        ? 1.1
-        : 1.0
-      : withSpring(focused ? 1.1 : 1.0, {
-          damping: 15,
-          stiffness: 300,
-          mass: 0.8,
-        });
+    const target = focused ? 1.1 : 1.0;
+    scale.set(
+      reducedMotion ? target : withSpring(target, { damping: 15, stiffness: 300, mass: 0.8 }),
+    );
   }, [focused, scale, reducedMotion]);
 
   const animatedStyle = useAnimatedStyle(() => ({

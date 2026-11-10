@@ -309,15 +309,17 @@ export default function RepoDetailsScreen() {
   }, []);
 
   useEffect(() => {
-    chevronTranslateY.value = withDelay(
-      600,
-      withRepeat(
-        withSequence(
-          withTiming(-6, { duration: 800, easing: Easing.inOut(Easing.ease) }),
-          withTiming(0, { duration: 800, easing: Easing.inOut(Easing.ease) }),
+    chevronTranslateY.set(
+      withDelay(
+        600,
+        withRepeat(
+          withSequence(
+            withTiming(-6, { duration: 800, easing: Easing.inOut(Easing.ease) }),
+            withTiming(0, { duration: 800, easing: Easing.inOut(Easing.ease) }),
+          ),
+          -1,
+          true,
         ),
-        -1,
-        true,
       ),
     );
   }, [chevronTranslateY]);
