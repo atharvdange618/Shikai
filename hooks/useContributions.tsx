@@ -5,12 +5,13 @@
  * staleTime: 15 minutes. The graph only updates once per day anyway.
  */
 
+import { getContributionStats } from "@/lib/contribution-stats";
 import { fetchContributionGraph } from "@/lib/github-graphql";
 import { queryKeys } from "@/lib/query-client";
 import { fetchContributionsForWidget } from "@/lib/widget-data";
-import type { ContributionStats } from "@/types/github-graphql.types";
 import { queryOptions, useQuery } from "@tanstack/react-query";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { AppState } from "react-native";
 import { requestWidgetUpdate } from "react-native-android-widget";
 import { ContributionWidget } from "@/widgets/ContributionWidget";
 
@@ -20,8 +21,38 @@ export const contributionsQueryOptions = queryOptions({
   staleTime: 1000 * 60 * 15,
 });
 
+function localDay(date: Date): string {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+}
+
 export function useContributions() {
   const query = useQuery(contributionsQueryOptions);
+  const weeks = query.data?.weeks;
+  const [today, setToday] = useState(() => localDay(new Date()));
+
+  useEffect(() => {
+    let timer: ReturnType<typeof setTimeout>;
+    // The day can change while the app is backgrounded or the time zone changes.
+    function scheduleNextDay(now: Date) {
+      const midnight = new Date(now);
+      midnight.setHours(24, 0, 0, 0);
+      timer = setTimeout(syncDay, midnight.getTime() - now.getTime());
+    }
+    function syncDay() {
+      clearTimeout(timer);
+      const now = new Date();
+      setToday(localDay(now));
+      scheduleNextDay(now);
+    }
+    scheduleNextDay(new Date());
+    const subscription = AppState.addEventListener("change", (state) => {
+      if (state === "active") syncDay();
+    });
+    return () => {
+      clearTimeout(timer);
+      subscription.remove();
+    };
+  }, []);
 
   useEffect(() => {
     if (query.data?.weeks.length) {
@@ -52,58 +83,10 @@ export function useContributions() {
     }
   }, [query.data?.weeks.length]);
 
-  const stats = useMemo<ContributionStats | null>(() => {
-    if (!query.data?.weeks.length) return null;
-
-    const allDays = query.data.weeks.flatMap((w) => w.contributionDays);
-
-    const now = new Date();
-    const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
-    let i = allDays.length - 1;
-    while (i >= 0 && allDays[i].date > todayStr) {
-      i--;
-    }
-
-    if (i >= 0 && allDays[i].date === todayStr && allDays[i].contributionCount === 0) {
-      i--;
-    }
-
-    let currentStreak = 0;
-    for (; i >= 0; i--) {
-      if (allDays[i].contributionCount > 0) {
-        currentStreak++;
-      } else {
-        break;
-      }
-    }
-
-    let longestStreak = 0;
-    let streak = 0;
-    for (const day of allDays) {
-      if (day.contributionCount > 0) {
-        streak++;
-        if (streak > longestStreak) longestStreak = streak;
-      } else {
-        streak = 0;
-      }
-    }
-
-    const weekdayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-    const weekdayTotals = [0, 0, 0, 0, 0, 0, 0];
-    for (const day of allDays) {
-      weekdayTotals[day.weekday] += day.contributionCount;
-    }
-    const maxIdx = weekdayTotals.indexOf(Math.max(...weekdayTotals));
-
-    return {
-      currentStreak,
-      longestStreak,
-      mostActiveDay: weekdayNames[maxIdx],
-    };
-  }, [query.data?.weeks]);
+  const stats = useMemo(() => getContributionStats(weeks, today), [weeks, today]);
 
   return {
-    weeks: query.data?.weeks ?? [],
+    weeks: weeks ?? [],
     totalContributions: query.data?.totalContributions ?? 0,
     stats,
     isLoading: query.isLoading,

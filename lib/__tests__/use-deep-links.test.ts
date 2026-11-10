@@ -6,6 +6,16 @@ const m = vi.hoisted(() => ({
   resetShareIntent: vi.fn(),
   initialUrl: null as string | null,
   getInitialURL: vi.fn<() => Promise<string | null>>(),
+  addEventListener: vi
+    .fn<
+      (
+        type: string,
+        listener: (event: { url: string }) => void,
+      ) => {
+        remove: () => void;
+      }
+    >()
+    .mockImplementation(() => ({ remove: vi.fn() })),
   storage: new Map<string, string>(),
   share: {
     hasShareIntent: false,
@@ -17,13 +27,14 @@ const m = vi.hoisted(() => ({
 // the hook again is a re-render. For the cold-start tests it also stands in for
 // the next JS start, where the refs are new but MMKV is not.
 vi.mock("react", () => ({
+  useCallback: <T>(callback: T) => callback,
   useEffect: (effect: () => void) => effect(),
   useRef: <T>(current: T) => ({ current }),
 }));
 vi.mock("expo-router", () => ({ useRouter: () => ({ push: m.push }) }));
 vi.mock("expo-linking", () => ({
   getInitialURL: m.getInitialURL,
-  addEventListener: () => ({ remove: vi.fn() }),
+  addEventListener: m.addEventListener,
   openURL: (url: string) => {
     m.openURL(url);
     return Promise.resolve();
@@ -82,6 +93,17 @@ describe("useDeepLinks cold-start links", () => {
     } finally {
       log.mockRestore();
     }
+  });
+
+  it("routes a GitHub link delivered after boot", async () => {
+    m.initialUrl = null;
+    useDeepLinks(true);
+    await Promise.resolve();
+
+    const [event, listener] = m.addEventListener.mock.calls[0];
+    expect(event).toBe("url");
+    listener({ url: "https://github.com/facebook/react/pull/1" });
+    expect(m.push).toHaveBeenCalledWith("/(app)/repo/facebook~~react/pr/1");
   });
 
   // Android hands back the intent that created the task on every start, so the

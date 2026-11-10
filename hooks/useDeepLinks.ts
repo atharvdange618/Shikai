@@ -2,7 +2,7 @@ import * as Linking from "expo-linking";
 import type { Href } from "expo-router";
 import { useRouter } from "expo-router";
 import { useShareIntentContext } from "expo-share-intent";
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 
 import { appLinkPath, isGitHubUrl, parseGitHubUrl } from "@/lib/github-url";
 import { mmkv } from "@/lib/mmkv";
@@ -43,27 +43,27 @@ const LAST_INITIAL_LINK_KEY = "deep-links.last-initial-link";
 export function useDeepLinks(enabled: boolean) {
   const router = useRouter();
   const routerRef = useRef(router);
-  routerRef.current = router;
 
   const { hasShareIntent, shareIntent, resetShareIntent } = useShareIntentContext();
 
   const initialHandled = useRef(false);
 
-  function route(url: string) {
+  const route = useCallback((url: string) => {
     if (!isGitHubUrl(url)) return;
     const target = parseGitHubUrl(url);
     if (target) routerRef.current.push(target as Href);
     else Linking.openURL(url).catch(() => {});
-  }
+  }, []);
 
-  const routeRef = useRef(route);
-  routeRef.current = route;
+  useEffect(() => {
+    routerRef.current = router;
+  }, [router]);
 
   useEffect(() => {
     if (!enabled) return;
 
     const handle = (url: string | null) => {
-      if (url) routeRef.current(url);
+      if (url) route(url);
     };
 
     if (!initialHandled.current) {
@@ -87,7 +87,7 @@ export function useDeepLinks(enabled: boolean) {
     }
     const sub = Linking.addEventListener("url", ({ url }) => handle(url));
     return () => sub.remove();
-  }, [enabled]);
+  }, [enabled, route]);
 
   // A share that lands during boot or while signed out waits here, and routes
   // once `enabled` turns true. Resetting it early would lose it.
@@ -96,7 +96,7 @@ export function useDeepLinks(enabled: boolean) {
 
     const shared =
       shareIntent.webUrl ?? shareIntent.text?.match(/https?:\/\/\S+/)?.[0] ?? shareIntent.text;
-    if (shared) routeRef.current(shared);
+    if (shared) route(shared);
     resetShareIntent();
-  }, [enabled, hasShareIntent, shareIntent, resetShareIntent]);
+  }, [enabled, hasShareIntent, shareIntent, resetShareIntent, route]);
 }
