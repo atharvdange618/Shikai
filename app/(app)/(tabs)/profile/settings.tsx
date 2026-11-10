@@ -23,6 +23,7 @@ import {
   areAlertsEnabled,
   disableAlerts,
   enableAlerts,
+  type EnableAlertsResult,
   postTestAlert,
   wasPatRejected,
 } from "@/lib/background-notifications";
@@ -39,6 +40,12 @@ import { useThemeContext } from "@/contexts/ThemeContext";
 import { refreshWidgetTheme } from "@/lib/widget-refresh";
 import { useAuthStore } from "@/stores/auth.store";
 import { useQueryClient } from "@tanstack/react-query";
+
+// A lookup, not a ternary: the React Compiler bails on a ternary inside try.
+const NOT_ENABLED_MESSAGE = {
+  denied: "Shikai needs permission to show notifications.",
+  unavailable: "Android isn't allowing background work for Shikai right now.",
+} satisfies Record<Exclude<EnableAlertsResult, "enabled" | "blocked">, string>;
 
 export default function SettingsScreen() {
   const { theme, themeName, setThemeName } = useThemeContext();
@@ -158,36 +165,33 @@ export default function SettingsScreen() {
         if (!on) {
           await disableAlerts();
           setAlertsOn(false);
-          return;
-        }
-        const result = await enableAlerts();
-        setAlertsOn(result === "enabled");
-        if (result === "enabled") {
-          setPatRejected(false);
-        } else if (result === "blocked") {
-          alert.show({
-            variant: "danger",
-            title: "Notifications are off for Shikai",
-            message: "Allow notifications in Android settings, then turn alerts on again.",
-            actions: [
-              { text: "Cancel", style: "cancel" },
-              {
-                text: "Open settings",
-                onPress: () => {
-                  Linking.openSettings().catch(() => console.error("Could not open settings"));
-                },
-              },
-            ],
-          });
         } else {
-          alert.show({
-            variant: "danger",
-            title: "Alerts not turned on",
-            message:
-              result === "denied"
-                ? "Shikai needs permission to show notifications."
-                : "Android isn't allowing background work for Shikai right now.",
-          });
+          const result = await enableAlerts();
+          setAlertsOn(result === "enabled");
+          if (result === "enabled") {
+            setPatRejected(false);
+          } else if (result === "blocked") {
+            alert.show({
+              variant: "danger",
+              title: "Notifications are off for Shikai",
+              message: "Allow notifications in Android settings, then turn alerts on again.",
+              actions: [
+                { text: "Cancel", style: "cancel" },
+                {
+                  text: "Open settings",
+                  onPress: () => {
+                    Linking.openSettings().catch(() => console.error("Could not open settings"));
+                  },
+                },
+              ],
+            });
+          } else {
+            alert.show({
+              variant: "danger",
+              title: "Alerts not turned on",
+              message: NOT_ENABLED_MESSAGE[result],
+            });
+          }
         }
       } catch (error) {
         console.error("[alerts] toggle failed", error);
@@ -196,9 +200,9 @@ export default function SettingsScreen() {
           title: "Something went wrong",
           message: "Couldn't change notification alerts. Please try again.",
         });
-      } finally {
-        setAlertsBusy(false);
       }
+      // After the try, not in a finally: the React Compiler bails on finally.
+      setAlertsBusy(false);
     },
     [alert],
   );
