@@ -37,9 +37,11 @@ import { clearAllMMKV } from "@/lib/mmkv";
 import { prefetchOverview } from "@/lib/prefetch";
 import { queryClient, queryKeys } from "@/lib/query-client";
 import { restorePATFor } from "@/lib/session";
+import { fetchContributionsForWidget } from "@/lib/widget-data";
 import { clearPendingAuth, getPendingAuth, savePendingAuth, saveToken } from "@/lib/secure-storage";
 import { useAuthStore } from "@/stores/auth.store";
 import { useSignInStore } from "@/stores/signin.store";
+import { ContributionWidget } from "@/widgets/ContributionWidget";
 import { requestWidgetUpdate } from "react-native-android-widget";
 
 const CLIENT_ID = process.env.EXPO_PUBLIC_GITHUB_CLIENT_ID!;
@@ -65,6 +67,124 @@ const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 // Completes any lingering auth session when the app returns from the browser
 // (Android cold start). Must run at module load for openAuthSessionAsync.
 WebBrowser.maybeCompleteAuthSession();
+
+function base64Url(bytes: Iterable<number>): string {
+  return btoa(String.fromCharCode(...bytes))
+    .replace(/=/g, "")
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_");
+}
+
+// PKCE verifier and S256 challenge. The helpers below sit outside the
+// component because the React Compiler bails on loops, ternaries and
+// optional chaining inside a try.
+async function createPkcePair(): Promise<{ codeVerifier: string; codeChallenge: string }> {
+  const codeVerifier = base64Url(Crypto.getRandomBytes(32));
+  const hexDigest = await Crypto.digestStringAsync(
+    Crypto.CryptoDigestAlgorithm.SHA256,
+    codeVerifier,
+  );
+  const digestBytes = new Uint8Array(hexDigest.length / 2);
+  for (let i = 0; i < hexDigest.length; i += 2) {
+    digestBytes[i / 2] = parseInt(hexDigest.slice(i, i + 2), 16);
+  }
+  return { codeVerifier, codeChallenge: base64Url(digestBytes) };
+}
+
+function codeFromRedirect(url: string): string | null {
+  const rawCode = Linking.parse(url).queryParams?.code;
+  const code = Array.isArray(rawCode) ? rawCode[0] : rawCode;
+  return typeof code === "string" && code ? code : null;
+}
+
+// The token held while the user installs the app, or null once it expired.
+function freshPendingToken(): string | null {
+  const { pendingToken, pendingTokenExpiry } = useSignInStore.getState();
+  if (!pendingToken || (pendingTokenExpiry && Date.now() > pendingTokenExpiry)) return null;
+  return pendingToken;
+}
+
+// Module level so the React Compiler can still build SignInScreen: it bails
+// on try/finally and on a try without a catch.
+async function completeSignIn(
+  code: string,
+  codeVerifier: string,
+  redirectUri: string,
+  finalizeSession: (accessToken: string, user: GitHubUser) => Promise<void>,
+): Promise<void> {
+  const { setLoading, setError, setNeedsInstall, setPendingToken } = useSignInStore.getState();
+
+  setLoading(true);
+  setError(null);
+
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000);
+
+    let accessToken: string;
+
+    try {
+      const tokenResponse = await fetch(OAUTH_PROXY_URL, {
+        signal: controller.signal,
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          client_id: CLIENT_ID,
+          code,
+          redirect_uri: redirectUri,
+          code_verifier: codeVerifier,
+        }),
+      });
+
+      const tokenData: unknown = tokenResponse.ok ? await tokenResponse.json() : null;
+
+      if (
+        typeof tokenData !== "object" ||
+        tokenData === null ||
+        ("error" in tokenData && tokenData.error) ||
+        !("access_token" in tokenData) ||
+        typeof tokenData.access_token !== "string" ||
+        !tokenData.access_token
+      ) {
+        setError("Could not get access token. Please try again.");
+        setLoading(false);
+        await clearPendingAuth();
+        return;
+      }
+
+      accessToken = tokenData.access_token;
+    } finally {
+      clearTimeout(timeoutId);
+    }
+
+    await clearPendingAuth();
+
+    githubAxios.defaults.headers.common["Authorization"] = `Bearer ${accessToken}`;
+
+    const [installations, user] = await Promise.all([
+      fetchUserInstallations(),
+      fetchAuthenticatedUser(),
+    ]);
+
+    if (!hasOwnInstallation(installations, user.login)) {
+      setPendingToken(accessToken);
+      setLoading(false);
+      setNeedsInstall(true);
+      return;
+    }
+
+    await finalizeSession(accessToken, user);
+
+    setLoading(false);
+  } catch {
+    setError("Something went wrong. Check your connection and try again.");
+    setLoading(false);
+    await clearPendingAuth();
+  }
+}
 
 export default function SignInScreen() {
   const { colors, isDark } = useTheme();
@@ -124,8 +244,6 @@ export default function SignInScreen() {
       requestWidgetUpdate({
         widgetName: "ContributionGraph",
         renderWidget: async () => {
-          const { fetchContributionsForWidget } = await import("@/lib/widget-data");
-          const { ContributionWidget } = await import("@/widgets/ContributionWidget");
           const data = await fetchContributionsForWidget();
           if (data) {
             return (
@@ -152,83 +270,12 @@ export default function SignInScreen() {
   );
 
   const completeAuth = useCallback(
-    async (code: string, codeVerifier: string) => {
-      if (processingCodeRef.current === code) return;
+    (code: string, codeVerifier: string) => {
+      if (processingCodeRef.current === code) return Promise.resolve();
       processingCodeRef.current = code;
-      const { setLoading, setError, setNeedsInstall, setPendingToken } = useSignInStore.getState();
-
-      setLoading(true);
-      setError(null);
-
-      try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 30000);
-
-        let accessToken: string;
-
-        try {
-          const tokenResponse = await fetch(OAUTH_PROXY_URL, {
-            signal: controller.signal,
-            method: "POST",
-            headers: {
-              Accept: "application/json",
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              client_id: CLIENT_ID,
-              code,
-              redirect_uri: redirectUri,
-              code_verifier: codeVerifier,
-            }),
-          });
-
-          const tokenData: unknown = tokenResponse.ok ? await tokenResponse.json() : null;
-
-          if (
-            typeof tokenData !== "object" ||
-            tokenData === null ||
-            ("error" in tokenData && tokenData.error) ||
-            !("access_token" in tokenData) ||
-            typeof tokenData.access_token !== "string" ||
-            !tokenData.access_token
-          ) {
-            setError("Could not get access token. Please try again.");
-            setLoading(false);
-            await clearPendingAuth();
-            return;
-          }
-
-          accessToken = tokenData.access_token;
-        } finally {
-          clearTimeout(timeoutId);
-        }
-
-        await clearPendingAuth();
-
-        githubAxios.defaults.headers.common["Authorization"] = `Bearer ${accessToken}`;
-
-        const [installations, user] = await Promise.all([
-          fetchUserInstallations(),
-          fetchAuthenticatedUser(),
-        ]);
-
-        if (!hasOwnInstallation(installations, user.login)) {
-          setPendingToken(accessToken);
-          setLoading(false);
-          setNeedsInstall(true);
-          return;
-        }
-
-        await finalizeSession(accessToken, user);
-
-        setLoading(false);
-      } catch {
-        setError("Something went wrong. Check your connection and try again.");
-        setLoading(false);
-        await clearPendingAuth();
-      } finally {
+      return completeSignIn(code, codeVerifier, redirectUri, finalizeSession).finally(() => {
         processingCodeRef.current = null;
-      }
+      });
     },
     [redirectUri, finalizeSession],
   );
@@ -292,23 +339,7 @@ export default function SignInScreen() {
     setNeedsInstall(false);
 
     try {
-      const codeVerifier = btoa(String.fromCharCode(...Crypto.getRandomBytes(32)))
-        .replace(/=/g, "")
-        .replace(/\+/g, "-")
-        .replace(/\//g, "_");
-
-      const hexDigest = await Crypto.digestStringAsync(
-        Crypto.CryptoDigestAlgorithm.SHA256,
-        codeVerifier,
-      );
-      const digestBytes = new Uint8Array(hexDigest.length / 2);
-      for (let i = 0; i < hexDigest.length; i += 2) {
-        digestBytes[i / 2] = parseInt(hexDigest.slice(i, i + 2), 16);
-      }
-      const codeChallenge = btoa(String.fromCharCode(...digestBytes))
-        .replace(/=/g, "")
-        .replace(/\+/g, "-")
-        .replace(/\//g, "_");
+      const { codeVerifier, codeChallenge } = await createPkcePair();
 
       await savePendingAuth(codeVerifier);
 
@@ -330,10 +361,8 @@ export default function SignInScreen() {
         return;
       }
 
-      const parsed = Linking.parse(result.url);
-      const rawCode = parsed.queryParams?.code;
-      const receivedCode = Array.isArray(rawCode) ? rawCode[0] : rawCode;
-      if (!receivedCode || typeof receivedCode !== "string") {
+      const receivedCode = codeFromRedirect(result.url);
+      if (!receivedCode) {
         // The Linking listener may already be handling this redirect; if it
         // cleared the pending auth, it owns the exchange.
         const stillPending = await getPendingAuth();
@@ -368,8 +397,8 @@ export default function SignInScreen() {
         return;
       }
 
-      const { pendingToken, pendingTokenExpiry } = useSignInStore.getState();
-      if (!pendingToken || (pendingTokenExpiry && Date.now() > pendingTokenExpiry)) {
+      const pendingToken = freshPendingToken();
+      if (!pendingToken) {
         setPendingToken(null);
         setLoading(false);
         setNeedsInstall(false);
@@ -403,20 +432,12 @@ export default function SignInScreen() {
   // For users who only need repos from accounts that already have the app,
   // like an org. Settings and the Repos tab still link to the install page.
   const handleSkipInstall = useCallback(async () => {
-    const {
-      setLoading,
-      setError,
-      setNeedsInstall,
-      setPendingToken,
-      pendingToken,
-      pendingTokenExpiry,
-    } = useSignInStore.getState();
+    const { setLoading, setError, setNeedsInstall, setPendingToken } = useSignInStore.getState();
 
+    const pendingToken = freshPendingToken();
     setPendingToken(null);
     setNeedsInstall(false);
-    if (!pendingToken || (pendingTokenExpiry && Date.now() > pendingTokenExpiry)) {
-      return;
-    }
+    if (!pendingToken) return;
 
     setLoading(true);
     try {
