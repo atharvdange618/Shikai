@@ -289,7 +289,7 @@ export default function SearchScreen() {
               value={search}
               onChangeText={setSearch}
               onSubmitEditing={handleSubmitEditing}
-              placeholder="Search GitHub..."
+              placeholder="Search GitHub…"
               placeholderTextColor={colors.textMuted}
               autoCapitalize="none"
               autoCorrect={false}

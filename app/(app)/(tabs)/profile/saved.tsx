@@ -182,7 +182,7 @@ export default function SavedScreen() {
           <SearchBar
             value={search}
             onChangeText={setSearch}
-            placeholder={tab === "stars" ? "Search starred repos..." : "Search watchlist..."}
+            placeholder={tab === "stars" ? "Search starred repos…" : "Search watchlist…"}
           />
         </View>
       )}
