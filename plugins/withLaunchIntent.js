@@ -31,7 +31,7 @@ function patchMainActivity(contents) {
   const found = contents.match(anchor);
   if (!found) {
     throw new Error(
-      "withLaunchIntent: no 'super.onCreate(' in MainActivity to anchor the restored-intent block. Expo's template changed; update this plugin."
+      "withLaunchIntent: no 'super.onCreate(' in MainActivity to anchor the restored-intent block. Expo's template changed; update this plugin.",
     );
   }
 
@@ -44,7 +44,7 @@ module.exports = function withLaunchIntent(config) {
   return withMainActivity(config, (cfg) => {
     if (cfg.modResults.language !== "kt") {
       throw new Error(
-        `withLaunchIntent: MainActivity is ${cfg.modResults.language}, not Kotlin. This patch is Kotlin-only; update this plugin.`
+        `withLaunchIntent: MainActivity is ${cfg.modResults.language}, not Kotlin. This patch is Kotlin-only; update this plugin.`,
       );
     }
     cfg.modResults.contents = patchMainActivity(cfg.modResults.contents);

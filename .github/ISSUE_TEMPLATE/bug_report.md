@@ -1,16 +1,16 @@
 ---
 name: Bug report
 about: Something in Shikai isn't working
-title: ''
+title: ""
 labels: bug
-assignees: ''
-
+assignees: ""
 ---
 
 **What happened**
 What went wrong, in a sentence or two.
 
 **Steps to reproduce**
+
 1. Open '...'
 2. Tap '...'
 3. See the problem
@@ -22,6 +22,7 @@ What should have happened instead.
 If you have one, add it here.
 
 **Device**
+
 - Phone model: [e.g. Pixel 8]
 - Android version: [e.g. 15]
 - Shikai version: [Profile > Settings > About Shikai]

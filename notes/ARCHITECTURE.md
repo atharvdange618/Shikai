@@ -34,13 +34,13 @@ Expo's update server serves OTA updates to EAS builds. Cloudflare also serves th
 
 The app can hold two GitHub tokens at once, and most of the auth code exists to keep them apart.
 
-|                 | Session token                                             | PAT                                                      |
-| --------------- | --------------------------------------------------------- | -------------------------------------------------------- |
-| Comes from      | OAuth (PKCE, browser auth session), or "Sign in with a token" | The user pastes it in Settings                           |
-| What it unlocks | Everything the GitHub App installation covers             | Notifications, alerts, issue search, Your work, stargazers, private events in Recent Activity |
-| In memory       | `useAuthStore().token`                                    | `useAuthStore().pat`                                     |
-| On disk         | `expo-secure-store` via `lib/secure-storage.ts`           | Same                                                     |
-| Sent by         | The axios request interceptor, by default                 | `patHeaders(pat)`, set per call                          |
+|                 | Session token                                                 | PAT                                                                                           |
+| --------------- | ------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| Comes from      | OAuth (PKCE, browser auth session), or "Sign in with a token" | The user pastes it in Settings                                                                |
+| What it unlocks | Everything the GitHub App installation covers                 | Notifications, alerts, issue search, Your work, stargazers, private events in Recent Activity |
+| In memory       | `useAuthStore().token`                                        | `useAuthStore().pat`                                                                          |
+| On disk         | `expo-secure-store` via `lib/secure-storage.ts`               | Same                                                                                          |
+| Sent by         | The axios request interceptor, by default                     | `patHeaders(pat)`, set per call                                                               |
 
 OAuth opens through `WebBrowser.openAuthSessionAsync` in `app/sign-in.tsx`. Its result and the Linking callback share the completion path; a concurrent-code guard prevents duplicate exchanges. `finalizeSession()` saves the session, and the root layout routes authenticated users to Overview.
 

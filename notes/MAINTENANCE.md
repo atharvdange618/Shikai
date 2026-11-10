@@ -39,6 +39,7 @@ Google Play requires updates to target a recent Android API level and usually ra
    ```
 
    EAS signs with its own stored credentials. The signing and ABI-split plugins skip themselves there.
+
 4. **GitHub release APKs:** build locally, then attach the three APKs from `android/app/build/outputs/apk/release/` to the release.
 
    ```bash
