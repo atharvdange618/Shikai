@@ -16,10 +16,7 @@ export interface EventDisplay {
   url: string;
 }
 
-export function getEventDisplay(
-  event: GitHubEvent,
-  colors: ColorTokens,
-): EventDisplay | null {
+export function getEventDisplay(event: GitHubEvent, colors: ColorTokens): EventDisplay | null {
   const repoName = event.repo.name.split("/")[1] || event.repo.name;
   const repoUrl = `https://github.com/${event.repo.name}`;
 
@@ -56,9 +53,7 @@ export function getEventDisplay(
         icon: "repo-forked",
         iconColor: "#58a6ff",
         primaryText: "Forked a repository",
-        secondaryText: forkName
-          ? `${repoName} → ${forkName.split("/")[1]}`
-          : repoName,
+        secondaryText: forkName ? `${repoName} → ${forkName.split("/")[1]}` : repoName,
         url: payload.forkee?.html_url ?? repoUrl,
       };
     }
@@ -93,7 +88,7 @@ export function getEventDisplay(
       const prNumber = payload.pull_request?.number;
       const merged = payload.pull_request?.merged;
 
-      let iconColor = colors.accent as string;
+      let iconColor = colors.accent;
       let actionText = action;
 
       if (merged) {

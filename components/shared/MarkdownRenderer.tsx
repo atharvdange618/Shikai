@@ -5,14 +5,7 @@ import { resolveMarkdownLink } from "@/lib/markdown-links";
 import * as Clipboard from "expo-clipboard";
 import { useRouter, type Href } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
-import {
-  Animated,
-  Linking,
-  StyleSheet,
-  View,
-  type StyleProp,
-  type ViewStyle,
-} from "react-native";
+import { Animated, Linking, StyleSheet, View, type StyleProp, type ViewStyle } from "react-native";
 import type { WebViewMessageEvent } from "react-native-webview";
 import RNWebView from "react-native-webview";
 
@@ -442,7 +435,7 @@ function buildHtml(html: string, isDark: boolean, bodyPadding: number): string {
     document.querySelectorAll('.markdown-body pre').forEach(function(pre) {
       if (pre.closest('.code-block-wrapper') || pre.closest('.highlight') || pre.closest('section[data-type="mermaid"]') || pre.closest('.render-needs-enrichment')) return;
       var code = pre.querySelector('code');
-      var rawLang = code ? (code.className.match(/language-([\w+]+)/) || [])[1] || '' : '';
+      var rawLang = code ? (code.className.match(/language-([w+]+)/) || [])[1] || '' : '';
       var isMermaidPre = (rawLang === 'mermaid') || (pre.getAttribute('lang') === 'mermaid');
       if (isMermaidPre) {
         var src = code ? code.textContent : pre.textContent;
@@ -607,32 +600,17 @@ export function MarkdownRenderer({
         // ignore parse errors
       }
     },
-    [
-      reveal,
-      onHeightChange,
-      onAnchorOffset,
-      context,
-      filePath,
-      router,
-    ],
+    [reveal, onHeightChange, onAnchorOffset, context, filePath, router],
   );
 
   if (!html) {
     return (
       <View style={[s.loading, { padding: bodyPadding }, style]}>
+        <View style={[s.skeletonLine, { backgroundColor: colors.surfaceSecondary }]} />
         <View
-          style={[s.skeletonLine, { backgroundColor: colors.surfaceSecondary }]}
+          style={[s.skeletonLine, s.skeletonShort, { backgroundColor: colors.surfaceSecondary }]}
         />
-        <View
-          style={[
-            s.skeletonLine,
-            s.skeletonShort,
-            { backgroundColor: colors.surfaceSecondary },
-          ]}
-        />
-        <View
-          style={[s.skeletonLine, { backgroundColor: colors.surfaceSecondary }]}
-        />
+        <View style={[s.skeletonLine, { backgroundColor: colors.surfaceSecondary }]} />
       </View>
     );
   }

@@ -2,7 +2,7 @@ import { Octicons } from "@expo/vector-icons";
 import NetInfo from "@react-native-community/netinfo";
 import { useQueryClient } from "@tanstack/react-query";
 import { Image } from "expo-image";
-import { type Href, useLocalSearchParams, useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
@@ -44,8 +44,7 @@ const TABS: { key: SearchTab; label: string }[] = [
   { key: "topics", label: "Topics" },
 ];
 
-const keyExtractor = (item: GitHubRepo | GitHubUser | GitHubIssue) =>
-  String(item.id);
+const keyExtractor = (item: GitHubRepo | GitHubUser | GitHubIssue) => String(item.id);
 
 export default function SearchScreen() {
   const { colors, isDark } = useTheme();
@@ -66,9 +65,7 @@ export default function SearchScreen() {
 
   useEffect(() => {
     return NetInfo.addEventListener((state) => {
-      setIsOffline(
-        state.isConnected === false || state.isInternetReachable === false,
-      );
+      setIsOffline(state.isConnected === false || state.isInternetReachable === false);
     });
   }, []);
 
@@ -104,13 +101,10 @@ export default function SearchScreen() {
     [queryClient],
   );
 
-  const handleTopicPress = useCallback(
-    (topic: string) => {
-      setSearch(topic);
-      setTab("topics");
-    },
-    [],
-  );
+  const handleTopicPress = useCallback((topic: string) => {
+    setSearch(topic);
+    setTab("topics");
+  }, []);
 
   const handleRecentTermPress = useCallback((term: string) => {
     setSearch(term);
@@ -155,9 +149,7 @@ export default function SearchScreen() {
           />
         ) : (
           <View style={s.userAvatar}>
-            <Text style={s.userAvatarText}>
-              {item.login.charAt(0).toUpperCase()}
-            </Text>
+            <Text style={s.userAvatarText}>{item.login.charAt(0).toUpperCase()}</Text>
           </View>
         )}
         <View style={s.userInfo}>
@@ -171,16 +163,13 @@ export default function SearchScreen() {
   );
 
   const renderIssueItem = useCallback(
-    ({ item }: { item: GitHubIssue }) => (
-      <IssueResultCard issue={item} colors={colors} />
-    ),
+    ({ item }: { item: GitHubIssue }) => <IssueResultCard issue={item} colors={colors} />,
     [colors],
   );
 
   const renderItem = useCallback(
     ({ item }: { item: GitHubRepo | GitHubUser | GitHubIssue }) => {
-      if (tab === "repos" || tab === "topics")
-        return renderRepoItem({ item: item as GitHubRepo });
+      if (tab === "repos" || tab === "topics") return renderRepoItem({ item: item as GitHubRepo });
       if (tab === "users") return renderUserItem({ item: item as GitHubUser });
       return renderIssueItem({ item: item as GitHubIssue });
     },
@@ -188,13 +177,7 @@ export default function SearchScreen() {
   );
 
   const data =
-    tab === "repos"
-      ? repos
-      : tab === "users"
-        ? users
-        : tab === "topics"
-          ? topics
-          : issues;
+    tab === "repos" ? repos : tab === "users" ? users : tab === "topics" ? topics : issues;
 
   const ListEmpty = useMemo(() => {
     if (isLoading) {
@@ -209,13 +192,8 @@ export default function SearchScreen() {
         <View style={s.emptyContainer}>
           <Octicons name="key" size={32} color={colors.textMuted} />
           <Text style={s.emptyTitle}>Needs a personal access token</Text>
-          <Text style={s.emptySubtitle}>
-            GitHub only answers issue searches with a PAT.
-          </Text>
-          <Pressable
-            onPress={() => router.push("/(app)/(tabs)/profile/settings" as Href)}
-            hitSlop={8}
-          >
+          <Text style={s.emptySubtitle}>GitHub only answers issue searches with a PAT.</Text>
+          <Pressable onPress={() => router.push("/(app)/(tabs)/profile/settings")} hitSlop={8}>
             <Text style={s.settingsLink}>Add one in Settings</Text>
           </Pressable>
         </View>
@@ -225,9 +203,7 @@ export default function SearchScreen() {
       return (
         <View style={s.emptyContainer}>
           <Octicons name="cloud-offline" size={32} color={colors.textMuted} />
-          <Text style={s.emptyTitle}>
-            Search requires internet connection
-          </Text>
+          <Text style={s.emptyTitle}>Search requires internet connection</Text>
           <Text style={s.emptySubtitle}>
             Connect to GitHub to search repositories, users, and issues
           </Text>
@@ -247,10 +223,7 @@ export default function SearchScreen() {
             {recentTerms.map((term) => (
               <Pressable
                 key={term}
-                style={({ pressed }) => [
-                  s.recentItem,
-                  pressed && { opacity: 0.7 },
-                ]}
+                style={({ pressed }) => [s.recentItem, pressed && { opacity: 0.7 }]}
                 onPress={() => handleRecentTermPress(term)}
               >
                 <Octicons name="history" size={14} color={colors.textMuted} />
@@ -262,11 +235,7 @@ export default function SearchScreen() {
                   hitSlop={8}
                   style={s.recentRemove}
                 >
-                  <Octicons
-                    name="x"
-                    size={12}
-                    color={colors.textMuted}
-                  />
+                  <Octicons name="x" size={12} color={colors.textMuted} />
                 </Pressable>
               </Pressable>
             ))}
@@ -277,9 +246,7 @@ export default function SearchScreen() {
         <View style={s.emptyContainer}>
           <Octicons name="search" size={32} color={colors.textMuted} />
           <Text style={s.emptyTitle}>Search GitHub</Text>
-          <Text style={s.emptySubtitle}>
-            Find repositories, users, issues, and pull requests
-          </Text>
+          <Text style={s.emptySubtitle}>Find repositories, users, issues, and pull requests</Text>
         </View>
       );
     }
@@ -289,7 +256,20 @@ export default function SearchScreen() {
         <Text style={s.emptySubtitle}>Try a different search term</Text>
       </View>
     );
-  }, [isLoading, needsPat, router, isOffline, debouncedSearch, data.length, recentTerms, s, colors, clearRecentTerms, handleRecentTermPress, removeRecentTerm]);
+  }, [
+    isLoading,
+    needsPat,
+    router,
+    isOffline,
+    debouncedSearch,
+    data.length,
+    recentTerms,
+    s,
+    colors,
+    clearRecentTerms,
+    handleRecentTermPress,
+    removeRecentTerm,
+  ]);
 
   const ListFooter = isFetchingNextPage ? (
     <View style={s.footerLoader}>
@@ -300,69 +280,63 @@ export default function SearchScreen() {
   return (
     <KeyboardAvoid>
       <View style={s.container}>
-      <View style={s.searchContainer}>
-        <View style={s.searchBar}>
-          <Octicons name="search" size={15} color={colors.textMuted} />
-          <TextInput
-            ref={searchInputRef}
-            style={s.searchInput}
-            value={search}
-            onChangeText={setSearch}
-            onSubmitEditing={handleSubmitEditing}
-            placeholder="Search GitHub..."
-            placeholderTextColor={colors.textMuted}
-            autoCapitalize="none"
-            autoCorrect={false}
-            returnKeyType="search"
-          />
-          {search.length > 0 && (
-            <Pressable onPress={() => setSearch("")} hitSlop={8}>
-              <Octicons
-                name="x-circle-fill"
-                size={15}
-                color={colors.textMuted}
-              />
-            </Pressable>
+        <View style={s.searchContainer}>
+          <View style={s.searchBar}>
+            <Octicons name="search" size={15} color={colors.textMuted} />
+            <TextInput
+              ref={searchInputRef}
+              style={s.searchInput}
+              value={search}
+              onChangeText={setSearch}
+              onSubmitEditing={handleSubmitEditing}
+              placeholder="Search GitHub..."
+              placeholderTextColor={colors.textMuted}
+              autoCapitalize="none"
+              autoCorrect={false}
+              returnKeyType="search"
+            />
+            {search.length > 0 && (
+              <Pressable onPress={() => setSearch("")} hitSlop={8}>
+                <Octicons name="x-circle-fill" size={15} color={colors.textMuted} />
+              </Pressable>
+            )}
+          </View>
+
+          <View style={s.tabRow}>
+            {TABS.map((t) => (
+              <Pressable
+                key={t.key}
+                style={[s.tab, tab === t.key && s.tabActive]}
+                onPress={() => setTab(t.key)}
+              >
+                <Text style={[s.tabText, tab === t.key && s.tabTextActive]}>{t.label}</Text>
+              </Pressable>
+            ))}
+          </View>
+
+          {debouncedSearch.length > 0 && !needsPat && (
+            <Text style={s.resultCount}>
+              {totalCount.toLocaleString()} {tab} found
+            </Text>
           )}
         </View>
 
-        <View style={s.tabRow}>
-          {TABS.map((t) => (
-            <Pressable
-              key={t.key}
-              style={[s.tab, tab === t.key && s.tabActive]}
-              onPress={() => setTab(t.key)}
-            >
-              <Text style={[s.tabText, tab === t.key && s.tabTextActive]}>
-                {t.label}
-              </Text>
-            </Pressable>
-          ))}
-        </View>
-
-        {debouncedSearch.length > 0 && !needsPat && (
-          <Text style={s.resultCount}>
-            {totalCount.toLocaleString()} {tab} found
-          </Text>
-        )}
-      </View>
-
-      <FlashList
-        data={data}
-        renderItem={renderItem}
-        keyExtractor={keyExtractor}
-        contentContainerStyle={s.listContent}
-        ItemSeparatorComponent={ListItemSeparator}
-        ListEmptyComponent={ListEmpty}
-        ListFooterComponent={ListFooter}
-        onEndReached={() => {
-          if (hasNextPage) fetchNextPage();
-        }}
-        onEndReachedThreshold={0.5}
-        keyboardShouldPersistTaps="handled"
-        removeClippedSubviews
-        drawDistance={400}
-      />
+        <FlashList
+          data={data}
+          renderItem={renderItem}
+          keyExtractor={keyExtractor}
+          contentContainerStyle={s.listContent}
+          ItemSeparatorComponent={ListItemSeparator}
+          ListEmptyComponent={ListEmpty}
+          ListFooterComponent={ListFooter}
+          onEndReached={() => {
+            if (hasNextPage) fetchNextPage();
+          }}
+          onEndReachedThreshold={0.5}
+          keyboardShouldPersistTaps="handled"
+          removeClippedSubviews
+          drawDistance={400}
+        />
       </View>
     </KeyboardAvoid>
   );
@@ -564,6 +538,5 @@ function buildStyles(colors: ColorTokens) {
       fontSize: FontSize.caption,
       color: colors.textMuted,
     },
-
   });
 }

@@ -8,7 +8,7 @@ const m = vi.hoisted(() => ({
   storage: new Map<string, string>(),
   share: {
     hasShareIntent: false,
-    shareIntent: {} as { webUrl?: string | null; text?: string | null },
+    shareIntent: {},
   },
 }));
 
@@ -57,8 +57,7 @@ describe("useDeepLinks cold-start links", () => {
   });
 
   it("opens a cold-start shikai:// link once routing is enabled", async () => {
-    m.initialUrl =
-      "shikai://repo/facebook~~react/diff?filename=a%2Fb.js&source=pr&number=1";
+    m.initialUrl = "shikai://repo/facebook~~react/diff?filename=a%2Fb.js&source=pr&number=1";
     useDeepLinks(false);
     await Promise.resolve();
     expect(m.push).not.toHaveBeenCalled();
@@ -92,9 +91,7 @@ describe("useDeepLinks cold-start links", () => {
 
     m.initialUrl = "shikai://repo/facebook~~react/pull/2";
     useDeepLinks(true);
-    await vi.waitFor(() =>
-      expect(m.push).toHaveBeenLastCalledWith("/repo/facebook~~react/pull/2"),
-    );
+    await vi.waitFor(() => expect(m.push).toHaveBeenLastCalledWith("/repo/facebook~~react/pull/2"));
     expect(m.push).toHaveBeenCalledTimes(2);
   });
 
@@ -121,8 +118,7 @@ describe("useDeepLinks cold-start links", () => {
 
     // The dev client launches the app on every reload and rebuild. That is a
     // start without an app link, so it has to clear the marker.
-    m.initialUrl =
-      "shikai://expo-development-client/?url=http%3A%2F%2F10.0.0.2%3A8081";
+    m.initialUrl = "shikai://expo-development-client/?url=http%3A%2F%2F10.0.0.2%3A8081";
     useDeepLinks(true);
     await new Promise((r) => setTimeout(r, 0));
     expect(m.push).toHaveBeenCalledOnce();
@@ -133,16 +129,13 @@ describe("useDeepLinks cold-start links", () => {
     await vi.waitFor(() => expect(m.push).toHaveBeenCalledTimes(2));
   });
 
-  it.each(["shikai://?code=abc", "shikai://"])(
-    "leaves %s alone",
-    async (url) => {
-      m.initialUrl = url;
-      useDeepLinks(true);
-      await new Promise((r) => setTimeout(r, 0));
-      expect(m.push).not.toHaveBeenCalled();
-      expect(m.openURL).not.toHaveBeenCalled();
-    },
-  );
+  it.each(["shikai://?code=abc", "shikai://"])("leaves %s alone", async (url) => {
+    m.initialUrl = url;
+    useDeepLinks(true);
+    await new Promise((r) => setTimeout(r, 0));
+    expect(m.push).not.toHaveBeenCalled();
+    expect(m.openURL).not.toHaveBeenCalled();
+  });
 });
 
 describe("useDeepLinks share intents", () => {
@@ -160,9 +153,7 @@ describe("useDeepLinks share intents", () => {
     expect(m.push).not.toHaveBeenCalled();
 
     useDeepLinks(true);
-    expect(m.push).toHaveBeenCalledWith(
-      parseGitHubUrl("https://github.com/facebook/react/pull/1"),
-    );
+    expect(m.push).toHaveBeenCalledWith(parseGitHubUrl("https://github.com/facebook/react/pull/1"));
     expect(m.resetShareIntent).toHaveBeenCalledOnce();
   });
 

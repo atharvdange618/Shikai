@@ -1,13 +1,7 @@
 import { Octicons } from "@expo/vector-icons";
-import { type Href, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 import { useCallback, useMemo, useState } from "react";
-import {
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { IssueResultCard } from "@/components/shared/IssueResultCard";
 import { PullToRefresh } from "@/components/shared/PullToRefresh";
@@ -54,10 +48,7 @@ export default function MyWorkScreen() {
         <Text style={s.emptySubtitle}>
           GitHub only answers these searches with a PAT. Add one in Settings.
         </Text>
-        <Pressable
-          style={s.retry}
-          onPress={() => router.push("/(app)/(tabs)/profile/settings" as Href)}
-        >
+        <Pressable style={s.retry} onPress={() => router.push("/(app)/(tabs)/profile/settings")}>
           <Text style={s.retryText}>Open Settings</Text>
         </Pressable>
       </View>
@@ -80,9 +71,7 @@ export default function MyWorkScreen() {
     <ScrollView
       style={s.container}
       contentContainerStyle={s.content}
-      refreshControl={
-        <PullToRefresh refreshing={refreshing} onRefresh={onRefresh} />
-      }
+      refreshControl={<PullToRefresh refreshing={refreshing} onRefresh={onRefresh} />}
     >
       {sections.map((section) => {
         const isCollapsed = collapsed.has(section.key);
@@ -115,11 +104,7 @@ export default function MyWorkScreen() {
               ) : (
                 <View style={s.sectionBody}>
                   {section.issues.map((issue) => (
-                    <IssueResultCard
-                      key={issue.id}
-                      issue={issue}
-                      colors={colors}
-                    />
+                    <IssueResultCard key={issue.id} issue={issue} colors={colors} />
                   ))}
                 </View>
               ))}
