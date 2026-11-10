@@ -41,7 +41,11 @@ export function PdfViewer({ url }: PdfViewerProps) {
         const base64 = await new Promise<string>((resolve, reject) => {
           const reader = new FileReader();
           reader.onloadend = () => {
-            const result = String(reader.result);
+            const result = reader.result;
+            if (typeof result !== "string") {
+              reject(new Error("Could not read PDF as a data URL"));
+              return;
+            }
             const comma = result.indexOf(",");
             resolve(comma === -1 ? result : result.slice(comma + 1));
           };
