@@ -1,0 +1,77 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "categories": {
+    "correctness": "error"
+  },
+  "ignorePatterns": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/.next/**",
+    "**/build/**",
+    "**/*.{js,mjs,cjs}",
+    "**/.pnpm-store/**",
+    "**/*.config.*",
+    "**/components/ui/**",
+    "**/.env*",
+    "**/.expo/**"
+  ],
+  "options": {
+    "typeAware": true
+  },
+  "plugins": ["typescript", "unicorn", "import", "react", "jsx-a11y"],
+  "rules": {
+    "eslint/no-unused-vars": [
+      "error",
+      {
+        "argsIgnorePattern": "^_",
+        "caughtErrorsIgnorePattern": "^_",
+        "varsIgnorePattern": "^_"
+      }
+    ],
+    "import/no-cycle": "warn",
+    "import/no-duplicates": "warn",
+    "import/no-self-import": "error",
+    "unicorn/no-thenable": "off",
+    "typescript/ban-ts-comment": "error",
+    "typescript/no-empty-object-type": "error",
+    "typescript/no-explicit-any": "warn",
+    "typescript/no-namespace": "error",
+    "typescript/no-require-imports": "off",
+    "typescript/no-unnecessary-type-constraint": "error",
+    "typescript/no-unsafe-function-type": "error",
+    "typescript/no-misused-promises": "warn",
+    "typescript/no-unnecessary-type-assertion": "warn",
+    "typescript/no-unsafe-argument": "warn",
+    "typescript/no-unsafe-assignment": "warn",
+    "typescript/no-unsafe-call": "warn",
+    "typescript/no-unsafe-enum-comparison": "error",
+    "typescript/no-unsafe-member-access": "warn",
+    "typescript/no-unsafe-return": "warn",
+    "typescript/only-throw-error": "error",
+    "typescript/prefer-promise-reject-errors": "warn",
+    "typescript/require-await": "warn",
+    "typescript/restrict-plus-operands": "error",
+    "react/rules-of-hooks": "error",
+    "react/exhaustive-deps": "error",
+    "react/refs": "warn",
+    "react/set-state-in-effect": "error",
+    "react/immutability": "error",
+    "react/preserve-manual-memoization": "warn",
+    "react/purity": "warn",
+    "typescript/no-floating-promises": "warn",
+    "typescript/unbound-method": "warn",
+    "typescript/no-base-to-string": "warn",
+    "eslint/no-useless-escape": "warn",
+    "eslint/no-control-regex": "warn",
+    "unicorn/no-single-promise-in-promise-methods": "warn",
+    "unicorn/no-new-array": "warn"
+  },
+  "overrides": [
+    {
+      "files": ["**/__tests__/**"],
+      "rules": {
+        "react/rules-of-hooks": "off"
+      }
+    }
+  ]
+}
