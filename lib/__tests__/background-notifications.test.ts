@@ -1,3 +1,4 @@
+import type { scheduleNotificationAsync } from "expo-notifications";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const m = vi.hoisted(() => ({
@@ -10,7 +11,7 @@ const m = vi.hoisted(() => ({
   setNotificationChannelAsync: vi.fn(),
   getPermissionsAsync: vi.fn(),
   requestPermissionsAsync: vi.fn(),
-  scheduleNotificationAsync: vi.fn(),
+  scheduleNotificationAsync: vi.fn<typeof scheduleNotificationAsync>(),
   pollNotifications: vi.fn(),
   recordPoll: vi.fn(),
   resetNotificationPoller: vi.fn(),

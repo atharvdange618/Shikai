@@ -42,7 +42,8 @@ beforeEach(() => {
 });
 
 describe("signOut", () => {
-  const queryClient = { clear: vi.fn() } as unknown as QueryClient;
+  const clear = vi.fn();
+  const queryClient = { clear } as unknown as QueryClient;
 
   beforeEach(() => {
     useAuthStore.setState({ token: "t", user: null, pat: "ghp_abc" });
@@ -68,7 +69,7 @@ describe("signOut", () => {
   it("clears auth state, the query cache and MMKV", async () => {
     await signOut(queryClient);
     expect(useAuthStore.getState()).toMatchObject({ token: null, user: null, pat: null });
-    expect(queryClient.clear).toHaveBeenCalled();
+    expect(clear).toHaveBeenCalled();
     expect(m.clearAllMMKV).toHaveBeenCalled();
   });
 });

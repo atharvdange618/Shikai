@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 // Plain CommonJS config plugin, same shape expo prebuild loads.
 const { GUARD, patchMainActivity } = createRequire(import.meta.url)(
   "../../plugins/withLaunchIntent.js",
-);
+) as { GUARD: string; patchMainActivity: (source: string) => string };
 
 // Trimmed to the parts the patch anchors on, matching Expo's SDK 54 template.
 const TEMPLATE = `package com.example.app

@@ -1,7 +1,13 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+interface RequestOptions {
+  headers?: Record<string, string>;
+  params?: Record<string, unknown>;
+  validateStatus?: (status: number) => boolean;
+}
+
 const { get, GitHubApiError } = vi.hoisted(() => ({
-  get: vi.fn(),
+  get: vi.fn<(path: string, options?: RequestOptions) => Promise<unknown>>(),
   GitHubApiError: class GitHubApiError extends Error {
     constructor(
       public status: number,
@@ -79,7 +85,7 @@ describe("fetchUserEvents", () => {
 
   it("leaves auth to the session token when there is no PAT", async () => {
     await fetchUserEvents("octocat", 1, 20, null);
-    expect(get.mock.calls[0][1].headers).toBeUndefined();
+    expect(get.mock.calls[0][1]?.headers).toBeUndefined();
   });
 });
 
@@ -124,26 +130,26 @@ describe("paged list endpoints", () => {
     get.mockResolvedValue({ data: [{ id: 1 }], headers: next(3) });
     const result = await call();
     expect(get.mock.calls[0][0]).toBe(path);
-    expect(get.mock.calls[0][1].params).toMatchObject({ page: 2, per_page: 30 });
+    expect(get.mock.calls[0][1]?.params).toMatchObject({ page: 2, per_page: 30 });
     expect(result).toEqual({ items: [{ id: 1 }], pagination: { next: 3 } });
   });
 
   it("sends stargazers with the PAT, since App tokens get a 403", async () => {
     get.mockResolvedValue({ data: [], headers: {} });
     await fetchStargazers("o", "r", 1, "ghp_abc");
-    expect(get.mock.calls[0][1].headers).toEqual({ Authorization: "Bearer ghp_abc" });
+    expect(get.mock.calls[0][1]?.headers).toEqual({ Authorization: "Bearer ghp_abc" });
   });
 
   it("leaves the session token in place for the other lists", async () => {
     get.mockResolvedValue({ data: [], headers: {} });
     await fetchFollowers("octocat", 1);
-    expect(get.mock.calls[0][1].headers).toBeUndefined();
+    expect(get.mock.calls[0][1]?.headers).toBeUndefined();
   });
 
   it("sorts forks by stars", async () => {
     get.mockResolvedValue({ data: [], headers: {} });
     await fetchForks("o", "r", 1);
-    expect(get.mock.calls[0][1].params.sort).toBe("stargazers");
+    expect(get.mock.calls[0][1]?.params?.sort).toBe("stargazers");
   });
 
   it("offers no next page at the page cap, where GitHub would 422", async () => {
@@ -156,7 +162,7 @@ describe("paged list endpoints", () => {
     get.mockResolvedValue({ data: [{ filename: "a.ts" }], headers: next(3) });
     const result = await fetchPullRequestFiles("o", "r", 7, 2, 100);
     expect(get.mock.calls[0][0]).toBe("/repos/o/r/pulls/7/files");
-    expect(get.mock.calls[0][1].params).toEqual({ page: 2, per_page: 100 });
+    expect(get.mock.calls[0][1]?.params).toEqual({ page: 2, per_page: 100 });
     expect(result).toEqual({ files: [{ filename: "a.ts" }], pagination: { next: 3 } });
   });
 });
@@ -205,8 +211,8 @@ describe("fetchParticipatingNotifications", () => {
     await fetchParticipatingNotifications("ghp_abc", '"etag-1"');
     const [path, config] = get.mock.calls[0];
     expect(path).toBe("/notifications");
-    expect(config.params).toEqual({ participating: true, per_page: 50 });
-    expect(config.headers).toEqual({
+    expect(config?.params).toEqual({ participating: true, per_page: 50 });
+    expect(config?.headers).toEqual({
       Authorization: "Bearer ghp_abc",
       "If-None-Match": '"etag-1"',
     });
@@ -215,7 +221,7 @@ describe("fetchParticipatingNotifications", () => {
   it("leaves out If-None-Match when there is no ETag", async () => {
     get.mockResolvedValue({ status: 200, data: [], headers: {} });
     await fetchParticipatingNotifications("ghp_abc", null);
-    expect(get.mock.calls[0][1].headers).toEqual({ Authorization: "Bearer ghp_abc" });
+    expect(get.mock.calls[0][1]?.headers).toEqual({ Authorization: "Bearer ghp_abc" });
   });
 
   it("treats 304 as a normal response, not an error", async () => {
@@ -223,10 +229,10 @@ describe("fetchParticipatingNotifications", () => {
     await expect(fetchParticipatingNotifications("ghp_abc", "x")).resolves.toEqual({
       modified: false,
     });
-    const { validateStatus } = get.mock.calls[0][1];
-    expect(validateStatus(304)).toBe(true);
-    expect(validateStatus(200)).toBe(true);
-    expect(validateStatus(401)).toBe(false);
+    const validateStatus = get.mock.calls[0][1]?.validateStatus;
+    expect(validateStatus?.(304)).toBe(true);
+    expect(validateStatus?.(200)).toBe(true);
+    expect(validateStatus?.(401)).toBe(false);
   });
 
   it("returns the threads and ETag on 200", async () => {

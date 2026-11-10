@@ -59,7 +59,7 @@
     "react/preserve-manual-memoization": "warn",
     "react/purity": "warn",
     "typescript/no-floating-promises": "error",
-    "typescript/unbound-method": "warn",
+    "typescript/unbound-method": "error",
     "typescript/no-base-to-string": "warn",
     "eslint/no-useless-escape": "error",
     "eslint/no-control-regex": "warn",
@@ -71,17 +71,6 @@
       "files": ["**/__tests__/**"],
       "rules": {
         "react/rules-of-hooks": "off"
-      }
-    },
-    {
-      "files": ["**/__tests__/**", "**/*.{test,spec}.{ts,tsx}"],
-      "rules": {
-        "typescript/no-explicit-any": "warn",
-        "typescript/no-unsafe-argument": "warn",
-        "typescript/no-unsafe-assignment": "warn",
-        "typescript/no-unsafe-call": "warn",
-        "typescript/no-unsafe-member-access": "warn",
-        "typescript/no-unsafe-return": "warn"
       }
     }
   ]
