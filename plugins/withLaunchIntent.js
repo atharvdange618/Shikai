@@ -23,7 +23,10 @@ const BLOCK = [
   "}",
 ];
 
-/** Injects the block above before `super.onCreate(`. Pure, for tests. */
+/**
+ * Injects the block above before `super.onCreate(`. Pure, for tests.
+ * @param {string} contents
+ */
 function patchMainActivity(contents) {
   if (contents.includes(GUARD)) return contents;
 
@@ -40,8 +43,9 @@ function patchMainActivity(contents) {
   return contents.replace(anchor, `${block}\n${indent}super.onCreate(`);
 }
 
-module.exports = function withLaunchIntent(config) {
-  return withMainActivity(config, (cfg) => {
+/** @type {import("expo/config-plugins").ConfigPlugin} */
+const withLaunchIntent = (config) =>
+  withMainActivity(config, (cfg) => {
     if (cfg.modResults.language !== "kt") {
       throw new Error(
         `withLaunchIntent: MainActivity is ${cfg.modResults.language}, not Kotlin. This patch is Kotlin-only; update this plugin.`,
@@ -50,7 +54,5 @@ module.exports = function withLaunchIntent(config) {
     cfg.modResults.contents = patchMainActivity(cfg.modResults.contents);
     return cfg;
   });
-};
 
-module.exports.patchMainActivity = patchMainActivity;
-module.exports.GUARD = GUARD;
+module.exports = Object.assign(withLaunchIntent, { patchMainActivity, GUARD });

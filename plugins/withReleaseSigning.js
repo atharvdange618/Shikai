@@ -14,6 +14,7 @@ const RELEASE_SIGNING_CONFIG = `        release {
             keyPassword System.getenv('SHIKAI_KEYSTORE_PASSWORD')
         }`;
 
+/** @type {import("expo/config-plugins").ConfigPlugin} */
 module.exports = function withReleaseSigning(config) {
   return withAppBuildGradle(config, (cfg) => {
     const keystore = path.join(cfg.modRequest.projectRoot, "keystore", "release.keystore");

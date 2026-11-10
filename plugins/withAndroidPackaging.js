@@ -12,6 +12,7 @@ const SPLITS_BLOCK = `    splits {
         }
     }`;
 
+/** @type {import("expo/config-plugins").ConfigPlugin} */
 module.exports = function withAndroidPackaging(config) {
   return withAppBuildGradle(config, (cfg) => {
     let contents = cfg.modResults.contents;
