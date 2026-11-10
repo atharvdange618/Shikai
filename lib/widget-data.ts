@@ -27,11 +27,7 @@ export interface WidgetContributionDay {
   date: string;
   contributionCount: number;
   contributionLevel:
-    | "NONE"
-    | "FIRST_QUARTILE"
-    | "SECOND_QUARTILE"
-    | "THIRD_QUARTILE"
-    | "FOURTH_QUARTILE";
+    "NONE" | "FIRST_QUARTILE" | "SECOND_QUARTILE" | "THIRD_QUARTILE" | "FOURTH_QUARTILE";
   weekday: number;
 }
 
@@ -74,12 +70,9 @@ export async function fetchContributionsForWidget(): Promise<WidgetContributionD
     return null;
   }
 
-  const calendar =
-    json.data.viewer.contributionsCollection.contributionCalendar;
+  const calendar = json.data.viewer.contributionsCollection.contributionCalendar;
 
-  const allDays = calendar.weeks.flatMap(
-    (w: WidgetContributionWeek) => w.contributionDays,
-  );
+  const allDays = calendar.weeks.flatMap((w: WidgetContributionWeek) => w.contributionDays);
 
   const now = new Date();
   const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
@@ -89,11 +82,7 @@ export async function fetchContributionsForWidget(): Promise<WidgetContributionD
     i--;
   }
 
-  if (
-    i >= 0 &&
-    allDays[i].date === todayStr &&
-    allDays[i].contributionCount === 0
-  ) {
+  if (i >= 0 && allDays[i].date === todayStr && allDays[i].contributionCount === 0) {
     i--;
   }
 

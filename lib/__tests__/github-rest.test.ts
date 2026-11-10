@@ -32,19 +32,15 @@ import {
 
 describe("parseActionsJobId", () => {
   it("extracts the job id from an Actions details_url", () => {
-    expect(
-      parseActionsJobId(
-        "https://github.com/facebook/react/actions/runs/123/job/456",
-      ),
-    ).toBe(456);
+    expect(parseActionsJobId("https://github.com/facebook/react/actions/runs/123/job/456")).toBe(
+      456,
+    );
   });
 
   it("accepts the plural /jobs/ form too", () => {
-    expect(
-      parseActionsJobId(
-        "https://github.com/facebook/react/actions/runs/123/jobs/456",
-      ),
-    ).toBe(456);
+    expect(parseActionsJobId("https://github.com/facebook/react/actions/runs/123/jobs/456")).toBe(
+      456,
+    );
   });
 
   it("returns null for a non-Actions details_url (external CI)", () => {
@@ -58,11 +54,7 @@ describe("parseActionsJobId", () => {
 
 describe("parseCheckRunId", () => {
   it("extracts the id from a job's check_run_url", () => {
-    expect(
-      parseCheckRunId(
-        "https://api.github.com/repos/facebook/react/check-runs/789",
-      ),
-    ).toBe(789);
+    expect(parseCheckRunId("https://api.github.com/repos/facebook/react/check-runs/789")).toBe(789);
   });
 
   it("returns null for an unrelated url or null", () => {
@@ -202,13 +194,13 @@ describe("fetchParticipatingNotifications", () => {
 
   it("asks for participating threads with the PAT and If-None-Match", async () => {
     get.mockResolvedValue({ status: 200, data: [], headers: {} });
-    await fetchParticipatingNotifications("ghp_abc", "\"etag-1\"");
+    await fetchParticipatingNotifications("ghp_abc", '"etag-1"');
     const [path, config] = get.mock.calls[0];
     expect(path).toBe("/notifications");
     expect(config.params).toEqual({ participating: true, per_page: 50 });
     expect(config.headers).toEqual({
       Authorization: "Bearer ghp_abc",
-      "If-None-Match": "\"etag-1\"",
+      "If-None-Match": '"etag-1"',
     });
   });
 
@@ -234,12 +226,12 @@ describe("fetchParticipatingNotifications", () => {
     get.mockResolvedValue({
       status: 200,
       data,
-      headers: { etag: "\"etag-2\"" },
+      headers: { etag: '"etag-2"' },
     });
     await expect(fetchParticipatingNotifications("ghp_abc", null)).resolves.toEqual({
       modified: true,
       notifications: data,
-      etag: "\"etag-2\"",
+      etag: '"etag-2"',
     });
   });
 });

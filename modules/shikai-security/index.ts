@@ -21,9 +21,7 @@ export async function runSecurityChecks(): Promise<SecurityCheckResult> {
   }
 }
 
-export async function setDevModeOverride(
-  enabled: boolean,
-): Promise<boolean> {
+export async function setDevModeOverride(enabled: boolean): Promise<boolean> {
   try {
     const result = await ShikaiSecurityModule.setDevModeOverride(enabled);
     return result.success;

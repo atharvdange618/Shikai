@@ -1,10 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import {
-  LAUNCHES_BEFORE_REVIEW,
-  recordLaunch,
-  type ReviewStorage,
-} from "@/lib/review-prompt";
+import { LAUNCHES_BEFORE_REVIEW, recordLaunch, type ReviewStorage } from "@/lib/review-prompt";
 
 function memoryStorage(): ReviewStorage {
   const values = new Map<string, number | boolean>();
@@ -26,9 +22,7 @@ function memoryStorage(): ReviewStorage {
 describe("recordLaunch", () => {
   it("asks only on the fifth launch", () => {
     const storage = memoryStorage();
-    const results = Array.from({ length: LAUNCHES_BEFORE_REVIEW }, () =>
-      recordLaunch(storage),
-    );
+    const results = Array.from({ length: LAUNCHES_BEFORE_REVIEW }, () => recordLaunch(storage));
     expect(results).toEqual([false, false, false, false, true]);
   });
 

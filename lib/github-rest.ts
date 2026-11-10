@@ -73,9 +73,7 @@ export async function fetchAuthenticatedUser(): Promise<GitHubUser> {
 }
 
 export async function fetchUserProfile(username: string): Promise<GitHubUser> {
-  const { data } = await githubAxios.get<GitHubUser>(
-    `/users/${encodeURIComponent(username)}`,
-  );
+  const { data } = await githubAxios.get<GitHubUser>(`/users/${encodeURIComponent(username)}`);
   return data;
 }
 
@@ -120,26 +118,18 @@ function findOwnInstallation(
   installations: GitHubInstallation[],
   login: string,
 ): GitHubInstallation | undefined {
-  return installations.find(
-    (i) => i.account.login.toLowerCase() === login.toLowerCase(),
-  );
+  return installations.find((i) => i.account.login.toLowerCase() === login.toLowerCase());
 }
 
 // /user/installations also returns installs on accounts the user collaborates
 // with, so a non-empty list doesn't mean the user's own repos are covered.
-export function hasOwnInstallation(
-  installations: GitHubInstallation[],
-  login: string,
-): boolean {
+export function hasOwnInstallation(installations: GitHubInstallation[], login: string): boolean {
   return findOwnInstallation(installations, login) !== undefined;
 }
 
 // The app only sees repos its installation covers. True when the user's own
 // account has no installation (only orgs) or was installed on select repos.
-export function hasPartialRepoAccess(
-  installations: GitHubInstallation[],
-  login: string,
-): boolean {
+export function hasPartialRepoAccess(installations: GitHubInstallation[], login: string): boolean {
   return findOwnInstallation(installations, login)?.repository_selection !== "all";
 }
 
@@ -151,9 +141,7 @@ export async function validateToken(token: string): Promise<GitHubUser> {
 }
 
 export async function fetchSocialAccounts(): Promise<GitHubSocialAccount[]> {
-  const { data } = await githubAxios.get<GitHubSocialAccount[]>(
-    "/user/social_accounts",
-  );
+  const { data } = await githubAxios.get<GitHubSocialAccount[]>("/user/social_accounts");
   return data;
 }
 
@@ -174,9 +162,7 @@ export async function fetchRepoCount(): Promise<number> {
   return 1;
 }
 
-export async function fetchRepos(
-  params: RepoListParams,
-): Promise<FetchReposResult> {
+export async function fetchRepos(params: RepoListParams): Promise<FetchReposResult> {
   const { page, per_page, sort = "updated", type } = params;
 
   const { data, headers } = await githubAxios.get<GitHubRepo[]>("/user/repos", {
@@ -184,9 +170,7 @@ export async function fetchRepos(
       page,
       per_page,
       sort,
-      ...(type
-        ? { type }
-        : { affiliation: "owner,collaborator,organization_member" }),
+      ...(type ? { type } : { affiliation: "owner,collaborator,organization_member" }),
     },
   });
 
@@ -212,20 +196,14 @@ export async function fetchUserRepos(
   };
 }
 
-export async function fetchRepo(
-  owner: string,
-  repo: string,
-): Promise<GitHubRepo> {
+export async function fetchRepo(owner: string, repo: string): Promise<GitHubRepo> {
   const { data } = await githubAxios.get<GitHubRepo>(
     `/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}`,
   );
   return data;
 }
 
-export async function fetchBranches(
-  owner: string,
-  repo: string,
-): Promise<GitHubBranch[]> {
+export async function fetchBranches(owner: string, repo: string): Promise<GitHubBranch[]> {
   const { data } = await githubAxios.get<GitHubBranch[]>(
     `/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/branches`,
     { params: { per_page: 100 } },
@@ -233,10 +211,7 @@ export async function fetchBranches(
   return data;
 }
 
-export async function fetchLanguages(
-  owner: string,
-  repo: string,
-): Promise<GitHubLanguages> {
+export async function fetchLanguages(owner: string, repo: string): Promise<GitHubLanguages> {
   const { data } = await githubAxios.get<GitHubLanguages>(
     `/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/languages`,
   );
@@ -341,11 +316,12 @@ export async function searchRepos(
   totalCount: number;
   pagination: GitHubPagination;
 }> {
-  const { data, headers } = await githubAxios.get<
-    GitHubSearchResult<GitHubRepo>
-  >("/search/repositories", {
-    params: { q: query, page, per_page, sort, order },
-  });
+  const { data, headers } = await githubAxios.get<GitHubSearchResult<GitHubRepo>>(
+    "/search/repositories",
+    {
+      params: { q: query, page, per_page, sort, order },
+    },
+  );
   return {
     repos: data.items,
     totalCount: data.total_count,
@@ -364,9 +340,9 @@ export async function searchUsers(
   totalCount: number;
   pagination: GitHubPagination;
 }> {
-  const { data, headers } = await githubAxios.get<
-    GitHubSearchResult<GitHubUser>
-  >("/search/users", { params: { q: query, page, per_page, sort, order } });
+  const { data, headers } = await githubAxios.get<GitHubSearchResult<GitHubUser>>("/search/users", {
+    params: { q: query, page, per_page, sort, order },
+  });
   return {
     users: data.items,
     totalCount: data.total_count,
@@ -387,12 +363,13 @@ export async function searchIssues(
   pagination: GitHubPagination;
 }> {
   // The App token gets 0 results here for every query, so callers pass the PAT (D-027).
-  const { data, headers } = await githubAxios.get<
-    GitHubSearchResult<GitHubIssue>
-  >("/search/issues", {
-    params: { q: query, page, per_page, sort, order },
-    headers: patHeaders(pat),
-  });
+  const { data, headers } = await githubAxios.get<GitHubSearchResult<GitHubIssue>>(
+    "/search/issues",
+    {
+      params: { q: query, page, per_page, sort, order },
+      headers: patHeaders(pat),
+    },
+  );
   return {
     issues: data.items,
     totalCount: data.total_count,
@@ -406,9 +383,7 @@ export async function fetchGists(
   page: number = 1,
   per_page: number = 30,
 ): Promise<{ gists: GitHubGist[]; pagination: GitHubPagination }> {
-  const path = isSelf
-    ? "/gists"
-    : `/users/${encodeURIComponent(username)}/gists`;
+  const path = isSelf ? "/gists" : `/users/${encodeURIComponent(username)}/gists`;
   const { data, headers } = await githubAxios.get<GitHubGist[]>(path, {
     params: { page, per_page },
   });
@@ -416,16 +391,11 @@ export async function fetchGists(
 }
 
 export async function fetchGist(id: string): Promise<GitHubGist> {
-  const { data } = await githubAxios.get<GitHubGist>(
-    `/gists/${encodeURIComponent(id)}`,
-  );
+  const { data } = await githubAxios.get<GitHubGist>(`/gists/${encodeURIComponent(id)}`);
   return data;
 }
 
-export async function fetchLastCommit(
-  owner: string,
-  repo: string,
-): Promise<GitHubCommit | null> {
+export async function fetchLastCommit(owner: string, repo: string): Promise<GitHubCommit | null> {
   const { data } = await githubAxios.get<GitHubCommit[]>(
     `/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/commits`,
     { params: { per_page: 1 } },
@@ -433,10 +403,7 @@ export async function fetchLastCommit(
   return data[0] ?? null;
 }
 
-export async function fetchContributors(
-  owner: string,
-  repo: string,
-): Promise<GitHubContributor[]> {
+export async function fetchContributors(owner: string, repo: string): Promise<GitHubContributor[]> {
   const { data } = await githubAxios.get<GitHubContributor[]>(
     `/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/contributors`,
     { params: { per_page: 20 } },
@@ -465,12 +432,7 @@ async function fetchPagedList<T>(
 
 // GitHub App tokens need Contents: write for this list, which Shikai doesn't
 // ask for, so it always goes out with the PAT (D-023).
-export function fetchStargazers(
-  owner: string,
-  repo: string,
-  page: number,
-  pat: string | null,
-) {
+export function fetchStargazers(owner: string, repo: string, page: number, pat: string | null) {
   return fetchPagedList<GitHubSimpleUser>(
     `/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/stargazers`,
     page,
@@ -488,17 +450,11 @@ export function fetchForks(owner: string, repo: string, page: number) {
 }
 
 export function fetchFollowers(username: string, page: number) {
-  return fetchPagedList<GitHubSimpleUser>(
-    `/users/${encodeURIComponent(username)}/followers`,
-    page,
-  );
+  return fetchPagedList<GitHubSimpleUser>(`/users/${encodeURIComponent(username)}/followers`, page);
 }
 
 export function fetchFollowing(username: string, page: number) {
-  return fetchPagedList<GitHubSimpleUser>(
-    `/users/${encodeURIComponent(username)}/following`,
-    page,
-  );
+  return fetchPagedList<GitHubSimpleUser>(`/users/${encodeURIComponent(username)}/following`, page);
 }
 
 // GitHub caches /stats per default-branch SHA. On a cache miss it answers 202
@@ -534,10 +490,7 @@ export function fetchContributorStats(
   return getStats(owner, repo, "contributors");
 }
 
-export function fetchPunchCard(
-  owner: string,
-  repo: string,
-): Promise<GitHubPunchCardEntry[]> {
+export function fetchPunchCard(owner: string, repo: string): Promise<GitHubPunchCardEntry[]> {
   return getStats(owner, repo, "punch_card");
 }
 
@@ -578,10 +531,7 @@ export async function fetchFileContent(
   };
 }
 
-export async function fetchReadme(
-  owner: string,
-  repo: string,
-): Promise<string> {
+export async function fetchReadme(owner: string, repo: string): Promise<string> {
   const { data } = await githubAxios.get<GitHubReadme>(
     `/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/readme`,
   );
@@ -598,12 +548,9 @@ export async function fetchStarred(
   per_page: number = 10,
   sort: NonNullable<RepoListParams["sort"]> = "created",
 ): Promise<FetchStarredResult> {
-  const { data, headers } = await githubAxios.get<GitHubRepo[]>(
-    "/user/starred",
-    {
-      params: { page, per_page, sort },
-    },
-  );
+  const { data, headers } = await githubAxios.get<GitHubRepo[]>("/user/starred", {
+    params: { page, per_page, sort },
+  });
 
   return {
     repos: data,
@@ -777,10 +724,10 @@ export async function fetchNotifications(
   all: boolean = false,
   pat?: string | null,
 ): Promise<FetchNotificationsResult> {
-  const { data, headers } = await githubAxios.get<GitHubNotification[]>(
-    "/notifications",
-    { params: { page, per_page, all }, headers: patHeaders(pat) },
-  );
+  const { data, headers } = await githubAxios.get<GitHubNotification[]>("/notifications", {
+    params: { page, per_page, all },
+    headers: patHeaders(pat),
+  });
   return {
     notifications: data,
     pagination: parseLinkHeader(headers["link"]),
@@ -807,17 +754,14 @@ export async function fetchParticipatingNotifications(
   pat: string,
   etag: string | null,
 ): Promise<ParticipatingNotificationsResult> {
-  const { data, status, headers } = await githubAxios.get<GitHubNotification[]>(
-    "/notifications",
-    {
-      params: { participating: true, per_page: 50 },
-      headers: {
-        ...patHeaders(pat),
-        ...(etag ? { "If-None-Match": etag } : {}),
-      },
-      validateStatus: (s) => (s >= 200 && s < 300) || s === 304,
+  const { data, status, headers } = await githubAxios.get<GitHubNotification[]>("/notifications", {
+    params: { participating: true, per_page: 50 },
+    headers: {
+      ...patHeaders(pat),
+      ...(etag ? { "If-None-Match": etag } : {}),
     },
-  );
+    validateStatus: (s) => (s >= 200 && s < 300) || s === 304,
+  });
   if (status === 304) return { modified: false };
   return {
     modified: true,
@@ -826,20 +770,13 @@ export async function fetchParticipatingNotifications(
   };
 }
 
-export async function markNotificationAsRead(
-  threadId: string,
-  pat?: string | null,
-): Promise<void> {
-  await githubAxios.patch(
-    `/notifications/threads/${encodeURIComponent(threadId)}`,
-    undefined,
-    { headers: patHeaders(pat) },
-  );
+export async function markNotificationAsRead(threadId: string, pat?: string | null): Promise<void> {
+  await githubAxios.patch(`/notifications/threads/${encodeURIComponent(threadId)}`, undefined, {
+    headers: patHeaders(pat),
+  });
 }
 
-export async function markAllNotificationsAsRead(
-  pat?: string | null,
-): Promise<void> {
+export async function markAllNotificationsAsRead(pat?: string | null): Promise<void> {
   await githubAxios.put("/notifications", undefined, {
     headers: patHeaders(pat),
   });
@@ -1022,10 +959,9 @@ export async function fetchWorkflowRuns(
 ): Promise<FetchWorkflowRunsResult> {
   const { data, headers } = await githubAxios.get<{
     workflow_runs: GitHubWorkflowRun[];
-  }>(
-    `/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/actions/runs`,
-    { params: { page, per_page } },
-  );
+  }>(`/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/actions/runs`, {
+    params: { page, per_page },
+  });
   return {
     runs: data.workflow_runs,
     pagination: parseLinkHeader(headers["link"]),

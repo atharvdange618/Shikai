@@ -28,9 +28,7 @@ export const MAX_HIGHLIGHT_CHARS = 200_000;
 export function languageFor(fileName: string): string {
   const ext = fileName.split(".").pop()?.toLowerCase() ?? "";
   // The highlighter's aliases miss .gradle.
-  const byExtension = highlighter.normalizeLanguage(
-    ext === "gradle" ? "groovy" : ext,
-  );
+  const byExtension = highlighter.normalizeLanguage(ext === "gradle" ? "groovy" : ext);
   if (byExtension !== "plaintext") return byExtension;
   return highlighter.normalizeLanguage(getLanguage(fileName));
 }
@@ -54,17 +52,12 @@ export function highlightFile(
     lineCount > MAX_HIGHLIGHT_LINES || code.length > MAX_HIGHLIGHT_CHARS
       ? "plaintext"
       : languageFor(fileName);
-  const hasTarget =
-    targetLine !== undefined &&
-    targetLine >= 1 &&
-    targetLine <= lineCount;
+  const hasTarget = targetLine !== undefined && targetLine >= 1 && targetLine <= lineCount;
 
   const { html } = highlighter.highlight(code, {
     lang,
     lineNumbers: true,
-    decorations: hasTarget
-      ? [{ lines: targetLine, className: "th-target" }]
-      : undefined,
+    decorations: hasTarget ? [{ lines: targetLine, className: "th-target" }] : undefined,
   });
 
   return { html, lang, lineCount };

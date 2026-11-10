@@ -83,10 +83,7 @@ describe("getEventDisplay", () => {
 
   it("returns null for an event type it does not render", () => {
     expect(
-      getEventDisplay(
-        event({ type: "GollumEvent", repo: { name: "a/b" }, payload: {} }),
-        colors,
-      ),
+      getEventDisplay(event({ type: "GollumEvent", repo: { name: "a/b" }, payload: {} }), colors),
     ).toBeNull();
   });
 });

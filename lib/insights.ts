@@ -1,7 +1,4 @@
-import type {
-  GitHubContributorStats,
-  GitHubPunchCardEntry,
-} from "@/types/github.types";
+import type { GitHubContributorStats, GitHubPunchCardEntry } from "@/types/github.types";
 
 export interface ContributorSummary {
   author: GitHubContributorStats["author"];

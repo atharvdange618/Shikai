@@ -67,61 +67,44 @@ export const queryClient = new QueryClient({
 export const queryKeys = {
   user: () => ["user"] as const,
   userProfile: (username: string) => ["userProfile", username] as const,
-  userProfileRepos: (username: string) =>
-    ["userProfile", username, "repos"] as const,
-  userAllRepos: (username: string) =>
-    ["userProfile", username, "repos", "all"] as const,
-  userFollowers: (username: string) =>
-    ["userProfile", username, "followers"] as const,
-  userFollowing: (username: string) =>
-    ["userProfile", username, "following"] as const,
-  userProfileEvents: (username: string) =>
-    ["userProfile", username, "events"] as const,
+  userProfileRepos: (username: string) => ["userProfile", username, "repos"] as const,
+  userAllRepos: (username: string) => ["userProfile", username, "repos", "all"] as const,
+  userFollowers: (username: string) => ["userProfile", username, "followers"] as const,
+  userFollowing: (username: string) => ["userProfile", username, "following"] as const,
+  userProfileEvents: (username: string) => ["userProfile", username, "events"] as const,
   repos: () => ["repos"] as const,
   starred: () => ["starred"] as const,
   pinned: () => ["pinned"] as const,
   contributions: () => ["contributions-v2"] as const,
   events: (username: string) => ["events", username] as const,
   repo: (owner: string, repo: string) => ["repo", owner, repo] as const,
-  repoLanguages: (owner: string, repo: string) =>
-    ["repo", owner, repo, "langs"] as const,
+  repoLanguages: (owner: string, repo: string) => ["repo", owner, repo, "langs"] as const,
   repoCommits: (owner: string, repo: string, branch?: string, path?: string) =>
     ["repo", owner, repo, "commits", branch, path] as const,
-  repoLastCommit: (owner: string, repo: string) =>
-    ["repo", owner, repo, "lastCommit"] as const,
-  repoContributors: (owner: string, repo: string) =>
-    ["repo", owner, repo, "contributors"] as const,
-  repoStargazers: (owner: string, repo: string) =>
-    ["repo", owner, repo, "stargazers"] as const,
-  repoForks: (owner: string, repo: string) =>
-    ["repo", owner, repo, "forks"] as const,
+  repoLastCommit: (owner: string, repo: string) => ["repo", owner, repo, "lastCommit"] as const,
+  repoContributors: (owner: string, repo: string) => ["repo", owner, repo, "contributors"] as const,
+  repoStargazers: (owner: string, repo: string) => ["repo", owner, repo, "stargazers"] as const,
+  repoForks: (owner: string, repo: string) => ["repo", owner, repo, "forks"] as const,
   repoFileTree: (owner: string, repo: string, branch: string) =>
     ["repo", owner, repo, "tree", branch] as const,
-  repoBranches: (owner: string, repo: string) =>
-    ["repo", owner, repo, "branches"] as const,
+  repoBranches: (owner: string, repo: string) => ["repo", owner, repo, "branches"] as const,
   repoFile: (owner: string, repo: string, path: string) =>
     ["repo", owner, repo, "file", path] as const,
-  repoReadme: (owner: string, repo: string) =>
-    ["repo", owner, repo, "readme"] as const,
-  repoCommitCount: (owner: string, repo: string) =>
-    ["repo", owner, repo, "commitCount"] as const,
+  repoReadme: (owner: string, repo: string) => ["repo", owner, repo, "readme"] as const,
+  repoCommitCount: (owner: string, repo: string) => ["repo", owner, repo, "commitCount"] as const,
   repoIssuesPRStats: (owner: string, repo: string) =>
     ["repo", owner, repo, "issuesPRStats"] as const,
   repoIssues: (owner: string, repo: string, state: "open" | "closed" | "all") =>
     ["repo", owner, repo, "issues", state] as const,
-  repoPullRequests: (
-    owner: string,
-    repo: string,
-    state: "open" | "closed" | "all",
-  ) => ["repo", owner, repo, "pullRequests", state] as const,
+  repoPullRequests: (owner: string, repo: string, state: "open" | "closed" | "all") =>
+    ["repo", owner, repo, "pullRequests", state] as const,
   issueDetail: (owner: string, repo: string, number: number) =>
     ["repo", owner, repo, "issue", number] as const,
   issueComments: (owner: string, repo: string, number: number) =>
     ["repo", owner, repo, "issue", number, "comments"] as const,
   issueTimeline: (owner: string, repo: string, number: number) =>
     ["repo", owner, repo, "issue", number, "timeline"] as const,
-  repoDiscussions: (owner: string, repo: string) =>
-    ["repo", owner, repo, "discussions"] as const,
+  repoDiscussions: (owner: string, repo: string) => ["repo", owner, repo, "discussions"] as const,
   discussionDetail: (owner: string, repo: string, number: number) =>
     ["repo", owner, repo, "discussion", number] as const,
   prDetail: (owner: string, repo: string, number: number) =>
@@ -144,8 +127,7 @@ export const queryKeys = {
     ["repo", owner, repo, "check-run", runId, "annotations"] as const,
   checkRunJobLog: (owner: string, repo: string, jobId: number) =>
     ["repo", owner, repo, "check-run", "job-log", jobId] as const,
-  workflowRuns: (owner: string, repo: string) =>
-    ["repo", owner, repo, "workflow-runs"] as const,
+  workflowRuns: (owner: string, repo: string) => ["repo", owner, repo, "workflow-runs"] as const,
   workflowRun: (owner: string, repo: string, runId: number) =>
     ["repo", owner, repo, "workflow-run", runId] as const,
   workflowRunJobs: (owner: string, repo: string, runId: number) =>
@@ -156,8 +138,7 @@ export const queryKeys = {
     ["repo", owner, repo, "commit", sha] as const,
   comparison: (owner: string, repo: string, base: string, head: string) =>
     ["repo", owner, repo, "compare", base, head] as const,
-  repoReleases: (owner: string, repo: string) =>
-    ["repo", owner, repo, "releases"] as const,
+  repoReleases: (owner: string, repo: string) => ["repo", owner, repo, "releases"] as const,
   repoRelease: (owner: string, repo: string, tag: string) =>
     ["repo", owner, repo, "release", tag] as const,
   repoCommitActivity: (owner: string, repo: string) =>

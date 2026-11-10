@@ -8,10 +8,7 @@ const { colors, syntaxTheme } = themes.dark;
 
 describe("buildSvgHtml", () => {
   it("keeps a quote in the URL inside the src attribute", () => {
-    const html = buildSvgHtml(
-      'https://x.test/a.svg"><script>alert(1)</script>',
-      "#000",
-    );
+    const html = buildSvgHtml('https://x.test/a.svg"><script>alert(1)</script>', "#000");
     expect(html).not.toContain("<script>");
     expect(html).toContain(
       'src="https://x.test/a.svg&quot;&gt;&lt;script&gt;alert(1)&lt;/script&gt;"',
@@ -48,10 +45,7 @@ describe("buildCodeHtml", () => {
 });
 
 describe("buildDiffHtml", () => {
-  const diff = highlightDiff(
-    "@@ -9,2 +9,2 @@\n-old();\n+fresh();\n same();",
-    "a.ts",
-  );
+  const diff = highlightDiff("@@ -9,2 +9,2 @@\n-old();\n+fresh();\n same();", "a.ts");
   const html = buildDiffHtml(diff, colors, syntaxTheme);
 
   it("puts old and new numbers and the sign on each code line", () => {
@@ -65,9 +59,7 @@ describe("buildDiffHtml", () => {
   });
 
   it("escapes patch content", () => {
-    const evil = highlightDiff('@@ -1 +1 @@\n+<script>alert(1)</script>', "a.txt");
-    expect(buildDiffHtml(evil, colors, syntaxTheme)).not.toContain(
-      "<script>alert",
-    );
+    const evil = highlightDiff("@@ -1 +1 @@\n+<script>alert(1)</script>", "a.txt");
+    expect(buildDiffHtml(evil, colors, syntaxTheme)).not.toContain("<script>alert");
   });
 });

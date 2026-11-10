@@ -103,19 +103,13 @@ describe("highlightDiff", () => {
   });
 
   it("restarts numbering at each hunk", () => {
-    const { lines } = highlightDiff(
-      "@@ -1 +1 @@\n-a\n+b\n@@ -50,2 +60,2 @@\n x\n y",
-      "a.txt",
-    );
+    const { lines } = highlightDiff("@@ -1 +1 @@\n-a\n+b\n@@ -50,2 +60,2 @@\n x\n y", "a.txt");
     expect(lines.filter((l) => l.kind === "hunk")).toHaveLength(2);
     expect(lines[4]).toMatchObject({ kind: "context", oldLine: 50, newLine: 60 });
   });
 
   it("keeps a no-newline marker as a meta line without a number", () => {
-    const { lines } = highlightDiff(
-      "@@ -1 +1 @@\n-a\n\\ No newline at end of file\n+a",
-      "a.txt",
-    );
+    const { lines } = highlightDiff("@@ -1 +1 @@\n-a\n\\ No newline at end of file\n+a", "a.txt");
     expect(lines.map((l) => l.kind)).toEqual(["hunk", "del", "meta", "add"]);
     expect(lines[3].newLine).toBe(1);
   });

@@ -36,9 +36,7 @@ describe("scrubEvent", () => {
 
   it("redacts breadcrumb message and string data", () => {
     const out = scrubEvent({
-      breadcrumbs: [
-        { message: `GET with ${OAUTH}`, data: { url: `x?t=${OAUTH}`, n: 1 } },
-      ],
+      breadcrumbs: [{ message: `GET with ${OAUTH}`, data: { url: `x?t=${OAUTH}`, n: 1 } }],
     });
     const crumb = out.breadcrumbs?.[0];
     expect(crumb?.message).toBe("GET with [redacted-token]");
@@ -60,9 +58,7 @@ describe("apiEndpoint", () => {
   });
 
   it("strips the origin from a full pagination URL", () => {
-    expect(apiEndpoint("https://api.github.com/users/octocat/repos")).toBe(
-      "/users/:x/repos",
-    );
+    expect(apiEndpoint("https://api.github.com/users/octocat/repos")).toBe("/users/:x/repos");
   });
 
   it("keeps a path with no identifiers as-is", () => {
@@ -117,11 +113,8 @@ describe("reportApiError", () => {
     expect(captureMessage).toHaveBeenCalledTimes(3);
   });
 
-  it.each([0, 401, 403, 404, 409, 410, 422, 429, 451])(
-    "skips expected status %i",
-    (status) => {
-      reportApiError(status, "get", "/user");
-      expect(captureMessage).not.toHaveBeenCalled();
-    },
-  );
+  it.each([0, 401, 403, 404, 409, 410, 422, 429, 451])("skips expected status %i", (status) => {
+    reportApiError(status, "get", "/user");
+    expect(captureMessage).not.toHaveBeenCalled();
+  });
 });

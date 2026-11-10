@@ -28,9 +28,7 @@ export function resolveMarkdownLink(
 
   // Root-relative links start at the repo root; the rest start at the folder
   // holding the current file.
-  const segments = path.startsWith("/")
-    ? []
-    : (filePath ?? "").split("/").slice(0, -1);
+  const segments = path.startsWith("/") ? [] : (filePath ?? "").split("/").slice(0, -1);
   for (const part of path.split("/")) {
     if (part === "..") segments.pop();
     else if (part !== "." && part !== "") segments.push(part);

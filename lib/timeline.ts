@@ -28,9 +28,7 @@ export type RenderableTimelineEvent =
   | GitHubTimelineForcePushEvent
   | GitHubTimelineCrossReferencedEvent;
 
-function isRenderableTimelineEvent(
-  event: GitHubTimelineEvent,
-): event is RenderableTimelineEvent {
+function isRenderableTimelineEvent(event: GitHubTimelineEvent): event is RenderableTimelineEvent {
   return RENDERABLE_EVENTS.has(event.event);
 }
 
@@ -59,20 +57,16 @@ export function mergeCommentsWithTimeline(
   events: GitHubTimelineEvent[],
 ): TimelineItem[] {
   const items: TimelineItem[] = [
-    ...comments.map(
-      (comment): CommentItem => ({
-        kind: "comment",
-        created_at: comment.created_at,
-        comment,
-      }),
-    ),
-    ...events.filter(isRenderableTimelineEvent).map(
-      (event): EventItem => ({
-        kind: "event",
-        created_at: event.created_at,
-        event,
-      }),
-    ),
+    ...comments.map((comment): CommentItem => ({
+      kind: "comment",
+      created_at: comment.created_at,
+      comment,
+    })),
+    ...events.filter(isRenderableTimelineEvent).map((event): EventItem => ({
+      kind: "event",
+      created_at: event.created_at,
+      event,
+    })),
   ];
 
   return items.sort((a, b) => a.created_at.localeCompare(b.created_at));

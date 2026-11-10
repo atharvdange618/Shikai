@@ -9,8 +9,7 @@ import { ContributionWidget } from "./ContributionWidget";
 
 function getWidgetColors() {
   const stored = mmkv.getString(THEME_KEY);
-  const themeName: ThemeName =
-    stored && stored in themes ? (stored as ThemeName) : "dark";
+  const themeName: ThemeName = stored && stored in themes ? (stored as ThemeName) : "dark";
   return colorsForTheme(themeName);
 }
 

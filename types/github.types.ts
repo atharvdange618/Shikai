@@ -482,11 +482,7 @@ export interface GitHubReviewComment {
 }
 
 export type GitHubReviewState =
-  | "APPROVED"
-  | "CHANGES_REQUESTED"
-  | "COMMENTED"
-  | "DISMISSED"
-  | "PENDING";
+  "APPROVED" | "CHANGES_REQUESTED" | "COMMENTED" | "DISMISSED" | "PENDING";
 
 export interface GitHubReview {
   id: number;
@@ -503,13 +499,7 @@ export interface GitHubRequestedReviewers {
 }
 
 export type GitHubFileStatus =
-  | "added"
-  | "removed"
-  | "modified"
-  | "renamed"
-  | "copied"
-  | "changed"
-  | "unchanged";
+  "added" | "removed" | "modified" | "renamed" | "copied" | "changed" | "unchanged";
 
 export interface GitHubPullRequestFile {
   sha: string;
@@ -533,12 +523,7 @@ export interface GitHubComparison {
 }
 
 export type GitHubCheckStatus =
-  | "queued"
-  | "in_progress"
-  | "completed"
-  | "waiting"
-  | "requested"
-  | "pending";
+  "queued" | "in_progress" | "completed" | "waiting" | "requested" | "pending";
 
 export type GitHubCheckConclusion =
   | "success"
@@ -574,16 +559,9 @@ export interface GitHubCheckRunDetail extends GitHubCheckRun {
 }
 
 export type GitHubWorkflowRunStatus =
-  | GitHubCheckStatus
-  | "waiting"
-  | "requested"
-  | "pending"
-  | "action_required";
+  GitHubCheckStatus | "waiting" | "requested" | "pending" | "action_required";
 
-export type GitHubWorkflowRunConclusion =
-  | GitHubCheckConclusion
-  | "stale"
-  | "startup_failure";
+export type GitHubWorkflowRunConclusion = GitHubCheckConclusion | "stale" | "startup_failure";
 
 export interface GitHubWorkflowRun {
   id: number;
@@ -651,13 +629,13 @@ export interface GitHubNotification {
     url: string | null;
     latest_comment_url: string | null;
     type:
-    | "Issue"
-    | "PullRequest"
-    | "Discussion"
-    | "DiscussionComment"
-    | "CheckRun"
-    | "Commit"
-    | "Release";
+      | "Issue"
+      | "PullRequest"
+      | "Discussion"
+      | "DiscussionComment"
+      | "CheckRun"
+      | "Commit"
+      | "Release";
   };
   repository: {
     id: number;

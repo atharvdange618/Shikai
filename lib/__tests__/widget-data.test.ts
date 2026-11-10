@@ -9,12 +9,7 @@ vi.mock("@/lib/secure-storage", () => ({
 import { fetchContributionsForWidget } from "@/lib/widget-data";
 
 function stubFetch(status: number, body: unknown = {}) {
-  vi.stubGlobal(
-    "fetch",
-    vi.fn().mockResolvedValue(
-      new Response(JSON.stringify(body), { status }),
-    ),
-  );
+  vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify(body), { status })));
 }
 
 describe("fetchContributionsForWidget", () => {
@@ -24,11 +19,7 @@ describe("fetchContributionsForWidget", () => {
   it("reports a failed response to Sentry and returns null", async () => {
     stubFetch(502);
     await expect(fetchContributionsForWidget()).resolves.toBeNull();
-    expect(reportApiError).toHaveBeenCalledWith(
-      502,
-      "POST",
-      "https://api.github.com/graphql",
-    );
+    expect(reportApiError).toHaveBeenCalledWith(502, "POST", "https://api.github.com/graphql");
   });
 
   it("does not report a successful response", async () => {
