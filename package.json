@@ -40,7 +40,8 @@
     "lint:fix": "oxlint . --fix",
     "lint:strict": "oxlint . --deny-warnings",
     "prepare": "husky",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "doctor": "npx react-doctor@latest"
   },
   "dependencies": {
     "@expo-google-fonts/inter": "^0.4.2",
