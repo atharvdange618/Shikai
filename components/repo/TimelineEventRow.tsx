@@ -79,7 +79,9 @@ export function TimelineEventRow({
         },
       });
     } else {
-      WebBrowser.openBrowserAsync(src.html_url);
+      WebBrowser.openBrowserAsync(src.html_url).catch(() =>
+        console.error("Could not open browser"),
+      );
     }
   };
 

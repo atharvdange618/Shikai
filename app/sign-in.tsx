@@ -146,7 +146,7 @@ export default function SignInScreen() {
             />
           );
         },
-      });
+      }).catch(() => console.error("Could not update the contribution widget"));
     },
     [setToken, setUser, setPat],
   );
@@ -238,11 +238,20 @@ export default function SignInScreen() {
       await completeAuth(code, pendingAuth.codeVerifier);
     };
 
-    Linking.getInitialURL().then((url) => {
-      if (url) handleDeepLink({ url });
-    });
+    const handleLinkError = () => {
+      useSignInStore.getState().setLoading(false);
+      useSignInStore.getState().setError("Could not complete sign-in. Please try again.");
+    };
+    Linking.getInitialURL()
+      .then(
+        (url) => (url ? handleDeepLink({ url }) : undefined),
+        () => console.error("Could not read the initial link"),
+      )
+      .catch(handleLinkError);
 
-    const subscription = Linking.addEventListener("url", handleDeepLink);
+    const subscription = Linking.addEventListener("url", (event) => {
+      handleDeepLink(event).catch(handleLinkError);
+    });
     return () => subscription.remove();
   }, [completeAuth]);
 
@@ -253,7 +262,7 @@ export default function SignInScreen() {
         useSignInStore.getState().setLoading(true);
       }
     };
-    recoverPendingAuth();
+    void recoverPendingAuth();
   }, []);
 
   const buttonScale = useSharedValue(1);

@@ -21,7 +21,7 @@ export function useCopyToClipboard() {
       ToastAndroid.show("Couldn't copy to the clipboard", ToastAndroid.SHORT);
       return;
     }
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
     AccessibilityInfo.announceForAccessibility("Copied");
     setCopied(true);
     clearTimeout(timer.current);

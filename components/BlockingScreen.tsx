@@ -23,7 +23,14 @@ export function BlockingScreen({ reasons, devModeBlocked, onOverride }: Blocking
     }, []),
   );
 
-  const handleOverride = async () => {
+  const enableOverride = async () => {
+    setLoading(true);
+    const success = await setDevModeOverride(true);
+    setLoading(false);
+    if (success) onOverride?.();
+  };
+
+  const handleOverride = () => {
     alert.show({
       variant: "warning",
       title: "Developer Mode Override",
@@ -34,14 +41,7 @@ export function BlockingScreen({ reasons, devModeBlocked, onOverride }: Blocking
         {
           text: "Enable override",
           style: "destructive",
-          onPress: async () => {
-            setLoading(true);
-            const success = await setDevModeOverride(true);
-            setLoading(false);
-            if (success) {
-              onOverride?.();
-            }
-          },
+          onPress: () => void enableOverride(),
         },
       ],
     });

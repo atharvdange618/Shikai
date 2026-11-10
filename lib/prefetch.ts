@@ -28,27 +28,27 @@ export function prefetchRoute(href: string) {
 }
 
 export function prefetchRepoDetails(queryClient: QueryClient, owner: string, repo: string) {
-  queryClient.prefetchQuery({
+  void queryClient.prefetchQuery({
     queryKey: queryKeys.repo(owner, repo),
     queryFn: () => fetchRepo(owner, repo),
     staleTime: 1000 * 60 * 5,
   });
-  queryClient.prefetchQuery({
+  void queryClient.prefetchQuery({
     queryKey: queryKeys.repoLanguages(owner, repo),
     queryFn: () => fetchLanguages(owner, repo),
     staleTime: 1000 * 60 * 10,
   });
-  queryClient.prefetchQuery({
+  void queryClient.prefetchQuery({
     queryKey: queryKeys.repoLastCommit(owner, repo),
     queryFn: () => fetchLastCommit(owner, repo),
     staleTime: 1000 * 60 * 2,
   });
-  queryClient.prefetchQuery({
+  void queryClient.prefetchQuery({
     queryKey: queryKeys.repoCommitCount(owner, repo),
     queryFn: () => fetchCommitCount(owner, repo),
     staleTime: 1000 * 60 * 5,
   });
-  queryClient.prefetchQuery({
+  void queryClient.prefetchQuery({
     queryKey: queryKeys.repoIssuesPRStats(owner, repo),
     queryFn: () => fetchRepoIssuesPRStats(owner, repo),
     staleTime: 1000 * 60 * 5,
@@ -70,7 +70,7 @@ export function prefetchFileTree(queryClient: QueryClient, owner: string, repo: 
   const defaultBranch = repoData?.default_branch;
 
   if (defaultBranch) {
-    queryClient.prefetchQuery({
+    void queryClient.prefetchQuery({
       queryKey: queryKeys.repoFileTree(owner, repo, defaultBranch),
       queryFn: () => fetchFileTree(owner, repo, defaultBranch),
       staleTime: 1000 * 60 * 15,
@@ -104,7 +104,7 @@ export function prefetchFileContent(
   repo: string,
   path: string,
 ) {
-  queryClient.prefetchQuery({
+  void queryClient.prefetchQuery({
     queryKey: queryKeys.repoFile(owner, repo, path),
     queryFn: () => fetchFileContent(owner, repo, path),
     staleTime: 1000 * 60 * 15,
@@ -139,7 +139,7 @@ export function prefetchCommonFiles(
 }
 
 export function prefetchRepoCommits(queryClient: QueryClient, owner: string, repo: string) {
-  queryClient.prefetchInfiniteQuery({
+  void queryClient.prefetchInfiniteQuery({
     queryKey: queryKeys.repoCommits(owner, repo),
     queryFn: ({ pageParam }) => fetchCommits(owner, repo, pageParam, 10),
     initialPageParam: 1,
@@ -150,17 +150,17 @@ export function prefetchRepoCommits(queryClient: QueryClient, owner: string, rep
 }
 
 export function prefetchProfile(queryClient: QueryClient) {
-  queryClient.prefetchQuery({
+  void queryClient.prefetchQuery({
     queryKey: queryKeys.user(),
     queryFn: () => fetchAuthenticatedUser(),
     staleTime: 1000 * 60 * 30,
   });
-  queryClient.prefetchQuery({
+  void queryClient.prefetchQuery({
     queryKey: queryKeys.socialAccounts(),
     queryFn: fetchSocialAccounts,
     staleTime: 1000 * 60 * 30,
   });
-  queryClient.prefetchQuery({
+  void queryClient.prefetchQuery({
     queryKey: queryKeys.repoCount(),
     queryFn: () => fetchRepoCount(),
     staleTime: 1000 * 60 * 30,
@@ -168,19 +168,19 @@ export function prefetchProfile(queryClient: QueryClient) {
 }
 
 export function prefetchOverview(queryClient: QueryClient, username?: string) {
-  queryClient.prefetchQuery({
+  void queryClient.prefetchQuery({
     queryKey: queryKeys.pinned(),
     queryFn: fetchPinnedRepos,
     staleTime: 1000 * 60 * 15,
   });
-  queryClient.prefetchQuery({
+  void queryClient.prefetchQuery({
     queryKey: queryKeys.contributions(),
     queryFn: fetchContributionGraph,
     staleTime: 1000 * 60 * 15,
   });
   if (username) {
     const { pat } = useAuthStore.getState();
-    queryClient.prefetchInfiniteQuery({
+    void queryClient.prefetchInfiniteQuery({
       queryKey: [...queryKeys.events(username), pat ? "pat" : "oauth"],
       queryFn: ({ pageParam }) => fetchUserEvents(username, pageParam, 20, pat),
       initialPageParam: 1,

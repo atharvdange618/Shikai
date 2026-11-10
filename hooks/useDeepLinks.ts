@@ -68,20 +68,22 @@ export function useDeepLinks(enabled: boolean) {
 
     if (!initialHandled.current) {
       initialHandled.current = true;
-      Linking.getInitialURL().then((url) => {
-        const path = url ? appLinkPath(url) : null;
-        if (!path) {
-          // No launch link, the OAuth redirect or a dev client link: the task
-          // wasn't opened by an app link, so forget the last one and let the
-          // same link open again next time.
-          mmkv.remove(LAST_INITIAL_LINK_KEY);
-          handle(url);
-          return;
-        }
-        if (mmkv.getString(LAST_INITIAL_LINK_KEY) === path) return;
-        mmkv.set(LAST_INITIAL_LINK_KEY, path);
-        routerRef.current.push(path as Href);
-      });
+      Linking.getInitialURL()
+        .then((url) => {
+          const path = url ? appLinkPath(url) : null;
+          if (!path) {
+            // No launch link, the OAuth redirect or a dev client link: the task
+            // wasn't opened by an app link, so forget the last one and let the
+            // same link open again next time.
+            mmkv.remove(LAST_INITIAL_LINK_KEY);
+            handle(url);
+            return;
+          }
+          if (mmkv.getString(LAST_INITIAL_LINK_KEY) === path) return;
+          mmkv.set(LAST_INITIAL_LINK_KEY, path);
+          routerRef.current.push(path as Href);
+        })
+        .catch(() => console.error("Could not handle the initial link"));
     }
     const sub = Linking.addEventListener("url", ({ url }) => handle(url));
     return () => sub.remove();

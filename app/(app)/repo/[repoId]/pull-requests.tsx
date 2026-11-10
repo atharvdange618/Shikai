@@ -149,7 +149,7 @@ export default function PullRequestsScreen() {
         ListEmptyComponent={ListEmpty}
         ListFooterComponent={ListFooter}
         onEndReached={() => {
-          if (hasNextPage && filter !== "merged") fetchNextPage();
+          if (hasNextPage && filter !== "merged") void fetchNextPage();
         }}
         onEndReachedThreshold={0.5}
         refreshControl={<PullToRefresh refreshing={refreshing} onRefresh={onRefresh} />}

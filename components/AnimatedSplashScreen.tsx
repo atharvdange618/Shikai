@@ -31,7 +31,7 @@ export function AnimatedSplashScreen({ onComplete, isReady }: AnimatedSplashScre
   const hideNativeSplash = useCallback(() => {
     if (nativeSplashHidden.current) return;
     nativeSplashHidden.current = true;
-    SplashScreen.hideAsync();
+    SplashScreen.hideAsync().catch(() => {});
   }, []);
 
   useEffect(() => {

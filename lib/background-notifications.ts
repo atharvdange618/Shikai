@@ -21,12 +21,13 @@ const PAT_REJECTED_KEY = "notification-alerts.pat-rejected";
 // Without a handler, expo-notifications drops alerts posted while Shikai is
 // open. List them in the shade quietly instead.
 Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowBanner: true,
-    shouldShowList: true,
-    shouldPlaySound: false,
-    shouldSetBadge: false,
-  }),
+  handleNotification: () =>
+    Promise.resolve({
+      shouldShowBanner: true,
+      shouldShowList: true,
+      shouldPlaySound: false,
+      shouldSetBadge: false,
+    }),
 });
 
 // Must run at module load, outside React: when WorkManager wakes the app

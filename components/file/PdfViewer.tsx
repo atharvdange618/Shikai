@@ -33,7 +33,7 @@ export function PdfViewer({ url }: PdfViewerProps) {
   useEffect(() => {
     let cancelled = false;
 
-    (async () => {
+    void (async () => {
       try {
         const res = await fetch(url);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);

@@ -8,9 +8,9 @@ export const mmkv = createMMKV({ id: "shikai-cache" });
 export const THEME_KEY = "shikai-theme";
 
 export const mmkvStorage = {
-  getItem: async (key: string) => mmkv.getString(key) ?? null,
-  setItem: async (key: string, value: string) => mmkv.set(key, value),
-  removeItem: async (key: string) => {
+  getItem: (key: string) => mmkv.getString(key) ?? null,
+  setItem: (key: string, value: string) => mmkv.set(key, value),
+  removeItem: (key: string) => {
     mmkv.remove(key);
   },
 };

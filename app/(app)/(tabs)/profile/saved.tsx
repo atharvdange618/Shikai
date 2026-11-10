@@ -104,7 +104,7 @@ export default function SavedScreen() {
 
   const onEndReached = useCallback(() => {
     if (tab === "stars" && hasNextStarred && !isFetchingNextStarred) {
-      fetchNextStarred();
+      void fetchNextStarred();
     }
   }, [tab, hasNextStarred, isFetchingNextStarred, fetchNextStarred]);
 
