@@ -182,7 +182,7 @@ export default function SignInScreen() {
             }),
           });
 
-          const tokenData: unknown = await tokenResponse.json();
+          const tokenData: unknown = tokenResponse.ok ? await tokenResponse.json() : null;
 
           if (
             typeof tokenData !== "object" ||
