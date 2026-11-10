@@ -25,8 +25,7 @@ export function useReceivedEvents() {
   const { items: events, ...rest } = useInfinitePagedQuery(
     {
       queryKey: [...queryKeys.receivedEvents(), pat ? "pat" : "oauth"],
-      queryFn: ({ pageParam }) =>
-        fetchReceivedEvents(user!.login, pageParam, PER_PAGE, pat),
+      queryFn: ({ pageParam }) => fetchReceivedEvents(user!.login, pageParam, PER_PAGE, pat),
       staleTime: 1000 * 60 * 2,
       enabled: Boolean(user?.login),
       select: (data) => ({
@@ -34,9 +33,7 @@ export function useReceivedEvents() {
         pages: data.pages.map((page) => ({
           ...page,
           events: page.events.filter(
-            (e) =>
-              RENDERED_EVENT_TYPES.includes(e.type) &&
-              e.actor.login !== user?.login,
+            (e) => RENDERED_EVENT_TYPES.includes(e.type) && e.actor.login !== user?.login,
           ),
         })),
       }),

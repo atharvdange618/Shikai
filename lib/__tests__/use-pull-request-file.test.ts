@@ -4,7 +4,7 @@ const m = vi.hoisted(() => ({
   fetchNextPage: vi.fn(),
   state: {
     items: [] as { filename: string }[],
-    hasNextPage: false as boolean | undefined,
+    hasNextPage: false,
     isFetchingNextPage: false,
     isLoading: false,
     isError: false,
@@ -34,8 +34,7 @@ vi.mock("@/hooks/useInfinitePagedQuery", () => ({
 
 import { usePullRequestFile } from "@/hooks/usePullRequestDetail";
 
-const render = (filename: string) =>
-  usePullRequestFile("facebook", "react", 1, filename);
+const render = (filename: string) => usePullRequestFile("facebook", "react", 1, filename);
 
 describe("usePullRequestFile", () => {
   beforeEach(() => {

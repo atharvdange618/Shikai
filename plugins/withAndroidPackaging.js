@@ -20,7 +20,7 @@ module.exports = function withAndroidPackaging(config) {
     if (!contents.includes(marker)) {
       contents = contents.replace(
         /packagingOptions\s*\{/,
-        `packagingOptions {\n        excludes += '${marker}'`
+        `packagingOptions {\n        excludes += '${marker}'`,
       );
     }
 
@@ -28,7 +28,7 @@ module.exports = function withAndroidPackaging(config) {
       const anchor = /(androidResources\s*\{[^}]*\}\s*)/;
       if (!anchor.test(contents)) {
         throw new Error(
-          "withAndroidPackaging: no 'androidResources { ... }' block in build.gradle to anchor the ABI splits. Expo's template changed; update this plugin."
+          "withAndroidPackaging: no 'androidResources { ... }' block in build.gradle to anchor the ABI splits. Expo's template changed; update this plugin.",
         );
       }
       contents = contents.replace(anchor, `$1\n${SPLITS_BLOCK}\n`);

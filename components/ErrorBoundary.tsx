@@ -4,13 +4,7 @@ import { useRouter } from "expo-router";
 import { Component, type ErrorInfo, type ReactNode } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
-import {
-  FontFamily,
-  FontSize,
-  Radius,
-  Spacing,
-  useTheme,
-} from "@/constants/theme";
+import { FontFamily, FontSize, Radius, Spacing, useTheme } from "@/constants/theme";
 
 interface Props {
   children: ReactNode;
@@ -68,9 +62,7 @@ function ErrorFallback({
   return (
     <View style={[s.container, { backgroundColor: colors.background }]}>
       <Octicons name="alert" size={40} color={colors.danger} />
-      <Text style={[s.title, { color: colors.textPrimary }]}>
-        Something went wrong
-      </Text>
+      <Text style={[s.title, { color: colors.textPrimary }]}>Something went wrong</Text>
       <Text style={[s.message, { color: colors.textSecondary }]}>
         {error?.message || "An unexpected error occurred."}
       </Text>

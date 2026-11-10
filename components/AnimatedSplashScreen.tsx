@@ -16,10 +16,7 @@ interface AnimatedSplashScreenProps {
   isReady: boolean;
 }
 
-export function AnimatedSplashScreen({
-  onComplete,
-  isReady,
-}: AnimatedSplashScreenProps) {
+export function AnimatedSplashScreen({ onComplete, isReady }: AnimatedSplashScreenProps) {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === "dark";
 

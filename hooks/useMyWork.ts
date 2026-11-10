@@ -6,11 +6,7 @@ import { useAuthStore } from "@/stores/auth.store";
 
 const PER_PAGE = 20;
 
-export type MyWorkSectionKey =
-  | "review-requested"
-  | "assigned"
-  | "created"
-  | "mentioned";
+export type MyWorkSectionKey = "review-requested" | "assigned" | "created" | "mentioned";
 
 export const MY_WORK_SECTIONS: {
   key: MyWorkSectionKey;
@@ -44,8 +40,7 @@ export function useMyWork() {
   const results = useQueries({
     queries: MY_WORK_SECTIONS.map((section) => ({
       queryKey: queryKeys.searchIssues(section.query),
-      queryFn: () =>
-        searchIssues(section.query, 1, PER_PAGE, "updated", "desc", pat),
+      queryFn: () => searchIssues(section.query, 1, PER_PAGE, "updated", "desc", pat),
       enabled: !!pat,
       staleTime: 1000 * 60 * 2,
       meta: { persist: false },

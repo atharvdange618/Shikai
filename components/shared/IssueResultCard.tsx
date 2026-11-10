@@ -3,13 +3,7 @@ import { useRouter } from "expo-router";
 import { memo, useCallback, useMemo } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
-import {
-  type ColorTokens,
-  FontFamily,
-  FontSize,
-  Radius,
-  Spacing,
-} from "@/constants/theme";
+import { type ColorTokens, FontFamily, FontSize, Radius, Spacing } from "@/constants/theme";
 import { encodeRepoId } from "@/lib/utils";
 import type { GitHubIssue } from "@/types/github.types";
 
@@ -35,9 +29,7 @@ export const IssueResultCard = memo(function IssueResultCard({
     if (!parsed) return;
     const repoId = encodeRepoId(parsed.owner, parsed.repo);
     router.push({
-      pathname: isPR
-        ? "/(app)/repo/[repoId]/pr/[number]"
-        : "/(app)/repo/[repoId]/issue/[number]",
+      pathname: isPR ? "/(app)/repo/[repoId]/pr/[number]" : "/(app)/repo/[repoId]/issue/[number]",
       params: { repoId, number: String(issue.number) },
     });
   }, [router, issue.repository_url, issue.number, isPR]);
@@ -45,10 +37,7 @@ export const IssueResultCard = memo(function IssueResultCard({
   const repoFullName = parseRepo(issue.repository_url);
 
   return (
-    <Pressable
-      style={({ pressed }) => [s.card, pressed && { opacity: 0.7 }]}
-      onPress={handlePress}
-    >
+    <Pressable style={({ pressed }) => [s.card, pressed && { opacity: 0.7 }]} onPress={handlePress}>
       <View style={s.header}>
         <Octicons
           name={isPR ? "git-pull-request" : "issue-opened"}

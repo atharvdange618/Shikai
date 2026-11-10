@@ -59,9 +59,7 @@ export function RecentRepos({ repos, isLoading, onSeeAll }: RecentReposProps) {
                   params: { repoId: encodeRepoId(repo.owner.login, repo.name) },
                 })
               }
-              onPressIn={() =>
-                prefetchRepoDetails(queryClient, repo.owner.login, repo.name)
-              }
+              onPressIn={() => prefetchRepoDetails(queryClient, repo.owner.login, repo.name)}
             >
               <View style={s.info}>
                 <Text style={s.name} numberOfLines={1}>
@@ -77,21 +75,13 @@ export function RecentRepos({ repos, isLoading, onSeeAll }: RecentReposProps) {
                 {repo.stargazers_count > 0 && (
                   <View style={s.stat}>
                     <Octicons name="star" size={11} color={colors.star} />
-                    <Text style={s.statText}>
-                      {formatCount(repo.stargazers_count)}
-                    </Text>
+                    <Text style={s.statText}>{formatCount(repo.stargazers_count)}</Text>
                   </View>
                 )}
                 {repo.forks_count > 0 && (
                   <View style={s.stat}>
-                    <Octicons
-                      name="repo-forked"
-                      size={11}
-                      color={colors.textMuted}
-                    />
-                    <Text style={s.statText}>
-                      {formatCount(repo.forks_count)}
-                    </Text>
+                    <Octicons name="repo-forked" size={11} color={colors.textMuted} />
+                    <Text style={s.statText}>{formatCount(repo.forks_count)}</Text>
                   </View>
                 )}
               </View>

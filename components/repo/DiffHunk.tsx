@@ -3,12 +3,7 @@ import type { HighlightTheme, HighlightThemeToken } from "@tanstack/highlight/th
 import { useMemo } from "react";
 import { StyleSheet, Text, View } from "react-native";
 
-import {
-  FontFamily,
-  Spacing,
-  useTheme,
-  type ColorTokens,
-} from "@/constants/theme";
+import { FontFamily, Spacing, useTheme, type ColorTokens } from "@/constants/theme";
 import { highlightDiff, type DiffLine } from "@/lib/highlight";
 
 const SIGN: Partial<Record<DiffLine["kind"], string>> = {
@@ -59,13 +54,9 @@ export function DiffHunk({ hunk, fileName }: { hunk: string; fileName: string })
 function renderNodes(nodes: HighlightRenderNode[], theme: HighlightTheme) {
   return nodes.map((node, i) => {
     if (node.type === "text") return node.value;
-    const token = node.classNames
-      .find((c) => c.startsWith("th-") && c !== "th-token")
-      ?.slice(3);
+    const token = node.classNames.find((c) => c.startsWith("th-") && c !== "th-token")?.slice(3);
     const color =
-      token && token in theme.tokens
-        ? theme.tokens[token as HighlightThemeToken]
-        : undefined;
+      token && token in theme.tokens ? theme.tokens[token as HighlightThemeToken] : undefined;
     return (
       <Text key={i} style={color ? { color } : undefined}>
         {renderNodes(node.children, theme)}

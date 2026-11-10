@@ -6,13 +6,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
-import {
-  ActivityIndicator,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
 
 import { useReleases } from "@/hooks/useReleases";
 import { queryKeys } from "@/lib/query-client";
@@ -40,15 +34,8 @@ export default function ReleasesScreen() {
   const [owner, repoName] = decodeRepoId(repoId ?? "");
   const [refreshing, setRefreshing] = useState(false);
 
-  const {
-    releases,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-    isLoading,
-    isError,
-    refetch,
-  } = useReleases(owner, repoName);
+  const { releases, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, isError, refetch } =
+    useReleases(owner, repoName);
 
   const latestTag = useMemo(
     () => releases.find((r) => !r.prerelease)?.tag_name ?? null,
@@ -64,9 +51,7 @@ export default function ReleasesScreen() {
             hitSlop={12}
             style={{ marginRight: Spacing.sm, padding: Spacing.xs }}
             onPress={() =>
-              WebBrowser.openBrowserAsync(
-                `https://github.com/${owner}/${repoName}/releases`,
-              )
+              WebBrowser.openBrowserAsync(`https://github.com/${owner}/${repoName}/releases`)
             }
           >
             <Octicons name="link-external" size={16} color={colors.accent} />
@@ -139,9 +124,7 @@ export default function ReleasesScreen() {
           if (hasNextPage) fetchNextPage();
         }}
         onEndReachedThreshold={0.5}
-        refreshControl={
-          <PullToRefresh refreshing={refreshing} onRefresh={onRefresh} />
-        }
+        refreshControl={<PullToRefresh refreshing={refreshing} onRefresh={onRefresh} />}
         removeClippedSubviews
         drawDistance={300}
       />
@@ -171,10 +154,7 @@ const ReleaseItem = memo(function ReleaseItem({
   }, [router, repoId, release.tag_name]);
 
   return (
-    <Pressable
-      style={({ pressed }) => [s.item, pressed && s.itemPressed]}
-      onPress={handlePress}
-    >
+    <Pressable style={({ pressed }) => [s.item, pressed && s.itemPressed]} onPress={handlePress}>
       <View style={s.itemIcon}>
         <Octicons name="tag" size={16} color={colors.textMuted} />
       </View>
@@ -191,12 +171,8 @@ const ReleaseItem = memo(function ReleaseItem({
             </View>
           )}
           {release.prerelease && (
-            <View
-              style={[s.badge, { backgroundColor: colors.surfaceSecondary }]}
-            >
-              <Text style={[s.badgeText, { color: colors.warning }]}>
-                Pre-release
-              </Text>
+            <View style={[s.badge, { backgroundColor: colors.surfaceSecondary }]}>
+              <Text style={[s.badgeText, { color: colors.warning }]}>Pre-release</Text>
             </View>
           )}
           <Text style={s.itemMetaText} numberOfLines={1}>

@@ -2,16 +2,9 @@ import { Octicons } from "@expo/vector-icons";
 import { useQueryClient } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
-import { Href, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import {
-  ActivityIndicator,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import Animated, { useSharedValue, withTiming } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -50,13 +43,7 @@ function getGreeting() {
   return "Good evening";
 }
 
-function FadeInView({
-  children,
-  delay = 0,
-}: {
-  children: React.ReactNode;
-  delay?: number;
-}) {
+function FadeInView({ children, delay = 0 }: { children: React.ReactNode; delay?: number }) {
   const reducedMotion = useReducedMotion();
   const opacity = useSharedValue(reducedMotion ? 1 : 0);
   const [mounted, setMounted] = useState(false);
@@ -72,11 +59,7 @@ function FadeInView({
     }
   }, [mounted, opacity, reducedMotion]);
 
-  return (
-    <Animated.View style={{ opacity }}>
-      {children}
-    </Animated.View>
-  );
+  return <Animated.View style={{ opacity }}>{children}</Animated.View>;
 }
 
 function getFollowingEventText(event: GitHubEvent): string {
@@ -148,27 +131,14 @@ function FollowingPreview({
       <View style={followStyles.header}>
         <View style={followStyles.headerLeft}>
           <Octicons name="people" size={14} color={colors.accent} />
-          <Text
-            style={[followStyles.headerTitle, { color: colors.textPrimary }]}
-          >
-            Following
-          </Text>
+          <Text style={[followStyles.headerTitle, { color: colors.textPrimary }]}>Following</Text>
         </View>
-        <Text style={[followStyles.seeAll, { color: colors.accent }]}>
-          See all
-        </Text>
+        <Text style={[followStyles.seeAll, { color: colors.accent }]}>See all</Text>
       </View>
 
       {preview.map((event, i) => (
         <View key={event.id}>
-          {i > 0 && (
-            <View
-              style={[
-                followStyles.separator,
-                { backgroundColor: colors.border },
-              ]}
-            />
-          )}
+          {i > 0 && <View style={[followStyles.separator, { backgroundColor: colors.border }]} />}
           <View style={followStyles.eventRow}>
             <Image
               source={{ uri: event.actor.avatar_url }}
@@ -178,17 +148,12 @@ function FollowingPreview({
             />
             <View style={followStyles.eventContent}>
               <Text
-                style={[
-                  followStyles.eventText,
-                  { color: colors.textSecondary },
-                ]}
+                style={[followStyles.eventText, { color: colors.textSecondary }]}
                 numberOfLines={1}
               >
                 {getFollowingEventText(event)}
               </Text>
-              <Text
-                style={[followStyles.timeText, { color: colors.textMuted }]}
-              >
+              <Text style={[followStyles.timeText, { color: colors.textMuted }]}>
                 {compactTimeAgo(event.created_at)}
               </Text>
             </View>
@@ -298,8 +263,7 @@ export default function OverviewScreen() {
     isFetchingNextPage,
     isLoading: activityLoading,
   } = useEvents(eventsUsername);
-  const { events: followingEvents, isLoading: followingLoading } =
-    useReceivedEvents();
+  const { events: followingEvents, isLoading: followingLoading } = useReceivedEvents();
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -332,16 +296,12 @@ export default function OverviewScreen() {
           <View>
             <Text style={s.greeting}>{getGreeting()}</Text>
             <Text style={s.userName}>
-              {user?.name ||
-                storeUser?.name ||
-                user?.login ||
-                storeUser?.login ||
-                "..."}
+              {user?.name || storeUser?.name || user?.login || storeUser?.login || "..."}
             </Text>
           </View>
           <View style={s.headerActions}>
             <Pressable
-              onPress={() => router.push("/(app)/(tabs)/profile" as Href)}
+              onPress={() => router.push("/(app)/(tabs)/profile")}
               onPressIn={handleAvatarPressIn}
               hitSlop={8}
             >
@@ -366,20 +326,14 @@ export default function OverviewScreen() {
         style={s.scroll}
         contentContainerStyle={s.content}
         showsVerticalScrollIndicator={false}
-        refreshControl={
-          <PullToRefresh refreshing={refreshing} onRefresh={onRefresh} />
-        }
+        refreshControl={<PullToRefresh refreshing={refreshing} onRefresh={onRefresh} />}
       >
         <FadeInView delay={0}>
           <View style={s.section}>
             <Text style={s.sectionTitle}>Pinned</Text>
 
             {pinnedLoading ? (
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                style={s.pinnedScroll}
-              >
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={s.pinnedScroll}>
                 {Array.from({ length: 3 }).map((_, i) => (
                   <View key={i} style={s.pinnedSkeleton} />
                 ))}
@@ -399,9 +353,7 @@ export default function OverviewScreen() {
               <View style={s.emptyState}>
                 <Octicons name="repo" size={24} color={colors.textMuted} />
                 <Text style={s.emptyStateTitle}>No pinned repos</Text>
-                <Text style={s.emptyStateSubtitle}>
-                  Pin repos on GitHub to see them here
-                </Text>
+                <Text style={s.emptyStateSubtitle}>Pin repos on GitHub to see them here</Text>
               </View>
             )}
           </View>
@@ -424,7 +376,7 @@ export default function OverviewScreen() {
             <FollowingPreview
               events={followingEvents}
               isLoading={followingLoading}
-              onPress={() => router.push("/(app)/(tabs)/overview/feed" as Href)}
+              onPress={() => router.push("/(app)/(tabs)/overview/feed")}
               colors={colors}
             />
           ) : (
@@ -434,33 +386,33 @@ export default function OverviewScreen() {
                 { borderColor: colors.border, backgroundColor: colors.surface },
                 pressed && { opacity: 0.7 },
               ]}
-              onPress={() => router.push("/(app)/(tabs)/profile/settings" as Href)}
+              onPress={() => router.push("/(app)/(tabs)/profile/settings")}
             >
-            <View style={s.patPromptHeader}>
-              <Octicons name="bell" size={18} color={colors.accent} />
-              <Text style={[s.patPromptTitle, { color: colors.textPrimary }]}>
-                Unlock notifications
+              <View style={s.patPromptHeader}>
+                <Octicons name="bell" size={18} color={colors.accent} />
+                <Text style={[s.patPromptTitle, { color: colors.textPrimary }]}>
+                  Unlock notifications
+                </Text>
+              </View>
+              <Text style={[s.patPromptBody, { color: colors.textSecondary }]}>
+                Add a Personal Access Token to see what people you follow are up to and get alerts
+                when someone needs you.
               </Text>
-            </View>
-            <Text style={[s.patPromptBody, { color: colors.textSecondary }]}>
-              Add a Personal Access Token to see what people you follow are up
-              to and get alerts when someone needs you.
-            </Text>
-            <View style={s.patPromptFeatures}>
-              <View style={s.patPromptFeature}>
-                <Octicons name="people" size={12} color={colors.textMuted} />
-                <Text style={[s.patPromptFeatureText, { color: colors.textMuted }]}>
-                  Following feed
-                </Text>
+              <View style={s.patPromptFeatures}>
+                <View style={s.patPromptFeature}>
+                  <Octicons name="people" size={12} color={colors.textMuted} />
+                  <Text style={[s.patPromptFeatureText, { color: colors.textMuted }]}>
+                    Following feed
+                  </Text>
+                </View>
+                <View style={s.patPromptFeature}>
+                  <Octicons name="bell" size={12} color={colors.textMuted} />
+                  <Text style={[s.patPromptFeatureText, { color: colors.textMuted }]}>
+                    Notification alerts
+                  </Text>
+                </View>
               </View>
-              <View style={s.patPromptFeature}>
-                <Octicons name="bell" size={12} color={colors.textMuted} />
-                <Text style={[s.patPromptFeatureText, { color: colors.textMuted }]}>
-                  Notification alerts
-                </Text>
-              </View>
-            </View>
-          </Pressable>
+            </Pressable>
           )}
         </FadeInView>
 
@@ -471,13 +423,11 @@ export default function OverviewScreen() {
               { borderColor: colors.border, backgroundColor: colors.surface },
               pressed && { opacity: 0.7 },
             ]}
-            onPress={() => router.push("/(app)/(tabs)/overview/mine" as Href)}
+            onPress={() => router.push("/(app)/(tabs)/overview/mine")}
           >
             <Octicons name="checklist" size={16} color={colors.accent} />
             <View style={s.myWorkText}>
-              <Text style={[s.myWorkTitle, { color: colors.textPrimary }]}>
-                Your work
-              </Text>
+              <Text style={[s.myWorkTitle, { color: colors.textPrimary }]}>Your work</Text>
               <Text style={[s.myWorkSubtitle, { color: colors.textMuted }]}>
                 Review requests, assignments, and mentions
               </Text>

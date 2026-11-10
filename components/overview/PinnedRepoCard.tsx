@@ -48,9 +48,8 @@ export function PinnedRepoCard({ repo }: PinnedRepoCardProps) {
   }, [queryClient, owner, repo.name, route]);
 
   const langColor = repo.primaryLanguage?.name
-    ? ((languageColors as Record<string, { color: string | null }>)[
-        repo.primaryLanguage.name
-      ]?.color ?? colors.textMuted)
+    ? ((languageColors as Record<string, { color: string | null }>)[repo.primaryLanguage.name]
+        ?.color ?? colors.textMuted)
     : null;
 
   const s = useMemo(() => buildStyles(colors, shadows), [colors, shadows]);
@@ -84,12 +83,7 @@ export function PinnedRepoCard({ repo }: PinnedRepoCardProps) {
       <View style={s.footer}>
         {repo.primaryLanguage && (
           <View style={s.langRow}>
-            <View
-              style={[
-                s.langDot,
-                { backgroundColor: langColor ?? colors.textMuted },
-              ]}
-            />
+            <View style={[s.langDot, { backgroundColor: langColor ?? colors.textMuted }]} />
             <Text style={s.langName} numberOfLines={1}>
               {repo.primaryLanguage.name}
             </Text>

@@ -19,7 +19,7 @@ Expo ships about three SDKs a year. Upgrade one SDK at a time. Skip an SDK only 
 2. Remove the `react-native` pin: the `overrides` entry and the exact version in the dependency (npm rejects an override that differs from the direct dependency). The new SDK picks its own React Native version, and the pin will fight it.
 3. `npm install expo@^<new version>`, then align the rest by hand as in the monthly dependency step, since `--fix` hits `EALLOWSCRIPTS`.
 4. `npx expo prebuild --clean`. The config plugins in `plugins/` throw if Expo's `build.gradle` template has changed. If one throws, update that plugin's regex to match the new template.
-5. `npx expo lint`, `npx tsc --noEmit`, `npx vitest run`.
+5. `npm run lint`, `npm run typecheck`, `npx vitest run`.
 6. Build a release APK (see Releasing) and test on a device: sign in, open a repo, open a full-screen diff, check the widget.
 7. Check `modules/shikai-security/`. The Kotlin module can break on a new Kotlin or Android Gradle Plugin version.
 8. Pin `react-native` back to the exact version the hop ended on, in the dependency and in `overrides`. A transitive bump should never move React Native without a test.
@@ -39,6 +39,7 @@ Google Play requires updates to target a recent Android API level and usually ra
    ```
 
    EAS signs with its own stored credentials. The signing and ABI-split plugins skip themselves there.
+
 4. **GitHub release APKs:** build locally, then attach the three APKs from `android/app/build/outputs/apk/release/` to the release.
 
    ```bash
@@ -88,3 +89,5 @@ Keep an offline backup of each. None of them are in the repo.
 - **CI red:** the GitHub Actions run shows which of lint, typecheck, or tests failed.
 - **Crash spike after a release:** Sentry groups it by release. If an OTA update caused it, republish the previous update with `eas update:republish`.
 - **Sign-in fails for everyone:** check the OAuth proxy Worker's logs in the Cloudflare dashboard, then the GitHub App's settings.
+- **`expo run:android` fails with `JAVA_HOME is set to an invalid directory`:** Microsoft's OpenJDK auto-updates its patch build and deletes the previous folder (17.0.20.101 became 17.0.21.21), leaving `JAVA_HOME` pointing at nothing. Check what's installed with `ls "/c/Program Files/Microsoft"`, then fix both places it is set, since each hides the other: `export JAVA_HOME` in `~/.bashrc` (what Git Bash uses) and the user environment variable (`setx JAVA_HOME "C:\Program Files\Microsoft\jdk-<version>"`). The system-level variable is separate and was already correct, which is why `java -version` still worked while Gradle failed. Open a new terminal afterwards: a running shell, Metro and the agent all keep the value they started with. `cd android && ./gradlew.bat -version` prints the JVM Gradle actually picked.
+- **A native module fails to compile right after a `gradlew clean`** (`Unresolved reference 'SvgView'` in `react-native-gesture-handler`, or `Failed to create MD5 hash for file` in another module): the Gradle build cache is holding an incomplete task output and replays it, so cleaning the build folders does not help. Delete `~/.gradle/caches/build-cache-1` and rebuild. To confirm the cause, count a module's compiled classes: `react-native-svg`'s `compileDebugJavaWithJavac` output should hold 175 classes including `SvgView.class`, and a subset means the broken entry survived.

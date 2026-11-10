@@ -16,9 +16,7 @@ import { useAuthStore } from "@/stores/auth.store";
  * the app offline cleared auth (status 0 landed in the same catch) and a slow
  * network held the splash for up to the 15s axios timeout.
  */
-export async function revalidateSession(
-  queryClient: QueryClient,
-): Promise<void> {
+export async function revalidateSession(queryClient: QueryClient): Promise<void> {
   try {
     // staleTime 0 forces the round trip even when the persisted profile is
     // fresh, so a revoked token is caught on the first boot and not in 30 min.

@@ -14,12 +14,7 @@ import { PdfViewer } from "@/components/file/PdfViewer";
 import { VideoViewer } from "@/components/file/VideoViewer";
 import { Spacing, useTheme } from "@/constants/theme";
 import { useFileContent, useRepo } from "@/hooks/useRepoDetails";
-import {
-  decodeRepoId,
-  getFileKind,
-  isSvgFile,
-  parseTargetLine,
-} from "@/lib/utils";
+import { decodeRepoId, getFileKind, isSvgFile, parseTargetLine } from "@/lib/utils";
 
 export default function FileViewerScreen() {
   return (
@@ -98,29 +93,12 @@ function FileViewerScreenContent() {
         /* navigator not ready yet */
       }
     }
-  }, [
-    navigation,
-    router,
-    fileName,
-    repoId,
-    path,
-    colors.accent,
-    canBlame,
-    repo?.default_branch,
-  ]);
+  }, [navigation, router, fileName, repoId, path, colors.accent, canBlame, repo?.default_branch]);
 
-  const { data, isLoading, isError, error } = useFileContent(
-    owner,
-    repoName,
-    path ?? "",
-    true,
-  );
+  const { data, isLoading, isError, error } = useFileContent(owner, repoName, path ?? "", true);
 
   return (
-    <SafeAreaView
-      style={[s.container, { backgroundColor: colors.background }]}
-      edges={["bottom"]}
-    >
+    <SafeAreaView style={[s.container, { backgroundColor: colors.background }]} edges={["bottom"]}>
       <FileLoading isLoading={isLoading} fileName={fileName ?? ""} />
       {isError && (
         <FileError
@@ -137,19 +115,11 @@ function FileViewerScreenContent() {
     const targetLine = parseTargetLine(line);
 
     if (kind === "binary") {
-      return (
-        <FileError
-          title="Binary file"
-          message="Shikai can't preview this file type."
-        />
-      );
+      return <FileError title="Binary file" message="Shikai can't preview this file type." />;
     }
 
     // GitHub's contents API leaves out the body of files over 1 MB.
-    if (
-      (kind === "text" || kind === "markdown") &&
-      file.meta.encoding === "none"
-    ) {
+    if ((kind === "text" || kind === "markdown") && file.meta.encoding === "none") {
       return (
         <FileError
           title="File too large to preview"
@@ -182,23 +152,12 @@ function FileViewerScreenContent() {
     }
 
     if (!url) {
-      return (
-        <FileError
-          title="Failed to load file"
-          message="GitHub returned no download link"
-        />
-      );
+      return <FileError title="Failed to load file" message="GitHub returned no download link" />;
     }
 
     switch (kind) {
       case "image":
-        return (
-          <ImageViewer
-            key={url}
-            url={url}
-            isSvg={isSvgFile(fileName ?? "")}
-          />
-        );
+        return <ImageViewer key={url} url={url} isSvg={isSvgFile(fileName ?? "")} />;
       case "video":
         return <VideoViewer key={url} url={url} />;
       case "pdf":

@@ -1,19 +1,9 @@
 import { Octicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import {
-  Linking,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { Linking, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
-import {
-  ProfileHeader,
-  type ProfileLink,
-} from "@/components/shared/ProfileHeader";
+import { ProfileHeader, type ProfileLink } from "@/components/shared/ProfileHeader";
 import { RecentRepos } from "@/components/shared/RecentRepos";
 import { PullToRefresh } from "@/components/shared/PullToRefresh";
 import { useUserProfile } from "@/hooks/useUserProfile";
@@ -75,16 +65,9 @@ export default function UserProfileScreen() {
   const navigation = useNavigation();
   const router = useRouter();
 
-  const {
-    data: user,
-    isLoading,
-    isError,
-    refetch,
-  } = useUserProfile(username ?? "");
+  const { data: user, isLoading, isError, refetch } = useUserProfile(username ?? "");
 
-  const { data: recentRepos, isLoading: reposLoading } = useUserProfileRepos(
-    username ?? "",
-  );
+  const { data: recentRepos, isLoading: reposLoading } = useUserProfileRepos(username ?? "");
 
   const [refreshing, setRefreshing] = useState(false);
 
@@ -100,7 +83,7 @@ export default function UserProfileScreen() {
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    await Promise.all([refetch()]);
+    await refetch();
     setRefreshing(false);
   }, [refetch]);
 
@@ -122,10 +105,7 @@ export default function UserProfileScreen() {
         <Octicons name="alert" size={32} color={colors.textMuted} />
         <Text style={s.errorText}>User not found</Text>
         <Pressable
-          style={({ pressed }) => [
-            s.retryButton,
-            pressed && s.retryButtonPressed,
-          ]}
+          style={({ pressed }) => [s.retryButton, pressed && s.retryButtonPressed]}
           onPress={() => refetch()}
         >
           <Text style={s.retryText}>Try again</Text>
@@ -139,9 +119,7 @@ export default function UserProfileScreen() {
       style={s.scroll}
       contentContainerStyle={s.content}
       showsVerticalScrollIndicator={false}
-      refreshControl={
-        <PullToRefresh refreshing={refreshing} onRefresh={onRefresh} />
-      }
+      refreshControl={<PullToRefresh refreshing={refreshing} onRefresh={onRefresh} />}
     >
       <ProfileHeader
         user={user}
@@ -170,11 +148,7 @@ export default function UserProfileScreen() {
               })
             }
           >
-            <Octicons
-              name="code"
-              size={IconSize.md}
-              color={colors.textSecondary}
-            />
+            <Octicons name="code" size={IconSize.md} color={colors.textSecondary} />
             <Text style={s.rowLabel}>Gists</Text>
             <Octicons name="chevron-right" size={13} color={colors.textMuted} />
           </Pressable>
@@ -183,11 +157,7 @@ export default function UserProfileScreen() {
             style={({ pressed }) => [s.row, s.rowDivider, pressed && s.pressed]}
             onPress={() => Linking.openURL(user.html_url)}
           >
-            <Octicons
-              name="mark-github"
-              size={IconSize.md}
-              color={colors.textSecondary}
-            />
+            <Octicons name="mark-github" size={IconSize.md} color={colors.textSecondary} />
             <Text style={s.rowLabel}>View on GitHub</Text>
             <Octicons name="link-external" size={13} color={colors.textMuted} />
           </Pressable>

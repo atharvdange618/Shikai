@@ -80,16 +80,7 @@ export function format24HourTime(isoDate: string): string {
   return `${shortMonthFormatter.format(date)} ${date.getDate()}, ${hours}:${minutes}`;
 }
 
-const IMAGE_EXTENSIONS = [
-  ".png",
-  ".jpg",
-  ".jpeg",
-  ".gif",
-  ".svg",
-  ".webp",
-  ".bmp",
-  ".ico",
-];
+const IMAGE_EXTENSIONS = [".png", ".jpg", ".jpeg", ".gif", ".svg", ".webp", ".bmp", ".ico"];
 
 export function isImageFile(filename: string): boolean {
   return IMAGE_EXTENSIONS.some((ext) => filename.toLowerCase().endsWith(ext));
@@ -105,23 +96,47 @@ export function isVideoFile(filename: string): boolean {
   return VIDEO_EXTENSIONS.some((ext) => filename.toLowerCase().endsWith(ext));
 }
 
-export type FileKind =
-  | "image"
-  | "video"
-  | "pdf"
-  | "markdown"
-  | "binary"
-  | "text";
+export type FileKind = "image" | "video" | "pdf" | "markdown" | "binary" | "text";
 
 const MARKDOWN_EXTENSIONS = [".md", ".mdx", ".markdown"];
 
 // Common binaries the contents API still returns as base64, which would
 // render as noise in the code viewer.
 const BINARY_EXTENSIONS = [
-  ".zip", ".gz", ".tgz", ".tar", ".7z", ".rar", ".jar", ".aar", ".apk",
-  ".aab", ".exe", ".dll", ".so", ".dylib", ".bin", ".class", ".o", ".a",
-  ".wasm", ".pyc", ".woff", ".woff2", ".ttf", ".otf", ".eot", ".mp3",
-  ".wav", ".ogg", ".flac", ".sqlite", ".db", ".jks", ".keystore", ".psd",
+  ".zip",
+  ".gz",
+  ".tgz",
+  ".tar",
+  ".7z",
+  ".rar",
+  ".jar",
+  ".aar",
+  ".apk",
+  ".aab",
+  ".exe",
+  ".dll",
+  ".so",
+  ".dylib",
+  ".bin",
+  ".class",
+  ".o",
+  ".a",
+  ".wasm",
+  ".pyc",
+  ".woff",
+  ".woff2",
+  ".ttf",
+  ".otf",
+  ".eot",
+  ".mp3",
+  ".wav",
+  ".ogg",
+  ".flac",
+  ".sqlite",
+  ".db",
+  ".jks",
+  ".keystore",
+  ".psd",
 ];
 
 /** Picks the viewer for a file. SVGs count as images. */

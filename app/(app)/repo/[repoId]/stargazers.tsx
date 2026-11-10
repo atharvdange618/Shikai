@@ -10,10 +10,6 @@ export default function StargazersScreen() {
   const query = useStargazers(owner, repoName);
 
   return (
-    <UserList
-      {...query}
-      emptyText="No stargazers yet"
-      errorText="Failed to load stargazers"
-    />
+    <UserList {...query} emptyText="No stargazers yet" errorText="Failed to load stargazers" />
   );
 }

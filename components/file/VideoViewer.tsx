@@ -1,10 +1,5 @@
 import { VideoView, useVideoPlayer } from "expo-video";
-import {
-  ScrollView,
-  StyleSheet,
-  View,
-  useWindowDimensions,
-} from "react-native";
+import { ScrollView, StyleSheet, View, useWindowDimensions } from "react-native";
 
 import { Radius, Spacing } from "@/constants/theme";
 

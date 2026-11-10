@@ -1,19 +1,18 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-const { store, getStoredPAT, fetchParticipatingNotifications, GitHubApiError } =
-  vi.hoisted(() => ({
-    store: new Map<string, string>(),
-    getStoredPAT: vi.fn(),
-    fetchParticipatingNotifications: vi.fn(),
-    GitHubApiError: class GitHubApiError extends Error {
-      constructor(
-        public status: number,
-        message: string,
-      ) {
-        super(message);
-      }
-    },
-  }));
+const { store, getStoredPAT, fetchParticipatingNotifications, GitHubApiError } = vi.hoisted(() => ({
+  store: new Map<string, string>(),
+  getStoredPAT: vi.fn(),
+  fetchParticipatingNotifications: vi.fn(),
+  GitHubApiError: class GitHubApiError extends Error {
+    constructor(
+      public status: number,
+      message: string,
+    ) {
+      super(message);
+    }
+  },
+}));
 
 vi.mock("@/lib/axios", () => ({ GitHubApiError }));
 vi.mock("@/lib/secure-storage", () => ({ getStoredPAT }));
@@ -39,11 +38,7 @@ import type { GitHubNotification } from "@/types/github.types";
 const MARKER_KEY = "notification-alerts.marker";
 const ETAG_KEY = "notification-alerts.etag";
 
-function thread(
-  id: string,
-  updatedAt: string,
-  unread = true,
-): GitHubNotification {
+function thread(id: string, updatedAt: string, unread = true): GitHubNotification {
   return {
     id,
     unread,
@@ -86,9 +81,7 @@ describe("planAlerts", () => {
   });
 
   it(`caps at ${MAX_ALERTS} alerts and counts the rest as overflow`, () => {
-    const threads = ["1", "2", "3", "4", "5"].map((id) =>
-      thread(id, `2026-10-15T10:0${id}:00Z`),
-    );
+    const threads = ["1", "2", "3", "4", "5"].map((id) => thread(id, `2026-10-15T10:0${id}:00Z`));
     const { alerts, overflow } = planAlerts(threads, MARKER);
     expect(alerts.map((a) => a.threadId)).toEqual(["5", "4", "3"]);
     expect(overflow).toBe(2);
@@ -160,16 +153,13 @@ describe("pollNotifications", () => {
       store.set(ETAG_KEY, "stale");
       fetchParticipatingNotifications.mockResolvedValue({
         modified: true,
-        notifications: [
-          thread("1", "2026-10-15T10:05:00Z"),
-          thread("2", "2026-10-15T10:10:00Z"),
-        ],
-        etag: "\"etag-2\"",
+        notifications: [thread("1", "2026-10-15T10:05:00Z"), thread("2", "2026-10-15T10:10:00Z")],
+        etag: '"etag-2"',
       });
 
       await expect(pollNotifications()).resolves.toEqual({ kind: "seeded" });
       expect(store.get(MARKER_KEY)).toBe("2026-10-15T10:10:00Z");
-      expect(store.get(ETAG_KEY)).toBe("\"etag-2\"");
+      expect(store.get(ETAG_KEY)).toBe('"etag-2"');
       // No marker yet, so the stale ETag is not sent.
       expect(fetchParticipatingNotifications).toHaveBeenCalledWith("ghp_abc", null);
     });
@@ -190,14 +180,11 @@ describe("pollNotifications", () => {
 
   it("sends the stored ETag and stops on 304", async () => {
     store.set(MARKER_KEY, MARKER);
-    store.set(ETAG_KEY, "\"etag-1\"");
+    store.set(ETAG_KEY, '"etag-1"');
     fetchParticipatingNotifications.mockResolvedValue({ modified: false });
 
     await expect(pollNotifications()).resolves.toEqual({ kind: "not-modified" });
-    expect(fetchParticipatingNotifications).toHaveBeenCalledWith(
-      "ghp_abc",
-      "\"etag-1\"",
-    );
+    expect(fetchParticipatingNotifications).toHaveBeenCalledWith("ghp_abc", '"etag-1"');
     expect(store.get(MARKER_KEY)).toBe(MARKER);
   });
 
@@ -205,10 +192,8 @@ describe("pollNotifications", () => {
     store.set(MARKER_KEY, MARKER);
     fetchParticipatingNotifications.mockResolvedValue({
       modified: true,
-      notifications: ["1", "2", "3", "4"].map((id) =>
-        thread(id, `2026-10-15T10:0${id}:00Z`),
-      ),
-      etag: "\"etag-4\"",
+      notifications: ["1", "2", "3", "4"].map((id) => thread(id, `2026-10-15T10:0${id}:00Z`)),
+      etag: '"etag-4"',
     });
 
     const result = await pollNotifications();
@@ -217,7 +202,7 @@ describe("pollNotifications", () => {
     expect(result.alerts.map((a) => a.threadId)).toEqual(["4", "3", "2"]);
     expect(result.overflow).toBe(1);
     expect(store.get(MARKER_KEY)).toBe("2026-10-15T10:04:00Z");
-    expect(store.get(ETAG_KEY)).toBe("\"etag-4\"");
+    expect(store.get(ETAG_KEY)).toBe('"etag-4"');
   });
 
   it("reports a 401 without touching the marker", async () => {
@@ -236,7 +221,7 @@ describe("pollNotifications", () => {
 
   it("starts over after a reset", async () => {
     store.set(MARKER_KEY, MARKER);
-    store.set(ETAG_KEY, "\"etag-1\"");
+    store.set(ETAG_KEY, '"etag-1"');
     resetNotificationPoller();
     fetchParticipatingNotifications.mockResolvedValue({
       modified: true,

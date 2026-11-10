@@ -67,8 +67,7 @@ export function planAlerts(
     .sort((a, b) => Date.parse(b.updated_at) - Date.parse(a.updated_at));
 
   const nextMarker = notifications.reduce(
-    (latest, n) =>
-      Date.parse(n.updated_at) > Date.parse(latest) ? n.updated_at : latest,
+    (latest, n) => (Date.parse(n.updated_at) > Date.parse(latest) ? n.updated_at : latest),
     marker,
   );
 

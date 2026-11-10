@@ -3,10 +3,7 @@
 import React from "react";
 
 import { FlexWidget, TextWidget } from "react-native-android-widget";
-import type {
-  WidgetContributionDay,
-  WidgetContributionWeek,
-} from "../lib/widget-data";
+import type { WidgetContributionDay, WidgetContributionWeek } from "../lib/widget-data";
 
 export interface WidgetThemeColors {
   bg: `#${string}`;
@@ -64,8 +61,7 @@ const HEADER_HEIGHT = 26;
 const FOOTER_HEIGHT = 14;
 
 function calcLayout(widgetWidth: number, widgetHeight: number) {
-  const graphHeight =
-    widgetHeight - PADDING * 2 - HEADER_HEIGHT - FOOTER_HEIGHT - 16;
+  const graphHeight = widgetHeight - PADDING * 2 - HEADER_HEIGHT - FOOTER_HEIGHT - 16;
   const cellSize = Math.max(4, Math.floor((graphHeight - CELL_GAP * 6) / 7));
   const colWidth = cellSize + CELL_GAP;
   const graphWidth = widgetWidth - PADDING * 2;
@@ -130,10 +126,7 @@ export function ContributionWidget({
         }}
       >
         {recentWeeks.map((week, weekIdx) => (
-          <FlexWidget
-            key={weekIdx}
-            style={{ flexDirection: "column", flexGap: CELL_GAP }}
-          >
+          <FlexWidget key={weekIdx} style={{ flexDirection: "column", flexGap: CELL_GAP }}>
             {week.contributionDays.map((day, dayIdx) => (
               <FlexWidget
                 key={dayIdx}

@@ -8,9 +8,7 @@ function contributor(
   weeks: [a: number, d: number, c: number][],
 ): GitHubContributorStats {
   return {
-    author: login
-      ? { id: login.length, login, avatar_url: "", html_url: "" }
-      : null,
+    author: login ? { id: login.length, login, avatar_url: "", html_url: "" } : null,
     total: weeks.reduce((sum, [, , c]) => sum + c, 0),
     weeks: weeks.map(([a, d, c], i) => ({ w: i, a, d, c })),
   };
@@ -35,10 +33,7 @@ describe("summarizeContributors", () => {
   });
 
   it("flags missing line counts (10,000+ commit repos)", () => {
-    const { hasLineCounts } = summarizeContributors(
-      [contributor("a", [[0, 0, 7]])],
-      10,
-    );
+    const { hasLineCounts } = summarizeContributors([contributor("a", [[0, 0, 7]])], 10);
     expect(hasLineCounts).toBe(false);
   });
 
@@ -86,7 +81,10 @@ describe("buildPunchCard", () => {
   });
 
   it("ignores out-of-range entries", () => {
-    const { busiest } = buildPunchCard([[7, 0, 5], [0, 24, 5]]);
+    const { busiest } = buildPunchCard([
+      [7, 0, 5],
+      [0, 24, 5],
+    ]);
     expect(busiest).toBeNull();
   });
 });

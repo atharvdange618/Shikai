@@ -1,8 +1,4 @@
-import {
-  fetchWorkflowRun,
-  fetchWorkflowRunJobs,
-  fetchWorkflowRuns,
-} from "@/lib/github-rest";
+import { fetchWorkflowRun, fetchWorkflowRunJobs, fetchWorkflowRuns } from "@/lib/github-rest";
 import { queryKeys } from "@/lib/query-client";
 import { useInfinitePagedQuery } from "@/hooks/useInfinitePagedQuery";
 import { queryOptions, useQuery } from "@tanstack/react-query";
@@ -13,8 +9,7 @@ export function useWorkflowRuns(owner: string, repo: string) {
   const { items: runs, ...rest } = useInfinitePagedQuery(
     {
       queryKey: queryKeys.workflowRuns(owner, repo),
-      queryFn: ({ pageParam }) =>
-        fetchWorkflowRuns(owner, repo, pageParam, PER_PAGE),
+      queryFn: ({ pageParam }) => fetchWorkflowRuns(owner, repo, pageParam, PER_PAGE),
       enabled: Boolean(owner && repo),
       staleTime: 1000 * 60,
     },

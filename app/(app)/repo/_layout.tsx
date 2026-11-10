@@ -26,10 +26,7 @@ export default function RepoLayout() {
       }}
     >
       <Stack.Screen name="[repoId]/commits" options={{ title: "Commits" }} />
-      <Stack.Screen
-        name="[repoId]/stargazers"
-        options={{ title: "Stargazers" }}
-      />
+      <Stack.Screen name="[repoId]/stargazers" options={{ title: "Stargazers" }} />
       <Stack.Screen name="[repoId]/forks" options={{ title: "Forks" }} />
     </Stack>
   );

@@ -1,12 +1,6 @@
 import { Octicons } from "@expo/vector-icons";
 import { useMemo } from "react";
-import {
-  Pressable,
-  StyleSheet,
-  TextInput,
-  TextInputProps,
-  View,
-} from "react-native";
+import { Pressable, StyleSheet, TextInput, TextInputProps, View } from "react-native";
 
 import {
   type ColorTokens,
@@ -27,7 +21,7 @@ interface SearchBarProps {
 export function SearchBar({
   value,
   onChangeText,
-  placeholder = "Search…",
+  placeholder = "Searchâ€¦",
   textInputProps,
 }: SearchBarProps) {
   const { colors } = useTheme();
@@ -35,12 +29,7 @@ export function SearchBar({
 
   return (
     <View style={s.container}>
-      <Octicons
-        name="search"
-        size={15}
-        color={colors.textMuted}
-        style={s.icon}
-      />
+      <Octicons name="search" size={15} color={colors.textMuted} style={s.icon} />
 
       <TextInput
         style={s.input}

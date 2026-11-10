@@ -11,11 +11,7 @@ export function buildThreads(comments: GitHubReviewComment[]) {
   }
   return comments
     .filter((comment) => !comment.in_reply_to_id)
-    .sort(
-      (a, b) =>
-        a.path.localeCompare(b.path) ||
-        a.created_at.localeCompare(b.created_at),
-    )
+    .sort((a, b) => a.path.localeCompare(b.path) || a.created_at.localeCompare(b.created_at))
     .map((root) => ({
       path: root.path,
       line: root.line ?? root.original_line,
@@ -28,13 +24,7 @@ export function buildThreads(comments: GitHubReviewComment[]) {
 }
 
 export type CheckGroup =
-  | "Needs attention"
-  | "Running"
-  | "Passed"
-  | "Skipped"
-  | "Cancelled"
-  | "Neutral"
-  | "Unknown";
+  "Needs attention" | "Running" | "Passed" | "Skipped" | "Cancelled" | "Neutral" | "Unknown";
 export const CHECK_GROUPS: CheckGroup[] = [
   "Needs attention",
   "Running",
@@ -45,9 +35,7 @@ export const CHECK_GROUPS: CheckGroup[] = [
   "Neutral",
 ];
 
-export function checkGroup(
-  conclusion: CheckSummaryItem["conclusion"],
-): CheckGroup {
+export function checkGroup(conclusion: CheckSummaryItem["conclusion"]): CheckGroup {
   switch (conclusion) {
     case "failure":
     case "error":
@@ -78,19 +66,15 @@ export function checksSummary(
   const failing = checks.filter(
     (check) => checkGroup(check.conclusion) === "Needs attention",
   ).length;
-  const running = checks.filter(
-    (check) => checkGroup(check.conclusion) === "Running",
-  ).length;
+  const running = checks.filter((check) => checkGroup(check.conclusion) === "Running").length;
   if (failing)
     return `${failing} need attention${running ? ` · ${running} running` : ""}${error || partial || loading ? " · partial results" : ""}`;
-  if (error)
-    return checks.length ? "Checks partly unavailable" : "Checks unavailable";
+  if (error) return checks.length ? "Checks partly unavailable" : "Checks unavailable";
   if (loading) return "Loading checks…";
   if (partial) return `${checks.length} checks loaded · more available`;
   if (!checks.length) return "No checks reported";
   if (running) return `${running} running`;
-  if (checks.every((check) => check.conclusion === "success"))
-    return "All checks passed";
+  if (checks.every((check) => check.conclusion === "success")) return "All checks passed";
   return `${checks.filter((check) => check.conclusion === "success").length} passed · ${checks.length} total · see results`;
 }
 
@@ -100,19 +84,10 @@ export function checksIcon(
   error: boolean,
   partial: boolean,
 ) {
-  if (
-    checks.some((check) => checkGroup(check.conclusion) === "Needs attention")
-  )
-    return "x-circle";
+  if (checks.some((check) => checkGroup(check.conclusion) === "Needs attention")) return "x-circle";
   if (error) return "alert";
-  if (
-    loading ||
-    partial ||
-    checks.some((check) => check.conclusion === "pending")
-  )
-    return "clock";
-  return checks.length > 0 &&
-    checks.every((check) => check.conclusion === "success")
+  if (loading || partial || checks.some((check) => check.conclusion === "pending")) return "clock";
+  return checks.length > 0 && checks.every((check) => check.conclusion === "success")
     ? "check-circle"
     : "circle-slash";
 }

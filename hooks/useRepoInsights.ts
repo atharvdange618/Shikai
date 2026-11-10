@@ -1,8 +1,4 @@
-import {
-  fetchCommitActivity,
-  fetchContributorStats,
-  fetchPunchCard,
-} from "@/lib/github-rest";
+import { fetchCommitActivity, fetchContributorStats, fetchPunchCard } from "@/lib/github-rest";
 import { queryKeys, statsRetry, statsRetryDelay } from "@/lib/query-client";
 import { queryOptions, useQuery } from "@tanstack/react-query";
 

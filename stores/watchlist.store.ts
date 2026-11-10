@@ -15,8 +15,7 @@ const watchlistStorage: PersistStorage<string[]> = {
       return { state: [] };
     }
   },
-  setItem: (name, value) =>
-    watchlistMMKV.set(name, JSON.stringify(value.state)),
+  setItem: (name, value) => watchlistMMKV.set(name, JSON.stringify(value.state)),
   removeItem: (name) => watchlistMMKV.remove(name),
 };
 

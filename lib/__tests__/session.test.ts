@@ -75,8 +75,7 @@ describe("signOut", () => {
 
 describe("revalidateSession", () => {
   const user = { login: "octocat" } as never;
-  const client = (fetchQuery: unknown) =>
-    ({ fetchQuery }) as unknown as QueryClient;
+  const client = (fetchQuery: unknown) => ({ fetchQuery }) as unknown as QueryClient;
 
   beforeEach(() => {
     useAuthStore.setState({ token: "t", user: null, pat: null });
@@ -93,9 +92,7 @@ describe("revalidateSession", () => {
   });
 
   it("signs out when GitHub rejects the token", async () => {
-    const fetchQuery = vi
-      .fn()
-      .mockRejectedValue(new m.GitHubApiError(401, "Bad credentials"));
+    const fetchQuery = vi.fn().mockRejectedValue(new m.GitHubApiError(401, "Bad credentials"));
 
     await revalidateSession(client(fetchQuery));
 
@@ -106,9 +103,7 @@ describe("revalidateSession", () => {
     // Status 0 is offline, a timeout or a cancelled request (lib/sentry.ts).
     // Boot used to clear auth on it, so opening the app without signal signed
     // the user out.
-    const fetchQuery = vi
-      .fn()
-      .mockRejectedValue(new m.GitHubApiError(0, "Network Error"));
+    const fetchQuery = vi.fn().mockRejectedValue(new m.GitHubApiError(0, "Network Error"));
 
     await revalidateSession(client(fetchQuery));
 

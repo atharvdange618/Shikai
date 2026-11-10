@@ -4,14 +4,7 @@ import { Image } from "expo-image";
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
 import { type ReactNode, useCallback, useEffect, useMemo, useState } from "react";
-import {
-  ActivityIndicator,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import {
   AvatarSize,
@@ -23,11 +16,7 @@ import {
   Spacing,
   useTheme,
 } from "@/constants/theme";
-import {
-  useCommitActivity,
-  useContributorStats,
-  usePunchCard,
-} from "@/hooks/useRepoInsights";
+import { useCommitActivity, useContributorStats, usePunchCard } from "@/hooks/useRepoInsights";
 import {
   buildPunchCard,
   type ContributorSummary,
@@ -65,9 +54,7 @@ export default function InsightsScreen() {
             hitSlop={12}
             style={{ marginRight: Spacing.sm, padding: Spacing.xs }}
             onPress={() =>
-              WebBrowser.openBrowserAsync(
-                `https://github.com/${owner}/${repoName}/pulse`,
-              )
+              WebBrowser.openBrowserAsync(`https://github.com/${owner}/${repoName}/pulse`)
             }
           >
             <Octicons name="link-external" size={16} color={colors.accent} />
@@ -81,11 +68,7 @@ export default function InsightsScreen() {
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    await Promise.all([
-      activity.refetch(),
-      contributors.refetch(),
-      punchCard.refetch(),
-    ]);
+    await Promise.all([activity.refetch(), contributors.refetch(), punchCard.refetch()]);
     setRefreshing(false);
   }, [activity, contributors, punchCard]);
 
@@ -95,9 +78,7 @@ export default function InsightsScreen() {
     <ScrollView
       style={s.container}
       contentContainerStyle={s.content}
-      refreshControl={
-        <PullToRefresh refreshing={refreshing} onRefresh={onRefresh} />
-      }
+      refreshControl={<PullToRefresh refreshing={refreshing} onRefresh={onRefresh} />}
     >
       <StatsSection title="Commit activity" query={activity} colors={colors}>
         {(weeks) => <ActivityBars weeks={weeks} colors={colors} />}
@@ -105,10 +86,7 @@ export default function InsightsScreen() {
 
       <StatsSection title="Top contributors" query={contributors} colors={colors}>
         {(stats) => (
-          <ContributorList
-            {...summarizeContributors(stats, TOP_CONTRIBUTORS)}
-            colors={colors}
-          />
+          <ContributorList {...summarizeContributors(stats, TOP_CONTRIBUTORS)} colors={colors} />
         )}
       </StatsSection>
 
@@ -143,8 +121,7 @@ function StatsSection<T>({
   } else if (query.isError) {
     body = isStatsPending(query.error) ? (
       <Text style={s.muted}>
-        GitHub is still computing these stats. Pull down to refresh in a
-        minute.
+        GitHub is still computing these stats. Pull down to refresh in a minute.
       </Text>
     ) : (
       <View style={s.errorRow}>
@@ -193,8 +170,7 @@ function ActivityBars({
   return (
     <View style={s.chartBlock}>
       <Text style={s.headline}>
-        {formatCount(total)}{" "}
-        <Text style={s.headlineSub}>commits in the past year</Text>
+        {formatCount(total)} <Text style={s.headlineSub}>commits in the past year</Text>
       </Text>
       <View style={s.bars}>
         {weeks.map((w) => (
@@ -271,8 +247,7 @@ function ContributorList({
                 {login ?? "Unknown author"}
               </Text>
               <Text style={s.contributorMeta}>
-                {formatCount(c.commits)}{" "}
-                {c.commits === 1 ? "commit" : "commits"}
+                {formatCount(c.commits)} {c.commits === 1 ? "commit" : "commits"}
               </Text>
             </View>
             {hasLineCounts && (
@@ -320,8 +295,7 @@ function PunchCard({
   return (
     <View style={s.chartBlock}>
       <Text style={s.headlineSub}>
-        Busiest: {DAY_LABELS[grid.busiest.day]} around{" "}
-        {formatHour(grid.busiest.hour)}
+        Busiest: {DAY_LABELS[grid.busiest.day]} around {formatHour(grid.busiest.hour)}
       </Text>
 
       <View style={s.punchGrid}>
@@ -329,10 +303,7 @@ function PunchCard({
           <View key={day} style={s.punchRow}>
             <Text style={s.dayLabel}>{DAY_LABELS[day]}</Text>
             {row.map((level, hour) => (
-              <View
-                key={hour}
-                style={[s.punchCell, { backgroundColor: shades[level] }]}
-              />
+              <View key={hour} style={[s.punchCell, { backgroundColor: shades[level] }]} />
             ))}
           </View>
         ))}
@@ -341,10 +312,7 @@ function PunchCard({
           <View style={s.dayLabelSpacer} />
           <View style={s.hourTicks}>
             {HOUR_TICKS.map((h) => (
-              <Text
-                key={h}
-                style={[s.axisText, s.hourTick, { left: `${(h / 24) * 100}%` }]}
-              >
+              <Text key={h} style={[s.axisText, s.hourTick, { left: `${(h / 24) * 100}%` }]}>
                 {formatHour(h)}
               </Text>
             ))}
@@ -359,9 +327,7 @@ function PunchCard({
         ))}
         <Text style={s.axisText}>More</Text>
       </View>
-      <Text style={[s.muted, s.footnote]}>
-        Hours use each commit&apos;s local time.
-      </Text>
+      <Text style={[s.muted, s.footnote]}>Hours use each commit&apos;s local time.</Text>
     </View>
   );
 }

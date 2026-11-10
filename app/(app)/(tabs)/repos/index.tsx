@@ -3,12 +3,7 @@ import { useDebounce } from "@/hooks/useDebounce";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { useCallback, useMemo, useRef, useState } from "react";
-import {
-  ActivityIndicator,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 
 import * as Haptics from "expo-haptics";
 
@@ -23,10 +18,7 @@ import { useFirstBookmarkNudge } from "@/hooks/useFirstBookmarkNudge";
 import { useInstallations } from "@/hooks/useInstallations";
 import { useRepos } from "@/hooks/useRepos";
 import { useUsername } from "@/hooks/useUser";
-import {
-  hasPartialRepoAccess,
-  MANAGE_REPO_ACCESS_URL,
-} from "@/lib/github-rest";
+import { hasPartialRepoAccess, MANAGE_REPO_ACCESS_URL } from "@/lib/github-rest";
 import * as Linking from "expo-linking";
 import { prefetchRepoDetails, prefetchRoute } from "@/lib/prefetch";
 import { queryKeys } from "@/lib/query-client";
@@ -45,10 +37,7 @@ import { FlashList } from "@shopify/flash-list";
 
 const keyExtractor = (item: GitHubRepo) => String(item.id);
 
-const overrideItemLayout = (
-  layout: { span?: number; size?: number },
-  item: GitHubRepo,
-) => {
+const overrideItemLayout = (layout: { span?: number; size?: number }, item: GitHubRepo) => {
   let size = 96;
   if (item.description) {
     size += 36;
@@ -59,8 +48,7 @@ const overrideItemLayout = (
   layout.size = size;
 };
 
-const getItemType = (item: GitHubRepo) =>
-  item.topics.length > 0 ? 2 : item.description ? 1 : 0;
+const getItemType = (item: GitHubRepo) => (item.topics.length > 0 ? 2 : item.description ? 1 : 0);
 
 export default function ReposScreen() {
   const { colors, isDark } = useTheme();
@@ -72,28 +60,18 @@ export default function ReposScreen() {
   const [sort, setSort] = useState<SortOption>("pushed");
   const [type, setType] = useState<TypeOption>("all");
   const debouncedSearch = useDebounce(search, 300);
-  const { visible: nudgeVisible, dismiss: dismissNudge } =
-    useFirstBookmarkNudge();
+  const { visible: nudgeVisible, dismiss: dismissNudge } = useFirstBookmarkNudge();
 
   const prefetchMap = useRef(new Set<number>());
   const viewportTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const {
-    repos,
-    loadedCount,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-    isLoading,
-    isError,
-  } = useRepos({ search: debouncedSearch, sort, type });
+  const { repos, loadedCount, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, isError } =
+    useRepos({ search: debouncedSearch, sort, type });
 
   const username = useUsername();
   const { data: installations } = useInstallations();
   const partialAccess =
-    !!installations &&
-    !!username &&
-    hasPartialRepoAccess(installations, username);
+    !!installations && !!username && hasPartialRepoAccess(installations, username);
 
   const [refreshing, setRefreshing] = useState(false);
 
@@ -181,26 +159,18 @@ export default function ReposScreen() {
         </>
       ) : debouncedSearch ? (
         <>
-          <Text style={s.emptyTitle}>
-            No results for &quot;{debouncedSearch}&quot;
-          </Text>
-          <Text style={s.emptySubtitle}>
-            Try a different search term or filter
-          </Text>
+          <Text style={s.emptyTitle}>No results for &quot;{debouncedSearch}&quot;</Text>
+          <Text style={s.emptySubtitle}>Try a different search term or filter</Text>
         </>
       ) : type !== "all" ? (
         <>
-          <Text style={s.emptyTitle}>
-            No {type === "forks" ? "forked" : type} repositories
-          </Text>
+          <Text style={s.emptyTitle}>No {type === "forks" ? "forked" : type} repositories</Text>
           <Text style={s.emptySubtitle}>Try changing the type filter</Text>
         </>
       ) : (
         <>
           <Text style={s.emptyTitle}>No repositories yet</Text>
-          <Text style={s.emptySubtitle}>
-            Create a repo on GitHub and it&apos;ll show up here
-          </Text>
+          <Text style={s.emptySubtitle}>Create a repo on GitHub and it&apos;ll show up here</Text>
         </>
       )}
     </View>
@@ -223,56 +193,42 @@ export default function ReposScreen() {
   return (
     <KeyboardAvoid>
       <View style={s.container}>
-      <View style={s.listHeader}>
-        <SearchBar
-          value={search}
-          onChangeText={setSearch}
-          placeholder="Search repositories…"
-        />
-        <RepoFilters
-          sort={sort}
-          type={type}
-          onSortChange={setSort}
-          onTypeChange={setType}
-        />
-        {partialAccess && (
-          <Text
-            style={s.accessHint}
-            onPress={() => Linking.openURL(MANAGE_REPO_ACCESS_URL)}
-          >
-            Shikai can only see some of your repos.{" "}
-            <Text style={s.accessHintLink}>Manage access</Text>
-          </Text>
-        )}
-      </View>
+        <View style={s.listHeader}>
+          <SearchBar value={search} onChangeText={setSearch} placeholder="Search repositories…" />
+          <RepoFilters sort={sort} type={type} onSortChange={setSort} onTypeChange={setType} />
+          {partialAccess && (
+            <Text style={s.accessHint} onPress={() => Linking.openURL(MANAGE_REPO_ACCESS_URL)}>
+              Shikai can only see some of your repos.{" "}
+              <Text style={s.accessHintLink}>Manage access</Text>
+            </Text>
+          )}
+        </View>
 
-      <FirstBookmarkNudge visible={nudgeVisible} onDismiss={dismissNudge} />
+        <FirstBookmarkNudge visible={nudgeVisible} onDismiss={dismissNudge} />
 
-      <FlashList
-        ref={flashListRef}
-        key={listKey}
-        data={repos}
-        renderItem={renderItem}
-        keyExtractor={keyExtractor}
-        contentContainerStyle={s.listContent}
-        ItemSeparatorComponent={ListItemSeparator}
-        ListEmptyComponent={ListEmpty}
-        ListFooterComponent={ListFooter}
-        onEndReached={() => {
-          if (hasNextPage) fetchNextPage();
-        }}
-        onEndReachedThreshold={0.5}
-        onViewableItemsChanged={onViewableItemsChanged}
-        viewabilityConfig={{ itemVisiblePercentThreshold: 50 }}
-        keyboardShouldPersistTaps="handled"
-        refreshControl={
-          <PullToRefresh refreshing={refreshing} onRefresh={onRefresh} />
-        }
-        overrideItemLayout={overrideItemLayout}
-        getItemType={getItemType}
-        removeClippedSubviews
-        drawDistance={400}
-      />
+        <FlashList
+          ref={flashListRef}
+          key={listKey}
+          data={repos}
+          renderItem={renderItem}
+          keyExtractor={keyExtractor}
+          contentContainerStyle={s.listContent}
+          ItemSeparatorComponent={ListItemSeparator}
+          ListEmptyComponent={ListEmpty}
+          ListFooterComponent={ListFooter}
+          onEndReached={() => {
+            if (hasNextPage) fetchNextPage();
+          }}
+          onEndReachedThreshold={0.5}
+          onViewableItemsChanged={onViewableItemsChanged}
+          viewabilityConfig={{ itemVisiblePercentThreshold: 50 }}
+          keyboardShouldPersistTaps="handled"
+          refreshControl={<PullToRefresh refreshing={refreshing} onRefresh={onRefresh} />}
+          overrideItemLayout={overrideItemLayout}
+          getItemType={getItemType}
+          removeClippedSubviews
+          drawDistance={400}
+        />
       </View>
     </KeyboardAvoid>
   );

@@ -1,10 +1,6 @@
 import { reportApiError } from "@/lib/sentry";
 import { useAuthStore } from "@/stores/auth.store";
-import axios, {
-  type AxiosError,
-  type AxiosInstance,
-  type InternalAxiosRequestConfig,
-} from "axios";
+import axios, { type AxiosError, type AxiosInstance, type InternalAxiosRequestConfig } from "axios";
 
 const GITHUB_API_BASE = "https://api.github.com";
 const GITHUB_API_VERSION = "2022-11-28";
@@ -30,9 +26,7 @@ export const rateLimit: RateLimitState = {
 
 export function isRateLimited(): boolean {
   return (
-    rateLimit.remaining === 0 &&
-    rateLimit.reset !== null &&
-    Date.now() < rateLimit.reset.getTime()
+    rateLimit.remaining === 0 && rateLimit.reset !== null && Date.now() < rateLimit.reset.getTime()
   );
 }
 
@@ -106,8 +100,7 @@ githubAxios.interceptors.response.use(
   (error: AxiosError) => {
     const status = error.response?.status;
     const data = error.response?.data as Record<string, unknown> | undefined;
-    const message =
-      (data?.message as string) ?? error.message ?? "Unknown error";
+    const message = (data?.message as string) ?? error.message ?? "Unknown error";
 
     if (status === 401 && authReady && usedSessionToken(error.config)) {
       useAuthStore.getState().clearAuth();

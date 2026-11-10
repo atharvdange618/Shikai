@@ -19,12 +19,8 @@ const link = '<https://api.github.com/next?page=3&per_page=100>; rel="next"';
 describe("PR paging", () => {
   it("pages general conversation and activity without truncating either stream", async () => {
     get.mockResolvedValue({ data: [], headers: { link } });
-    expect(
-      (await fetchIssueComments("org", "repo", 42, 2, 100)).pagination.next,
-    ).toBe(3);
-    expect(
-      (await fetchIssueTimelinePage("org", "repo", 42, 2)).pagination.next,
-    ).toBe(3);
+    expect((await fetchIssueComments("org", "repo", 42, 2, 100)).pagination.next).toBe(3);
+    expect((await fetchIssueTimelinePage("org", "repo", 42, 2)).pagination.next).toBe(3);
     expect(get).toHaveBeenLastCalledWith("/repos/org/repo/issues/42/timeline", {
       params: { page: 2, per_page: 100 },
     });
@@ -33,17 +29,14 @@ describe("PR paging", () => {
     ["commits", fetchPullRequestCommits],
     ["reviews", fetchPullRequestReviews],
     ["comments", fetchPullRequestReviewComments],
-  ] as const)(
-    "requests later %s pages and exposes the next page",
-    async (resource, fetch) => {
-      get.mockResolvedValue({ data: [], headers: { link } });
-      const result = await fetch("org", "repo", 42, 2);
-      expect(get).toHaveBeenCalledWith(`/repos/org/repo/pulls/42/${resource}`, {
-        params: { page: 2, per_page: 100 },
-      });
-      expect(result.pagination.next).toBe(3);
-    },
-  );
+  ] as const)("requests later %s pages and exposes the next page", async (resource, fetch) => {
+    get.mockResolvedValue({ data: [], headers: { link } });
+    const result = await fetch("org", "repo", 42, 2);
+    expect(get).toHaveBeenCalledWith(`/repos/org/repo/pulls/42/${resource}`, {
+      params: { page: 2, per_page: 100 },
+    });
+    expect(result.pagination.next).toBe(3);
+  });
   it("honors the 250 PR commit limit even if GitHub sends a next link", async () => {
     get.mockResolvedValue({
       data: Array.from({ length: 100 }, (_, id) => ({ sha: String(id) })),

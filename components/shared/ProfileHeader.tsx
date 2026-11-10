@@ -70,11 +70,7 @@ export function ProfileHeader({
           />
         ) : (
           <View style={[s.avatar, s.avatarFallback]}>
-            <Octicons
-              name="person"
-              size={IconSize.xxl}
-              color={colors.textMuted}
-            />
+            <Octicons name="person" size={IconSize.xxl} color={colors.textMuted} />
           </View>
         )}
 
@@ -90,19 +86,13 @@ export function ProfileHeader({
             {user?.type === "Organization" && (
               <View style={[s.badge, { backgroundColor: colors.accentSubtle }]}>
                 <Octicons name="organization" size={12} color={colors.accent} />
-                <Text style={[s.badgeText, { color: colors.accent }]}>
-                  Organization
-                </Text>
+                <Text style={[s.badgeText, { color: colors.accent }]}>Organization</Text>
               </View>
             )}
             {user?.hireable && (
-              <View
-                style={[s.badge, { backgroundColor: colors.successSubtle }]}
-              >
+              <View style={[s.badge, { backgroundColor: colors.successSubtle }]}>
                 <View style={s.hireableDot} />
-                <Text style={[s.badgeText, { color: colors.success }]}>
-                  Open to work
-                </Text>
+                <Text style={[s.badgeText, { color: colors.success }]}>Open to work</Text>
               </View>
             )}
           </View>
@@ -155,17 +145,12 @@ function LinkRow({ link, colors }: { link: ProfileLink; colors: ColorTokens }) {
         <Octicons name={link.icon.name} size={15} color={iconColor} />
       )}
       <Text
-        style={[
-          linkStyles.text,
-          { color: link.url ? colors.accent : colors.textSecondary },
-        ]}
+        style={[linkStyles.text, { color: link.url ? colors.accent : colors.textSecondary }]}
         numberOfLines={1}
       >
         {link.text}
       </Text>
-      {link.url && (
-        <Octicons name="link-external" size={12} color={colors.textMuted} />
-      )}
+      {link.url && <Octicons name="link-external" size={12} color={colors.textMuted} />}
     </View>
   );
 

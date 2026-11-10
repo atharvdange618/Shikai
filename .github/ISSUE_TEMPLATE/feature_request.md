@@ -1,10 +1,9 @@
 ---
 name: Feature request
 about: Suggest something Shikai should do
-title: ''
+title: ""
 labels: enhancement
-assignees: ''
-
+assignees: ""
 ---
 
 **What you want to do**

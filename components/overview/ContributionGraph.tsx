@@ -1,12 +1,6 @@
 import { Octicons } from "@expo/vector-icons";
 import { useCallback, useMemo, useRef, useState } from "react";
-import {
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-  type ScrollViewInstance,
-} from "react-native";
+import { ScrollView, StyleSheet, Text, View, type ScrollViewInstance } from "react-native";
 import Svg, { Rect, Text as SvgText } from "react-native-svg";
 
 import {
@@ -105,8 +99,7 @@ export function ContributionGraph({
   // Captured once on mount: the staleness label only needs to know whether
   // the data was already old when this screen opened.
   const [mountedAt] = useState(() => Date.now());
-  const isStale =
-    dataUpdatedAt != null && mountedAt - dataUpdatedAt > 1000 * 60 * 5;
+  const isStale = dataUpdatedAt != null && mountedAt - dataUpdatedAt > 1000 * 60 * 5;
 
   if (isLoading) {
     return <ContributionGraphSkeleton colors={colors} />;
@@ -119,9 +112,7 @@ export function ContributionGraph({
         <View style={s.emptyState}>
           <Octicons name="graph" size={24} color={colors.textMuted} />
           <Text style={s.emptyStateTitle}>No contributions yet</Text>
-          <Text style={s.emptyStateSubtitle}>
-            Start pushing code to see your activity here
-          </Text>
+          <Text style={s.emptyStateSubtitle}>Start pushing code to see your activity here</Text>
         </View>
       </View>
     );
@@ -161,13 +152,9 @@ export function ContributionGraph({
       <View style={s.header}>
         <Text style={s.sectionTitle}>Contributions</Text>
         <View style={s.headerRight}>
-          <Text style={s.totalCount}>
-            {totalContributions.toLocaleString()} this year
-          </Text>
+          <Text style={s.totalCount}>{totalContributions.toLocaleString()} this year</Text>
           {dataUpdatedAt != null && isStale && (
-            <Text style={s.updatedAgo}>
-              Updated {formatRelativeTime(dataUpdatedAt)}
-            </Text>
+            <Text style={s.updatedAgo}>Updated {formatRelativeTime(dataUpdatedAt)}</Text>
           )}
         </View>
       </View>
@@ -180,10 +167,7 @@ export function ContributionGraph({
           {DAY_LABELS.map(({ label, row }) => (
             <View
               key={label}
-              style={[
-                s.dayLabelSlot,
-                { top: MONTH_LABEL_HEIGHT + row * STEP + CELL / 2 - 5 },
-              ]}
+              style={[s.dayLabelSlot, { top: MONTH_LABEL_HEIGHT + row * STEP + CELL / 2 - 5 }]}
             >
               <Text style={s.dayLabel}>{label}</Text>
             </View>
@@ -222,11 +206,7 @@ export function ContributionGraph({
                   height={CELL}
                   rx={2}
                   ry={2}
-                  fill={getContributionColor(
-                    day.contributionLevel,
-                    day.contributionCount,
-                    colors,
-                  )}
+                  fill={getContributionColor(day.contributionLevel, day.contributionCount, colors)}
                 />
               )),
             )}

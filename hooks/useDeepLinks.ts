@@ -45,8 +45,7 @@ export function useDeepLinks(enabled: boolean) {
   const routerRef = useRef(router);
   routerRef.current = router;
 
-  const { hasShareIntent, shareIntent, resetShareIntent } =
-    useShareIntentContext();
+  const { hasShareIntent, shareIntent, resetShareIntent } = useShareIntentContext();
 
   const initialHandled = useRef(false);
 
@@ -94,9 +93,7 @@ export function useDeepLinks(enabled: boolean) {
     if (!enabled || !hasShareIntent) return;
 
     const shared =
-      shareIntent.webUrl ??
-      shareIntent.text?.match(/https?:\/\/\S+/)?.[0] ??
-      shareIntent.text;
+      shareIntent.webUrl ?? shareIntent.text?.match(/https?:\/\/\S+/)?.[0] ?? shareIntent.text;
     if (shared) routeRef.current(shared);
     resetShareIntent();
   }, [enabled, hasShareIntent, shareIntent, resetShareIntent]);

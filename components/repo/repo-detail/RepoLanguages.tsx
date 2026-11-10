@@ -1,12 +1,7 @@
 import { StyleSheet, Text, View } from "react-native";
 
 import { LanguageBar } from "@/components/repo/LanguageBar";
-import {
-  FontFamily,
-  FontSize,
-  Spacing,
-  type ColorTokens,
-} from "@/constants/theme";
+import { FontFamily, FontSize, Spacing, type ColorTokens } from "@/constants/theme";
 import type { LanguageShare } from "@/types/github.types";
 
 import { formatBytes } from "./repo-detail-helpers";
@@ -17,11 +12,7 @@ interface RepoLanguagesProps {
   colors: ColorTokens;
 }
 
-export function RepoLanguages({
-  languages,
-  isLoading,
-  colors,
-}: RepoLanguagesProps) {
+export function RepoLanguages({ languages, isLoading, colors }: RepoLanguagesProps) {
   const s = buildStyles(colors);
   const totalBytes = languages.reduce((sum, l) => sum + l.bytes, 0);
 

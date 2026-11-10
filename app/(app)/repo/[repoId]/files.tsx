@@ -3,24 +3,12 @@ import { FlashList, type FlashListRef } from "@shopify/flash-list";
 import { useQueryClient } from "@tanstack/react-query";
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import {
-  ActivityIndicator,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { BranchSelector } from "@/components/repo/BranchSelector";
 import { SearchBar } from "@/components/shared/SearchBar";
-import {
-  type ColorTokens,
-  FontFamily,
-  FontSize,
-  Spacing,
-  useTheme,
-} from "@/constants/theme";
+import { type ColorTokens, FontFamily, FontSize, Spacing, useTheme } from "@/constants/theme";
 import { useBranches, useFileTree, useRepo } from "@/hooks/useRepoDetails";
 import { prefetchCommonFiles, prefetchFileContent } from "@/lib/prefetch";
 import { decodeRepoId } from "@/lib/utils";
@@ -172,10 +160,7 @@ export default function FileExplorerScreen() {
   const [pendingScrollPath, setPendingScrollPath] = useState(targetPath);
 
   const { data: repo } = useRepo(owner, repoName);
-  const { data: branches, isLoading: branchesLoading } = useBranches(
-    owner,
-    repoName,
-  );
+  const { data: branches, isLoading: branchesLoading } = useBranches(owner, repoName);
 
   // Default to the repo's default branch until the user picks one. Set
   // during render, not in an effect, so it never cascades an extra render.
@@ -194,19 +179,10 @@ export default function FileExplorerScreen() {
     }
   }, [navigation, repo?.name]);
 
-  const { data: fileTreeData, isLoading } = useFileTree(
-    owner,
-    repoName,
-    selectedBranch,
-    true,
-  );
+  const { data: fileTreeData, isLoading } = useFileTree(owner, repoName, selectedBranch, true);
 
   useEffect(() => {
-    if (
-      fileTreeData?.tree &&
-      fileTreeData.tree.length > 0 &&
-      !commonFilesPrefetched.current
-    ) {
+    if (fileTreeData?.tree && fileTreeData.tree.length > 0 && !commonFilesPrefetched.current) {
       commonFilesPrefetched.current = true;
       prefetchCommonFiles(queryClient, owner, repoName, fileTreeData.tree);
     }
@@ -243,10 +219,7 @@ export default function FileExplorerScreen() {
     [queryClient, owner, repoName],
   );
 
-  const tree = useMemo(
-    () => buildTree(fileTreeData?.tree ?? []),
-    [fileTreeData?.tree],
-  );
+  const tree = useMemo(() => buildTree(fileTreeData?.tree ?? []), [fileTreeData?.tree]);
 
   const flattenedTree = useMemo(() => {
     const result: FlatTreeItem[] = [];
@@ -274,10 +247,7 @@ export default function FileExplorerScreen() {
 
     function traverse(nodes: TreeNode[]) {
       for (const node of nodes) {
-        if (
-          node.name.toLowerCase().includes(query) ||
-          node.path.toLowerCase().includes(query)
-        ) {
+        if (node.name.toLowerCase().includes(query) || node.path.toLowerCase().includes(query)) {
           results.push({ node, depth: 0, isExpanded: false });
         }
         if (node.children) traverse(node.children);
@@ -293,9 +263,7 @@ export default function FileExplorerScreen() {
   // tick so the scroll doesn't repeat.
   useEffect(() => {
     if (!pendingScrollPath) return;
-    const index = displayTree.findIndex(
-      (item) => item.node.path === pendingScrollPath,
-    );
+    const index = displayTree.findIndex((item) => item.node.path === pendingScrollPath);
     if (index === -1) return;
     listRef.current?.scrollToIndex({ index, animated: true, viewPosition: 0.3 });
     const id = setTimeout(() => setPendingScrollPath(undefined), 0);
@@ -347,9 +315,7 @@ export default function FileExplorerScreen() {
         </View>
       ) : displayTree.length === 0 ? (
         <View style={s.loadingContainer}>
-          <Text style={s.loadingText}>
-            No results for &ldquo;{searchQuery}&rdquo;
-          </Text>
+          <Text style={s.loadingText}>No results for &ldquo;{searchQuery}&rdquo;</Text>
         </View>
       ) : (
         <FlashList

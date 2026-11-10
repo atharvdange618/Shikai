@@ -21,13 +21,8 @@ export default function UserLayout() {
   };
 
   return (
-    <Stack
-      screenOptions={{ contentStyle: { backgroundColor: colors.background } }}
-    >
-      <Stack.Screen
-        name="[username]/index"
-        options={{ ...sharedHeaderOptions, title: "" }}
-      />
+    <Stack screenOptions={{ contentStyle: { backgroundColor: colors.background } }}>
+      <Stack.Screen name="[username]/index" options={{ ...sharedHeaderOptions, title: "" }} />
       <Stack.Screen
         name="[username]/repos"
         options={{ ...sharedHeaderOptions, title: "Repositories" }}
@@ -40,10 +35,7 @@ export default function UserLayout() {
         name="[username]/following"
         options={{ ...sharedHeaderOptions, title: "Following" }}
       />
-      <Stack.Screen
-        name="[username]/gists"
-        options={{ ...sharedHeaderOptions, title: "Gists" }}
-      />
+      <Stack.Screen name="[username]/gists" options={{ ...sharedHeaderOptions, title: "Gists" }} />
       <Stack.Screen
         name="[username]/gist/[id]"
         options={{ ...sharedHeaderOptions, title: "Gist" }}

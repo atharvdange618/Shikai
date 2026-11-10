@@ -59,11 +59,7 @@ function ReleaseDetailScreenContent() {
 
   const [owner, repoName] = decodeRepoId(repoId ?? "");
 
-  const { data: release, isLoading, isError } = useRelease(
-    owner,
-    repoName,
-    tag ?? "",
-  );
+  const { data: release, isLoading, isError } = useRelease(owner, repoName, tag ?? "");
 
   // Best-effort: only resolves if the previous tag is in the loaded pages.
   const { releases } = useReleases(owner, repoName);
@@ -99,9 +95,7 @@ function ReleaseDetailScreenContent() {
     return (
       <View style={[s.centered, { backgroundColor: colors.background }]}>
         <Octicons name="alert" size={IconSize.xl} color={colors.danger} />
-        <Text style={[s.emptyTitle, { color: colors.textSecondary }]}>
-          Failed to load release
-        </Text>
+        <Text style={[s.emptyTitle, { color: colors.textSecondary }]}>Failed to load release</Text>
       </View>
     );
   }
@@ -127,21 +121,15 @@ function ReleaseDetailScreenContent() {
             contentFit="cover"
             transition={100}
           />
-          <Text style={[s.authorName, { color: colors.textPrimary }]}>
-            {release.author.login}
-          </Text>
-          <Text style={[s.metaText, { color: colors.textMuted }]}>
-            released this
-          </Text>
+          <Text style={[s.authorName, { color: colors.textPrimary }]}>{release.author.login}</Text>
+          <Text style={[s.metaText, { color: colors.textMuted }]}>released this</Text>
         </View>
       )}
 
       <View style={s.metaRow}>
         {release.prerelease && (
           <View style={[s.badge, { backgroundColor: colors.surfaceSecondary }]}>
-            <Text style={[s.badgeText, { color: colors.warning }]}>
-              Pre-release
-            </Text>
+            <Text style={[s.badgeText, { color: colors.warning }]}>Pre-release</Text>
           </View>
         )}
         <Text style={[s.metaText, { color: colors.textMuted }]}>
@@ -164,36 +152,21 @@ function ReleaseDetailScreenContent() {
           }
         >
           <Octicons name="git-compare" size={14} color={colors.accent} />
-          <Text style={[s.compareText, { color: colors.accent }]}>
-            Compare to {prevTag}
-          </Text>
+          <Text style={[s.compareText, { color: colors.accent }]}>Compare to {prevTag}</Text>
         </Pressable>
       )}
 
       {release.body?.trim() ? (
         <View
-          style={[
-            s.bodySection,
-            { backgroundColor: colors.surface, borderColor: colors.border },
-          ]}
+          style={[s.bodySection, { backgroundColor: colors.surface, borderColor: colors.border }]}
         >
-          <MarkdownRenderer
-            markdown={release.body}
-            context={`${owner}/${repoName}`}
-          />
+          <MarkdownRenderer markdown={release.body} context={`${owner}/${repoName}`} />
         </View>
       ) : (
-        <Text style={[s.metaText, { color: colors.textMuted }]}>
-          No release notes.
-        </Text>
+        <Text style={[s.metaText, { color: colors.textMuted }]}>No release notes.</Text>
       )}
 
-      <View
-        style={[
-          s.card,
-          { backgroundColor: colors.surface, borderColor: colors.border },
-        ]}
-      >
+      <View style={[s.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
         <Text style={[s.cardHeader, { color: colors.textPrimary }]}>
           Assets ({release.assets.length + sourceTargets.length})
         </Text>
@@ -229,11 +202,7 @@ function ReleaseDetailScreenContent() {
 
       <View style={{ height: Spacing.xxl + 60 + Spacing.lg }} />
 
-      <AssetActionMenu
-        target={menuTarget}
-        colors={colors}
-        onClose={() => setMenuTarget(null)}
-      />
+      <AssetActionMenu target={menuTarget} colors={colors} onClose={() => setMenuTarget(null)} />
     </ScrollView>
   );
 }
@@ -264,15 +233,10 @@ function AssetRow({
     >
       <Octicons name={icon} size={14} color={colors.textMuted} />
       <View style={{ flex: 1, gap: 2 }}>
-        <Text
-          style={[s.assetName, { color: colors.textPrimary }]}
-          numberOfLines={1}
-        >
+        <Text style={[s.assetName, { color: colors.textPrimary }]} numberOfLines={1}>
           {name}
         </Text>
-        {meta ? (
-          <Text style={[s.assetMeta, { color: colors.textMuted }]}>{meta}</Text>
-        ) : null}
+        {meta ? <Text style={[s.assetMeta, { color: colors.textMuted }]}>{meta}</Text> : null}
       </View>
       <Pressable
         onPress={onMenu}
@@ -329,13 +293,7 @@ function AssetActionMenu({
   };
 
   return (
-    <Modal
-      visible
-      transparent
-      animationType="none"
-      statusBarTranslucent
-      onRequestClose={onClose}
-    >
+    <Modal visible transparent animationType="none" statusBarTranslucent onRequestClose={onClose}>
       <Animated.View
         entering={FadeIn.duration(150)}
         exiting={FadeOut.duration(120)}
@@ -354,10 +312,7 @@ function AssetActionMenu({
             },
           ]}
         >
-          <Text
-            style={[s.menuHeader, { color: colors.textMuted }]}
-            numberOfLines={1}
-          >
+          <Text style={[s.menuHeader, { color: colors.textMuted }]} numberOfLines={1}>
             {target.name}
           </Text>
           <Pressable
@@ -368,9 +323,7 @@ function AssetActionMenu({
             onPress={() => run(() => Share.share({ message: target.url }))}
           >
             <Octicons name="share" size={16} color={colors.textSecondary} />
-            <Text style={[s.menuRowText, { color: colors.textPrimary }]}>
-              Share
-            </Text>
+            <Text style={[s.menuRowText, { color: colors.textPrimary }]}>Share</Text>
           </Pressable>
           <Pressable
             style={({ pressed }) => [
@@ -384,12 +337,7 @@ function AssetActionMenu({
               size={16}
               color={copied ? colors.success : colors.textSecondary}
             />
-            <Text
-              style={[
-                s.menuRowText,
-                { color: copied ? colors.success : colors.textPrimary },
-              ]}
-            >
+            <Text style={[s.menuRowText, { color: copied ? colors.success : colors.textPrimary }]}>
               {copied ? "Copied" : "Copy link"}
             </Text>
           </Pressable>
@@ -401,9 +349,7 @@ function AssetActionMenu({
             onPress={() => run(() => Linking.openURL(target.url))}
           >
             <Octicons name="download" size={16} color={colors.textSecondary} />
-            <Text style={[s.menuRowText, { color: colors.textPrimary }]}>
-              Download
-            </Text>
+            <Text style={[s.menuRowText, { color: colors.textPrimary }]}>Download</Text>
           </Pressable>
         </Animated.View>
       </Animated.View>

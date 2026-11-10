@@ -64,11 +64,7 @@ export function useContributions() {
       i--;
     }
 
-    if (
-      i >= 0 &&
-      allDays[i].date === todayStr &&
-      allDays[i].contributionCount === 0
-    ) {
+    if (i >= 0 && allDays[i].date === todayStr && allDays[i].contributionCount === 0) {
       i--;
     }
 

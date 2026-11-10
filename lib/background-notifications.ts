@@ -76,10 +76,7 @@ useAuthStore.subscribe((next, prev) => {
   if (lostAlertsAccess(prev, next)) void disableAlerts();
 });
 
-async function postAlerts(
-  alerts: NotificationAlert[],
-  overflow: number,
-): Promise<void> {
+async function postAlerts(alerts: NotificationAlert[], overflow: number): Promise<void> {
   for (const alert of alerts) {
     await Notifications.scheduleNotificationAsync({
       content: {

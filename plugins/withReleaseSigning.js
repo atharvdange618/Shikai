@@ -26,7 +26,7 @@ module.exports = function withReleaseSigning(config) {
     const debugConfig = /(signingConfigs\s*\{\s*debug\s*\{[^}]+\}\s*)/;
     if (!buildType.test(contents) || !debugConfig.test(contents)) {
       throw new Error(
-        "withReleaseSigning: couldn't find the debug signingConfig or the release build type in build.gradle. Expo's template changed; update this plugin."
+        "withReleaseSigning: couldn't find the debug signingConfig or the release build type in build.gradle. Expo's template changed; update this plugin.",
       );
     }
 

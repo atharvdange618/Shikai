@@ -1,13 +1,7 @@
 import { Octicons } from "@expo/vector-icons";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
-import {
-  FontFamily,
-  FontSize,
-  Radius,
-  Spacing,
-  type ColorTokens,
-} from "@/constants/theme";
+import { FontFamily, FontSize, Radius, Spacing, type ColorTokens } from "@/constants/theme";
 import { formatCount } from "@/lib/utils";
 
 interface RepoStatsProps {
@@ -136,11 +130,7 @@ function StatItem({
       accessibilityRole={onPress ? "button" : undefined}
       accessibilityLabel={`${formatCount(value)} ${label}`}
     >
-      <Octicons
-        name={icon}
-        size={14}
-        color={iconColor ?? colors.textSecondary}
-      />
+      <Octicons name={icon} size={14} color={iconColor ?? colors.textSecondary} />
       <Text
         style={{
           fontFamily: FontFamily.semiBold,

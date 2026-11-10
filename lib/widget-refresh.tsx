@@ -2,10 +2,7 @@ import React from "react";
 
 import { requestWidgetUpdate } from "react-native-android-widget";
 import { themes, type ThemeName } from "../constants/themes";
-import {
-  ContributionWidget,
-  type WidgetThemeColors,
-} from "../widgets/ContributionWidget";
+import { ContributionWidget, type WidgetThemeColors } from "../widgets/ContributionWidget";
 import { fetchContributionsForWidget } from "./widget-data";
 
 export function colorsForTheme(themeName: ThemeName): WidgetThemeColors {

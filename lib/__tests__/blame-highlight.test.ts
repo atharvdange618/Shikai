@@ -8,9 +8,7 @@ describe("tokenizeLine", () => {
   });
 
   it("tags a line comment as one token", () => {
-    expect(tokenizeLine("// a note")).toEqual([
-      { text: "// a note", kind: "comment" },
-    ]);
+    expect(tokenizeLine("// a note")).toEqual([{ text: "// a note", kind: "comment" }]);
   });
 
   it("tags a quoted string, leaving surrounding code plain", () => {

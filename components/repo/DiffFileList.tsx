@@ -1,21 +1,9 @@
-import {
-  type ColorTokens,
-  FontFamily,
-  FontSize,
-  Radius,
-  Spacing,
-} from "@/constants/theme";
+import { type ColorTokens, FontFamily, FontSize, Radius, Spacing } from "@/constants/theme";
 import type { GitHubPullRequestFile } from "@/types/github.types";
 import { Octicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useMemo, useState } from "react";
-import {
-  ActivityIndicator,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
 
 import { DiffStat, getFileStatusDisplay } from "@/components/repo/DiffStat";
 
@@ -55,10 +43,8 @@ export function DiffFileList({
   const [sectionExpanded, setSectionExpanded] = useState(false);
 
   const fileCount = totals?.files ?? files.length;
-  const totalAdditions =
-    totals?.additions ?? files.reduce((sum, f) => sum + f.additions, 0);
-  const totalDeletions =
-    totals?.deletions ?? files.reduce((sum, f) => sum + f.deletions, 0);
+  const totalAdditions = totals?.additions ?? files.reduce((sum, f) => sum + f.additions, 0);
+  const totalDeletions = totals?.deletions ?? files.reduce((sum, f) => sum + f.deletions, 0);
 
   const openFile = (filename: string) => {
     router.push({
@@ -73,19 +59,12 @@ export function DiffFileList({
   };
 
   return (
-    <View
-      style={[s.card, { backgroundColor: colors.surface, borderColor: colors.border }]}
-    >
-      <Pressable
-        style={s.sectionHeader}
-        onPress={() => setSectionExpanded((v) => !v)}
-      >
+    <View style={[s.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+      <Pressable style={s.sectionHeader} onPress={() => setSectionExpanded((v) => !v)}>
         <Text style={[s.sectionTitle, { color: colors.textPrimary }]}>
           {fileCount} file{fileCount === 1 ? "" : "s"} changed
         </Text>
-        <View
-          style={{ flexDirection: "row", alignItems: "center", gap: Spacing.sm }}
-        >
+        <View style={{ flexDirection: "row", alignItems: "center", gap: Spacing.sm }}>
           <DiffStat additions={totalAdditions} deletions={totalDeletions} />
           <Octicons
             name={sectionExpanded ? "chevron-up" : "chevron-down"}
@@ -108,10 +87,7 @@ export function DiffFileList({
               accessibilityLabel={`${file.filename}, ${file.additions} additions, ${file.deletions} deletions`}
             >
               <Octicons name={display.icon} size={14} color={display.color} />
-              <Text
-                style={[s.rowText, { color: colors.textPrimary }]}
-                numberOfLines={1}
-              >
+              <Text style={[s.rowText, { color: colors.textPrimary }]} numberOfLines={1}>
                 {file.filename}
               </Text>
               <DiffStat additions={file.additions} deletions={file.deletions} />

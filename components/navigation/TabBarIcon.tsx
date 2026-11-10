@@ -2,11 +2,7 @@ import { Octicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { useEffect } from "react";
 import type { ColorValue } from "react-native";
-import Animated, {
-  useAnimatedStyle,
-  useSharedValue,
-  withSpring,
-} from "react-native-reanimated";
+import Animated, { useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
 
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 
@@ -32,13 +28,7 @@ interface TabBarIconProps {
   focused: boolean;
 }
 
-export function TabBarIcon({
-  name,
-  filledName,
-  color,
-  size,
-  focused,
-}: TabBarIconProps) {
+export function TabBarIcon({ name, filledName, color, size, focused }: TabBarIconProps) {
   const reducedMotion = useReducedMotion();
   const scale = useSharedValue(focused ? 1.1 : 1.0);
 
@@ -47,7 +37,9 @@ export function TabBarIcon({
       Haptics.selectionAsync();
     }
     scale.value = reducedMotion
-      ? focused ? 1.1 : 1.0
+      ? focused
+        ? 1.1
+        : 1.0
       : withSpring(focused ? 1.1 : 1.0, {
           damping: 15,
           stiffness: 300,

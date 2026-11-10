@@ -8,9 +8,7 @@ export function useOnlineManager() {
   useEffect(() => {
     return NetInfo.addEventListener((state: NetInfoState) => {
       const online =
-        state.isConnected != null &&
-        state.isConnected &&
-        Boolean(state.isInternetReachable);
+        state.isConnected != null && state.isConnected && Boolean(state.isInternetReachable);
       setIsOnline(online);
       onlineManager.setOnline(online);
     });

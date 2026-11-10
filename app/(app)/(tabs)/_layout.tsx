@@ -6,13 +6,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { TabBarIcon } from "@/components/navigation/TabBarIcon";
-import {
-  BorderWidth,
-  FontFamily,
-  Layout,
-  Spacing,
-  useTheme,
-} from "@/constants/theme";
+import { BorderWidth, FontFamily, Layout, Spacing, useTheme } from "@/constants/theme";
 import { useNotifications } from "@/hooks/useNotifications";
 import { useUser } from "@/hooks/useUser";
 import { prefetchOverview, prefetchProfile } from "@/lib/prefetch";
@@ -26,15 +20,7 @@ const renderOverviewIcon = ({
   color: ColorValue;
   size: number;
   focused: boolean;
-}) => (
-  <TabBarIcon
-    name="home"
-    filledName="home-fill"
-    color={color}
-    size={size}
-    focused={focused}
-  />
-);
+}) => <TabBarIcon name="home" filledName="home-fill" color={color} size={size} focused={focused} />;
 
 const renderReposIcon = ({
   color,
@@ -64,15 +50,7 @@ const renderNotificationsIcon = ({
   color: ColorValue;
   size: number;
   focused: boolean;
-}) => (
-  <TabBarIcon
-    name="bell"
-    filledName="bell-fill"
-    color={color}
-    size={size}
-    focused={focused}
-  />
-);
+}) => <TabBarIcon name="bell" filledName="bell-fill" color={color} size={size} focused={focused} />;
 
 const renderProfileIcon = ({
   color,
@@ -83,13 +61,7 @@ const renderProfileIcon = ({
   size: number;
   focused: boolean;
 }) => (
-  <TabBarIcon
-    name="person"
-    filledName="person-fill"
-    color={color}
-    size={size}
-    focused={focused}
-  />
+  <TabBarIcon name="person" filledName="person-fill" color={color} size={size} focused={focused} />
 );
 
 export default function TabsLayout() {
@@ -101,10 +73,7 @@ export default function TabsLayout() {
   const pat = useAuthStore((s) => s.pat);
 
   const { notifications } = useNotifications(Boolean(pat));
-  const unreadCount = useMemo(
-    () => notifications.filter((n) => n.unread).length,
-    [notifications],
-  );
+  const unreadCount = useMemo(() => notifications.filter((n) => n.unread).length, [notifications]);
 
   useEffect(() => {
     prefetchProfile(queryClient);
@@ -171,12 +140,7 @@ export default function TabsLayout() {
             options={{
               title: "Notifications",
               tabBarIcon: renderNotificationsIcon,
-              tabBarBadge:
-                unreadCount > 0
-                  ? unreadCount > 99
-                    ? "99+"
-                    : unreadCount
-                  : undefined,
+              tabBarBadge: unreadCount > 0 ? (unreadCount > 99 ? "99+" : unreadCount) : undefined,
               href: pat ? undefined : null,
             }}
           />

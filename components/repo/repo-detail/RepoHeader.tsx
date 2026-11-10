@@ -50,12 +50,7 @@ export function RepoHeader({
     <View style={s.headerCard}>
       <Pressable onPress={onOwnerPress} hitSlop={8}>
         {({ pressed }) => (
-          <Text
-            style={[
-              s.ownerText,
-              pressed && { color: colors.accent, opacity: 0.7 },
-            ]}
-          >
+          <Text style={[s.ownerText, pressed && { color: colors.accent, opacity: 0.7 }]}>
             {owner}
           </Text>
         )}
@@ -74,9 +69,7 @@ export function RepoHeader({
               },
             ]}
           >
-            <Text style={[s.badgeText, { color: colors.badgeForkText }]}>
-              Fork
-            </Text>
+            <Text style={[s.badgeText, { color: colors.badgeForkText }]}>Fork</Text>
           </View>
         )}
         {repo && (
@@ -84,12 +77,8 @@ export function RepoHeader({
             style={[
               s.badge,
               {
-                backgroundColor: repo.private
-                  ? colors.badgePrivateBg
-                  : colors.badgePublicBg,
-                borderColor: repo.private
-                  ? colors.border
-                  : colors.successSubtle,
+                backgroundColor: repo.private ? colors.badgePrivateBg : colors.badgePublicBg,
+                borderColor: repo.private ? colors.border : colors.successSubtle,
               },
             ]}
           >
@@ -97,9 +86,7 @@ export function RepoHeader({
               style={[
                 s.badgeText,
                 {
-                  color: repo.private
-                    ? colors.badgePrivateText
-                    : colors.badgePublicText,
+                  color: repo.private ? colors.badgePrivateText : colors.badgePublicText,
                 },
               ]}
             >

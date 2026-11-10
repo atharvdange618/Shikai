@@ -31,9 +31,7 @@ describe("patchMainActivity", () => {
     expect(patched).toContain("intent = intent?.setData(null)");
     // expo-linking copies intent.data in its onCreate, which runs inside
     // super.onCreate, so the block has to come first.
-    expect(patched.indexOf(GUARD)).toBeLessThan(
-      patched.indexOf("super.onCreate("),
-    );
+    expect(patched.indexOf(GUARD)).toBeLessThan(patched.indexOf("super.onCreate("));
   });
 
   it("keeps the indentation of the method body", () => {

@@ -15,13 +15,7 @@ import { decodeRepoId } from "@/lib/utils";
 import { Octicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useNavigation } from "expo-router";
 import { useEffect } from "react";
-import {
-  ActivityIndicator,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from "react-native";
 
 export default function CompareScreen() {
   return (
@@ -42,12 +36,7 @@ function CompareScreenContent() {
 
   const [owner, repoName] = decodeRepoId(repoId ?? "");
 
-  const { data, isLoading, isError } = useComparison(
-    owner,
-    repoName,
-    base ?? "",
-    head ?? "",
-  );
+  const { data, isLoading, isError } = useComparison(owner, repoName, base ?? "", head ?? "");
 
   useEffect(() => {
     try {
@@ -85,10 +74,7 @@ function CompareScreenContent() {
     >
       <View style={s.refRow}>
         <Octicons name="git-compare" size={20} color={colors.textMuted} />
-        <Text
-          style={[s.refText, { color: colors.textPrimary }]}
-          numberOfLines={2}
-        >
+        <Text style={[s.refText, { color: colors.textPrimary }]} numberOfLines={2}>
           {base} <Text style={{ color: colors.textMuted }}>…</Text> {head}
         </Text>
       </View>
@@ -105,10 +91,7 @@ function CompareScreenContent() {
 
       {data.status === "identical" || data.total_commits === 0 ? (
         <View
-          style={[
-            s.bodySection,
-            { backgroundColor: colors.surface, borderColor: colors.border },
-          ]}
+          style={[s.bodySection, { backgroundColor: colors.surface, borderColor: colors.border }]}
         >
           <Text style={[s.metaText, { color: colors.textMuted }]}>
             {head} is up to date with {base}. Nothing to compare.
@@ -117,11 +100,7 @@ function CompareScreenContent() {
       ) : (
         <>
           {data.commits.length > 0 && (
-            <DiffCommitList
-              commits={data.commits}
-              colors={colors}
-              repoId={repoId ?? ""}
-            />
+            <DiffCommitList commits={data.commits} colors={colors} repoId={repoId ?? ""} />
           )}
           {data.files.length > 0 && (
             <DiffFileList

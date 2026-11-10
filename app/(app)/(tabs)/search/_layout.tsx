@@ -6,9 +6,7 @@ export default function SearchLayout() {
   const { colors } = useTheme();
 
   return (
-    <Stack
-      screenOptions={{ contentStyle: { backgroundColor: colors.background } }}
-    >
+    <Stack screenOptions={{ contentStyle: { backgroundColor: colors.background } }}>
       <Stack.Screen
         name="index"
         options={{

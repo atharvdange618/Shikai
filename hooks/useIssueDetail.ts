@@ -1,8 +1,4 @@
-import {
-  fetchIssue,
-  fetchIssueComments,
-  fetchIssueTimeline,
-} from "@/lib/github-rest";
+import { fetchIssue, fetchIssueComments, fetchIssueTimeline } from "@/lib/github-rest";
 import { queryKeys } from "@/lib/query-client";
 import { queryOptions, useQuery } from "@tanstack/react-query";
 

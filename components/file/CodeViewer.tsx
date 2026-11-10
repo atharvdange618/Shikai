@@ -9,13 +9,7 @@ import {
   useRef,
   useState,
 } from "react";
-import {
-  ActivityIndicator,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
 import { WebView } from "react-native-webview";
 
 import {
@@ -56,15 +50,9 @@ interface CodeViewerProps {
 }
 
 type Highlighted =
-  | { kind: "file"; file: HighlightedFile }
-  | { kind: "diff"; diff: HighlightedDiff };
+  { kind: "file"; file: HighlightedFile } | { kind: "diff"; diff: HighlightedDiff };
 
-export function CodeViewer({
-  content,
-  fileName,
-  targetLine,
-  diff = false,
-}: CodeViewerProps) {
+export function CodeViewer({ content, fileName, targetLine, diff = false }: CodeViewerProps) {
   const { colors, syntaxTheme } = useTheme();
   const s = useMemo(() => buildStyles(colors), [colors]);
   const webViewRef = useRef<WebViewHandle>(null);

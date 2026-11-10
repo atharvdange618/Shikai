@@ -2,13 +2,7 @@ import { Octicons } from "@expo/vector-icons";
 import { useQueryClient } from "@tanstack/react-query";
 import { type Href, useRouter } from "expo-router";
 import { useCallback, useMemo, useRef, useState } from "react";
-import {
-  ActivityIndicator,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
 
 import { FlashList } from "@shopify/flash-list";
 import { Image } from "expo-image";
@@ -64,9 +58,7 @@ function EventItem({
           <Text style={s.time}>{compactTimeAgo(event.created_at)}</Text>
         </View>
         <View style={s.eventRow}>
-          <View
-            style={[s.iconBadge, { backgroundColor: display.iconColor + "20" }]}
-          >
+          <View style={[s.iconBadge, { backgroundColor: display.iconColor + "20" }]}>
             <Octicons name={display.icon} size={12} color={display.iconColor} />
           </View>
           <Text style={s.eventText} numberOfLines={2}>
@@ -142,15 +134,8 @@ export default function FollowingFeedScreen() {
   const queryClient = useQueryClient();
   const [refreshing, setRefreshing] = useState(false);
 
-  const {
-    events,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-    isLoading,
-    isError,
-    error,
-  } = useReceivedEvents();
+  const { events, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, isError, error } =
+    useReceivedEvents();
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -219,9 +204,7 @@ export default function FollowingFeedScreen() {
         <View style={s.emptyContainer}>
           <Octicons name="people" size={48} color={colors.textMuted} />
           <Text style={s.emptyTitle}>No activity yet</Text>
-          <Text style={s.emptySubtitle}>
-            Follow users on GitHub to see their activity here
-          </Text>
+          <Text style={s.emptySubtitle}>Follow users on GitHub to see their activity here</Text>
         </View>
       ) : (
         <FlashList
@@ -240,9 +223,7 @@ export default function FollowingFeedScreen() {
           onEndReachedThreshold={0.5}
           removeClippedSubviews
           drawDistance={400}
-          refreshControl={
-            <PullToRefresh refreshing={refreshing} onRefresh={onRefresh} />
-          }
+          refreshControl={<PullToRefresh refreshing={refreshing} onRefresh={onRefresh} />}
           contentContainerStyle={s.listContent}
         />
       )}

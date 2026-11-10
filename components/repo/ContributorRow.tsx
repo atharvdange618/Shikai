@@ -2,12 +2,7 @@ import { Image } from "expo-image";
 import { useMemo } from "react";
 import { StyleSheet, Text, View } from "react-native";
 
-import {
-  AvatarSize,
-  type ColorTokens,
-  FontFamily,
-  useTheme,
-} from "@/constants/theme";
+import { AvatarSize, type ColorTokens, FontFamily, useTheme } from "@/constants/theme";
 import type { GitHubContributor } from "@/types/github.types";
 
 const MAX_SHOWN = 8;
@@ -19,10 +14,7 @@ interface ContributorRowProps {
   isLoading?: boolean;
 }
 
-export function ContributorRow({
-  contributors,
-  isLoading = false,
-}: ContributorRowProps) {
+export function ContributorRow({ contributors, isLoading = false }: ContributorRowProps) {
   const { colors } = useTheme();
   const s = useMemo(() => buildStyles(colors), [colors]);
 
@@ -55,24 +47,14 @@ export function ContributorRow({
         <Image
           key={contributor.id}
           source={{ uri: contributor.avatar_url }}
-          style={[
-            s.avatar,
-            i > 0 && { marginLeft: -OVERLAP },
-            { zIndex: MAX_SHOWN - i },
-          ]}
+          style={[s.avatar, i > 0 && { marginLeft: -OVERLAP }, { zIndex: MAX_SHOWN - i }]}
           contentFit="cover"
           transition={150}
         />
       ))}
 
       {overflow > 0 && (
-        <View
-          style={[
-            s.avatar,
-            s.overflowBadge,
-            { marginLeft: -OVERLAP, zIndex: 0 },
-          ]}
-        >
+        <View style={[s.avatar, s.overflowBadge, { marginLeft: -OVERLAP, zIndex: 0 }]}>
           <Text style={s.overflowText}>+{overflow}</Text>
         </View>
       )}

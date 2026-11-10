@@ -31,32 +31,20 @@ function Thread() {
   useEffect(() => {
     if (hasNextPage && !isFetchingNextPage && !isError) void fetchNextPage();
   }, [hasNextPage, isFetchingNextPage, isError, fetchNextPage]);
-  const thread = buildThreads(query.comments).find(
-    (item) => item.root.id === Number(threadId),
-  );
+  const thread = buildThreads(query.comments).find((item) => item.root.id === Number(threadId));
   return (
     <>
       <PRHeader title="Review thread" repoId={repoId} number={number} />
-      <ScrollView
-        style={{ backgroundColor: colors.background }}
-        contentContainerStyle={s.content}
-      >
+      <ScrollView style={{ backgroundColor: colors.background }} contentContainerStyle={s.content}>
         {thread && (
-          <ReviewThreadList
-            reviewComments={[thread.root, ...thread.replies]}
-            colors={colors}
-          />
+          <ReviewThreadList reviewComments={[thread.root, ...thread.replies]} colors={colors} />
         )}
         {query.hasNextPage && (
           <Text style={[s.meta, { color: colors.textSecondary }]}>
             Loading remaining comments and replies…
           </Text>
         )}
-        <PRPageState
-          {...query}
-          count={thread ? 1 : 0}
-          emptyText="Thread not found"
-        />
+        <PRPageState {...query} count={thread ? 1 : 0} emptyText="Thread not found" />
       </ScrollView>
     </>
   );

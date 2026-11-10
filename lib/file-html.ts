@@ -3,11 +3,7 @@ import type { HighlightTheme } from "@tanstack/highlight/theme";
 import { createThemeRule, themeTokenClasses } from "@tanstack/highlight/theme";
 
 import type { ColorTokens } from "@/constants/themes";
-import type {
-  DiffLineKind,
-  HighlightedDiff,
-  HighlightedFile,
-} from "@/lib/highlight";
+import type { DiffLineKind, HighlightedDiff, HighlightedFile } from "@/lib/highlight";
 
 // Page builders for the file viewers' WebViews. Kept out of the components so
 // Vitest can check them without React Native.
@@ -64,10 +60,7 @@ export function buildDiffHtml(
   colors: ColorTokens,
   syntaxTheme: HighlightTheme,
 ): string {
-  const maxLine = diff.lines.reduce(
-    (max, l) => Math.max(max, l.oldLine ?? 0, l.newLine ?? 0),
-    0,
-  );
+  const maxLine = diff.lines.reduce((max, l) => Math.max(max, l.oldLine ?? 0, l.newLine ?? 0), 0);
   const col = `${String(maxLine).length}ch`;
   const body = diff.lines
     .map((line) => {

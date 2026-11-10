@@ -1,11 +1,6 @@
 import { FlashList, type FlashListProps } from "@shopify/flash-list";
 import { useCallback, useMemo, useState } from "react";
-import {
-  ActivityIndicator,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 
 import { ListItemSeparator } from "@/components/shared/ListItemSeparator";
 import { PullToRefresh } from "@/components/shared/PullToRefresh";
@@ -86,9 +81,7 @@ export function PagedList<T>({
           if (hasNextPage) fetchNextPage();
         }}
         onEndReachedThreshold={0.5}
-        refreshControl={
-          <PullToRefresh refreshing={refreshing} onRefresh={onRefresh} />
-        }
+        refreshControl={<PullToRefresh refreshing={refreshing} onRefresh={onRefresh} />}
       />
     </View>
   );

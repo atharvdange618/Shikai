@@ -41,9 +41,7 @@ export function useWatchlistRepos(): {
     }),
   });
 
-  const repos = queries
-    .map((q) => q.data)
-    .filter((r): r is GitHubRepo => r !== undefined);
+  const repos = queries.map((q) => q.data).filter((r): r is GitHubRepo => r !== undefined);
 
   const isLoading = queries.some((q) => q.isLoading);
 

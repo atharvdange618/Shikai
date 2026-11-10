@@ -1,21 +1,11 @@
 import { Octicons } from "@expo/vector-icons";
 import { useQueryClient } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
-import { Href, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 import { useCallback, useMemo, useState } from "react";
-import {
-  Linking,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { Linking, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
-import {
-  ProfileHeader,
-  type ProfileLink,
-} from "@/components/shared/ProfileHeader";
+import { ProfileHeader, type ProfileLink } from "@/components/shared/ProfileHeader";
 import { RecentRepos } from "@/components/shared/RecentRepos";
 import { PullToRefresh } from "@/components/shared/PullToRefresh";
 import { useRepoCount } from "@/hooks/useRepoCount";
@@ -47,9 +37,7 @@ function buildLinks(
 ): ProfileLink[] {
   if (!user) return [];
   const linkedInUrl = socialUrls.find((url) => url.includes("linkedin.com"));
-  const twitterUrl = socialUrls.find(
-    (url) => url.includes("x.com") || url.includes("twitter.com"),
-  );
+  const twitterUrl = socialUrls.find((url) => url.includes("x.com") || url.includes("twitter.com"));
   const blog = genericUrl || user.blog;
 
   const links: ProfileLink[] = [];
@@ -72,9 +60,7 @@ function buildLinks(
   if (twitterUrl || user.twitter_username) {
     links.push({
       icon: { set: "fontawesome6", name: "x-twitter" },
-      text: twitterUrl
-        ? `@${twitterUrl.split("/").pop()}`
-        : `@${user.twitter_username}`,
+      text: twitterUrl ? `@${twitterUrl.split("/").pop()}` : `@${user.twitter_username}`,
       url: twitterUrl || `https://twitter.com/${user.twitter_username}`,
     });
   }
@@ -104,9 +90,7 @@ export default function ProfileScreen() {
   const { data: user, isLoading } = useUser();
   const { data: socialAccounts } = useSocialAccounts();
   const { data: repoCount } = useRepoCount();
-  const { data: recentRepos, isLoading: reposLoading } = useUserProfileRepos(
-    user?.login ?? "",
-  );
+  const { data: recentRepos, isLoading: reposLoading } = useUserProfileRepos(user?.login ?? "");
   const login = user?.login;
 
   const links = buildLinks(
@@ -149,17 +133,12 @@ export default function ProfileScreen() {
       style={s.scroll}
       contentContainerStyle={s.content}
       showsVerticalScrollIndicator={false}
-      refreshControl={
-        <PullToRefresh refreshing={refreshing} onRefresh={onRefresh} />
-      }
+      refreshControl={<PullToRefresh refreshing={refreshing} onRefresh={onRefresh} />}
     >
       <View style={s.headerRow}>
         <Pressable
-          style={({ pressed }) => [
-            s.headerIconButton,
-            pressed && s.pressed,
-          ]}
-          onPress={() => router.push("/(app)/(tabs)/profile/settings" as Href)}
+          style={({ pressed }) => [s.headerIconButton, pressed && s.pressed]}
+          onPress={() => router.push("/(app)/(tabs)/profile/settings")}
           hitSlop={8}
           accessibilityLabel="Settings"
         >
@@ -178,9 +157,7 @@ export default function ProfileScreen() {
         emptyBio={
           <Pressable
             style={({ pressed }) => [s.profilePrompt, pressed && s.pressed]}
-            onPress={() =>
-              Linking.openURL("https://github.com/settings/profile")
-            }
+            onPress={() => Linking.openURL("https://github.com/settings/profile")}
           >
             <Octicons name="person" size={14} color={colors.accent} />
             <Text style={s.profilePromptText}>Add a bio to your profile</Text>
@@ -199,13 +176,9 @@ export default function ProfileScreen() {
       <View style={s.card}>
         <Pressable
           style={({ pressed }) => [s.row, pressed && s.pressed]}
-          onPress={() => router.push("/(app)/(tabs)/profile/saved" as Href)}
+          onPress={() => router.push("/(app)/(tabs)/profile/saved")}
         >
-          <Octicons
-            name="bookmark"
-            size={IconSize.md}
-            color={colors.textSecondary}
-          />
+          <Octicons name="bookmark" size={IconSize.md} color={colors.textSecondary} />
           <Text style={s.rowLabel}>Saved Repos</Text>
           <Octicons name="chevron-right" size={13} color={colors.textMuted} />
         </Pressable>
@@ -220,11 +193,7 @@ export default function ProfileScreen() {
               })
             }
           >
-            <Octicons
-              name="code"
-              size={IconSize.md}
-              color={colors.textSecondary}
-            />
+            <Octicons name="code" size={IconSize.md} color={colors.textSecondary} />
             <Text style={s.rowLabel}>Gists</Text>
             <Octicons name="chevron-right" size={13} color={colors.textMuted} />
           </Pressable>
@@ -235,11 +204,7 @@ export default function ProfileScreen() {
             style={({ pressed }) => [s.row, s.rowDivider, pressed && s.pressed]}
             onPress={() => Linking.openURL(user.html_url)}
           >
-            <Octicons
-              name="mark-github"
-              size={IconSize.md}
-              color={colors.textSecondary}
-            />
+            <Octicons name="mark-github" size={IconSize.md} color={colors.textSecondary} />
             <Text style={s.rowLabel}>View on GitHub</Text>
             <Octicons name="link-external" size={13} color={colors.textMuted} />
           </Pressable>

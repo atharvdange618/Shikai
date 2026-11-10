@@ -5,7 +5,7 @@ const m = vi.hoisted(() => ({
   markNotificationAsRead: vi.fn(),
   response: null as unknown,
   // The hook has one ref; sharing it across calls keeps it across re-renders.
-  ref: { current: null as unknown },
+  ref: { current: null },
 }));
 
 // Effects run inline on each call, so calling the hook again is a re-render.

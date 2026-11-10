@@ -3,6 +3,7 @@
 GitHub API behavior that makes Shikai look broken when it isn't. Read this before you debug an empty list, a missing item or a 4xx. Use it to answer a user report with evidence.
 
 Add an entry whenever a bug traces back to GitHub, in the same change as the fix or workaround. Each entry has:
+
 - **Symptom**: what the user sees in Shikai.
 - **Cause**: what GitHub does, with the date and source (a changelog link, or "inferred from results").
 - **Check**: a command that shows it on the user's account, so a report can be confirmed in a minute.

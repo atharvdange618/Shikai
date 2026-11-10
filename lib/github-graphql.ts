@@ -19,10 +19,7 @@ import type {
 
 const GRAPHQL_ENDPOINT = "/graphql";
 
-async function graphql<T>(
-  query: string,
-  variables?: Record<string, unknown>,
-): Promise<T> {
+async function graphql<T>(query: string, variables?: Record<string, unknown>): Promise<T> {
   const { data } = await githubAxios.post<{
     data: T;
     errors?: { message: string }[];
@@ -31,11 +28,7 @@ async function graphql<T>(
   // A partial response (e.g. a repo with Discussions disabled) still carries
   // usable `data` alongside `errors`. Only throw when there's nothing to use;
   // callers already null-check the fields they read.
-  if (
-    Array.isArray(data.errors) &&
-    data.errors.length > 0 &&
-    data.data == null
-  ) {
+  if (Array.isArray(data.errors) && data.errors.length > 0 && data.data == null) {
     const messages = data.errors.map((e) => e.message).join(", ");
     throw new Error(`GraphQL error: ${messages}`);
   }
@@ -82,8 +75,7 @@ export async function fetchRepoCount(): Promise<number> {
 }
 
 export async function fetchPinnedRepos(): Promise<PinnedRepoNode[]> {
-  const response =
-    await graphql<PinnedReposResponse["data"]>(PINNED_REPOS_QUERY);
+  const response = await graphql<PinnedReposResponse["data"]>(PINNED_REPOS_QUERY);
 
   return response.viewer.pinnedItems.nodes;
 }
@@ -109,9 +101,7 @@ const CONTRIBUTION_GRAPH_QUERY = `
 `;
 
 export async function fetchContributionGraph(): Promise<ContributionCalendar> {
-  const response = await graphql<ContributionGraphResponse["data"]>(
-    CONTRIBUTION_GRAPH_QUERY,
-  );
+  const response = await graphql<ContributionGraphResponse["data"]>(CONTRIBUTION_GRAPH_QUERY);
 
   return response.viewer.contributionsCollection.contributionCalendar;
 }
@@ -132,21 +122,13 @@ const COMMIT_COUNT_QUERY = `
   }
 `;
 
-export async function fetchCommitCount(
-  owner: string,
-  repo: string,
-): Promise<number | null> {
-  const response = await graphql<CommitCountResponse["data"]>(
-    COMMIT_COUNT_QUERY,
-    {
-      owner,
-      name: repo,
-    },
-  );
+export async function fetchCommitCount(owner: string, repo: string): Promise<number | null> {
+  const response = await graphql<CommitCountResponse["data"]>(COMMIT_COUNT_QUERY, {
+    owner,
+    name: repo,
+  });
 
-  return (
-    response.repository?.defaultBranchRef?.target?.history?.totalCount ?? null
-  );
+  return response.repository?.defaultBranchRef?.target?.history?.totalCount ?? null;
 }
 
 const REPO_ISSUES_PR_STATS_QUERY = `
@@ -172,10 +154,10 @@ export async function fetchRepoIssuesPRStats(
   owner: string,
   repo: string,
 ): Promise<RepoIssuesPRStats> {
-  const response = await graphql<RepoIssuesPRStatsResponse["data"]>(
-    REPO_ISSUES_PR_STATS_QUERY,
-    { owner, name: repo },
-  );
+  const response = await graphql<RepoIssuesPRStatsResponse["data"]>(REPO_ISSUES_PR_STATS_QUERY, {
+    owner,
+    name: repo,
+  });
 
   const r = response.repository;
   return {
@@ -289,10 +271,11 @@ export async function fetchDiscussions(
   repo: string,
   after?: string | null,
 ): Promise<DiscussionsPage> {
-  const response = await graphql<DiscussionsListResponse["data"]>(
-    DISCUSSIONS_QUERY,
-    { owner, name: repo, after: after ?? null },
-  );
+  const response = await graphql<DiscussionsListResponse["data"]>(DISCUSSIONS_QUERY, {
+    owner,
+    name: repo,
+    after: after ?? null,
+  });
 
   const discussions = response.repository?.discussions;
   return {
@@ -358,10 +341,11 @@ export async function fetchDiscussion(
   repo: string,
   number: number,
 ): Promise<DiscussionDetail | null> {
-  const response = await graphql<DiscussionDetailResponse["data"]>(
-    DISCUSSION_QUERY,
-    { owner, name: repo, number },
-  );
+  const response = await graphql<DiscussionDetailResponse["data"]>(DISCUSSION_QUERY, {
+    owner,
+    name: repo,
+    number,
+  });
 
   return response.repository?.discussion ?? null;
 }

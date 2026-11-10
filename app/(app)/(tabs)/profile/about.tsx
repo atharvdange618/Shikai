@@ -3,14 +3,7 @@ import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import Constants from "expo-constants";
 import { Image } from "expo-image";
 import { useMemo } from "react";
-import {
-  Linking,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { Linking, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import {
   FontFamily,
@@ -123,16 +116,15 @@ export default function AboutScreen() {
       <View style={s.card}>
         <Text style={s.cardTitle}>About</Text>
         <Text style={s.bodyText}>
-          Shikai brings GitHub&apos;s web experience to mobile. Pinned repos,
-          contribution graphs, recent activity, the features that make
-          GitHub&apos;s web version so useful, beautifully crafted for mobile.
+          Shikai brings GitHub&apos;s web experience to mobile. Pinned repos, contribution graphs,
+          recent activity, the features that make GitHub&apos;s web version so useful, beautifully
+          crafted for mobile.
         </Text>
         <View style={s.divider} />
         <Text style={s.bodyText}>
-          Built by a developer who wanted a better way to check GitHub on the
-          go. Read-only by design. Your GitHub data stays on your device; only
-          anonymous crash and performance diagnostics are sent, with your tokens
-          stripped out. See the privacy policy for details.
+          Built by a developer who wanted a better way to check GitHub on the go. Read-only by
+          design. Your GitHub data stays on your device; only anonymous crash and performance
+          diagnostics are sent, with your tokens stripped out. See the privacy policy for details.
         </Text>
       </View>
 
@@ -163,11 +155,7 @@ export default function AboutScreen() {
           style={({ pressed }) => [s.linkRow, pressed && { opacity: 0.7 }]}
           onPress={() => Linking.openURL("https://github.com/atharvdange618")}
         >
-          <Octicons
-            name="mark-github"
-            size={IconSize.sm}
-            color={colors.accent}
-          />
+          <Octicons name="mark-github" size={IconSize.sm} color={colors.accent} />
           <Text style={s.linkText}>atharvdange618</Text>
           <Octicons name="link-external" size={12} color={colors.textMuted} />
         </Pressable>
@@ -175,11 +163,7 @@ export default function AboutScreen() {
           style={({ pressed }) => [s.linkRow, pressed && { opacity: 0.7 }]}
           onPress={() => Linking.openURL("https://x.com/atharvdangedev")}
         >
-          <FontAwesome6
-            name="x-twitter"
-            size={IconSize.sm}
-            color={colors.accent}
-          />
+          <FontAwesome6 name="x-twitter" size={IconSize.sm} color={colors.accent} />
           <Text style={s.linkText}>@atharvdangedev</Text>
           <Octicons name="link-external" size={12} color={colors.textMuted} />
         </Pressable>
@@ -188,36 +172,24 @@ export default function AboutScreen() {
       <View style={s.card}>
         <Text style={s.cardTitle}>Open Source</Text>
         <Text style={s.bodyText}>
-          Shikai is open source. Found a bug or want to contribute? Check out
-          the repository on GitHub.
+          Shikai is open source. Found a bug or want to contribute? Check out the repository on
+          GitHub.
         </Text>
         <Pressable
-          style={({ pressed }) => [
-            s.openSourceButton,
-            pressed && { opacity: 0.7 },
-          ]}
-          onPress={() =>
-            Linking.openURL("https://github.com/atharvdange618/shikai")
-          }
+          style={({ pressed }) => [s.openSourceButton, pressed && { opacity: 0.7 }]}
+          onPress={() => Linking.openURL("https://github.com/atharvdange618/shikai")}
         >
-          <Octicons
-            name="mark-github"
-            size={IconSize.sm}
-            color={colors.textPrimary}
-          />
+          <Octicons name="mark-github" size={IconSize.sm} color={colors.textPrimary} />
           <Text style={s.openSourceButtonText}>View on GitHub</Text>
           <Octicons name="link-external" size={12} color={colors.textMuted} />
         </Pressable>
         <View style={s.divider} />
         <Text style={s.bodyText}>
-          Enjoying Shikai? A star on the repo helps others discover it and keeps
-          the project going.
+          Enjoying Shikai? A star on the repo helps others discover it and keeps the project going.
         </Text>
         <Pressable
           style={({ pressed }) => [s.starButton, pressed && { opacity: 0.7 }]}
-          onPress={() =>
-            Linking.openURL("https://github.com/atharvdange618/shikai#readme")
-          }
+          onPress={() => Linking.openURL("https://github.com/atharvdange618/shikai#readme")}
         >
           <Octicons name="star" size={IconSize.sm} color={colors.accent} />
           <Text style={s.starButtonText}>Star on GitHub</Text>
@@ -243,9 +215,7 @@ export default function AboutScreen() {
       </View>
 
       <View style={s.footer}>
-        <Text style={s.footerText}>
-          Built with care for the developer community
-        </Text>
+        <Text style={s.footerText}>Built with care for the developer community</Text>
       </View>
     </ScrollView>
   );

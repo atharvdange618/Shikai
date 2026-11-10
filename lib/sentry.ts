@@ -27,8 +27,7 @@ const dsn = process.env.EXPO_PUBLIC_SENTRY_DSN;
 
 // gh[pousr]_ covers PATs (ghp_), OAuth (gho_), and the other GitHub token
 // prefixes; github_pat_ covers fine-grained PATs.
-const TOKEN_RE =
-  /\b(gh[pousr]_[A-Za-z0-9]{16,}|github_pat_[A-Za-z0-9_]{20,})\b/g;
+const TOKEN_RE = /\b(gh[pousr]_[A-Za-z0-9]{16,}|github_pat_[A-Za-z0-9_]{20,})\b/g;
 
 function redact(value: string): string {
   return value.replace(TOKEN_RE, "[redacted-token]");
@@ -75,9 +74,7 @@ if (__DEV__) {
   const probe = scrubEvent({
     message: "token ghp_0123456789abcdefghijklmnopqrstuvwxyz leaked",
     exception: {
-      values: [
-        { value: "failed with github_pat_ABCDEFGHIJKLMNOPQRSTUVWXYZ012345" },
-      ],
+      values: [{ value: "failed with github_pat_ABCDEFGHIJKLMNOPQRSTUVWXYZ012345" }],
     },
   });
   if (
@@ -116,13 +113,50 @@ const lastSent = new Map<string, number>();
 // Path segments safe to send as-is. Anything else (owner, repo, username, id,
 // branch, file path) becomes ":x", so the endpoint tag never names a person.
 const ENDPOINT_WORDS = new Set([
-  "actions", "annotations", "branches", "check-runs", "comments", "commits",
-  "compare", "contents", "contributors", "events", "files", "followers",
-  "following", "forks", "gists", "git", "graphql", "installations", "issues",
-  "jobs", "languages", "logs", "notifications", "pulls", "readme",
-  "received_events", "releases", "repos", "repositories", "requested_reviewers",
-  "reviews", "runs", "search", "social_accounts", "starred", "stargazers",
-  "stats", "status", "tags", "threads", "timeline", "trees", "user", "users",
+  "actions",
+  "annotations",
+  "branches",
+  "check-runs",
+  "comments",
+  "commits",
+  "compare",
+  "contents",
+  "contributors",
+  "events",
+  "files",
+  "followers",
+  "following",
+  "forks",
+  "gists",
+  "git",
+  "graphql",
+  "installations",
+  "issues",
+  "jobs",
+  "languages",
+  "logs",
+  "notifications",
+  "pulls",
+  "readme",
+  "received_events",
+  "releases",
+  "repos",
+  "repositories",
+  "requested_reviewers",
+  "reviews",
+  "runs",
+  "search",
+  "social_accounts",
+  "starred",
+  "stargazers",
+  "stats",
+  "status",
+  "tags",
+  "threads",
+  "timeline",
+  "trees",
+  "user",
+  "users",
 ]);
 
 /** `/repos/octocat/hello/pulls/7?page=2` → `/repos/:x/:x/pulls/:x` */

@@ -15,7 +15,7 @@ export interface PendingAuth {
 
 export function isValidToken(token: string | null): token is string {
   if (!token || token.length < 10 || token.length > 500) return false;
-  return /^[\w\-\.]+$/.test(token);
+  return /^[\w\-.]+$/.test(token);
 }
 
 export function isValidPAT(pat: string | null): pat is string {

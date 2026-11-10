@@ -1,29 +1,13 @@
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { PRHeader } from "@/components/repo/PRHeader";
-import {
-  PRGitHubLink,
-  PRList,
-  PRPageState,
-  prStyles as s,
-} from "@/components/repo/PRList";
-import {
-  FontFamily,
-  Layout,
-  Radius,
-  Spacing,
-  useTheme,
-} from "@/constants/theme";
+import { PRGitHubLink, PRList, PRPageState, prStyles as s } from "@/components/repo/PRList";
+import { FontFamily, Layout, Radius, Spacing, useTheme } from "@/constants/theme";
 import {
   useChecks,
   usePullRequestDetail,
   type CheckSummaryItem,
 } from "@/hooks/usePullRequestDetail";
-import {
-  CHECK_GROUPS,
-  checkGroup,
-  checksSummary,
-  type CheckGroup,
-} from "@/lib/pr-review";
+import { CHECK_GROUPS, checkGroup, checksSummary, type CheckGroup } from "@/lib/pr-review";
 import { getCheckDisplay } from "@/lib/run-display";
 import { decodeRepoId, formatDuration, relativeTime } from "@/lib/utils";
 import { Octicons } from "@expo/vector-icons";
@@ -32,8 +16,7 @@ import { useState } from "react";
 import { Linking, Pressable, Text, View } from "react-native";
 
 type Row =
-  | { kind: "group"; group: CheckGroup; count: number }
-  | { kind: "check"; check: CheckSummaryItem };
+  { kind: "group"; group: CheckGroup; count: number } | { kind: "check"; check: CheckSummaryItem };
 export default function ChecksScreen() {
   return (
     <ErrorBoundary fallback="back">
@@ -50,21 +33,13 @@ function Checks() {
   const { colors } = useTheme();
   const detail = usePullRequestDetail(owner, repo, Number(number));
   const query = useChecks(owner, repo, detail.data?.head.sha ?? "");
-  const [expanded, setExpanded] = useState<CheckGroup[]>([
-    "Needs attention",
-    "Running",
-    "Unknown",
-  ]);
+  const [expanded, setExpanded] = useState<CheckGroup[]>(["Needs attention", "Running", "Unknown"]);
   const rows: Row[] = CHECK_GROUPS.flatMap((group): Row[] => {
-    const checks = query.data.filter(
-      (check) => checkGroup(check.conclusion) === group,
-    );
+    const checks = query.data.filter((check) => checkGroup(check.conclusion) === group);
     if (!checks.length) return [];
     return [
       { kind: "group", group, count: checks.length },
-      ...(expanded.includes(group)
-        ? checks.map((check): Row => ({ kind: "check", check }))
-        : []),
+      ...(expanded.includes(group) ? checks.map((check): Row => ({ kind: "check", check })) : []),
     ];
   });
   return (
@@ -72,9 +47,7 @@ function Checks() {
       <PRHeader title="Checks" repoId={repoId} number={number} />
       <PRList
         data={rows}
-        keyExtractor={(row) =>
-          row.kind === "group" ? row.group : row.check.key
-        }
+        keyExtractor={(row) => (row.kind === "group" ? row.group : row.check.key)}
         getItemType={(row) => row.kind}
         header={
           <>
@@ -88,8 +61,7 @@ function Checks() {
             </Text>
             <Text style={[s.meta, { color: colors.textSecondary }]}>
               {query.data.length} loaded
-              {query.total !== undefined ? ` of ${query.total}` : ""} · Latest
-              head{" "}
+              {query.total !== undefined ? ` of ${query.total}` : ""} · Latest head{" "}
               {detail.data?.head.sha.slice(0, 7) ?? "unknown"}
             </Text>
           </>
@@ -137,18 +109,12 @@ function Checks() {
                 >
                   {item.group}
                 </Text>
-                <Text style={[s.meta, { color: colors.textMuted }]}>
-                  {item.count}
-                </Text>
+                <Text style={[s.meta, { color: colors.textMuted }]}>{item.count}</Text>
               </Pressable>
             );
           }
           const check = item.check;
-          const display = getCheckDisplay(
-            check.status,
-            check.conclusion,
-            colors,
-          );
+          const display = getCheckDisplay(check.status, check.conclusion, colors);
           const endedAt = check.completedAt ?? check.startedAt;
           const duration =
             check.startedAt && check.completedAt
@@ -193,13 +159,9 @@ function Checks() {
                 style={{ marginTop: 2 }}
               />
               <View style={{ flex: 1, gap: Spacing.xs }}>
-                <Text style={[s.text, { color: colors.textPrimary }]}>
-                  {check.name}
-                </Text>
+                <Text style={[s.text, { color: colors.textPrimary }]}>{check.name}</Text>
                 {check.app && (
-                  <Text style={[s.meta, { color: colors.textMuted }]}>
-                    {check.app}
-                  </Text>
+                  <Text style={[s.meta, { color: colors.textMuted }]}>{check.app}</Text>
                 )}
                 <View
                   style={{
@@ -232,9 +194,7 @@ function Checks() {
                     </View>
                   )}
                   {meta.length > 0 && (
-                    <Text style={[s.meta, { color: colors.textMuted }]}>
-                      {meta}
-                    </Text>
+                    <Text style={[s.meta, { color: colors.textMuted }]}>{meta}</Text>
                   )}
                 </View>
               </View>
@@ -260,15 +220,11 @@ function Checks() {
                 />
               )
             )}
-            <Text
-              style={[s.meta, { padding: 16, color: colors.textSecondary }]}
-            >
-              GitHub limits this API to the 1,000 most recent check suites.
-              Older suites may be omitted.
+            <Text style={[s.meta, { padding: 16, color: colors.textSecondary }]}>
+              GitHub limits this API to the 1,000 most recent check suites. Older suites may be
+              omitted.
             </Text>
-            <PRGitHubLink
-              url={`https://github.com/${owner}/${repo}/pull/${number}/checks`}
-            />
+            <PRGitHubLink url={`https://github.com/${owner}/${repo}/pull/${number}/checks`} />
           </>
         }
       />

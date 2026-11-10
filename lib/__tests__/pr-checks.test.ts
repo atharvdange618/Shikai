@@ -1,8 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type {
-  GitHubCheckRun,
-  GitHubCombinedStatus,
-} from "@/types/github.types";
+import type { GitHubCheckRun, GitHubCombinedStatus } from "@/types/github.types";
 
 const m = vi.hoisted(() => ({
   paged: vi.fn(),

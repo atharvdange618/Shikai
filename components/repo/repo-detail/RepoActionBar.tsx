@@ -50,11 +50,7 @@ export function RepoActionBar({
         onPressIn={onCodePressIn}
       >
         <Octicons name="code" size={IconSize.sm} color={colors.textOnAccent} />
-        <Text
-          style={s.actionButtonFilledText}
-          numberOfLines={1}
-          adjustsFontSizeToFit
-        >
+        <Text style={s.actionButtonFilledText} numberOfLines={1} adjustsFontSizeToFit>
           Code
         </Text>
       </Pressable>
@@ -68,16 +64,8 @@ export function RepoActionBar({
         onPress={onCommitsPress}
         onPressIn={onCommitsPressIn}
       >
-        <Octicons
-          name="history"
-          size={IconSize.sm}
-          color={colors.textPrimary}
-        />
-        <Text
-          style={s.actionButtonOutlineText}
-          numberOfLines={1}
-          adjustsFontSizeToFit
-        >
+        <Octicons name="history" size={IconSize.sm} color={colors.textPrimary} />
+        <Text style={s.actionButtonOutlineText} numberOfLines={1} adjustsFontSizeToFit>
           Commits
         </Text>
       </Pressable>
@@ -98,10 +86,7 @@ export function RepoActionBar({
           color={copiedUrl ? colors.success : colors.textPrimary}
         />
         <Text
-          style={[
-            s.actionButtonOutlineText,
-            copiedUrl && { color: colors.success },
-          ]}
+          style={[s.actionButtonOutlineText, copiedUrl && { color: colors.success }]}
           numberOfLines={1}
           adjustsFontSizeToFit
         >
@@ -118,9 +103,7 @@ export function RepoActionBar({
           pressed && s.actionButtonPressed,
         ]}
         onPress={onBookmarkToggle}
-        accessibilityLabel={
-          isWatchlisted ? "Remove from watchlist" : "Add to watchlist"
-        }
+        accessibilityLabel={isWatchlisted ? "Remove from watchlist" : "Add to watchlist"}
         accessibilityRole="button"
       >
         <Octicons

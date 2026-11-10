@@ -24,17 +24,14 @@ export function useEvents(username: string) {
   const { items: events, ...rest } = useInfinitePagedQuery(
     {
       queryKey: [...queryKeys.events(username), pat ? "pat" : "oauth"],
-      queryFn: ({ pageParam }) =>
-        fetchUserEvents(username, pageParam, PER_PAGE, pat),
+      queryFn: ({ pageParam }) => fetchUserEvents(username, pageParam, PER_PAGE, pat),
       enabled: Boolean(username),
       staleTime: 1000 * 60 * 2,
       select: (data) => ({
         ...data,
         pages: data.pages.map((page) => ({
           ...page,
-          events: page.events.filter((e) =>
-            RENDERED_EVENT_TYPES.includes(e.type),
-          ),
+          events: page.events.filter((e) => RENDERED_EVENT_TYPES.includes(e.type)),
         })),
       }),
     },

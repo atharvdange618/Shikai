@@ -26,14 +26,21 @@
     "android": "expo run:android",
     "ios": "expo run:ios",
     "web": "expo start --web",
-    "lint": "expo lint",
+    "lint": "oxlint .",
     "test": "vitest run",
     "deploy": "npx expo export -p web && wrangler deploy",
     "preview": "npx expo export -p web && wrangler dev",
     "prebuild:clean": "npx expo prebuild --clean",
     "android:assemble": "cd android && SENTRY_DISABLE_AUTO_UPLOAD=true ./gradlew assembleRelease",
     "android:bundle": "cd android && ./gradlew bundleRelease",
-    "sentry:sourcemaps": "sentry-expo-upload-sourcemaps dist"
+    "sentry:sourcemaps": "sentry-expo-upload-sourcemaps dist",
+    "commit": "cz",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "lint:fix": "oxlint . --fix",
+    "lint:strict": "oxlint . --deny-warnings",
+    "prepare": "husky",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@expo-google-fonts/inter": "^0.4.2",
@@ -91,12 +98,19 @@
   },
   "devDependencies": {
     "@types/react": "~19.3.0",
-    "eslint": "^9.25.0",
-    "eslint-config-expo": "~58.0.4",
     "sharp": "^0.34.5",
-    "typescript": "~6.0.3",
+    "typescript": "^7.0.2",
     "vitest": "^3.2.7",
-    "wrangler": "^4.88.0"
+    "wrangler": "^4.88.0",
+    "@commitlint/cli": "^21.2.4",
+    "@commitlint/config-conventional": "^21.2.4",
+    "@commitlint/cz-commitlint": "^21.2.4",
+    "commitizen": "^4.3.2",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.6.0",
+    "oxlint": "^1.92.0",
+    "oxlint-tsgolint": "^7.0.2006",
+    "prettier": "^3.9.10"
   },
   "private": true,
   "overrides": {
@@ -121,5 +135,19 @@
     "@sentry/cli@3.8.0": true,
     "@sentry/cli@2.58.6": true,
     "workerd@1.20261102.1": true
+  },
+  "lint-staged": {
+    "*.{json,md,css}": [
+      "prettier --write"
+    ],
+    "*.{ts,tsx}": [
+      "oxlint --fix",
+      "prettier --write"
+    ]
+  },
+  "config": {
+    "commitizen": {
+      "path": "@commitlint/cz-commitlint"
+    }
   }
 }

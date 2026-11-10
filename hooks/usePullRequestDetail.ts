@@ -12,23 +12,15 @@ import {
 } from "@/lib/github-rest";
 import { useInfinitePagedQuery } from "@/hooks/useInfinitePagedQuery";
 import { queryKeys } from "@/lib/query-client";
-import type {
-  GitHubCheckConclusion,
-  GitHubCheckStatus,
-} from "@/types/github.types";
+import type { GitHubCheckConclusion, GitHubCheckStatus } from "@/types/github.types";
 import { queryOptions, useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
 
-export function usePullRequestConversation(
-  owner: string,
-  repo: string,
-  number: number,
-) {
+export function usePullRequestConversation(owner: string, repo: string, number: number) {
   return useInfinitePagedQuery(
     {
       queryKey: [...queryKeys.prDetail(owner, repo, number), "conversation"],
-      queryFn: ({ pageParam }) =>
-        fetchIssueComments(owner, repo, number, pageParam, 100),
+      queryFn: ({ pageParam }) => fetchIssueComments(owner, repo, number, pageParam, 100),
       enabled: Boolean(owner && repo && number),
       staleTime: 1000 * 60 * 2,
       meta: { persist: false },
@@ -37,16 +29,11 @@ export function usePullRequestConversation(
   );
 }
 
-export function usePullRequestActivity(
-  owner: string,
-  repo: string,
-  number: number,
-) {
+export function usePullRequestActivity(owner: string, repo: string, number: number) {
   return useInfinitePagedQuery(
     {
       queryKey: [...queryKeys.prDetail(owner, repo, number), "activity"],
-      queryFn: ({ pageParam }) =>
-        fetchIssueTimelinePage(owner, repo, number, pageParam),
+      queryFn: ({ pageParam }) => fetchIssueTimelinePage(owner, repo, number, pageParam),
       enabled: Boolean(owner && repo && number),
       staleTime: 1000 * 60 * 2,
       meta: { persist: false },
@@ -55,11 +42,7 @@ export function usePullRequestActivity(
   );
 }
 
-export function usePullRequestDetail(
-  owner: string,
-  repo: string,
-  number: number,
-) {
+export function usePullRequestDetail(owner: string, repo: string, number: number) {
   return useQuery(
     queryOptions({
       queryKey: queryKeys.prDetail(owner, repo, number),
@@ -71,16 +54,11 @@ export function usePullRequestDetail(
   );
 }
 
-export function usePullRequestReviewComments(
-  owner: string,
-  repo: string,
-  number: number,
-) {
+export function usePullRequestReviewComments(owner: string, repo: string, number: number) {
   const query = useInfinitePagedQuery(
     {
       queryKey: queryKeys.prReviewComments(owner, repo, number),
-      queryFn: ({ pageParam }) =>
-        fetchPullRequestReviewComments(owner, repo, number, pageParam),
+      queryFn: ({ pageParam }) => fetchPullRequestReviewComments(owner, repo, number, pageParam),
       enabled: Boolean(owner && repo && number),
       staleTime: 1000 * 60 * 2,
       meta: { persist: false },
@@ -93,11 +71,7 @@ export function usePullRequestReviewComments(
 // GitHub's max page size. The endpoint stops at 3000 files.
 const FILES_PER_PAGE = 100;
 
-export function usePullRequestFiles(
-  owner: string,
-  repo: string,
-  number: number,
-) {
+export function usePullRequestFiles(owner: string, repo: string, number: number) {
   const { items: files, ...rest } = useInfinitePagedQuery(
     {
       queryKey: queryKeys.prFiles(owner, repo, number),
@@ -118,15 +92,9 @@ export function usePullRequestFiles(
  * first page, so this keeps loading pages until the file turns up or the
  * pages run out, and reports loading until then.
  */
-export function usePullRequestFile(
-  owner: string,
-  repo: string,
-  number: number,
-  filename: string,
-) {
+export function usePullRequestFile(owner: string, repo: string, number: number, filename: string) {
   const query = usePullRequestFiles(owner, repo, number);
-  const { files, hasNextPage, isFetchingNextPage, isError, fetchNextPage } =
-    query;
+  const { files, hasNextPage, isFetchingNextPage, isError, fetchNextPage } = query;
   const file = files.find((f) => f.filename === filename);
   const searching = !file && hasNextPage && !isError;
 
@@ -142,16 +110,11 @@ export function usePullRequestFile(
   };
 }
 
-export function usePullRequestReviews(
-  owner: string,
-  repo: string,
-  number: number,
-) {
+export function usePullRequestReviews(owner: string, repo: string, number: number) {
   const query = useInfinitePagedQuery(
     {
       queryKey: queryKeys.prReviews(owner, repo, number),
-      queryFn: ({ pageParam }) =>
-        fetchPullRequestReviews(owner, repo, number, pageParam),
+      queryFn: ({ pageParam }) => fetchPullRequestReviews(owner, repo, number, pageParam),
       enabled: Boolean(owner && repo && number),
       staleTime: 1000 * 60 * 2,
       meta: { persist: false },
@@ -161,11 +124,7 @@ export function usePullRequestReviews(
   return { ...query, reviews: query.items };
 }
 
-export function useRequestedReviewers(
-  owner: string,
-  repo: string,
-  number: number,
-) {
+export function useRequestedReviewers(owner: string, repo: string, number: number) {
   return useQuery(
     queryOptions({
       queryKey: queryKeys.prRequestedReviewers(owner, repo, number),
@@ -177,16 +136,11 @@ export function useRequestedReviewers(
   );
 }
 
-export function usePullRequestCommits(
-  owner: string,
-  repo: string,
-  number: number,
-) {
+export function usePullRequestCommits(owner: string, repo: string, number: number) {
   const query = useInfinitePagedQuery(
     {
       queryKey: queryKeys.prCommits(owner, repo, number),
-      queryFn: ({ pageParam }) =>
-        fetchPullRequestCommits(owner, repo, number, pageParam),
+      queryFn: ({ pageParam }) => fetchPullRequestCommits(owner, repo, number, pageParam),
       enabled: Boolean(owner && repo && number),
       staleTime: 1000 * 60 * 2,
       meta: { persist: false },
@@ -229,8 +183,7 @@ export function useChecks(owner: string, repo: string, ref: string) {
   const statuses = useInfinitePagedQuery(
     {
       queryKey: [...queryKeys.commitChecks(owner, repo, ref), "statuses"],
-      queryFn: ({ pageParam }) =>
-        fetchCombinedStatus(owner, repo, ref, pageParam),
+      queryFn: ({ pageParam }) => fetchCombinedStatus(owner, repo, ref, pageParam),
       enabled: Boolean(owner && repo && ref),
       staleTime: 1000 * 30,
       meta: { persist: false },
@@ -268,16 +221,13 @@ export function useChecks(owner: string, repo: string, ref: string) {
 
   return {
     data: [
-      ...new Map(
-        [...fromCheckRuns, ...fromStatuses].map((check) => [check.key, check]),
-      ).values(),
+      ...new Map([...fromCheckRuns, ...fromStatuses].map((check) => [check.key, check])).values(),
     ],
     // GitHub's own counts from the first page of each source, so the Checks
     // screen can show loaded rows against the real total.
     total:
       runs.data && statuses.data
-        ? (runs.data.pages[0]?.total ?? 0) +
-          (statuses.data.pages[0]?.total_count ?? 0)
+        ? (runs.data.pages[0]?.total ?? 0) + (statuses.data.pages[0]?.total_count ?? 0)
         : undefined,
     isLoading: runs.isLoading || statuses.isLoading,
     isError: runs.isError || statuses.isError,
@@ -285,11 +235,7 @@ export function useChecks(owner: string, repo: string, ref: string) {
     isFetchingNextPage: runs.isFetchingNextPage || statuses.isFetchingNextPage,
     fetchNextPage: () =>
       Promise.all([
-        runs.hasNextPage
-          ? runs.fetchNextPage()
-          : runs.isError
-            ? runs.refetch()
-            : undefined,
+        runs.hasNextPage ? runs.fetchNextPage() : runs.isError ? runs.refetch() : undefined,
         statuses.hasNextPage
           ? statuses.fetchNextPage()
           : statuses.isError

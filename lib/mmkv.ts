@@ -10,7 +10,9 @@ export const THEME_KEY = "shikai-theme";
 export const mmkvStorage = {
   getItem: async (key: string) => mmkv.getString(key) ?? null,
   setItem: async (key: string, value: string) => mmkv.set(key, value),
-  removeItem: async (key: string) => { mmkv.remove(key); },
+  removeItem: async (key: string) => {
+    mmkv.remove(key);
+  },
 };
 
 // Clears every MMKV-backed store, not just the React Query cache instance.

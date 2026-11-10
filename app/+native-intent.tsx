@@ -1,9 +1,4 @@
-import {
-  appLinkPath,
-  isDevClientUrl,
-  isGitHubUrl,
-  isOAuthRedirect,
-} from "@/lib/github-url";
+import { appLinkPath, isDevClientUrl, isGitHubUrl, isOAuthRedirect } from "@/lib/github-url";
 
 // The OAuth redirect (shikai://?code=...) maps to the blank index route. On a
 // warm start, letting the router navigate there buries the sign-in screen, so
@@ -22,13 +17,7 @@ import {
 // Warm ones pass through, since the router opens those itself. The dev client's
 // launch URLs are not routes: the legacy host showed "Page not found", while
 // SDK 58's `shikai://?__expo_url=…` pushed a blank index over Overview.
-export function redirectSystemPath({
-  path,
-  initial,
-}: {
-  path: string;
-  initial: boolean;
-}): string {
+export function redirectSystemPath({ path, initial }: { path: string; initial: boolean }): string {
   if (isGitHubUrl(path)) return "";
   if (isDevClientUrl(path)) return "";
   if (!initial && isOAuthRedirect(path)) return "";

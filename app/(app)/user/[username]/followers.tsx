@@ -7,11 +7,5 @@ export default function FollowersScreen() {
   const { username } = useLocalSearchParams<{ username: string }>();
   const query = useFollowers(username ?? "");
 
-  return (
-    <UserList
-      {...query}
-      emptyText="No followers yet"
-      errorText="Failed to load followers"
-    />
-  );
+  return <UserList {...query} emptyText="No followers yet" errorText="Failed to load followers" />;
 }

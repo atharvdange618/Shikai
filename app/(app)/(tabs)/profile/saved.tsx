@@ -2,13 +2,7 @@ import { Octicons } from "@expo/vector-icons";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { useCallback, useMemo, useState } from "react";
-import {
-  ActivityIndicator,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
 
 import { FlashList } from "@shopify/flash-list";
 
@@ -26,14 +20,7 @@ import { encodeRepoId } from "@/lib/utils";
 import { useWatchlistStore } from "@/stores/watchlist.store";
 import type { GitHubRepo } from "@/types/github.types";
 
-import {
-  FontFamily,
-  FontSize,
-  Layout,
-  Radius,
-  Spacing,
-  useTheme,
-} from "@/constants/theme";
+import { FontFamily, FontSize, Layout, Radius, Spacing, useTheme } from "@/constants/theme";
 
 type Tab = "stars" | "watchlist";
 
@@ -56,8 +43,7 @@ export default function SavedScreen() {
     isFetchingNextPage: isFetchingNextStarred,
   } = useStarred({ search: debouncedSearch, sort: "pushed" });
 
-  const { repos: watchlistedRepos, isLoading: watchlistLoading } =
-    useWatchlistRepos();
+  const { repos: watchlistedRepos, isLoading: watchlistLoading } = useWatchlistRepos();
 
   const filteredWatchlist = useSearchIndex(watchlistedRepos, debouncedSearch);
 
@@ -141,9 +127,7 @@ export default function SavedScreen() {
           ) : (
             <>
               <Text style={s.emptyTitle}>No starred repos</Text>
-              <Text style={s.emptySubtitle}>
-                Star repos on GitHub and they&apos;ll appear here
-              </Text>
+              <Text style={s.emptySubtitle}>Star repos on GitHub and they&apos;ll appear here</Text>
             </>
           )}
         </View>
@@ -154,9 +138,7 @@ export default function SavedScreen() {
         {watchlistIds.length === 0 ? (
           <>
             <Text style={s.emptyTitle}>No saved repos</Text>
-            <Text style={s.emptySubtitle}>
-              Tap the bookmark icon on any repo card to save it
-            </Text>
+            <Text style={s.emptySubtitle}>Tap the bookmark icon on any repo card to save it</Text>
           </>
         ) : (
           <>
@@ -200,11 +182,7 @@ export default function SavedScreen() {
           <SearchBar
             value={search}
             onChangeText={setSearch}
-            placeholder={
-              tab === "stars"
-                ? "Search starred repos..."
-                : "Search watchlist..."
-            }
+            placeholder={tab === "stars" ? "Search starred repos…" : "Search watchlist…"}
           />
         </View>
       )}
@@ -227,9 +205,7 @@ export default function SavedScreen() {
         onEndReached={onEndReached}
         onEndReachedThreshold={0.5}
         keyboardShouldPersistTaps="handled"
-        refreshControl={
-          <PullToRefresh refreshing={refreshing} onRefresh={onRefresh} />
-        }
+        refreshControl={<PullToRefresh refreshing={refreshing} onRefresh={onRefresh} />}
         removeClippedSubviews
         drawDistance={400}
       />
@@ -261,11 +237,7 @@ function TabButton({
       ]}
       onPress={onPress}
     >
-      <Octicons
-        name={icon}
-        size={14}
-        color={isActive ? "#fff" : colors.textMuted}
-      />
+      <Octicons name={icon} size={14} color={isActive ? "#fff" : colors.textMuted} />
       <Text
         style={[
           tabStyles.label,
@@ -279,17 +251,13 @@ function TabButton({
         <View
           style={[
             tabStyles.badge,
-            isActive
-              ? tabStyles.badgeActive
-              : { backgroundColor: colors.surfaceSecondary },
+            isActive ? tabStyles.badgeActive : { backgroundColor: colors.surfaceSecondary },
           ]}
         >
           <Text
             style={[
               tabStyles.badgeText,
-              isActive
-                ? tabStyles.badgeTextActive
-                : { color: colors.textMuted },
+              isActive ? tabStyles.badgeTextActive : { color: colors.textMuted },
             ]}
           >
             {count > 99 ? "99+" : count}

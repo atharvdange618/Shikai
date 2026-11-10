@@ -1,10 +1,5 @@
 import { useEffect, useState } from "react";
-import {
-  ActivityIndicator,
-  StyleSheet,
-  View,
-  useWindowDimensions,
-} from "react-native";
+import { ActivityIndicator, StyleSheet, View, useWindowDimensions } from "react-native";
 import Pdf from "react-native-pdf";
 
 import { Spacing, useTheme } from "@/constants/theme";
@@ -16,9 +11,7 @@ interface PdfViewerProps {
 }
 
 type Download =
-  | { status: "loading" }
-  | { status: "ready"; uri: string }
-  | { status: "error"; message: string };
+  { status: "loading" } | { status: "ready"; uri: string } | { status: "error"; message: string };
 
 export function PdfViewer({ url }: PdfViewerProps) {
   const { colors } = useTheme();
@@ -52,8 +45,7 @@ export function PdfViewer({ url }: PdfViewerProps) {
             const comma = result.indexOf(",");
             resolve(comma === -1 ? result : result.slice(comma + 1));
           };
-          reader.onerror = () =>
-            reject(reader.error ?? new Error("could not read PDF"));
+          reader.onerror = () => reject(reader.error ?? new Error("could not read PDF"));
           reader.readAsDataURL(blob);
         });
         if (!cancelled) {
@@ -81,9 +73,7 @@ export function PdfViewer({ url }: PdfViewerProps) {
     return (
       <FileError
         title="Failed to load PDF"
-        message={
-          renderError ?? (download.status === "error" ? download.message : "")
-        }
+        message={renderError ?? (download.status === "error" ? download.message : "")}
       />
     );
   }

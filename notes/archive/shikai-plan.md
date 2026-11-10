@@ -186,13 +186,13 @@ Root Stack (_layout.tsx)
 
 ### Navigator Breakdown
 
-| Navigator               | Location         | Why                                                |
-| ----------------------- | ---------------- | -------------------------------------------------- |
-| Stack                   | Root             | Handles sign-in → app transition                   |
-| Native Bottom Tabs      | `(tabs)`         | Main 6-tab navigation                              |
-| Stack                   | Inside each tab  | Tab-level navigation (repos, search, stars, etc.)   |
-| Stack                   | `(app)/repo/`    | Repo detail screens (pushed from tabs)             |
-| Stack                   | `(app)/user/`    | User profile (pushed from search/contributors)     |
+| Navigator          | Location        | Why                                               |
+| ------------------ | --------------- | ------------------------------------------------- |
+| Stack              | Root            | Handles sign-in → app transition                  |
+| Native Bottom Tabs | `(tabs)`        | Main 6-tab navigation                             |
+| Stack              | Inside each tab | Tab-level navigation (repos, search, stars, etc.) |
+| Stack              | `(app)/repo/`   | Repo detail screens (pushed from tabs)            |
+| Stack              | `(app)/user/`   | User profile (pushed from search/contributors)    |
 
 ### Repo/User Detail Navigation
 
@@ -479,7 +479,7 @@ Repos, Stars, Search results, Issues, PRs, and Activity Feed all use `useInfinit
 | Search repos       | GET    | `/search/repositories?q={query}&per_page=10`         |
 | Search users       | GET    | `/search/users?q={query}&per_page=10`                |
 | Search issues      | GET    | `/search/issues?q={query}+repo:{owner}/{repo}`       |
-| Markdown render    | POST   | `/markdown` (body: `{ text, mode: "gfm" }`)         |
+| Markdown render    | POST   | `/markdown` (body: `{ text, mode: "gfm" }`)          |
 
 ### GraphQL Queries (via POST to `/graphql`)
 
@@ -776,6 +776,7 @@ Note: Token is obtained via OAuth flow, not manual entry.
 ### MMKV Storage (`lib/mmkv.ts`)
 
 Used for:
+
 - Watchlist (bookmarked repo IDs)
 - React Query disk persistence
 - Offline query cache
@@ -813,23 +814,23 @@ Cache is cleared on sign-in and sign-out.
 
 ## 10. Key Technical Decisions
 
-| Decision           | Choice                         | Reason                                                               |
-| ------------------ | ------------------------------ | -------------------------------------------------------------------- |
-| Routing            | Expo Router                    | File-based routing, native tabs built-in, automatic deep linking     |
-| List rendering     | FlashList (Shopify)            | Better perf than FlatList - native item recycling                    |
-| Image rendering    | expo-image                     | Better caching, progressive loading, blurhash support                |
-| Auth flow          | expo-auth-session              | GitHub OAuth with code exchange                                      |
-| Token storage      | expo-secure-store              | Never AsyncStorage for secrets                                       |
-| REST client        | Axios                          | Familiar, interceptor support for auth header injection              |
-| GraphQL client     | Raw Axios POST                 | Only 3 queries - Apollo/URQL would be overkill                       |
-| Contribution graph | Custom SVG (react-native-svg)  | Not available in REST API, GraphQL returns color values directly     |
-| Pinned repos       | GraphQL                        | Not available in REST API at all                                     |
-| Commit count       | GraphQL (`history.totalCount`) | Cleaner than paginating REST to count                                |
-| File viewer        | FlashList-based                | Handles files of any length without truncation                       |
+| Decision           | Choice                         | Reason                                                                |
+| ------------------ | ------------------------------ | --------------------------------------------------------------------- |
+| Routing            | Expo Router                    | File-based routing, native tabs built-in, automatic deep linking      |
+| List rendering     | FlashList (Shopify)            | Better perf than FlatList - native item recycling                     |
+| Image rendering    | expo-image                     | Better caching, progressive loading, blurhash support                 |
+| Auth flow          | expo-auth-session              | GitHub OAuth with code exchange                                       |
+| Token storage      | expo-secure-store              | Never AsyncStorage for secrets                                        |
+| REST client        | Axios                          | Familiar, interceptor support for auth header injection               |
+| GraphQL client     | Raw Axios POST                 | Only 3 queries - Apollo/URQL would be overkill                        |
+| Contribution graph | Custom SVG (react-native-svg)  | Not available in REST API, GraphQL returns color values directly      |
+| Pinned repos       | GraphQL                        | Not available in REST API at all                                      |
+| Commit count       | GraphQL (`history.totalCount`) | Cleaner than paginating REST to count                                 |
+| File viewer        | FlashList-based                | Handles files of any length without truncation                        |
 | Markdown rendering | GitHub `/markdown` API         | 100% GFM fidelity, themed CSS, syntax highlighting via `pl-*` classes |
-| Local storage      | MMKV                           | 30x faster than AsyncStorage, used for watchlist, cache, persistence |
+| Local storage      | MMKV                           | 30x faster than AsyncStorage, used for watchlist, cache, persistence  |
 | Offline support    | NetInfo + MMKV persistence     | Network detection + disk-persisted React Query cache with 24h max age |
-| Search             | MiniSearch                     | Fuzzy search index for repos, fast client-side filtering             |
-| Fonts              | Inter + JetBrains Mono         | Inter for readability, JetBrains Mono for technical content          |
-| Styling            | `StyleSheet.create()`          | No CSS framework - raw RN stylesheets as agreed                      |
-| Repo ID encoding   | `~~` separator                 | Safe encoding that won't clash with route params or file paths       |
+| Search             | MiniSearch                     | Fuzzy search index for repos, fast client-side filtering              |
+| Fonts              | Inter + JetBrains Mono         | Inter for readability, JetBrains Mono for technical content           |
+| Styling            | `StyleSheet.create()`          | No CSS framework - raw RN stylesheets as agreed                       |
+| Repo ID encoding   | `~~` separator                 | Safe encoding that won't clash with route params or file paths        |

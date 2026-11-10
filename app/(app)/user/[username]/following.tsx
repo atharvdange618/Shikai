@@ -8,10 +8,6 @@ export default function FollowingScreen() {
   const query = useFollowing(username ?? "");
 
   return (
-    <UserList
-      {...query}
-      emptyText="Not following anyone"
-      errorText="Failed to load following"
-    />
+    <UserList {...query} emptyText="Not following anyone" errorText="Failed to load following" />
   );
 }

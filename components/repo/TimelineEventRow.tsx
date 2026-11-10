@@ -1,10 +1,4 @@
-import {
-  type ColorTokens,
-  FontFamily,
-  FontSize,
-  Radius,
-  Spacing,
-} from "@/constants/theme";
+import { type ColorTokens, FontFamily, FontSize, Radius, Spacing } from "@/constants/theme";
 import type { EventItem } from "@/lib/timeline";
 import { encodeRepoId, relativeTime } from "@/lib/utils";
 import { Octicons } from "@expo/vector-icons";
@@ -101,9 +95,7 @@ export function TimelineEventRow({
       <Text style={[s.text, { color: colors.textSecondary }]} numberOfLines={2}>
         {display.text}
       </Text>
-      <Text style={[s.time, { color: colors.textMuted }]}>
-        {relativeTime(event.created_at)}
-      </Text>
+      <Text style={[s.time, { color: colors.textMuted }]}>{relativeTime(event.created_at)}</Text>
     </Pressable>
   );
 }

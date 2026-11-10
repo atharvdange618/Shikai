@@ -37,11 +37,7 @@ export function useDiscussions(owner: string, repo: string) {
   };
 }
 
-export function useDiscussionDetail(
-  owner: string,
-  repo: string,
-  number: number,
-) {
+export function useDiscussionDetail(owner: string, repo: string, number: number) {
   return useQuery(
     queryOptions({
       queryKey: queryKeys.discussionDetail(owner, repo, number),
@@ -58,13 +54,8 @@ export function useLoadMoreReplies(owner: string, repo: string, number: number) 
   const queryKey = queryKeys.discussionDetail(owner, repo, number);
 
   return useMutation({
-    mutationFn: ({
-      commentId,
-      after,
-    }: {
-      commentId: string;
-      after: string | null;
-    }) => fetchMoreDiscussionReplies(commentId, after),
+    mutationFn: ({ commentId, after }: { commentId: string; after: string | null }) =>
+      fetchMoreDiscussionReplies(commentId, after),
     onSuccess: (result, { commentId }) => {
       if (!result) return;
       queryClient.setQueryData<DiscussionDetail | null>(queryKey, (old) => {

@@ -9,8 +9,7 @@ export function useReleases(owner: string, repo: string) {
   const { items: releases, ...rest } = useInfinitePagedQuery(
     {
       queryKey: queryKeys.repoReleases(owner, repo),
-      queryFn: ({ pageParam }) =>
-        fetchReleases(owner, repo, pageParam, PER_PAGE),
+      queryFn: ({ pageParam }) => fetchReleases(owner, repo, pageParam, PER_PAGE),
       enabled: Boolean(owner && repo),
       staleTime: 1000 * 60 * 5,
     },

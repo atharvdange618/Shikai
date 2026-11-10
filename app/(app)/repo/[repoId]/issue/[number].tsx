@@ -11,11 +11,7 @@ import {
   Spacing,
   useTheme,
 } from "@/constants/theme";
-import {
-  useIssueComments,
-  useIssueDetail,
-  useIssueTimeline,
-} from "@/hooks/useIssueDetail";
+import { useIssueComments, useIssueDetail, useIssueTimeline } from "@/hooks/useIssueDetail";
 import { mergeCommentsWithTimeline } from "@/lib/timeline";
 import { decodeRepoId, encodeRepoId, relativeTime } from "@/lib/utils";
 import type { GitHubLabel } from "@/types/github.types";
@@ -23,14 +19,7 @@ import { Octicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import { useEffect, useMemo } from "react";
-import {
-  ActivityIndicator,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 export default function IssueDetailScreen() {
   return (
@@ -52,21 +41,10 @@ function IssueDetailScreenContent() {
   const [owner, repoName] = decodeRepoId(repoId ?? "");
   const issueNumber = Number(number);
 
-  const {
-    data: issue,
-    isLoading,
-    isError,
-  } = useIssueDetail(owner, repoName, issueNumber);
+  const { data: issue, isLoading, isError } = useIssueDetail(owner, repoName, issueNumber);
   const { data: commentsData } = useIssueComments(owner, repoName, issueNumber);
-  const comments = useMemo(
-    () => commentsData?.comments ?? [],
-    [commentsData],
-  );
-  const { data: timelineEvents = [] } = useIssueTimeline(
-    owner,
-    repoName,
-    issueNumber,
-  );
+  const comments = useMemo(() => commentsData?.comments ?? [], [commentsData]);
+  const { data: timelineEvents = [] } = useIssueTimeline(owner, repoName, issueNumber);
   const timeline = useMemo(
     () => mergeCommentsWithTimeline(comments, timelineEvents),
     [comments, timelineEvents],
@@ -93,9 +71,7 @@ function IssueDetailScreenContent() {
     return (
       <View style={[s.centered, { backgroundColor: colors.background }]}>
         <Octicons name="alert" size={IconSize.xl} color={colors.danger} />
-        <Text style={[s.emptyTitle, { color: colors.textSecondary }]}>
-          Failed to load issue
-        </Text>
+        <Text style={[s.emptyTitle, { color: colors.textSecondary }]}>Failed to load issue</Text>
       </View>
     );
   }
@@ -107,15 +83,8 @@ function IssueDetailScreenContent() {
       showsVerticalScrollIndicator={false}
     >
       <View style={s.titleRow}>
-        <Octicons
-          name={isOpen ? "issue-opened" : "issue-closed"}
-          size={22}
-          color={stateColor}
-        />
-        <Text
-          style={[s.title, { color: colors.textPrimary }]}
-          numberOfLines={5}
-        >
+        <Octicons name={isOpen ? "issue-opened" : "issue-closed"} size={22} color={stateColor} />
+        <Text style={[s.title, { color: colors.textPrimary }]} numberOfLines={5}>
           {issue.title}
         </Text>
       </View>
@@ -144,9 +113,7 @@ function IssueDetailScreenContent() {
                 },
               ]}
             >
-              <Text style={[s.labelText, { color: `#${label.color}` }]}>
-                {label.name}
-              </Text>
+              <Text style={[s.labelText, { color: `#${label.color}` }]}>{label.name}</Text>
             </View>
           ))}
         </View>
@@ -159,9 +126,7 @@ function IssueDetailScreenContent() {
           contentFit="cover"
           transition={100}
         />
-        <Text style={[s.authorName, { color: colors.textPrimary }]}>
-          {issue.user.login}
-        </Text>
+        <Text style={[s.authorName, { color: colors.textPrimary }]}>{issue.user.login}</Text>
         <Text style={[s.authorTime, { color: colors.textMuted }]}>
           opened {relativeTime(issue.created_at)}
         </Text>
@@ -174,9 +139,7 @@ function IssueDetailScreenContent() {
         </View>
       )}
 
-      {timeline.length > 0 && (
-        <View style={[s.separator, { backgroundColor: colors.border }]} />
-      )}
+      {timeline.length > 0 && <View style={[s.separator, { backgroundColor: colors.border }]} />}
 
       {timeline.map((item, index) =>
         item.kind === "comment" ? (
@@ -205,10 +168,7 @@ function IssueDetailScreenContent() {
                   {relativeTime(item.comment.created_at)}
                 </Text>
               </View>
-              <MarkdownRenderer
-                markdown={item.comment.body}
-                bodyPadding={0}
-              />
+              <MarkdownRenderer markdown={item.comment.body} bodyPadding={0} />
               <ReactionsRow reactions={item.comment.reactions} colors={colors} />
             </View>
           </View>

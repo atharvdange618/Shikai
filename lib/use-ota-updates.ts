@@ -3,7 +3,10 @@ import * as Updates from "expo-updates";
 
 import { useOnlineManager } from "@/lib/use-online-manager";
 
-function logUpdateEvent(type: "check" | "available" | "downloading" | "ready" | "error", message?: string) {
+function logUpdateEvent(
+  type: "check" | "available" | "downloading" | "ready" | "error",
+  message?: string,
+) {
   if (__DEV__) {
     console.log(`[OTA] ${type}`, message ?? "");
   }

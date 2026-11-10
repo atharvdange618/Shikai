@@ -1,10 +1,4 @@
-import {
-  type ColorTokens,
-  FontFamily,
-  FontSize,
-  Radius,
-  Spacing,
-} from "@/constants/theme";
+import { type ColorTokens, FontFamily, FontSize, Radius, Spacing } from "@/constants/theme";
 import { relativeTime } from "@/lib/utils";
 import type { GitHubCommit } from "@/types/github.types";
 import { Octicons } from "@expo/vector-icons";
@@ -30,9 +24,7 @@ export function DiffCommitList({
   const [expanded, setExpanded] = useState(false);
 
   return (
-    <View
-      style={[s.card, { backgroundColor: colors.surface, borderColor: colors.border }]}
-    >
+    <View style={[s.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
       <Pressable style={s.sectionHeader} onPress={() => setExpanded((v) => !v)}>
         <Text style={[s.sectionTitle, { color: colors.textPrimary }]}>
           {commits.length} commit{commits.length === 1 ? "" : "s"}
@@ -45,13 +37,7 @@ export function DiffCommitList({
       </Pressable>
       {expanded &&
         commits.map((commit) => (
-          <CommitRow
-            key={commit.sha}
-            commit={commit}
-            colors={colors}
-            s={s}
-            repoId={repoId}
-          />
+          <CommitRow key={commit.sha} commit={commit} colors={colors} s={s} repoId={repoId} />
         ))}
     </View>
   );
@@ -91,10 +77,7 @@ function CommitRow({
     >
       <Octicons name="git-commit" size={14} color={colors.textMuted} />
       <View style={{ flex: 1, gap: 2 }}>
-        <Text
-          style={[s.rowText, { color: colors.textPrimary }]}
-          numberOfLines={1}
-        >
+        <Text style={[s.rowText, { color: colors.textPrimary }]} numberOfLines={1}>
           {commit.commit.message.split("\n")[0]}
         </Text>
         <Text style={s.commitMeta}>

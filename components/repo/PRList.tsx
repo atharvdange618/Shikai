@@ -1,20 +1,6 @@
-import {
-  FontFamily,
-  FontSize,
-  Layout,
-  Radius,
-  Spacing,
-  useTheme,
-} from "@/constants/theme";
+import { FontFamily, FontSize, Layout, Radius, Spacing, useTheme } from "@/constants/theme";
 import { FlashList, type FlashListProps } from "@shopify/flash-list";
-import {
-  ActivityIndicator,
-  Linking,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { ActivityIndicator, Linking, Pressable, StyleSheet, Text, View } from "react-native";
 import type { ReactNode } from "react";
 
 export const prStyles = StyleSheet.create({
@@ -65,10 +51,7 @@ export function PRPageState({
   return (
     <View style={{ padding: Spacing.md, gap: Spacing.sm }}>
       {(isLoading || isFetchingNextPage) && (
-        <ActivityIndicator
-          color={colors.accent}
-          accessibilityLabel="Loading results"
-        />
+        <ActivityIndicator color={colors.accent} accessibilityLabel="Loading results" />
       )}
       {isError && (
         <Text style={[prStyles.text, { color: colors.danger }]}>
@@ -78,9 +61,7 @@ export function PRPageState({
         </Text>
       )}
       {!isLoading && !isError && !hasNextPage && count === 0 && (
-        <Text style={[prStyles.text, { color: colors.textSecondary }]}>
-          {emptyText}
-        </Text>
+        <Text style={[prStyles.text, { color: colors.textSecondary }]}>{emptyText}</Text>
       )}
       {!isLoading && !isFetchingNextPage && (isError || hasNextPage) && (
         <Pressable
@@ -104,33 +85,23 @@ export function PRList<T>({
   header,
   footer,
   ...props
-}: Pick<
-  FlashListProps<T>,
-  "data" | "renderItem" | "keyExtractor" | "getItemType"
-> & { header?: ReactNode; footer?: ReactNode }) {
+}: Pick<FlashListProps<T>, "data" | "renderItem" | "keyExtractor" | "getItemType"> & {
+  header?: ReactNode;
+  footer?: ReactNode;
+}) {
   const { colors } = useTheme();
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       <FlashList
         {...props}
-        ListHeaderComponent={
-          <View style={{ padding: Spacing.md, gap: Spacing.sm }}>{header}</View>
-        }
-        ListFooterComponent={
-          <View style={{ paddingBottom: Spacing["3xl"] }}>{footer}</View>
-        }
+        ListHeaderComponent={<View style={{ padding: Spacing.md, gap: Spacing.sm }}>{header}</View>}
+        ListFooterComponent={<View style={{ paddingBottom: Spacing["3xl"] }}>{footer}</View>}
       />
     </View>
   );
 }
 
-export function PRGitHubLink({
-  url,
-  label = "Open on GitHub",
-}: {
-  url: string;
-  label?: string;
-}) {
+export function PRGitHubLink({ url, label = "Open on GitHub" }: { url: string; label?: string }) {
   const { colors } = useTheme();
   return (
     <Pressable

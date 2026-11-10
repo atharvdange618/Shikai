@@ -7,12 +7,7 @@ function matchesQuery(repo: GitHubRepo, query: string): boolean {
   const desc = repo.description?.toLowerCase() ?? "";
   const lang = repo.language?.toLowerCase() ?? "";
   const owner = repo.owner?.login?.toLowerCase() ?? "";
-  return (
-    name.includes(q) ||
-    desc.includes(q) ||
-    lang.includes(q) ||
-    owner.includes(q)
-  );
+  return name.includes(q) || desc.includes(q) || lang.includes(q) || owner.includes(q);
 }
 
 export function useSearchIndex(

@@ -17,8 +17,7 @@ export const isOAuthRedirect = (url: string): boolean =>
  */
 export const isDevClientUrl = (url: string): boolean =>
   url.startsWith("shikai:") &&
-  (url.startsWith("shikai://expo-development-client") ||
-    /[?&]__expo_url=/.test(url.split("#")[0]));
+  (url.startsWith("shikai://expo-development-client") || /[?&]__expo_url=/.test(url.split("#")[0]));
 
 /**
  * The router path for an in-app `shikai://` link, e.g.
@@ -94,9 +93,7 @@ export function parseGitHubUrl(url: string): string | null {
       if (!a) return `${repoBase}/pull-requests`;
       // GitHub's PR tabs map to the PR section screens; other tabs land on Overview.
       const tab = seg[4];
-      return tab && PR_TABS.has(tab)
-        ? `${repoBase}/pr/${a}/${tab}`
-        : `${repoBase}/pr/${a}`;
+      return tab && PR_TABS.has(tab) ? `${repoBase}/pr/${a}/${tab}` : `${repoBase}/pr/${a}`;
     }
     case "pulls":
       return `${repoBase}/pull-requests`;
@@ -125,9 +122,7 @@ export function parseGitHubUrl(url: string): string | null {
       // /actions/runs/{id}, optionally /job/{jobId} after it: the run screen
       // lists that job. Anything else under /actions opens the runs list.
       const runId = a === "runs" ? seg[4] : undefined;
-      return runId && /^\d+$/.test(runId)
-        ? `${repoBase}/run/${runId}`
-        : `${repoBase}/actions`;
+      return runId && /^\d+$/.test(runId) ? `${repoBase}/run/${runId}` : `${repoBase}/actions`;
     }
     // GitHub's Insights tab: /pulse and every /graphs/* chart.
     case "pulse":

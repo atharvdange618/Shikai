@@ -1,17 +1,9 @@
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { DiffStat, getFileStatusDisplay } from "@/components/repo/DiffStat";
 import { PRHeader } from "@/components/repo/PRHeader";
-import {
-  PRGitHubLink,
-  PRList,
-  PRPageState,
-  prStyles as s,
-} from "@/components/repo/PRList";
+import { PRGitHubLink, PRList, PRPageState, prStyles as s } from "@/components/repo/PRList";
 import { Spacing, useTheme } from "@/constants/theme";
-import {
-  usePullRequestDetail,
-  usePullRequestFiles,
-} from "@/hooks/usePullRequestDetail";
+import { usePullRequestDetail, usePullRequestFiles } from "@/hooks/usePullRequestDetail";
 import { decodeRepoId } from "@/lib/utils";
 import { Octicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
@@ -42,9 +34,7 @@ function Files() {
         header={
           <>
             <Text style={[s.title, { color: colors.textPrimary }]}>
-              {detail.data
-                ? `${detail.data.changed_files} files · `
-                : "Files changed"}
+              {detail.data ? `${detail.data.changed_files} files · ` : "Files changed"}
               {detail.data && (
                 <>
                   <Text style={{ color: colors.success }}>
@@ -67,9 +57,7 @@ function Files() {
                 style={s.button}
                 onPress={() => void detail.refetch()}
               >
-                <Text style={{ color: colors.accent }}>
-                  PR totals unavailable · Retry
-                </Text>
+                <Text style={{ color: colors.accent }}>PR totals unavailable · Retry</Text>
               </Pressable>
             )}
           </>
@@ -93,9 +81,7 @@ function Files() {
                 })
               }
             >
-              <Text style={[s.mono, { color: colors.textPrimary }]}>
-                {file.filename} ›
-              </Text>
+              <Text style={[s.mono, { color: colors.textPrimary }]}>{file.filename} ›</Text>
               <View
                 style={{
                   flexDirection: "row",
@@ -104,36 +90,22 @@ function Files() {
                 }}
               >
                 <Octicons name={display.icon} size={14} color={display.color} />
-                <Text style={[s.meta, { color: colors.textSecondary }]}>
-                  {file.status}
-                </Text>
+                <Text style={[s.meta, { color: colors.textSecondary }]}>{file.status}</Text>
                 <Text style={[s.meta, { color: colors.textMuted }]}>·</Text>
-                <DiffStat
-                  additions={file.additions}
-                  deletions={file.deletions}
-                />
+                <DiffStat additions={file.additions} deletions={file.deletions} />
               </View>
             </Pressable>
           );
         }}
         footer={
           <>
-            <PRPageState
-              {...query}
-              count={query.files.length}
-              emptyText="No changed files"
-            />
+            <PRPageState {...query} count={query.files.length} emptyText="No changed files" />
             {(detail.data?.changed_files ?? 0) > 3000 && (
               <>
-                <Text
-                  style={[s.text, { padding: 16, color: colors.textSecondary }]}
-                >
-                  GitHub’s API exposes at most 3,000 files. Open GitHub for the
-                  rest.
+                <Text style={[s.text, { padding: 16, color: colors.textSecondary }]}>
+                  GitHub’s API exposes at most 3,000 files. Open GitHub for the rest.
                 </Text>
-                <PRGitHubLink
-                  url={`https://github.com/${owner}/${repo}/pull/${number}/files`}
-                />
+                <PRGitHubLink url={`https://github.com/${owner}/${repo}/pull/${number}/files`} />
               </>
             )}
           </>

@@ -92,11 +92,7 @@ function BlameScreenContent() {
   const { colors, isDark } = useTheme();
 
   const [owner, repoName] = decodeRepoId(repoId ?? "");
-  const {
-    data,
-    isLoading,
-    isError,
-  } = useBlame(owner, repoName, ref ?? "", path ?? "");
+  const { data, isLoading, isError } = useBlame(owner, repoName, ref ?? "", path ?? "");
 
   useEffect(() => {
     try {
@@ -104,10 +100,7 @@ function BlameScreenContent() {
     } catch {}
   }, [navigation, fileName]);
 
-  const lines = useMemo(
-    () => (data?.text ? buildLines(data.text, data.ranges) : []),
-    [data],
-  );
+  const lines = useMemo(() => (data?.text ? buildLines(data.text, data.ranges) : []), [data]);
 
   const s = useMemo(() => buildStyles(colors), [colors]);
 
@@ -123,9 +116,7 @@ function BlameScreenContent() {
     return (
       <View style={[s.centered, { backgroundColor: colors.background }]}>
         <Octicons name="alert" size={IconSize.xl} color={colors.danger} />
-        <Text style={[s.emptyTitle, { color: colors.textSecondary }]}>
-          Failed to load blame
-        </Text>
+        <Text style={[s.emptyTitle, { color: colors.textSecondary }]}>Failed to load blame</Text>
       </View>
     );
   }
@@ -156,13 +147,7 @@ function BlameScreenContent() {
       data={lines}
       keyExtractor={(item) => String(item.lineNumber)}
       renderItem={({ item }) => (
-        <BlameLineRow
-          line={item}
-          colors={colors}
-          isDark={isDark}
-          s={s}
-          repoId={repoId ?? ""}
-        />
+        <BlameLineRow line={item} colors={colors} isDark={isDark} s={s} repoId={repoId ?? ""} />
       )}
       drawDistance={400}
       style={{ backgroundColor: colors.background }}
@@ -193,28 +178,20 @@ const BlameLineRow = memo(function BlameLineRow({
   const tintColor = line.tint === 0 ? colors.surface : colors.background;
 
   return (
-    <Pressable
-      onPress={handlePress}
-      style={[s.row, { backgroundColor: tintColor }]}
-    >
+    <Pressable onPress={handlePress} style={[s.row, { backgroundColor: tintColor }]}>
       <View style={s.gutter}>
         {line.isRangeStart && (
           <>
             <Text style={[s.sha, { color: colors.textSecondary }]}>
               {line.range.commit.oid.slice(0, 7)}
             </Text>
-            <Text
-              style={[s.date, { color: colors.textMuted }]}
-              numberOfLines={1}
-            >
+            <Text style={[s.date, { color: colors.textMuted }]} numberOfLines={1}>
               {relativeTime(line.range.commit.committedDate)}
             </Text>
           </>
         )}
       </View>
-      <Text style={[s.lineNumber, { color: colors.textMuted }]}>
-        {line.lineNumber}
-      </Text>
+      <Text style={[s.lineNumber, { color: colors.textMuted }]}>{line.lineNumber}</Text>
       <Text style={[s.code, { color: colors.textPrimary }]} numberOfLines={1}>
         {line.text.length > 0
           ? line.tokens.map((token, i) => {

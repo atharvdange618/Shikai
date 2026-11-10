@@ -27,11 +27,7 @@ export function prefetchRoute(href: string) {
   router.prefetch(href as Parameters<typeof router.prefetch>[0]);
 }
 
-export function prefetchRepoDetails(
-  queryClient: QueryClient,
-  owner: string,
-  repo: string,
-) {
+export function prefetchRepoDetails(queryClient: QueryClient, owner: string, repo: string) {
   queryClient.prefetchQuery({
     queryKey: queryKeys.repo(owner, repo),
     queryFn: () => fetchRepo(owner, repo),
@@ -69,14 +65,8 @@ const COMMON_ENTRY_FILES = [
   "CONTRIBUTING.md",
 ];
 
-export function prefetchFileTree(
-  queryClient: QueryClient,
-  owner: string,
-  repo: string,
-) {
-  const repoData = queryClient.getQueryData<GitHubRepo>(
-    queryKeys.repo(owner, repo),
-  );
+export function prefetchFileTree(queryClient: QueryClient, owner: string, repo: string) {
+  const repoData = queryClient.getQueryData<GitHubRepo>(queryKeys.repo(owner, repo));
   const defaultBranch = repoData?.default_branch;
 
   if (defaultBranch) {
@@ -93,23 +83,18 @@ export function prefetchFileTree(
         staleTime: 1000 * 60 * 5,
       })
       .then(() => {
-        const updatedRepo = queryClient.getQueryData<GitHubRepo>(
-          queryKeys.repo(owner, repo),
-        );
+        const updatedRepo = queryClient.getQueryData<GitHubRepo>(queryKeys.repo(owner, repo));
         if (updatedRepo?.default_branch) {
-          queryClient.prefetchQuery({
-            queryKey: queryKeys.repoFileTree(
-              owner,
-              repo,
-              updatedRepo.default_branch,
-            ),
-            queryFn: () =>
-              fetchFileTree(owner, repo, updatedRepo.default_branch),
-            staleTime: 1000 * 60 * 15,
-          }).catch(() => { });
+          queryClient
+            .prefetchQuery({
+              queryKey: queryKeys.repoFileTree(owner, repo, updatedRepo.default_branch),
+              queryFn: () => fetchFileTree(owner, repo, updatedRepo.default_branch),
+              staleTime: 1000 * 60 * 15,
+            })
+            .catch(() => {});
         }
       })
-      .catch(() => { });
+      .catch(() => {});
   }
 }
 
@@ -153,11 +138,7 @@ export function prefetchCommonFiles(
   }
 }
 
-export function prefetchRepoCommits(
-  queryClient: QueryClient,
-  owner: string,
-  repo: string,
-) {
+export function prefetchRepoCommits(queryClient: QueryClient, owner: string, repo: string) {
   queryClient.prefetchInfiniteQuery({
     queryKey: queryKeys.repoCommits(owner, repo),
     queryFn: ({ pageParam }) => fetchCommits(owner, repo, pageParam, 10),
@@ -201,8 +182,7 @@ export function prefetchOverview(queryClient: QueryClient, username?: string) {
     const { pat } = useAuthStore.getState();
     queryClient.prefetchInfiniteQuery({
       queryKey: [...queryKeys.events(username), pat ? "pat" : "oauth"],
-      queryFn: ({ pageParam }) =>
-        fetchUserEvents(username, pageParam, 20, pat),
+      queryFn: ({ pageParam }) => fetchUserEvents(username, pageParam, 20, pat),
       initialPageParam: 1,
       getNextPageParam: (lastPage) => lastPage.pagination.next ?? undefined,
       pages: 1,
