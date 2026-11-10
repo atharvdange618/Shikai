@@ -19,7 +19,7 @@ Expo ships about three SDKs a year. Upgrade one SDK at a time. Skip an SDK only 
 2. Remove the `react-native` pin: the `overrides` entry and the exact version in the dependency (npm rejects an override that differs from the direct dependency). The new SDK picks its own React Native version, and the pin will fight it.
 3. `npm install expo@^<new version>`, then align the rest by hand as in the monthly dependency step, since `--fix` hits `EALLOWSCRIPTS`.
 4. `npx expo prebuild --clean`. The config plugins in `plugins/` throw if Expo's `build.gradle` template has changed. If one throws, update that plugin's regex to match the new template.
-5. `npx expo lint`, `npx tsc --noEmit`, `npx vitest run`.
+5. `npm run lint`, `npm run typecheck`, `npx vitest run`.
 6. Build a release APK (see Releasing) and test on a device: sign in, open a repo, open a full-screen diff, check the widget.
 7. Check `modules/shikai-security/`. The Kotlin module can break on a new Kotlin or Android Gradle Plugin version.
 8. Pin `react-native` back to the exact version the hop ended on, in the dependency and in `overrides`. A transitive bump should never move React Native without a test.

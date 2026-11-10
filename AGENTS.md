@@ -13,8 +13,11 @@ Read-only GitHub companion for Android. React Native + Expo SDK 58, expo-router,
 ## Commands
 
 ```bash
-# Lint (uses expo's built-in eslint wrapper, NOT npx eslint)
-expo lint
+# Lint (oxlint, type-aware; config in .oxlintrc.json)
+npm run lint
+
+# Typecheck (TypeScript 7)
+npm run typecheck
 
 # Start dev server
 expo start
@@ -43,7 +46,7 @@ npx expo export -p web && wrangler dev
 npx vitest run
 ```
 
-Tests live in `lib/__tests__/`. Run `expo lint` and `npx vitest run` before considering a change done.
+Tests live in `lib/__tests__/`. Run `npm run lint`, `npm run typecheck` and `npx vitest run` before considering a change done. The pre-commit hook runs lint-staged (oxlint --fix, Prettier), typecheck and tests; commitlint checks the message. See D-041.
 
 ## Architecture
 

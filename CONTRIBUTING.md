@@ -59,8 +59,9 @@ A few rules that trip people up:
 Run the same checks CI runs:
 
 ```bash
-npx expo lint
-npx tsc --noEmit
+npm run lint
+npm run typecheck
+npm run format:check
 npx vitest run
 ```
 
