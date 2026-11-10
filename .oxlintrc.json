@@ -8,7 +8,6 @@
     "**/dist/**",
     "**/.next/**",
     "**/build/**",
-    "**/*.{js,mjs,cjs}",
     "**/.pnpm-store/**",
     "**/*.config.*",
     "**/components/ui/**",

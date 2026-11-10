@@ -140,8 +140,9 @@
     "*.{json,md,css}": [
       "prettier --write"
     ],
-    "*.{ts,tsx}": [
+    "*.{js,jsx,cjs,mjs,ts,tsx}": [
       "oxlint --fix",
+      "oxlint",
       "prettier --write"
     ]
   },
