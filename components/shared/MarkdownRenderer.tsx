@@ -7,10 +7,7 @@ import * as Clipboard from "expo-clipboard";
 import { useRouter, type Href } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import { Animated, Linking, StyleSheet, View, type StyleProp, type ViewStyle } from "react-native";
-import type { WebViewMessageEvent } from "react-native-webview";
-import RNWebView from "react-native-webview";
-
-const WebView = RNWebView as unknown as React.ComponentType<any>;
+import { WebView, type WebViewMessageEvent } from "react-native-webview";
 
 interface MarkdownRendererProps {
   markdown: string;
@@ -40,7 +37,7 @@ function resolveImageUrls(html: string, context?: string): string {
   const base = `https://raw.githubusercontent.com/${owner}/${repo}/HEAD/`;
   return html.replace(
     /<img\s+([^>]*?)src=["']((?!https?:\/\/)[^"']+)["']/gi,
-    (_match, attrs, src) => {
+    (_match, attrs: string, src: string) => {
       const resolved = src.startsWith("/") ? src.slice(1) : src;
       return `<img ${attrs}src="${base}${resolved}"`;
     },
@@ -132,20 +129,27 @@ export function MarkdownRenderer({
   const onMessage = useCallback(
     (event: WebViewMessageEvent) => {
       try {
-        const data = JSON.parse(event.nativeEvent.data);
-        if (data.type === "height" && data.height > 0) {
+        const data: unknown = JSON.parse(event.nativeEvent.data);
+        if (typeof data !== "object" || data === null || !("type" in data)) return;
+
+        if (
+          data.type === "height" &&
+          "height" in data &&
+          typeof data.height === "number" &&
+          data.height > 0
+        ) {
           setHeight(data.height);
           onHeightChange?.(data.height);
           reveal();
-        } else if (data.type === "anchor" && typeof data.y === "number") {
+        } else if (data.type === "anchor" && "y" in data && typeof data.y === "number") {
           onAnchorOffset?.(data.y);
-        } else if (data.type === "link" && typeof data.href === "string") {
+        } else if (data.type === "link" && "href" in data && typeof data.href === "string") {
           const url = resolveMarkdownLink(data.href, context, filePath);
           if (!url) return;
           const route = parseGitHubUrl(url);
           if (route) router.push(route as Href);
           else Linking.openURL(url).catch(() => {});
-        } else if (data.type === "copy" && typeof data.text === "string") {
+        } else if (data.type === "copy" && "text" in data && typeof data.text === "string") {
           Clipboard.setStringAsync(data.text).catch(() => {});
         }
       } catch {
@@ -180,7 +184,6 @@ export function MarkdownRenderer({
         onShouldStartLoadWithRequest={onShouldStartLoad}
         originWhitelist={["about:*", "data:*"]}
         javaScriptEnabled
-        textEncodingUsage="utf-8"
       />
     </Animated.View>
   );

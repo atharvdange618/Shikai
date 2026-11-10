@@ -101,6 +101,14 @@ describe("searchIssues", () => {
 describe("paged list endpoints", () => {
   beforeEach(() => get.mockReset());
 
+  it("ignores a non-string Link header", async () => {
+    get.mockResolvedValue({ data: [], headers: { link: 42 } });
+
+    const result = await fetchPullRequestFiles("o", "r", 1);
+
+    expect(result.pagination).toEqual({});
+  });
+
   const next = (page: number) => ({
     link: `<https://api.github.com/x?page=${page}>; rel="next"`,
   });

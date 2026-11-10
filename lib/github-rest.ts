@@ -39,8 +39,8 @@ import type {
   RepoListParams,
 } from "@/types/github.types";
 
-function parseLinkHeader(linkHeader: string | undefined): GitHubPagination {
-  if (!linkHeader) return {};
+function parseLinkHeader(linkHeader: unknown): GitHubPagination {
+  if (typeof linkHeader !== "string" || !linkHeader) return {};
 
   const pagination: GitHubPagination = {};
   const parts = linkHeader.split(",");
