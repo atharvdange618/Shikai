@@ -326,7 +326,7 @@ export default function NotificationsScreen() {
       );
 
       markNotificationAsRead(notification.id, pat).catch(() => {
-        queryClient.invalidateQueries({ queryKey: notificationsQueryKey });
+        void queryClient.invalidateQueries({ queryKey: notificationsQueryKey });
       });
     },
     [queryClient, notificationsQueryKey, pat],
@@ -366,7 +366,7 @@ export default function NotificationsScreen() {
       // Roll back first: offline, the refetch below fails too and would
       // leave every thread showing as read.
       queryClient.setQueryData(notificationsQueryKey, previous);
-      queryClient.invalidateQueries({ queryKey: notificationsQueryKey });
+      void queryClient.invalidateQueries({ queryKey: notificationsQueryKey });
       alert.show({
         variant: "danger",
         title: "Couldn't mark all as read",
@@ -393,7 +393,7 @@ export default function NotificationsScreen() {
       return;
     }
     if (hasNextPage && !isFetchingNextPage) {
-      fetchNextPage();
+      void fetchNextPage();
     }
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 

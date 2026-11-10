@@ -34,7 +34,7 @@ export function TabBarIcon({ name, filledName, color, size, focused }: TabBarIco
 
   useEffect(() => {
     if (focused) {
-      Haptics.selectionAsync();
+      Haptics.selectionAsync().catch(() => {});
     }
     scale.value = reducedMotion
       ? focused

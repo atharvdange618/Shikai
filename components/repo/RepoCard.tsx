@@ -46,7 +46,7 @@ export const RepoCard = memo(function RepoCard({
   const handleBookmarkPress = useCallback(
     (e: { stopPropagation?: () => void }) => {
       e.stopPropagation?.();
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
       toggleWatchlist(repoId);
     },
     [repoId, toggleWatchlist],

@@ -20,7 +20,7 @@ export function useReviewPrompt(enabled: boolean) {
     launchRecorded = true;
     if (!recordLaunch(reviewMMKV)) return;
 
-    const timer = setTimeout(async () => {
+    async function requestReview() {
       try {
         if (await StoreReview.isAvailableAsync()) {
           await StoreReview.requestReview();
@@ -28,7 +28,8 @@ export function useReviewPrompt(enabled: boolean) {
       } catch (e) {
         console.error("Review prompt failed", e);
       }
-    }, ASK_DELAY_MS);
+    }
+    const timer = setTimeout(() => void requestReview(), ASK_DELAY_MS);
     return () => clearTimeout(timer);
   }, [enabled]);
 }

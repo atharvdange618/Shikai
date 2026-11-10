@@ -26,11 +26,19 @@ vi.mock("@/stores/recent-searches.store", () => ({
   },
 }));
 
-import { clearAllMMKV, mmkv, THEME_KEY } from "@/lib/mmkv";
+import { clearAllMMKV, mmkv, mmkvStorage, THEME_KEY } from "@/lib/mmkv";
 
 beforeEach(() => {
   m.store.clear();
   vi.clearAllMocks();
+});
+
+it("stores, reads, and removes values through the persister storage adapter", () => {
+  mmkvStorage.setItem("cache", "{}");
+  expect(mmkvStorage.getItem("cache")).toBe("{}");
+
+  mmkvStorage.removeItem("cache");
+  expect(mmkvStorage.getItem("cache")).toBeNull();
 });
 
 describe("clearAllMMKV", () => {

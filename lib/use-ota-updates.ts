@@ -46,7 +46,7 @@ export function useOTAUpdates(): {
       }
     }
 
-    run();
+    void run();
   }, [isOnline]);
 
   const reload = useCallback(() => Updates.reloadAsync(), []);

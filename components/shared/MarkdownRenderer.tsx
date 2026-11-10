@@ -96,7 +96,7 @@ export function MarkdownRenderer({
       }
     }
 
-    render();
+    void render();
     return () => {
       cancelled = true;
     };

@@ -179,7 +179,11 @@ function ReleaseDetailScreenContent() {
               asset.download_count === 1 ? "" : "s"
             }`}
             colors={colors}
-            onPress={() => Linking.openURL(asset.browser_download_url)}
+            onPress={() => {
+              Linking.openURL(asset.browser_download_url).catch(() =>
+                console.error("Could not open release asset"),
+              );
+            }}
             onMenu={() =>
               setMenuTarget({
                 name: asset.name,
@@ -194,7 +198,9 @@ function ReleaseDetailScreenContent() {
             icon="file-code"
             name={src.name}
             colors={colors}
-            onPress={() => Linking.openURL(src.url)}
+            onPress={() => {
+              Linking.openURL(src.url).catch(() => console.error("Could not open source archive"));
+            }}
             onMenu={() => setMenuTarget(src)}
           />
         ))}
@@ -278,9 +284,9 @@ function AssetActionMenu({
 
   if (!target) return null;
 
-  const run = (fn: () => void) => {
+  const run = (fn: () => Promise<unknown>) => {
     onClose();
-    fn();
+    fn().catch(() => console.error("Could not open or share release link"));
   };
 
   const handleCopy = async () => {

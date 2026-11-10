@@ -90,7 +90,7 @@ export default function ReposScreen() {
       queryClient.invalidateQueries({ queryKey: queryKeys.installations() }),
     ]);
     setRefreshing(false);
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
   }, [queryClient]);
 
   const handleRepoPressIn = useCallback(
@@ -217,7 +217,7 @@ export default function ReposScreen() {
           ListEmptyComponent={ListEmpty}
           ListFooterComponent={ListFooter}
           onEndReached={() => {
-            if (hasNextPage) fetchNextPage();
+            if (hasNextPage) void fetchNextPage();
           }}
           onEndReachedThreshold={0.5}
           onViewableItemsChanged={onViewableItemsChanged}

@@ -97,7 +97,7 @@ export default function SettingsScreen() {
       await savePAT(trimmed);
       setPat(trimmed);
       setPatInput("");
-      queryClient.invalidateQueries({ queryKey: ["notifications"] });
+      void queryClient.invalidateQueries({ queryKey: ["notifications"] });
     } catch {
       setValidating(false);
       setPatError("Something went wrong. Please try again.");
@@ -105,6 +105,14 @@ export default function SettingsScreen() {
   }, [patInput, setPat, queryClient]);
 
   const handleRemovePAT = useCallback(() => {
+    async function removePAT() {
+      await deletePAT();
+      setPat(null);
+      setPatInput("");
+      setPatError(null);
+      void queryClient.invalidateQueries({ queryKey: ["notifications"] });
+    }
+
     alert.show({
       variant: "danger",
       title: "Remove token",
@@ -114,13 +122,7 @@ export default function SettingsScreen() {
         {
           text: "Remove",
           style: "destructive",
-          onPress: async () => {
-            await deletePAT();
-            setPat(null);
-            setPatInput("");
-            setPatError(null);
-            queryClient.invalidateQueries({ queryKey: ["notifications"] });
-          },
+          onPress: () => void removePAT(),
         },
       ],
     });
@@ -169,7 +171,12 @@ export default function SettingsScreen() {
             message: "Allow notifications in Android settings, then turn alerts on again.",
             actions: [
               { text: "Cancel", style: "cancel" },
-              { text: "Open settings", onPress: () => Linking.openSettings() },
+              {
+                text: "Open settings",
+                onPress: () => {
+                  Linking.openSettings().catch(() => console.error("Could not open settings"));
+                },
+              },
             ],
           });
         } else {
@@ -216,7 +223,15 @@ export default function SettingsScreen() {
         {
           text: "Sign out",
           style: "destructive",
-          onPress: () => signOut(queryClient),
+          onPress: () => {
+            signOut(queryClient).catch(() => {
+              alert.show({
+                variant: "danger",
+                title: "Could not sign out",
+                message: "Please try again.",
+              });
+            });
+          },
         },
       ],
     });

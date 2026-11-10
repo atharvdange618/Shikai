@@ -176,10 +176,10 @@ export function ActivityFeed({
 
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
 
-  const handleEventPress = async (url: string) => {
+  const handleEventPress = (url: string) => {
     const route = parseGitHubUrl(url);
     if (!route) return;
-    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
     router.push(route as Href);
   };
 
@@ -236,7 +236,7 @@ export function ActivityFeed({
           style={({ pressed }) => [s.item, pressed && s.itemPressed]}
           onPress={() => {
             if (isGroup) {
-              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
               toggleGroup(group.id);
             } else {
               handleEventPress(group.display.url);

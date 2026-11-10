@@ -121,7 +121,7 @@ export default function ReleasesScreen() {
         ListEmptyComponent={ListEmpty}
         ListFooterComponent={ListFooter}
         onEndReached={() => {
-          if (hasNextPage) fetchNextPage();
+          if (hasNextPage) void fetchNextPage();
         }}
         onEndReachedThreshold={0.5}
         refreshControl={<PullToRefresh refreshing={refreshing} onRefresh={onRefresh} />}

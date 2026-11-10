@@ -48,7 +48,7 @@ export function useContributions() {
             />
           );
         },
-      });
+      }).catch(() => console.error("Could not update the contribution widget"));
     }
   }, [query.data?.weeks.length]);
 
