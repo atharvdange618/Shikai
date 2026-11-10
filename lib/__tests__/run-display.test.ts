@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import type { ColorTokens } from "@/constants/themes";
-import { getCheckDisplay, getRunDisplay } from "@/lib/run-display";
+import { formatJobLogTail, getCheckDisplay, getRunDisplay } from "@/lib/run-display";
 
 const colors = {
   success: "success",
@@ -9,6 +9,13 @@ const colors = {
   warning: "warning",
   textMuted: "muted",
 } as ColorTokens;
+
+it("shows only the last 100 job log lines without ANSI colors", () => {
+  const lines = Array.from({ length: 101 }, (_, index) => `line ${index}`);
+  const log = `${lines[0]}\n\u001b[31;1m${lines.slice(1).join("\n")}\u001b[0m\n`;
+
+  expect(formatJobLogTail(log)).toBe(lines.slice(1).join("\n"));
+});
 
 describe("getRunDisplay", () => {
   it("separates queued from in progress", () => {

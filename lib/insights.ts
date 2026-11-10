@@ -38,7 +38,7 @@ export interface PunchCardGrid {
 }
 
 export function buildPunchCard(entries: GitHubPunchCardEntry[]): PunchCardGrid {
-  const counts = Array.from({ length: 7 }, () => new Array<number>(24).fill(0));
+  const counts = Array.from({ length: 7 }, () => Array.from({ length: 24 }, () => 0));
   let busiest: PunchCardGrid["busiest"] = null;
 
   for (const [day, hour, commits] of entries) {

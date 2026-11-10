@@ -14,6 +14,12 @@ export interface RunDisplay {
   label: string;
 }
 
+export function formatJobLogTail(jobLog: string): string {
+  // oxlint-disable-next-line eslint/no-control-regex -- ANSI color codes start with ESC.
+  const plainLog = jobLog.replace(/\u001b\[[0-9;]*m/g, "");
+  return plainLog.trimEnd().split("\n").slice(-100).join("\n");
+}
+
 /**
  * Display for a row of the merged PR check list, which carries two
  * pseudo-conclusions GitHub itself never reports: `pending` for a run in flight

@@ -13,7 +13,7 @@ import {
 } from "@/constants/theme";
 import { useCheckRun, useCheckRunAnnotations, useCheckRunJobLog } from "@/hooks/useCheckRun";
 import { parseActionsJobId } from "@/lib/github-rest";
-import { getRunDisplay } from "@/lib/run-display";
+import { formatJobLogTail, getRunDisplay } from "@/lib/run-display";
 import { decodeRepoId, relativeTime } from "@/lib/utils";
 import type { GitHubCheckAnnotationLevel } from "@/types/github.types";
 import { Octicons } from "@expo/vector-icons";
@@ -65,15 +65,7 @@ function CheckRunScreenContent() {
     isError: isLogError,
   } = useCheckRunJobLog(owner, repoName, jobId, logExpanded);
 
-  const logTail = useMemo(() => {
-    if (!jobLog) return null;
-    return jobLog
-      .replace(/\u001b\[[0-9;]*m/g, "")
-      .trimEnd()
-      .split("\n")
-      .slice(-100)
-      .join("\n");
-  }, [jobLog]);
+  const logTail = useMemo(() => (jobLog ? formatJobLogTail(jobLog) : null), [jobLog]);
 
   useEffect(() => {
     try {
