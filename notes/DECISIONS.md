@@ -424,3 +424,13 @@ Entries D-001 to D-021 were backfilled on 2026-10-15 from commits, the changelog
 **Rejected.** Fixing all 261 in the migration: it touches most screens, and a QA bug could come from the tooling or the rewrite (the D-036 reasoning). Turning type-aware linting off: it drops the main thing oxlint adds.
 **Consequences.** lint-staged's `oxlint --fix` also applies fixes for `warn` rules, so a commit can pick up small autofixes in files it touches; read the staged diff. `npx expo install --check` reports TypeScript 7 as outside Expo's range; ignore that one. The one-time format commits are listed in `.git-blame-ignore-revs`. The new lint found a real bug: the injected WebView script in `MarkdownRenderer.tsx` matches `language-([w+]+)`, because `\w` inside a template string becomes `w`.
 **Revisit when.** The follow-up fixes the warnings and sets each rule back to `error`.
+
+## D-042: Type the config plugins with checkJs, not a lint override
+
+**Date:** 2026-11-10 · **Status:** Accepted
+
+**Context.** Toolchain 2.1.0 (`d743011`) dropped the `**/*.{js,mjs,cjs}` ignore from `.oxlintrc.json`, so oxlint's type-aware rules started on `plugins/*.js`. Those files sat outside `tsconfig.json`, so `require` and `process` had no types and 31 lines failed `no-unsafe-*` rules.
+**Decision.** Add `plugins/**/*.js` to `include` with `allowJs` and `checkJs`, and mark each plugin `/** @type {import("expo/config-plugins").ConfigPlugin} */`. `withLaunchIntent.js` exports through one `Object.assign`, since TypeScript rejects `module.exports =` next to `module.exports.x =`. The plugins stay plain CommonJS, which is what prebuild loads.
+**Rejected.** An override that turns the `no-unsafe-*` rules off for `plugins/`: shorter, but these files rewrite release signing and `build.gradle`, and a typo there would only show up at prebuild. Putting the JS ignore back: it undoes the Toolchain default and drops lint for the plugins. Rewriting them in TypeScript: we haven't checked how SDK 58 loads `.ts` plugins, and four small files don't justify the risk.
+**Consequences.** `npm run typecheck` now covers the plugins. A new plugin needs the `ConfigPlugin` JSDoc line, and a pure helper needs `@param` types, or typecheck fails on implicit `any`.
+**Revisit when.** A plugin grows past what JSDoc types cleanly, or Expo documents loading TypeScript plugins with no build step.
