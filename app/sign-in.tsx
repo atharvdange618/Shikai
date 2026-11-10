@@ -182,9 +182,16 @@ export default function SignInScreen() {
             }),
           });
 
-          const tokenData = await tokenResponse.json();
+          const tokenData: unknown = await tokenResponse.json();
 
-          if (tokenData.error || !tokenData.access_token) {
+          if (
+            typeof tokenData !== "object" ||
+            tokenData === null ||
+            ("error" in tokenData && tokenData.error) ||
+            !("access_token" in tokenData) ||
+            typeof tokenData.access_token !== "string" ||
+            !tokenData.access_token
+          ) {
             setError("Could not get access token. Please try again.");
             setLoading(false);
             await clearPendingAuth();
@@ -461,8 +468,8 @@ export default function SignInScreen() {
               <Image
                 source={
                   isDark
-                    ? require("@/assets/images/splash-icon-dark.png")
-                    : require("@/assets/images/splash-icon.png")
+                    ? (require("@/assets/images/splash-icon-dark.png") as number)
+                    : (require("@/assets/images/splash-icon.png") as number)
                 }
                 style={s.logoImage}
                 contentFit="contain"

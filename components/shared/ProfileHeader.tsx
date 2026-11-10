@@ -1,4 +1,5 @@
-import { FontAwesome6, Octicons } from "@expo/vector-icons";
+import { Octicons } from "@expo/vector-icons";
+import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import { Image } from "expo-image";
 import type { ComponentProps, ReactNode } from "react";
 import { useMemo } from "react";
@@ -20,7 +21,7 @@ import type { GitHubUser } from "@/types/github.types";
 
 export type ProfileLinkIcon =
   | { set: "octicons"; name: ComponentProps<typeof Octicons>["name"] }
-  | { set: "fontawesome6"; name: ComponentProps<typeof FontAwesome6>["name"] };
+  | { set: "fontawesome6"; name: "linkedin" | "x-twitter" };
 
 export interface ProfileLink {
   icon: ProfileLinkIcon;

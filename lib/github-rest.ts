@@ -39,8 +39,8 @@ import type {
   RepoListParams,
 } from "@/types/github.types";
 
-function parseLinkHeader(linkHeader: string | undefined): GitHubPagination {
-  if (!linkHeader) return {};
+function parseLinkHeader(linkHeader: unknown): GitHubPagination {
+  if (typeof linkHeader !== "string" || !linkHeader) return {};
 
   const pagination: GitHubPagination = {};
   const parts = linkHeader.split(",");
@@ -499,7 +499,9 @@ export async function fetchFileTree(
   repo: string,
   branch: string,
 ): Promise<GitHubTree> {
-  const { data: branchData } = await githubAxios.get(
+  const { data: branchData } = await githubAxios.get<{
+    commit: { commit: { tree: { sha: string } } };
+  }>(
     `/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/branches/${encodeURIComponent(branch)}`,
   );
   const treeSha = branchData.commit.commit.tree.sha;
@@ -766,7 +768,7 @@ export async function fetchParticipatingNotifications(
   return {
     modified: true,
     notifications: data,
-    etag: headers["etag"] ?? null,
+    etag: typeof headers["etag"] === "string" ? headers["etag"] : null,
   };
 }
 

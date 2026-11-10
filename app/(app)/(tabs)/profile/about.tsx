@@ -88,8 +88,8 @@ export default function AboutScreen() {
           <Image
             source={
               isDark
-                ? require("@/assets/images/splash-icon-dark.png")
-                : require("@/assets/images/splash-icon.png")
+                ? (require("@/assets/images/splash-icon-dark.png") as number)
+                : (require("@/assets/images/splash-icon.png") as number)
             }
             style={s.logoImage}
             contentFit="contain"

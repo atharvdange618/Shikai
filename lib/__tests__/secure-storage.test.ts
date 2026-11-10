@@ -1,9 +1,24 @@
 import { describe, expect, it, vi } from "vitest";
 
-// The validators are pure; stub the native store so the module imports.
-vi.mock("expo-secure-store", () => ({}));
+const { getItemAsync } = vi.hoisted(() => ({
+  getItemAsync: vi.fn<() => Promise<string | null>>(),
+}));
+vi.mock("expo-secure-store", () => ({ getItemAsync }));
 
-import { isValidPAT, isValidToken } from "@/lib/secure-storage";
+import { getPendingAuth, isValidPAT, isValidToken } from "@/lib/secure-storage";
+
+describe("getPendingAuth", () => {
+  it("preserves a valid stored verifier", async () => {
+    const pending = { codeVerifier: "test-verifier", timestamp: Date.now() };
+    getItemAsync.mockResolvedValueOnce(JSON.stringify(pending));
+    await expect(getPendingAuth()).resolves.toEqual(pending);
+  });
+
+  it("rejects a stored verifier with an invalid timestamp", async () => {
+    getItemAsync.mockResolvedValueOnce(JSON.stringify({ codeVerifier: "test", timestamp: "bad" }));
+    await expect(getPendingAuth()).resolves.toBeNull();
+  });
+});
 
 describe("isValidToken", () => {
   it("rejects null, too-short and too-long values", () => {

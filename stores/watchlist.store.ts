@@ -10,7 +10,12 @@ const watchlistStorage: PersistStorage<string[]> = {
     const raw = watchlistMMKV.getString(name);
     if (!raw) return null;
     try {
-      return { state: JSON.parse(raw) };
+      const state: unknown = JSON.parse(raw);
+      return {
+        state: Array.isArray(state)
+          ? state.filter((value: unknown) => typeof value === "string")
+          : [],
+      };
     } catch {
       return { state: [] };
     }
@@ -62,7 +67,9 @@ export const useWatchlistStore = create<WatchlistState>()(
       partialize: (state) => state.watchlistIds,
       merge: (persisted, current) => ({
         ...current,
-        watchlistIds: Array.isArray(persisted) ? persisted : [],
+        watchlistIds: Array.isArray(persisted)
+          ? persisted.filter((value: unknown) => typeof value === "string")
+          : [],
       }),
     },
   ),

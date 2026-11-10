@@ -59,7 +59,7 @@ export function scrubEvent<T extends Sentry.Event>(event: T): T {
     }
     if (crumb.data) {
       for (const key of Object.keys(crumb.data)) {
-        const val = crumb.data[key];
+        const val: unknown = crumb.data[key];
         if (typeof val === "string") {
           crumb.data[key] = redact(val);
         }

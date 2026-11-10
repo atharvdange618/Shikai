@@ -11,7 +11,12 @@ const recentSearchesStorage: PersistStorage<string[]> = {
     const raw = recentSearchesMMKV.getString(name);
     if (!raw) return null;
     try {
-      return { state: JSON.parse(raw) };
+      const state: unknown = JSON.parse(raw);
+      return {
+        state: Array.isArray(state)
+          ? state.filter((value: unknown) => typeof value === "string")
+          : [],
+      };
     } catch {
       return { state: [] };
     }
@@ -53,7 +58,9 @@ export const useRecentSearchesStore = create<RecentSearchesState>()(
       partialize: (state) => state.terms,
       merge: (persisted, current) => ({
         ...current,
-        terms: Array.isArray(persisted) ? persisted : [],
+        terms: Array.isArray(persisted)
+          ? persisted.filter((value: unknown) => typeof value === "string")
+          : [],
       }),
     },
   ),

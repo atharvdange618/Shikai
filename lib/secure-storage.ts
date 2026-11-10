@@ -74,12 +74,21 @@ export const getPendingAuth = (): Promise<PendingAuth | null> =>
   safeRead(async () => {
     const raw = await SecureStore.getItemAsync(KEYS.PENDING_AUTH);
     if (!raw) return null;
-    const data: PendingAuth = JSON.parse(raw);
+    const data: unknown = JSON.parse(raw);
+    if (
+      typeof data !== "object" ||
+      data === null ||
+      !("codeVerifier" in data) ||
+      typeof data.codeVerifier !== "string" ||
+      !("timestamp" in data) ||
+      typeof data.timestamp !== "number"
+    )
+      return null;
     if (Date.now() - data.timestamp > PENDING_AUTH_TTL_MS) {
       await SecureStore.deleteItemAsync(KEYS.PENDING_AUTH);
       return null;
     }
-    return data;
+    return { codeVerifier: data.codeVerifier, timestamp: data.timestamp };
   }, null);
 
 export const clearPendingAuth = (): Promise<void> =>
