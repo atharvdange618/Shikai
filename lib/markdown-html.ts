@@ -390,8 +390,8 @@ export function buildHtml(html: string, isDark: boolean, bodyPadding: number): s
     document.querySelectorAll('.markdown-body pre').forEach(function(pre) {
       if (pre.closest('.code-block-wrapper') || pre.closest('.highlight') || pre.closest('section[data-type="mermaid"]') || pre.closest('.render-needs-enrichment')) return;
       var code = pre.querySelector('code');
-      var rawLang = code ? (code.className.match(/language-([\\w+]+)/) || [])[1] || '' : '';
-      var isMermaidPre = (rawLang === 'mermaid') || (pre.getAttribute('lang') === 'mermaid');
+      var rawLang = (code && (code.className.match(/language-([\\w+-]+)/) || [])[1]) || pre.getAttribute('lang') || '';
+      var isMermaidPre = rawLang === 'mermaid';
       if (isMermaidPre) {
         var src = code ? code.textContent : pre.textContent;
         window.__mermaidBlocks.push({ el: pre, source: src });
