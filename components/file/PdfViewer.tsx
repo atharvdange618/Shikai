@@ -13,6 +13,27 @@ interface PdfViewerProps {
 type Download =
   { status: "loading" } | { status: "ready"; uri: string } | { status: "error"; message: string };
 
+// Outside the component: React Compiler can't compile a `throw` inside `try`.
+async function fetchPdfBase64(url: string): Promise<string> {
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  const blob = await res.blob();
+  return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const result = reader.result;
+      if (typeof result !== "string") {
+        reject(new Error("Could not read PDF as a data URL"));
+        return;
+      }
+      const comma = result.indexOf(",");
+      resolve(comma === -1 ? result : result.slice(comma + 1));
+    };
+    reader.onerror = () => reject(reader.error ?? new Error("could not read PDF"));
+    reader.readAsDataURL(blob);
+  });
+}
+
 export function PdfViewer({ url }: PdfViewerProps) {
   const { colors } = useTheme();
   const { width: screenWidth } = useWindowDimensions();
@@ -33,40 +54,17 @@ export function PdfViewer({ url }: PdfViewerProps) {
   useEffect(() => {
     let cancelled = false;
 
-    void (async () => {
-      try {
-        const res = await fetch(url);
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const blob = await res.blob();
-        const base64 = await new Promise<string>((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onloadend = () => {
-            const result = reader.result;
-            if (typeof result !== "string") {
-              reject(new Error("Could not read PDF as a data URL"));
-              return;
-            }
-            const comma = result.indexOf(",");
-            resolve(comma === -1 ? result : result.slice(comma + 1));
-          };
-          reader.onerror = () => reject(reader.error ?? new Error("could not read PDF"));
-          reader.readAsDataURL(blob);
-        });
+    fetchPdfBase64(url).then(
+      (base64) => {
+        if (!cancelled)
+          setDownload({ status: "ready", uri: `data:application/pdf;base64,${base64}` });
+      },
+      (e: unknown) => {
         if (!cancelled) {
-          setDownload({
-            status: "ready",
-            uri: `data:application/pdf;base64,${base64}`,
-          });
+          setDownload({ status: "error", message: e instanceof Error ? e.message : String(e) });
         }
-      } catch (e) {
-        if (!cancelled) {
-          setDownload({
-            status: "error",
-            message: e instanceof Error ? e.message : String(e),
-          });
-        }
-      }
-    })();
+      },
+    );
 
     return () => {
       cancelled = true;

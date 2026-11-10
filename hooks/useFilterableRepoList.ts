@@ -23,6 +23,8 @@ interface UseFilterableRepoListOptions {
   staleTime?: number;
 }
 
+const FIVE_MINUTES = 1000 * 60 * 5;
+
 /**
  * When there's a search query, use GitHub's search API (searches ALL
  * matching repos, case-insensitive). Otherwise use the paginated list
@@ -35,7 +37,7 @@ export function useFilterableRepoList({
   search,
   filter,
   perPage = 10,
-  staleTime = 1000 * 60 * 5,
+  staleTime = FIVE_MINUTES,
 }: UseFilterableRepoListOptions) {
   const trimmedSearch = search?.trim() ?? "";
   const isSearching = !!trimmedSearch;

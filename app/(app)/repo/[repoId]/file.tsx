@@ -97,19 +97,6 @@ function FileViewerScreenContent() {
 
   const { data, isLoading, isError, error } = useFileContent(owner, repoName, path ?? "", true);
 
-  return (
-    <SafeAreaView style={[s.container, { backgroundColor: colors.background }]} edges={["bottom"]}>
-      <FileLoading isLoading={isLoading} fileName={fileName ?? ""} />
-      {isError && (
-        <FileError
-          title={kind === "pdf" ? "Failed to load PDF" : "Failed to load file"}
-          message={error?.message}
-        />
-      )}
-      {data && !isLoading && !isError && renderViewer(data)}
-    </SafeAreaView>
-  );
-
   function renderViewer(file: NonNullable<typeof data>) {
     const url = file.meta.download_url;
     const targetLine = parseTargetLine(line);
@@ -164,6 +151,19 @@ function FileViewerScreenContent() {
         return <PdfViewer key={url} url={url} />;
     }
   }
+
+  return (
+    <SafeAreaView style={[s.container, { backgroundColor: colors.background }]} edges={["bottom"]}>
+      <FileLoading isLoading={isLoading} fileName={fileName ?? ""} />
+      {isError && (
+        <FileError
+          title={kind === "pdf" ? "Failed to load PDF" : "Failed to load file"}
+          message={error?.message}
+        />
+      )}
+      {data && !isLoading && !isError && renderViewer(data)}
+    </SafeAreaView>
+  );
 }
 
 const s = StyleSheet.create({

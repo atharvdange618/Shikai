@@ -78,15 +78,6 @@ function DiffScreenContent() {
     }
   }, [navigation, baseName]);
 
-  return (
-    <SafeAreaView style={[s.container, { backgroundColor: colors.background }]} edges={["bottom"]}>
-      {prContext && <PRHeader title={baseName} repoId={params.repoId} number={prContext} />}
-      <FileLoading isLoading={query.isLoading} fileName={baseName} />
-      {query.isError && <FileError title="Failed to load diff" message={query.error?.message} />}
-      {!query.isLoading && !query.isError && renderDiff()}
-    </SafeAreaView>
-  );
-
   function renderDiff() {
     if (!file) {
       return <FileError title="File not found in this diff" />;
@@ -105,6 +96,15 @@ function DiffScreenContent() {
     }
     return <CodeViewer key={filename} content={file.patch} fileName={filename} diff />;
   }
+
+  return (
+    <SafeAreaView style={[s.container, { backgroundColor: colors.background }]} edges={["bottom"]}>
+      {prContext && <PRHeader title={baseName} repoId={params.repoId} number={prContext} />}
+      <FileLoading isLoading={query.isLoading} fileName={baseName} />
+      {query.isError && <FileError title="Failed to load diff" message={query.error?.message} />}
+      {!query.isLoading && !query.isError && renderDiff()}
+    </SafeAreaView>
+  );
 }
 
 const s = StyleSheet.create({
