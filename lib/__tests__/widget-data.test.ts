@@ -22,6 +22,22 @@ describe("fetchContributionsForWidget", () => {
     expect(reportApiError).toHaveBeenCalledWith(502, "POST", "https://api.github.com/graphql");
   });
 
+  it("gives the request a timeout signal", async () => {
+    stubFetch(502);
+    await fetchContributionsForWidget();
+    const init = vi.mocked(fetch).mock.calls[0][1];
+    expect(init?.signal).toBeInstanceOf(AbortSignal);
+  });
+
+  it("rejects when the request times out", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockRejectedValue(new DOMException("signal timed out", "TimeoutError")),
+    );
+    await expect(fetchContributionsForWidget()).rejects.toThrow("signal timed out");
+    expect(reportApiError).not.toHaveBeenCalled();
+  });
+
   it("does not report a successful response", async () => {
     stubFetch(200, {
       data: {

@@ -13,9 +13,24 @@ interface PdfViewerProps {
 type Download =
   { status: "loading" } | { status: "ready"; uri: string } | { status: "error"; message: string };
 
+// Covers the body download too, so it is longer than the API timeout.
+const DOWNLOAD_TIMEOUT_MS = 60_000;
+
+const isTimeout = (e: unknown): boolean =>
+  typeof e === "object" && e !== null && "name" in e && e.name === "TimeoutError";
+
 // Outside the component: React Compiler can't compile a `throw` inside `try`.
 async function fetchPdfBase64(url: string): Promise<string> {
-  const res = await fetch(url);
+  try {
+    return await downloadPdfBase64(url);
+  } catch (e) {
+    if (isTimeout(e)) throw new Error("The download took too long. Check your connection.");
+    throw e;
+  }
+}
+
+async function downloadPdfBase64(url: string): Promise<string> {
+  const res = await fetch(url, { signal: AbortSignal.timeout(DOWNLOAD_TIMEOUT_MS) });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   const blob = await res.blob();
   return new Promise<string>((resolve, reject) => {
