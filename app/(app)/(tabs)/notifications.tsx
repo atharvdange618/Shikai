@@ -159,6 +159,8 @@ function itemStyles(colors: ColorTokens) {
       paddingVertical: Spacing.md,
       paddingHorizontal: Spacing.lg,
       gap: Spacing.md,
+      // Opaque so the swipe action underneath stays hidden until the row slides.
+      backgroundColor: colors.background,
     },
     pressed: {
       backgroundColor: colors.surfaceSecondary,
