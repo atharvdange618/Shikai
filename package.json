@@ -99,7 +99,6 @@
   },
   "devDependencies": {
     "@types/react": "~19.3.0",
-    "sharp": "^0.34.5",
     "typescript": "^7.0.2",
     "vitest": "^3.2.7",
     "wrangler": "^4.88.0",
@@ -126,7 +125,6 @@
     "esbuild@0.27.3": true,
     "esbuild@0.28.1": true,
     "esbuild@0.28.2": true,
-    "sharp@0.34.5": true,
     "unrs-resolver@1.11.1": true,
     "workerd@1.20260504.1": true,
     "workerd@1.20260617.1": true,
