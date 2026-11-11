@@ -65,6 +65,17 @@ Google Play requires updates to target a recent Android API level and usually ra
 `runtimeVersion` uses the `appVersion` policy: an `eas update` goes to every installed build with the same `version`.
 
 - **JS-only change:** an OTA update is fine. Run `npm run sentry:sourcemaps` afterwards so stack traces stay readable.
+- **`sentry:sourcemaps` fails on Windows** with `spawnSync ... @sentry\cli\bin\sentry-cli ENOENT`: the script starts `sentry-cli`, a Node script with a shebang, through `spawnSync`, which Windows can't run. Upload the bundle `eas update` left in `dist/` through npx instead. `SENTRY_AUTH_TOKEN` lives in `.env.local`, so load both env files first:
+
+  ```bash
+  set -a; . ./.env.local; . ./.env; set +a
+  f=$(ls dist/_expo/static/js/android/*.hbc)
+  SENTRY_ORG=merc-with-a-mouth SENTRY_PROJECT=shikai SENTRY_URL=https://de.sentry.io/ \
+    npx sentry-cli sourcemaps upload --debug-id-reference "$f" "$f.map"
+  ```
+
+  The report should list the `.hbc` and its `.map` under the same debug ID.
+
 - **Always pass `--platform android` and `--environment production`:** `eas update --channel production --environment production --platform android --message "..."`. `--environment` has been required since SDK 55, when EAS started loading environment variables per environment. Without `--platform` the export also builds web, which fails on `react-native-pdf` and publishes nothing.
 - **Anything that changes what's inside the binary** (a new or upgraded native package, an Expo SDK upgrade, a config plugin or `app.config.ts` change that adds native code, permissions, or manifest entries): bump `version` and ship a new store build. Pushing JS that needs native code an older binary lacks crashes it. Build-only settings such as signing or ABI splits don't count.
 - **Bump `version` the moment a native dependency lands, not at release time.** An OTA reaches every EAS build with that version on the channel, on any Play track. The Sep 6 EAS build of 1.4.0 (versionCode 5) predates `react-native-pdf` but still says 1.4.0, so an OTA of later JS would crash it. That's why v1.5.0 shipped as a store build.
