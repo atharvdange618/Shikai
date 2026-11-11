@@ -13,6 +13,7 @@ import {
 } from "@/constants/theme";
 import { useCheckRun, useCheckRunAnnotations, useCheckRunJobLog } from "@/hooks/useCheckRun";
 import { parseActionsJobId } from "@/lib/github-rest";
+import { isSafeExternalUrl } from "@/lib/markdown-links";
 import { formatJobLogTail, getRunDisplay } from "@/lib/run-display";
 import { decodeRepoId, relativeTime } from "@/lib/utils";
 import type { GitHubCheckAnnotationLevel } from "@/types/github.types";
@@ -210,7 +211,15 @@ function CheckRunScreenContent() {
         )}
 
         <Pressable
-          onPress={() => Linking.openURL(run.details_url ?? run.html_url)}
+          onPress={() =>
+            // details_url comes from whichever app made the check, so fall
+            // back to GitHub's own page when it isn't a web link.
+            Linking.openURL(
+              run.details_url && isSafeExternalUrl(run.details_url)
+                ? run.details_url
+                : run.html_url,
+            )
+          }
           style={({ pressed }) => [
             s.linkButton,
             {

@@ -2,6 +2,13 @@ const SCHEME_RE = /^[a-z][a-z0-9+.-]*:/i;
 const ALLOWED_SCHEME_RE = /^(https?|mailto):/i;
 
 /**
+ * True when a URL someone else wrote (a repo homepage, a profile blog, a CI
+ * app's details_url) is safe to hand to `Linking.openURL`. Android opens any
+ * scheme in whichever app claims it, so only web and mail links pass.
+ */
+export const isSafeExternalUrl = (url: string): boolean => ALLOWED_SCHEME_RE.test(url);
+
+/**
  * Turns an href from GitHub-rendered markdown into an absolute URL, or null
  * when it can't or shouldn't be opened. GitHub's /markdown endpoint leaves
  * relative links as written, so `docs/GUIDE.md` in a README has to be

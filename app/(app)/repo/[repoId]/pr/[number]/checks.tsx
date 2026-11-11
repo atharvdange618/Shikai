@@ -7,6 +7,7 @@ import {
   usePullRequestDetail,
   type CheckSummaryItem,
 } from "@/hooks/usePullRequestDetail";
+import { isSafeExternalUrl } from "@/lib/markdown-links";
 import { CHECK_GROUPS, checkGroup, checksSummary, type CheckGroup } from "@/lib/pr-review";
 import { getCheckDisplay } from "@/lib/run-display";
 import { decodeRepoId, formatDuration, relativeTime } from "@/lib/utils";
@@ -149,7 +150,7 @@ function Checks() {
                       prNumber: number,
                     },
                   });
-                else if (check.url) void Linking.openURL(check.url);
+                else if (check.url && isSafeExternalUrl(check.url)) void Linking.openURL(check.url);
               }}
             >
               <Octicons

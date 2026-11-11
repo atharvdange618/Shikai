@@ -45,7 +45,7 @@ function buildLinks(user: GitHubUser | undefined): ProfileLink[] {
     links.push({
       icon: { set: "octicons", name: "globe" },
       text: user.blog.replace(/^https?:\/\//, ""),
-      url: user.blog.startsWith("http") ? user.blog : `https://${user.blog}`,
+      url: /^https?:\/\//i.test(user.blog) ? user.blog : `https://${user.blog}`,
     });
   }
   if (user.email) {

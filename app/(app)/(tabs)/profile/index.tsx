@@ -68,7 +68,7 @@ function buildLinks(
     links.push({
       icon: { set: "octicons", name: "globe" },
       text: blog.replace(/^https?:\/\//, ""),
-      url: blog.startsWith("http") ? blog : `https://${blog}`,
+      url: /^https?:\/\//i.test(blog) ? blog : `https://${blog}`,
     });
   }
   if (user.email) {

@@ -17,6 +17,7 @@ import {
   useTheme,
   type ColorTokens,
 } from "@/constants/theme";
+import { isSafeExternalUrl } from "@/lib/markdown-links";
 import type { GitHubUser } from "@/types/github.types";
 
 export type ProfileLinkIcon =
@@ -138,6 +139,8 @@ export function ProfileHeader({
 
 function LinkRow({ link, colors }: { link: ProfileLink; colors: ColorTokens }) {
   const iconColor = colors.textMuted;
+  // Profile text is user-written; only web and mail links become tappable.
+  const url = link.url && isSafeExternalUrl(link.url) ? link.url : undefined;
   const content = (
     <View style={linkStyles.row}>
       {link.icon.set === "fontawesome6" ? (
@@ -146,16 +149,15 @@ function LinkRow({ link, colors }: { link: ProfileLink; colors: ColorTokens }) {
         <Octicons name={link.icon.name} size={15} color={iconColor} />
       )}
       <Text
-        style={[linkStyles.text, { color: link.url ? colors.accent : colors.textSecondary }]}
+        style={[linkStyles.text, { color: url ? colors.accent : colors.textSecondary }]}
         numberOfLines={1}
       >
         {link.text}
       </Text>
-      {link.url && <Octicons name="link-external" size={12} color={colors.textMuted} />}
+      {url && <Octicons name="link-external" size={12} color={colors.textMuted} />}
     </View>
   );
 
-  const { url } = link;
   if (!url) return content;
 
   return (

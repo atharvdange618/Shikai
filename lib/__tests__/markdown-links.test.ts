@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { resolveMarkdownLink } from "@/lib/markdown-links";
+import { isSafeExternalUrl, resolveMarkdownLink } from "@/lib/markdown-links";
 
 const CTX = "octocat/hello";
 const BLOB = "https://github.com/octocat/hello/blob/HEAD";
@@ -53,5 +53,26 @@ describe("resolveMarkdownLink", () => {
 
   it("returns null for a relative link with no repo context", () => {
     expect(resolveMarkdownLink("docs/GUIDE.md")).toBeNull();
+  });
+});
+
+describe("isSafeExternalUrl", () => {
+  it("allows web and mail links", () => {
+    expect(isSafeExternalUrl("https://example.com")).toBe(true);
+    expect(isSafeExternalUrl("HTTP://example.com")).toBe(true);
+    expect(isSafeExternalUrl("mailto:me@example.com")).toBe(true);
+  });
+
+  it("rejects schemes that open other apps", () => {
+    expect(isSafeExternalUrl("tel:+15550100")).toBe(false);
+    expect(isSafeExternalUrl("intent://scan#Intent;scheme=zxing;end")).toBe(false);
+    expect(isSafeExternalUrl("market://details?id=x")).toBe(false);
+    expect(isSafeExternalUrl("httpx://example.com")).toBe(false);
+    expect(isSafeExternalUrl("javascript:alert(1)")).toBe(false);
+  });
+
+  it("rejects a URL with no scheme or leading whitespace", () => {
+    expect(isSafeExternalUrl("example.com")).toBe(false);
+    expect(isSafeExternalUrl(" tel:123")).toBe(false);
   });
 });
