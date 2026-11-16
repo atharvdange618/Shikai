@@ -63,7 +63,16 @@
     "eslint/no-useless-escape": "error",
     "eslint/no-control-regex": "error",
     "unicorn/no-single-promise-in-promise-methods": "error",
-    "unicorn/no-new-array": "error"
+    "unicorn/no-new-array": "error",
+    "react/error-boundaries": "warn",
+    "react/incompatible-library": "warn",
+    "react/memo-dependencies": "warn",
+    "react/no-deriving-state-in-effects": "warn",
+    "react/set-state-in-render": "warn",
+    "react/static-components": "warn",
+    "react/unsupported-syntax": "warn",
+    "react/use-memo": "warn",
+    "react/void-use-memo": "warn"
   },
   "overrides": [
     {
