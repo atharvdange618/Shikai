@@ -8,6 +8,6 @@
 
 ## Checklist
 
-- [ ] `npx expo lint`, `npx tsc --noEmit`, and `npx vitest run` pass
+- [ ] `npm run lint`, `npm run typecheck`, `npm run format:check`, and `npx vitest run` pass
 - [ ] Tests added or updated for changed logic
 - [ ] No hardcoded colors, no new dependencies without discussion

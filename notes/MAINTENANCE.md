@@ -97,7 +97,7 @@ Keep an offline backup of each. None of them are in the repo.
 
 ## When something breaks
 
-- **CI red:** the GitHub Actions run shows which of lint, typecheck, or tests failed.
+- **CI red:** the GitHub Actions run shows which of lint, typecheck, format check, or tests failed.
 - **Crash spike after a release:** Sentry groups it by release. If an OTA update caused it, republish the previous update with `eas update:republish`.
 - **Sign-in fails for everyone:** check the OAuth proxy Worker's logs in the Cloudflare dashboard, then the GitHub App's settings.
 - **`expo run:android` fails with `JAVA_HOME is set to an invalid directory`:** Microsoft's OpenJDK auto-updates its patch build and deletes the previous folder (17.0.20.101 became 17.0.21.21), leaving `JAVA_HOME` pointing at nothing. Check what's installed with `ls "/c/Program Files/Microsoft"`, then fix both places it is set, since each hides the other: `export JAVA_HOME` in `~/.bashrc` (what Git Bash uses) and the user environment variable (`setx JAVA_HOME "C:\Program Files\Microsoft\jdk-<version>"`). The system-level variable is separate and was already correct, which is why `java -version` still worked while Gradle failed. Open a new terminal afterwards: a running shell, Metro and the agent all keep the value they started with. `cd android && ./gradlew.bat -version` prints the JVM Gradle actually picked.

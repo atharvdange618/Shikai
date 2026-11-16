@@ -29,7 +29,7 @@ not code:
 **Security → WAF → Rate limiting rules → Create rule**
 
 - Name: `oauth-proxy token exchange`
-- If incoming requests match: `Hostname equals <worker route host>` and
+- If incoming requests match: `Hostname equals` the Worker's host (the one in `EXPO_PUBLIC_OAUTH_PROXY_URL`) and
   `Request Method equals POST`
 - Rate: `10 requests per 1 minute` per client IP
 - Then: `Block` for `1 minute`

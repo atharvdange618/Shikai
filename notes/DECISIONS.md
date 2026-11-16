@@ -51,6 +51,8 @@ Entries D-001 to D-021 were backfilled on 2026-10-15 from commits, the changelog
 **Rejected.** Asking for a PAT at sign-in. Most users never need it.
 **Consequences.** The app holds two tokens, and they must never mix up. D-004 sets the rules.
 
+**Update, November 16, 2026.** The Following feed works without a PAT. `fetchReceivedEvents()` sends the PAT only when one is saved, and the sign-in token still gets public events from `/users/{user}/received_events`. The PAT adds private events, which need the `repo` scope, not `notifications`. Checked with a token that lacks `notifications`, which returned 13 private events.
+
 ## D-004: A PAT never follows one account into another
 
 **Date:** 2026-10-15 (`20b91f3`, `30f012b`) · **Status:** Accepted

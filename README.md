@@ -74,12 +74,12 @@ Take a look at Shikai before you install: **[View Screenshots on Google Drive](h
 
 Optional PAT support unlocks features beyond the GitHub App token:
 
-| Feature            | Required Scopes         |
-| ------------------ | ----------------------- |
-| **Notifications**  | `notifications`         |
-| **Following Feed** | `notifications`, `repo` |
-| **Stargazers**     | `repo`                  |
-| **Issue Search**   | `repo`                  |
+| Feature            | Required Scopes              |
+| ------------------ | ---------------------------- |
+| **Notifications**  | `notifications`              |
+| **Following Feed** | `repo` (adds private events) |
+| **Stargazers**     | `repo`                       |
+| **Issue Search**   | `repo`                       |
 
 GitHub only shows a repo's stargazers to people who can push to it, and the sign-in token can't read that list, so Stars opens it only on your own repos with a token saved. GitHub also returns no issue search results for the sign-in token, so Your work and the Issues tab in Search ask for a token when none is saved.
 

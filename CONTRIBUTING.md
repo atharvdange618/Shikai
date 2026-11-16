@@ -17,7 +17,7 @@ You need:
 Expo Go won't work, because Shikai ships its own native module (`modules/shikai-security`). You build a dev client once and then iterate with Metro:
 
 ```bash
-git clone https://github.com/<you>/Shikai.git
+git clone https://github.com/atharvdange618/Shikai.git
 cd Shikai
 npm ci
 cp .env.example .env
@@ -69,7 +69,7 @@ Tests live in `lib/__tests__/`. Add or update tests for logic you change. For UI
 
 ## Commits and PRs
 
-- Branch off `main` in your fork.
+- Fork the repo and add it as a remote with `gh repo fork --remote`, or fork on GitHub and add the remote by hand. Branch off `main` and push the branch to your fork.
 - Use [Conventional Commits](https://www.conventionalcommits.org/) with a scope, such as `fix(search): keep the query after a rotation` or `feat(repos): show archived badge`.
 - Keep each PR to one change. Two unrelated fixes make two PRs.
 - In the PR description, say what changed, why, and how you tested it.

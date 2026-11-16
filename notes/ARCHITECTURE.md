@@ -44,7 +44,7 @@ The app can hold two GitHub tokens at once, and most of the auth code exists to 
 
 OAuth opens through `WebBrowser.openAuthSessionAsync` in `app/sign-in.tsx`. Its result and the Linking callback share the completion path; a concurrent-code guard prevents duplicate exchanges. `finalizeSession()` saves the session, and the root layout routes authenticated users to Overview.
 
-Dev-client launch URLs are not app routes. `isDevClientUrl()` recognizes both the old `expo-development-client` host and SDK 58's `__expo_url` query parameter. Both `app/+native-intent.tsx` and initial-link replay use this shared filter. Without it, a launch URL can push the blank root index over Overview (D-038). Current QA status lives in [Roadmap](ROADMAP.md#current-progress-november-3-2026).
+Dev-client launch URLs are not app routes. `isDevClientUrl()` recognizes both the old `expo-development-client` host and SDK 58's `__expo_url` query parameter. Both `app/+native-intent.tsx` and initial-link replay use this shared filter. Without it, a launch URL can push the blank root index over Overview (D-038). Current QA status lives in [Roadmap](ROADMAP.md).
 
 Rules that must keep holding:
 

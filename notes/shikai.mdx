@@ -13,21 +13,19 @@ stack:
   - "React Native Reanimated"
   - "React Native Gesture Handler"
   - "Shopify FlashList"
-  - "Shopify React Native Skia"
   - "React Native MMKV"
   - "React Native WebView"
   - "Expo SecureStore"
   - "Expo Image"
   - "Expo Haptics"
-  - "Expo Blur"
   - "React Native SVG"
   - "React Native Android Widget"
   - "Sentry"
   - "Vitest"
 startedAt: "2026-04-06"
-updatedAt: "2026-09-18"
+updatedAt: "2026-11-16"
 github: "https://github.com/atharvdange618/Shikai"
-live: "https://github.com/atharvdange618/Shikai/releases"
+live: "https://play.google.com/store/apps/details?id=com.atharvdange618.Shikai"
 description: "A beautifully crafted, read-only GitHub dashboard for Android. Browse repos, explore code, track your contribution streak, and share your profile - without the pressure of taking action."
 ---
 
@@ -58,17 +56,16 @@ Shikai is read-only by design. No write operations, no merge buttons. You open i
 
 ### Core Features
 
-- **Overview Dashboard**: A 52-week contribution heatmap rendered with React Native Skia, pinned repositories with live stats, and an activity feed from users you follow.
+- **Overview Dashboard**: A 52-week contribution heatmap drawn with React Native SVG, pinned repositories with live stats, and an activity feed from users you follow.
 - **Repository Management**: Filters, stats, language breakdowns, contributor lists, and commit history per branch.
-- **File Explorer**: A full-screen file tree with branch selection. Read code or markdown files in-app, with syntax highlighting via WebView.
+- **File Explorer**: A full-screen file tree with branch selection. Read code or markdown files in-app, with syntax highlighting done on the device.
 - **Issues and Pull Requests**: Detail screens with comments, labels, and state filters. Write actions link out to GitHub.
 - **Global Search**: Search repos, users, and issues. Tabbed results with prefetching.
-- **Notifications**: Filtered by type (review requests, mentions, assignments, CI activity). Mark-as-read requires a PAT.
+- **Notifications**: Filtered by type (review requests, mentions, assignments, CI activity), with swipe to mark read and optional background alerts. Needs a PAT.
 - **Saved Repos**: GitHub Stars plus a local Watchlist, both searchable and persisted offline.
 - **User Profiles**: Browse any GitHub user's profile, top repos, and contribution stats.
-- **Profile Card**: A 3D-interactive card you can share at meetups or in interviews.
-- **Android Widget**: Contribution stats and pinned repos on your home screen.
-- **5 Themes**: Light, Dark, Tokyo Night, Dracula, Atom One.
+- **Android Widget**: Your contribution streak and recent activity on your home screen.
+- **5 Themes**: Light, Dark, Tokyo Night, Dracula, Atom One Dark.
 - **Offline Support**: MMKV-backed disk caching with 24-hour persistence. An offline banner appears when connectivity drops.
 - **Security Module**: A Kotlin Expo module that checks for root, debuggers, and developer options at boot. Blocks access on compromised devices.
 - **Deep Repo Navigation**: Blame and per-file commit history, a compare view between any two refs, a releases tab with changelogs and downloadable assets, a Discussions viewer, and an Insights screen with a year of commit activity, top contributors, and a punch card.
@@ -92,10 +89,10 @@ Three ideas drove the design:
 
 - **State and data**: TanStack Query for server state (caching, background refetching). Zustand for client state (auth tokens, sign-in state, watchlist). TanStack Query persists to MMKV with a 24-hour max age. Individual queries set their own stale times. Stale time controls background refetch frequency (5min default). Persist max age controls how long data survives offline (24h). They serve different purposes. MMKV was chosen over AsyncStorage because it is synchronous and ~30x faster; a thin async wrapper makes it compatible with TanStack Query's persister.
 - **Navigation**: Expo Router, file-based. Tabs layout (Overview, Repos, Search, Profile) with stack screens for repo details, user profiles, and settings.
-- **UI and animations**: Reanimated and Gesture Handler for 60fps animations on the UI thread. FlashList for large lists. Skia for the contribution heatmap.
+- **UI and animations**: Reanimated and Gesture Handler for 60fps animations on the UI thread. FlashList for large lists. React Native SVG for the contribution heatmap.
 - **Prefetching**: A `lib/prefetch.ts` module with a 3-layer architecture (detailed in Challenges).
 - **Dual API**: REST for most data (repos, commits, issues, PRs, notifications, files). GraphQL for contribution graphs, pinned repos, and aggregate stats where it avoids over-fetching.
-- **Why not Octokit?**: GitHub's official `@octokit/rest` is built for Node.js and browsers. In React Native, a thin axios wrapper was simpler: one client handles both REST and GraphQL, custom interceptors track rate limits globally and handle 401 auto-logout, and the same auth path serves both OAuth tokens and PATs without Octokit's plugin adapters. The bundle is also smaller (~15KB vs ~50KB+).
+- **Why not Octokit?**: GitHub's official `@octokit/rest` is built for Node.js and browsers. In React Native, a thin axios wrapper was simpler: one client handles both REST and GraphQL, custom interceptors track rate limits globally and sign out on a 401 from the session token, and the same auth path serves both OAuth tokens and PATs without Octokit's plugin adapters. The bundle is also smaller (~15KB vs ~50KB+).
 
 ```ascii
 ┌──────────────┐
@@ -106,8 +103,8 @@ Three ideas drove the design:
        ▼
 ┌──────────────────┐     TanStack Query      ┌─────────────────┐
 │  Custom Hooks    │────────(caching)──────> │  Query Client   │
-│  (23 hooks in    │                         │  (5min default  │
-│   hooks/)        │                         │   stale, 24h    │
+│  (one per        │                         │  (5min default  │
+│   resource)      │                         │   stale, 24h    │
 └──────┬───────────┘                         │   persist)      │
        │                                     └────────┬────────┘
        │                                              │
@@ -147,15 +144,15 @@ By the time a screen renders, TanStack Query has the data and the UI paints from
 
 ### 3. The File Explorer
 
-I wanted users to read actual code files on their phones. The file explorer has a recursive tree UI with branch selection, a WebView-based syntax highlighter for multiple languages, and a markdown renderer for READMEs. All of it flows through the prefetch system, so files load from cache instead of the network. I used WebView with Prism.js for syntax highlighting because the native alternatives (react-native-syntax-highlighter) are unmaintained and WebView handles 100+ languages with zero extra native dependencies.
+I wanted users to read actual code files on their phones. The file explorer has a recursive tree UI with branch selection, a WebView code viewer, and a markdown renderer for READMEs. All of it flows through the prefetch system, so files load from cache instead of the network. The native highlighters (react-native-syntax-highlighter) are unmaintained, so code shows in a WebView. It started with Prism.js; now `@tanstack/highlight` colors each file and diff on the device, so code never goes to GitHub's markdown renderer.
 
 ### 4. Authentication: PAT to OAuth
 
 Shikai started with Personal Access Token auth. It worked, but asking users to generate a PAT was a bad onboarding experience. I replaced it with GitHub OAuth using PKCE. The token exchange happens on a Cloudflare Worker that acts as an OAuth proxy, keeping the client secret off the device. You need the proxy because GitHub requires `client_secret` in the token exchange, and you cannot ship that on a mobile app. Tokens go into expo-secure-store.
 
-Notifications are the exception: GitHub's notifications API does not work with OAuth tokens. It requires a PAT with the `notifications` scope. So PATs are still supported as an optional layer for notifications and the following feed. PAT-based endpoints use the same axios instance and pass the PAT as an explicit `Authorization` header. The request interceptor only attaches the OAuth token from Zustand when no header is set, so the PAT wins. The response interceptor checks which token got rejected before it signs anyone out, so a revoked PAT fails its own request without ending the OAuth session.
+Notifications are the exception: GitHub's notifications API does not work with OAuth tokens. It requires a PAT with the `notifications` scope. So PATs are still supported as an optional layer for notifications, alerts, issue search, Your work, and stargazers. PAT-based endpoints use the same axios instance and pass the PAT as an explicit `Authorization` header. The request interceptor only attaches the OAuth token from Zustand when no header is set, so the PAT wins. The response interceptor checks which token got rejected before it signs anyone out, so a revoked PAT fails its own request without ending the OAuth session.
 
-On 401, the axios response interceptor calls `clearAuth()` to auto-logout. This prevents users from seeing broken screens when their token expires or gets revoked. On sign-in and sign-out, MMKV is cleared to prevent stale data from a previous account leaking to the current one.
+On a 401 from the session token, the axios response interceptor calls `clearAuth()` to sign out. A boot check against `GET /user` runs in the background, so a slow network never blocks launch. This prevents users from seeing broken screens when their token expires or gets revoked. On sign-in and sign-out, MMKV is cleared to prevent stale data from a previous account leaking to the current one.
 
 ### 5. The Security Module
 
@@ -173,4 +170,4 @@ The fix was a second, self-contained entry point: a "Sign in with a token" optio
 
 Shikai does what it set out to do: a read-only GitHub dashboard that looks good on Android. Students use it to track contribution streaks. Open-source maintainers use it to monitor community engagement. I have pulled it up at interviews and client demos.
 
-The codebase is at [github.com/atharvdange618/Shikai](https://github.com/atharvdange618/Shikai). Release APKs are on the [releases page](https://github.com/atharvdange618/Shikai/releases).
+The codebase is at [github.com/atharvdange618/Shikai](https://github.com/atharvdange618/Shikai). Get it on [Google Play](https://play.google.com/store/apps/details?id=com.atharvdange618.Shikai), or grab release APKs from the [releases page](https://github.com/atharvdange618/Shikai/releases).
