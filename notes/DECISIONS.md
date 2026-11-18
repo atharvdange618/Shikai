@@ -437,3 +437,13 @@ Entries D-001 to D-021 were backfilled on 2026-10-15 from commits, the changelog
 **Rejected.** An override that turns the `no-unsafe-*` rules off for `plugins/`: shorter, but these files rewrite release signing and `build.gradle`, and a typo there would only show up at prebuild. Putting the JS ignore back: it undoes the Toolchain default and drops lint for the plugins. Rewriting them in TypeScript: we haven't checked how SDK 58 loads `.ts` plugins, and four small files don't justify the risk.
 **Consequences.** `npm run typecheck` now covers the plugins. A new plugin needs the `ConfigPlugin` JSDoc line, and a pure helper needs `@param` types, or typecheck fails on implicit `any`.
 **Revisit when.** A plugin grows past what JSDoc types cleanly, or Expo documents loading TypeScript plugins with no build step.
+
+## D-043: Unused queries stay in memory as long as the disk copy
+
+**Date:** 2026-11-18 · **Status:** Accepted
+
+**Context.** D-006 persists the React Query cache to MMKV for 24 hours (`PERSISTENCE_MAX_AGE`), but `gcTime` was 1 hour. The persister writes whatever is in memory, so a query nobody had used for an hour was garbage-collected and then dropped from the next disk write. Offline, any screen not opened in the last hour came up empty, not the 24 hours D-006 promises. TanStack Query's persistence docs say `gcTime` should be at least `maxAge` for this reason.
+**Decision.** `PERSISTENCE_MAX_AGE` moves to `lib/query-client.ts` and the default `gcTime` is set to it, so both lifetimes come from one constant. `lib/persister.ts` re-exports it, so `app/_layout.tsx` is unchanged. `lib/__tests__/query-client.test.ts` checks that an unused query is still in memory a minute before the max age and gone a minute after.
+**Rejected.** Shortening `maxAge` to 1 hour: it cuts offline support to an hour. Setting `gcTime` to `Infinity`: queries the disk copy has already dropped would stay in memory for the whole session.
+**Consequences.** Unused queries now stay in memory for up to 24 hours instead of 1, so a long session holds more data in memory. Android usually kills a backgrounded app well before that, and the same data already sits in MMKV. Queries that opt out of the disk cache (`meta.persist: false`, D-026) also keep the 24-hour `gcTime` unless a hook sets its own. Not yet checked on a device.
+**Revisit if.** Memory use climbs on long sessions, or a hook with large responses (file contents, job logs) needs a shorter `gcTime`.
