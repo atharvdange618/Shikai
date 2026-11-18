@@ -1,6 +1,7 @@
 import type { QueryClient } from "@tanstack/react-query";
 import { router } from "expo-router";
 
+import { isRateLimited } from "@/lib/axios";
 import {
   fetchCommitCount,
   fetchContributionGraph,
@@ -23,11 +24,14 @@ import { queryKeys } from "@/lib/query-client";
 import { useAuthStore } from "@/stores/auth.store";
 import type { GitHubRepo, GitHubTreeItem } from "@/types/github.types";
 
+// Every prefetch below that calls GitHub returns early while isRateLimited():
+// prefetch is optional work, and requests sent then only fail with 403s.
 export function prefetchRoute(href: string) {
   router.prefetch(href as Parameters<typeof router.prefetch>[0]);
 }
 
 export function prefetchRepoDetails(queryClient: QueryClient, owner: string, repo: string) {
+  if (isRateLimited()) return;
   void queryClient.prefetchQuery({
     queryKey: queryKeys.repo(owner, repo),
     queryFn: () => fetchRepo(owner, repo),
@@ -66,6 +70,7 @@ const COMMON_ENTRY_FILES = [
 ];
 
 export function prefetchFileTree(queryClient: QueryClient, owner: string, repo: string) {
+  if (isRateLimited()) return;
   const repoData = queryClient.getQueryData<GitHubRepo>(queryKeys.repo(owner, repo));
   const defaultBranch = repoData?.default_branch;
 
@@ -104,6 +109,7 @@ export function prefetchFileContent(
   repo: string,
   path: string,
 ) {
+  if (isRateLimited()) return;
   void queryClient.prefetchQuery({
     queryKey: queryKeys.repoFile(owner, repo, path),
     queryFn: () => fetchFileContent(owner, repo, path),
@@ -117,6 +123,7 @@ export function prefetchCommonFiles(
   repo: string,
   treeItems: GitHubTreeItem[],
 ) {
+  if (isRateLimited()) return;
   const rootBlobPaths = treeItems
     .filter((item) => item.type === "blob" && !item.path.includes("/"))
     .map((item) => item.path);
@@ -139,6 +146,7 @@ export function prefetchCommonFiles(
 }
 
 export function prefetchRepoCommits(queryClient: QueryClient, owner: string, repo: string) {
+  if (isRateLimited()) return;
   void queryClient.prefetchInfiniteQuery({
     queryKey: queryKeys.repoCommits(owner, repo),
     queryFn: ({ pageParam }) => fetchCommits(owner, repo, pageParam, 10),
@@ -150,6 +158,7 @@ export function prefetchRepoCommits(queryClient: QueryClient, owner: string, rep
 }
 
 export function prefetchProfile(queryClient: QueryClient) {
+  if (isRateLimited()) return;
   void queryClient.prefetchQuery({
     queryKey: queryKeys.user(),
     queryFn: () => fetchAuthenticatedUser(),
@@ -168,6 +177,7 @@ export function prefetchProfile(queryClient: QueryClient) {
 }
 
 export function prefetchOverview(queryClient: QueryClient, username?: string) {
+  if (isRateLimited()) return;
   void queryClient.prefetchQuery({
     queryKey: queryKeys.pinned(),
     queryFn: fetchPinnedRepos,
