@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const { GitHubApiError, isRateLimited } = vi.hoisted(() => ({
   GitHubApiError: class GitHubApiError extends Error {
@@ -14,7 +14,13 @@ const { GitHubApiError, isRateLimited } = vi.hoisted(() => ({
 vi.mock("@/lib/axios", () => ({ GitHubApiError, isRateLimited }));
 vi.mock("react-native", () => ({ AppState: {} }));
 
-import { defaultRetry, statsRetry, statsRetryDelay } from "@/lib/query-client";
+import {
+  PERSISTENCE_MAX_AGE,
+  defaultRetry,
+  queryClient,
+  statsRetry,
+  statsRetryDelay,
+} from "@/lib/query-client";
 
 const pending = new GitHubApiError(202, "computing");
 const notFound = new GitHubApiError(404, "missing");
@@ -61,5 +67,31 @@ describe("statsRetryDelay", () => {
     expect(statsRetryDelay(0, serverError)).toBe(1000);
     expect(statsRetryDelay(2, serverError)).toBe(4000);
     expect(statsRetryDelay(10, serverError)).toBe(30_000);
+  });
+});
+
+// D-043: the persister saves whatever is in memory, so a query that leaves
+// memory early also leaves the disk copy. Unused queries must stay in memory
+// for as long as the persister promises to keep them.
+describe("cache lifetime", () => {
+  const key = ["test", "cache-lifetime"];
+  const minute = 60 * 1000;
+
+  beforeEach(() => vi.useFakeTimers());
+  afterEach(() => {
+    queryClient.clear();
+    vi.useRealTimers();
+  });
+
+  it("keeps an unused query in memory until the persisted copy expires", () => {
+    queryClient.setQueryData(key, "cached");
+    vi.advanceTimersByTime(PERSISTENCE_MAX_AGE - minute);
+    expect(queryClient.getQueryData(key)).toBe("cached");
+  });
+
+  it("drops an unused query once the persisted copy has expired", () => {
+    queryClient.setQueryData(key, "cached");
+    vi.advanceTimersByTime(PERSISTENCE_MAX_AGE + minute);
+    expect(queryClient.getQueryData(key)).toBeUndefined();
   });
 });

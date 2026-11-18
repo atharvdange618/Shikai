@@ -6,4 +6,4 @@ export const mmkvPersister = createAsyncStoragePersister({
   key: "shikai-query-cache",
 });
 
-export const PERSISTENCE_MAX_AGE = 1000 * 60 * 60 * 24;
+export { PERSISTENCE_MAX_AGE } from "@/lib/query-client";

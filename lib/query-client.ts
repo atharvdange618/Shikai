@@ -52,11 +52,16 @@ export function statsRetryDelay(failureCount: number, error: Error): number {
     : Math.min(1000 * 2 ** failureCount, 30_000);
 }
 
+// How long the persister keeps the query cache on disk (D-006).
+export const PERSISTENCE_MAX_AGE = 1000 * 60 * 60 * 24;
+
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 1000 * 60 * 5,
-      gcTime: 1000 * 60 * 60,
+      // At least the persister's max age, or unused queries leave memory
+      // and then the disk copy before 24h (D-043).
+      gcTime: PERSISTENCE_MAX_AGE,
       retry: defaultRetry,
       refetchOnWindowFocus: true,
       refetchOnReconnect: true,
