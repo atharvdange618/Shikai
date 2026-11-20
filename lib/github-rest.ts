@@ -479,20 +479,9 @@ export function fetchPunchCard(owner: string, repo: string): Promise<GitHubPunch
   return getStats(owner, repo, "punch_card");
 }
 
-export async function fetchFileTree(
-  owner: string,
-  repo: string,
-  branch: string,
-): Promise<GitHubTree> {
-  const { data: branchData } = await githubAxios.get<{
-    commit: { commit: { tree: { sha: string } } };
-  }>(
-    `/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/branches/${encodeURIComponent(branch)}`,
-  );
-  const treeSha = branchData.commit.commit.tree.sha;
-
+export async function fetchFileTree(owner: string, repo: string, ref: string): Promise<GitHubTree> {
   const { data } = await githubAxios.get<GitHubTree>(
-    `/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/git/trees/${encodeURIComponent(treeSha)}`,
+    `/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/git/trees/${encodeURIComponent(ref)}`,
     { params: { recursive: 1 } },
   );
 
@@ -503,9 +492,11 @@ export async function fetchFileContent(
   owner: string,
   repo: string,
   path: string,
+  ref?: string,
 ): Promise<{ content: string; meta: GitHubContent }> {
   const { data } = await githubAxios.get<GitHubContent>(
     `/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/contents/${encodeURIComponent(path)}`,
+    ref ? { params: { ref } } : undefined,
   );
 
   if (data.type !== "file") {

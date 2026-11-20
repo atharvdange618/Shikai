@@ -22,6 +22,8 @@ vi.mock("@/lib/axios", () => ({ githubAxios: { get }, GitHubApiError }));
 import {
   fetchCommitActivity,
   fetchContributorStats,
+  fetchFileContent,
+  fetchFileTree,
   fetchFollowers,
   fetchFollowing,
   fetchForks,
@@ -35,6 +37,29 @@ import {
   parseCheckRunId,
   searchIssues,
 } from "@/lib/github-rest";
+
+describe("repository files", () => {
+  beforeEach(() => get.mockReset());
+
+  it("requests file content on the given ref", async () => {
+    get.mockResolvedValueOnce({ data: { type: "file" } });
+    await fetchFileContent("o", "r", "src/main.ts", "release/next");
+    expect(get).toHaveBeenCalledWith("/repos/o/r/contents/src%2Fmain.ts", {
+      params: { ref: "release/next" },
+    });
+  });
+
+  it("loads a tree by commit SHA", async () => {
+    const sha = "a".repeat(40);
+    const tree = { tree: [], truncated: false };
+    get.mockResolvedValueOnce({ data: tree });
+
+    await expect(fetchFileTree("o", "r", sha)).resolves.toBe(tree);
+    expect(get).toHaveBeenCalledExactlyOnceWith(`/repos/o/r/git/trees/${sha}`, {
+      params: { recursive: 1 },
+    });
+  });
+});
 
 describe("parseActionsJobId", () => {
   it("extracts the job id from an Actions details_url", () => {

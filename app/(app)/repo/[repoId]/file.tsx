@@ -25,11 +25,12 @@ export default function FileViewerScreen() {
 }
 
 function FileViewerScreenContent() {
-  const { repoId, path, fileName, line } = useLocalSearchParams<{
+  const { repoId, path, fileName, line, ref } = useLocalSearchParams<{
     repoId: string;
     path: string;
     fileName: string;
     line?: string;
+    ref?: string;
   }>();
   const navigation = useNavigation();
   const router = useRouter();
@@ -54,9 +55,9 @@ function FileViewerScreenContent() {
                       pathname: "/(app)/repo/[repoId]/blame",
                       params: {
                         repoId: repoId ?? "",
-                        path: path ?? "",
-                        ref: repo?.default_branch ?? "HEAD",
-                        fileName,
+                        path: encodeURIComponent(path ?? ""),
+                        ref: encodeURIComponent(ref ?? repo?.default_branch ?? "HEAD"),
+                        fileName: encodeURIComponent(fileName),
                       },
                     })
                   }
@@ -74,8 +75,9 @@ function FileViewerScreenContent() {
                     pathname: "/(app)/repo/[repoId]/commits",
                     params: {
                       repoId: repoId ?? "",
-                      path: path ?? "",
-                      fileName,
+                      path: encodeURIComponent(path ?? ""),
+                      fileName: encodeURIComponent(fileName),
+                      ref: ref ? encodeURIComponent(ref) : undefined,
                     },
                   })
                 }
@@ -91,9 +93,25 @@ function FileViewerScreenContent() {
         });
       } catch {}
     }
-  }, [navigation, router, fileName, repoId, path, colors.accent, canBlame, repo?.default_branch]);
+  }, [
+    navigation,
+    router,
+    fileName,
+    repoId,
+    path,
+    ref,
+    colors.accent,
+    canBlame,
+    repo?.default_branch,
+  ]);
 
-  const { data, isLoading, isError, error } = useFileContent(owner, repoName, path ?? "", true);
+  const { data, isLoading, isError, error } = useFileContent(
+    owner,
+    repoName,
+    path ?? "",
+    true,
+    ref,
+  );
 
   function renderViewer(file: NonNullable<typeof data>) {
     const url = file.meta.download_url;
@@ -130,6 +148,7 @@ function FileViewerScreenContent() {
           content={file.content}
           path={path ?? ""}
           repoContext={`${owner}/${repoName}`}
+          gitRef={ref}
           targetLine={targetLine}
         />
       );

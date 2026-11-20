@@ -6,6 +6,7 @@ import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { FileError } from "@/components/file/FileError";
 import { BranchSelector } from "@/components/repo/BranchSelector";
 import { SearchBar } from "@/components/shared/SearchBar";
 import { type ColorTokens, FontFamily, FontSize, Spacing, useTheme } from "@/constants/theme";
@@ -135,9 +136,16 @@ const TreeItem = memo(function TreeItem({
 });
 
 export default function FileExplorerScreen() {
-  const { repoId, path: targetPath } = useLocalSearchParams<{
+  const {
+    repoId,
+    path: targetPath,
+    ref,
+    refLabel,
+  } = useLocalSearchParams<{
     repoId: string;
     path?: string;
+    ref?: string;
+    refLabel?: string;
   }>();
   const router = useRouter();
   const navigation = useNavigation();
@@ -159,9 +167,7 @@ export default function FileExplorerScreen() {
   const { data: repo } = useRepo(owner, repoName);
   const { data: branches, isLoading: branchesLoading } = useBranches(owner, repoName);
 
-  if (repo?.default_branch && !selectedBranch) {
-    setSelectedBranch(repo.default_branch);
-  }
+  const selectedRef = selectedBranch || ref || repo?.default_branch || "";
 
   useEffect(() => {
     try {
@@ -172,14 +178,14 @@ export default function FileExplorerScreen() {
     } catch {}
   }, [navigation, repo?.name]);
 
-  const { data: fileTreeData, isLoading } = useFileTree(owner, repoName, selectedBranch, true);
+  const { data: fileTreeData, isLoading, error } = useFileTree(owner, repoName, selectedRef, true);
 
   useEffect(() => {
     if (fileTreeData?.tree && fileTreeData.tree.length > 0 && !commonFilesPrefetched.current) {
       commonFilesPrefetched.current = true;
-      prefetchCommonFiles(queryClient, owner, repoName, fileTreeData.tree);
+      prefetchCommonFiles(queryClient, owner, repoName, fileTreeData.tree, selectedRef);
     }
-  }, [fileTreeData, queryClient, owner, repoName]);
+  }, [fileTreeData, queryClient, owner, repoName, selectedRef]);
 
   const toggleFolder = useCallback((path: string) => {
     setExpandedPaths((prev) => {
@@ -198,18 +204,23 @@ export default function FileExplorerScreen() {
       const fileName = path.split("/").pop() ?? path;
       router.push({
         pathname: "/(app)/repo/[repoId]/file",
-        params: { repoId, path, fileName },
+        params: {
+          repoId,
+          path: encodeURIComponent(path),
+          fileName: encodeURIComponent(fileName),
+          ref: encodeURIComponent(selectedRef),
+        },
       });
     },
-    [router, repoId],
+    [router, repoId, selectedRef],
   );
 
   const handleFilePressIn = useCallback(
     (path: string) => {
       if (!owner || !repoName) return;
-      prefetchFileContent(queryClient, owner, repoName, path);
+      prefetchFileContent(queryClient, owner, repoName, path, selectedRef);
     },
-    [queryClient, owner, repoName],
+    [queryClient, owner, repoName, selectedRef],
   );
 
   const tree = useMemo(() => buildTree(fileTreeData?.tree ?? []), [fileTreeData?.tree]);
@@ -287,16 +298,19 @@ export default function FileExplorerScreen() {
     <SafeAreaView style={s.container} edges={["bottom"]}>
       <BranchSelector
         branches={branches ?? []}
-        selectedBranch={selectedBranch}
+        selectedBranch={selectedBranch || refLabel || selectedRef}
         onBranchChange={(branch) => {
           setSelectedBranch(branch);
           setExpandedPaths(new Set());
+          setPendingScrollPath(undefined);
           setSearchQuery("");
           commonFilesPrefetched.current = false;
         }}
         isLoading={branchesLoading}
       />
-      {isLoading ? (
+      {error ? (
+        <FileError title="Failed to load file tree" message={error.message} />
+      ) : isLoading ? (
         <View style={s.loadingContainer}>
           <ActivityIndicator color={colors.accent} />
           <Text style={s.loadingText}>{`Loading ${repoName} file tree…`}</Text>

@@ -106,11 +106,12 @@ export function prefetchFileContent(
   owner: string,
   repo: string,
   path: string,
+  ref?: string,
 ) {
   if (isRateLimited()) return;
   void queryClient.prefetchQuery({
-    queryKey: queryKeys.repoFile(owner, repo, path),
-    queryFn: () => fetchFileContent(owner, repo, path),
+    queryKey: queryKeys.repoFile(owner, repo, path, ref),
+    queryFn: () => fetchFileContent(owner, repo, path, ref),
     staleTime: 1000 * 60 * 15,
   });
 }
@@ -120,6 +121,7 @@ export function prefetchCommonFiles(
   owner: string,
   repo: string,
   treeItems: GitHubTreeItem[],
+  ref?: string,
 ) {
   if (isRateLimited()) return;
   const rootBlobPaths = treeItems
@@ -139,7 +141,7 @@ export function prefetchCommonFiles(
   }
 
   for (const path of toPrefetch) {
-    prefetchFileContent(queryClient, owner, repo, path);
+    prefetchFileContent(queryClient, owner, repo, path, ref);
   }
 }
 

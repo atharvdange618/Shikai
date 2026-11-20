@@ -21,6 +21,7 @@ interface MarkdownRendererProps {
    * PR and comment bodies, which need gfm mode's #123 and @mention linking.
    */
   filePath?: string;
+  gitRef?: string;
   /** A #link was tapped; y is the target's offset from the WebView's top. */
   onAnchorOffset?: (y: number) => void;
   /**
@@ -30,11 +31,11 @@ interface MarkdownRendererProps {
   bodyPadding?: number;
 }
 
-function resolveImageUrls(html: string, context?: string): string {
+function resolveImageUrls(html: string, context?: string, gitRef = "HEAD"): string {
   if (!context) return html;
   const [owner, repo] = context.split("/");
   if (!owner || !repo) return html;
-  const base = `https://raw.githubusercontent.com/${owner}/${repo}/HEAD/`;
+  const base = `https://raw.githubusercontent.com/${owner}/${repo}/${encodeURIComponent(gitRef)}/`;
   return html.replace(
     /<img\s+([^>]*?)src=["']((?!https?:\/\/)[^"']+)["']/gi,
     (_match, attrs: string, src: string) => {
@@ -50,6 +51,7 @@ export function MarkdownRenderer({
   context,
   onHeightChange,
   filePath,
+  gitRef,
   onAnchorOffset,
   bodyPadding = 16,
 }: MarkdownRendererProps) {
@@ -79,7 +81,7 @@ export function MarkdownRenderer({
         );
 
         if (!cancelled) {
-          setHtml(buildHtml(resolveImageUrls(data, context), isDark, bodyPadding));
+          setHtml(buildHtml(resolveImageUrls(data, context, gitRef), isDark, bodyPadding));
         }
       } catch {
         if (!cancelled) {
@@ -97,7 +99,7 @@ export function MarkdownRenderer({
     return () => {
       cancelled = true;
     };
-  }, [markdown, isDark, context, filePath, bodyPadding]);
+  }, [markdown, isDark, context, filePath, gitRef, bodyPadding]);
 
   useEffect(() => {
     opacity.setValue(0);
@@ -138,7 +140,7 @@ export function MarkdownRenderer({
         } else if (data.type === "anchor" && "y" in data && typeof data.y === "number") {
           onAnchorOffset?.(data.y);
         } else if (data.type === "link" && "href" in data && typeof data.href === "string") {
-          const url = resolveMarkdownLink(data.href, context, filePath);
+          const url = resolveMarkdownLink(data.href, context, filePath, gitRef);
           if (!url) return;
           const route = parseGitHubUrl(url);
           if (route) router.push(route as Href);
@@ -148,7 +150,7 @@ export function MarkdownRenderer({
         }
       } catch {}
     },
-    [reveal, onHeightChange, onAnchorOffset, context, filePath, router],
+    [reveal, onHeightChange, onAnchorOffset, context, filePath, gitRef, router],
   );
 
   if (!html) {

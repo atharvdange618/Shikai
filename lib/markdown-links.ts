@@ -7,6 +7,7 @@ export function resolveMarkdownLink(
   href: string,
   context?: string,
   filePath?: string,
+  gitRef = "HEAD",
 ): string | null {
   if (href.startsWith("//")) return `https:${href}`;
   if (SCHEME_RE.test(href)) return ALLOWED_SCHEME_RE.test(href) ? href : null;
@@ -18,12 +19,14 @@ export function resolveMarkdownLink(
   const path = suffixIndex === -1 ? href : href.slice(0, suffixIndex);
   const suffix = suffixIndex === -1 ? "" : href.slice(suffixIndex);
 
-  const segments = path.startsWith("/") ? [] : (filePath ?? "").split("/").slice(0, -1);
+  const segments = path.startsWith("/")
+    ? []
+    : (filePath ?? "").split("/").slice(0, -1).map(encodeURIComponent);
   for (const part of path.split("/")) {
     if (part === "..") segments.pop();
     else if (part !== "." && part !== "") segments.push(part);
   }
 
   const kind = path.endsWith("/") ? "tree" : "blob";
-  return `https://github.com/${owner}/${repo}/${kind}/HEAD/${segments.join("/")}${suffix}`;
+  return `https://github.com/${owner}/${repo}/${kind}/${encodeURIComponent(gitRef)}/${segments.join("/")}${suffix}`;
 }

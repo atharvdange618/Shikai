@@ -104,11 +104,21 @@ describe("parseGitHubUrl", () => {
   it("keeps the path for tree and blob, plus a blob line anchor", () => {
     const base = "/(app)/repo/facebook~~react";
     expect(parseGitHubUrl("https://github.com/facebook/react/tree/main/packages/core")).toBe(
-      `${base}/files?path=packages%2Fcore`,
+      `${base}/linked-path?kind=tree&segments=${encodeURIComponent('["main","packages","core"]')}`,
     );
     expect(parseGitHubUrl("https://github.com/facebook/react/blob/main/src/index.ts#L10")).toBe(
-      `${base}/file?path=src%2Findex.ts&fileName=index.ts&line=10`,
+      `${base}/linked-path?kind=blob&segments=${encodeURIComponent('["main","src","index.ts"]')}&line=10`,
     );
+  });
+
+  it("preserves segment boundaries and literal percent escapes through route decoding", () => {
+    const route = parseGitHubUrl("https://github.com/o/r/blob/feature%2Fdocs/guide%2520a.ts#L4");
+    const params = new URLSearchParams(route?.split("?")[1]);
+    expect(JSON.parse(decodeURIComponent(params.get("segments") ?? ""))).toEqual([
+      "feature/docs",
+      "guide%20a.ts",
+    ]);
+    expect(params.get("line")).toBe("4");
   });
 
   it("maps pulse and every graphs page to insights", () => {

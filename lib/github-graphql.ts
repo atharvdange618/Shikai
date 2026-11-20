@@ -33,6 +33,45 @@ async function graphql<T>(query: string, variables?: Record<string, unknown>): P
   return data.data;
 }
 
+export async function resolveLinkedPath(
+  owner: string,
+  repo: string,
+  segments: string[],
+  kind: "blob" | "tree",
+): Promise<{ ref: string; revision: string; path: string }> {
+  const longest = segments[0]?.includes("/") ? 1 : segments.length - (kind === "blob" ? 1 : 0);
+  const candidates = Array.from({ length: longest }, (_, index) => {
+    const length = longest - index;
+    return {
+      alias: `r${index}`,
+      ref: segments.slice(0, length).join("/"),
+      path: segments.slice(length).join("/"),
+    };
+  });
+
+  if (candidates.length > 0) {
+    const declarations = candidates.map(({ alias }) => `$${alias}: String!`).join(", ");
+    const fields = candidates
+      .map(({ alias }) => `${alias}: object(expression: $${alias}) { ... on Commit { oid } }`)
+      .join("\n");
+    const variables = Object.fromEntries(
+      candidates.map(({ alias, ref }) => [alias, `${ref}^{commit}`]),
+    );
+    const data = await graphql<{ repository: Record<string, { oid?: string } | null> | null }>(
+      `query LinkedPath($owner: String!, $name: String!, ${declarations}) {
+        repository(owner: $owner, name: $name) { ${fields} }
+      }`,
+      { owner, name: repo, ...variables },
+    );
+    for (const { alias, ref, path } of candidates) {
+      const revision = data.repository?.[alias]?.oid;
+      if (revision) return { ref, revision, path };
+    }
+  }
+
+  throw new Error("GitHub could not find the revision in this link.");
+}
+
 const PINNED_REPOS_QUERY = `
   query PinnedRepos {
     viewer {

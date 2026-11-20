@@ -18,6 +18,7 @@ import {
   PERSISTENCE_MAX_AGE,
   defaultRetry,
   queryClient,
+  queryKeys,
   statsRetry,
   statsRetryDelay,
 } from "@/lib/query-client";
@@ -91,4 +92,10 @@ describe("cache lifetime", () => {
     vi.advanceTimersByTime(PERSISTENCE_MAX_AGE + minute);
     expect(queryClient.getQueryData(key)).toBeUndefined();
   });
+});
+
+it("keeps file contents at different refs in separate cache entries", () => {
+  expect(queryKeys.repoFile("o", "r", "src/main.ts", "preview")).not.toEqual(
+    queryKeys.repoFile("o", "r", "src/main.ts", "main"),
+  );
 });

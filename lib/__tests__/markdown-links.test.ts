@@ -37,6 +37,12 @@ describe("resolveMarkdownLink", () => {
     );
   });
 
+  it("keeps the file's revision when resolving a relative link", () => {
+    expect(resolveMarkdownLink("../LICENSE", CTX, "docs/GUIDE.md", "release/next")).toBe(
+      "https://github.com/octocat/hello/blob/release%2Fnext/LICENSE",
+    );
+  });
+
   it("resolves from the repo root when there is no file path", () => {
     expect(resolveMarkdownLink("docs/GUIDE.md", CTX)).toBe(`${BLOB}/docs/GUIDE.md`);
   });

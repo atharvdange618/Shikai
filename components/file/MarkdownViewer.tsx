@@ -12,10 +12,17 @@ interface MarkdownViewerProps {
   path: string;
   /** `owner/repo`, for GitHub's markdown rendering context. */
   repoContext: string;
+  gitRef?: string;
   targetLine?: number;
 }
 
-export function MarkdownViewer({ content, path, repoContext, targetLine }: MarkdownViewerProps) {
+export function MarkdownViewer({
+  content,
+  path,
+  repoContext,
+  gitRef,
+  targetLine,
+}: MarkdownViewerProps) {
   const { colors } = useTheme();
   const s = useMemo(() => buildStyles(colors), [colors]);
   const { copied, copy } = useCopyToClipboard();
@@ -95,6 +102,7 @@ export function MarkdownViewer({ content, path, repoContext, targetLine }: Markd
           markdown={content}
           context={repoContext}
           filePath={path}
+          gitRef={gitRef}
           onHeightChange={handleMarkdownHeightChange}
           onAnchorOffset={handleAnchorOffset}
         />

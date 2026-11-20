@@ -28,10 +28,11 @@ import { decodeRepoId } from "@/lib/utils";
 const keyExtractor = (item: GitHubCommit) => item.sha;
 
 export default function CommitsScreen() {
-  const { repoId, path, fileName } = useLocalSearchParams<{
+  const { repoId, path, fileName, ref } = useLocalSearchParams<{
     repoId: string;
     path?: string;
     fileName?: string;
+    ref?: string;
   }>();
   const isFileHistory = Boolean(path);
   const router = useRouter();
@@ -57,7 +58,7 @@ export default function CommitsScreen() {
   }, [navigation, isFileHistory, fileName]);
 
   const { commits, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, isError, refetch } =
-    useCommits(owner, repoName, selectedBranch, path);
+    useCommits(owner, repoName, ref ?? selectedBranch, path);
 
   const [refreshing, setRefreshing] = useState(false);
 

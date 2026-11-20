@@ -133,11 +133,12 @@ export function useFileContent(
   repo: string,
   path: string,
   enabled: boolean = false,
+  ref?: string,
 ) {
   return useQuery(
     queryOptions({
-      queryKey: queryKeys.repoFile(owner, repo, path),
-      queryFn: () => fetchFileContent(owner, repo, path),
+      queryKey: queryKeys.repoFile(owner, repo, path, ref),
+      queryFn: () => fetchFileContent(owner, repo, path, ref),
       enabled: Boolean(owner && repo && path && enabled),
       staleTime: 1000 * 60 * 15,
       meta: { persist: false },

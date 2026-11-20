@@ -100,20 +100,14 @@ export function parseGitHubUrl(url: string): string | null {
     case "pulse":
     case "graphs":
       return `${repoBase}/insights`;
-    case "tree": {
-      const treePath = seg.slice(4).join("/");
-      if (!treePath) return `${repoBase}/files`;
-      return `${repoBase}/files?path=${encodeURIComponent(treePath)}`;
-    }
+    case "tree":
     case "blob": {
-      const filePath = seg.slice(4).join("/");
-      if (!filePath) return `${repoBase}/files`;
-      const fileName = seg[seg.length - 1];
-      const lineMatch = fragment.match(/^L(\d+)/i);
+      if (!a) return `${repoBase}/files`;
+      const linkedKind = kind === "blob" && seg.length > 4 ? "blob" : "tree";
+      const segments = JSON.stringify(seg.slice(3)).replaceAll("%", "\\u0025");
+      const lineMatch = linkedKind === "blob" && fragment.match(/^L(\d+)/i);
       const lineParam = lineMatch ? `&line=${lineMatch[1]}` : "";
-      return `${repoBase}/file?path=${encodeURIComponent(
-        filePath,
-      )}&fileName=${encodeURIComponent(fileName)}${lineParam}`;
+      return `${repoBase}/linked-path?kind=${linkedKind}&segments=${encodeURIComponent(segments)}${lineParam}`;
     }
     default:
       return null;

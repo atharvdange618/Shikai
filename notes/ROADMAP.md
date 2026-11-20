@@ -152,10 +152,10 @@ See Completed. `lib/github-url.ts` holds `parseGitHubUrl`; `hooks/useDeepLinks.t
 for VIEW links and for share-sheet links via `expo-share-intent`. github.com verified app
 links send a plain tap to the GitHub app, so the share sheet is the reliable entry on
 Android; the unverified `github.com` VIEW filter only helps on older Android, when the user
-opts Shikai in, or when the GitHub app is absent. `blob` and `tree` both drop the ref (the
-file viewer and file tree read the default branch).
+opts Shikai in, or when the GitHub app is absent. For `blob` and `tree` links, Shikai resolves
+the longest matching ref prefix to a commit, then uses that commit for the file or folder.
 
-`tree/{ref}/{...path}` now passes the path to `files.tsx`, which expands every ancestor
+`tree/{ref}/{...path}` passes the path to `files.tsx`, which expands every ancestor
 folder plus the target directory and scrolls the `FlashList` to it. `blob/{ref}/{...path}#L10`
 passes the starting line number as `line`. Code files open in `CodeViewer`, which marks and
 scrolls to that line exactly; markdown files keep a proportional-height scroll, since rendered
