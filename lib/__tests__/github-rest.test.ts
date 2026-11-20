@@ -28,6 +28,7 @@ import {
   fetchFollowing,
   fetchForks,
   fetchParticipatingNotifications,
+  fetchPreviousReleaseTag,
   fetchPullRequestFiles,
   fetchPunchCard,
   fetchStargazers,
@@ -39,6 +40,47 @@ import {
   parseCheckRunId,
   searchIssues,
 } from "@/lib/github-rest";
+
+describe("previous release tag", () => {
+  beforeEach(() => get.mockReset());
+
+  it("finds the predecessor of a release opened directly on a later page", async () => {
+    get
+      .mockResolvedValueOnce({
+        data: [{ tag_name: "v4" }],
+        headers: { link: '<https://api.github.com/repos/o/r/releases?page=2>; rel="next"' },
+      })
+      .mockResolvedValueOnce({
+        data: [{ tag_name: "v3" }, { tag_name: "v2" }],
+        headers: { link: '<https://api.github.com/repos/o/r/releases?page=3>; rel="next"' },
+      });
+
+    await expect(fetchPreviousReleaseTag("o", "r", "v3")).resolves.toBe("v2");
+    expect(get).toHaveBeenCalledTimes(2);
+  });
+
+  it("crosses a page boundary and skips drafts", async () => {
+    get
+      .mockResolvedValueOnce({
+        data: [{ tag_name: "v3" }],
+        headers: { link: '<https://api.github.com/repos/o/r/releases?page=2>; rel="next"' },
+      })
+      .mockResolvedValueOnce({
+        data: [{ tag_name: "draft", draft: true }, { tag_name: "v2" }],
+        headers: {},
+      });
+
+    await expect(fetchPreviousReleaseTag("o", "r", "v3")).resolves.toBe("v2");
+    expect(get).toHaveBeenLastCalledWith("/repos/o/r/releases", {
+      params: { page: 2, per_page: 100 },
+    });
+  });
+
+  it("returns no comparison for the oldest release", async () => {
+    get.mockResolvedValueOnce({ data: [{ tag_name: "v1" }], headers: {} });
+    await expect(fetchPreviousReleaseTag("o", "r", "v1")).resolves.toBeNull();
+  });
+});
 
 describe("workflow run jobs", () => {
   beforeEach(() => get.mockReset());

@@ -1,4 +1,4 @@
-import { fetchReleaseByTag, fetchReleases } from "@/lib/github-rest";
+import { fetchPreviousReleaseTag, fetchReleaseByTag, fetchReleases } from "@/lib/github-rest";
 import { queryKeys } from "@/lib/query-client";
 import { useInfinitePagedQuery } from "@/hooks/useInfinitePagedQuery";
 import { queryOptions, useQuery } from "@tanstack/react-query";
@@ -29,4 +29,14 @@ export function useRelease(owner: string, repo: string, tag: string) {
       meta: { persist: false },
     }),
   );
+}
+
+export function usePreviousReleaseTag(owner: string, repo: string, tag?: string) {
+  return useQuery({
+    queryKey: [...queryKeys.repoRelease(owner, repo, tag ?? ""), "previous"],
+    queryFn: ({ signal }) => fetchPreviousReleaseTag(owner, repo, tag ?? "", signal),
+    enabled: Boolean(owner && repo && tag),
+    staleTime: 1000 * 60 * 5,
+    meta: { persist: false },
+  });
 }

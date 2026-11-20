@@ -270,16 +270,36 @@ export async function fetchReleases(
   repo: string,
   page: number,
   per_page: number = 20,
+  signal?: AbortSignal,
 ): Promise<FetchReleasesResult> {
   const { data, headers } = await githubAxios.get<GitHubRelease[]>(
     `/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/releases`,
-    { params: { page, per_page } },
+    { params: { page, per_page }, ...(signal ? { signal } : {}) },
   );
 
   return {
     releases: data.filter((r) => !r.draft),
     pagination: parseLinkHeader(headers["link"]),
   };
+}
+
+export async function fetchPreviousReleaseTag(
+  owner: string,
+  repo: string,
+  tag: string,
+  signal?: AbortSignal,
+): Promise<string | null> {
+  let foundCurrent = false;
+  let page = 1;
+  for (;;) {
+    const { releases, pagination } = await fetchReleases(owner, repo, page, 100, signal);
+    for (const release of releases) {
+      if (release.tag_name === tag) foundCurrent = true;
+      else if (foundCurrent) return release.tag_name;
+    }
+    if (!pagination.next || pagination.next <= page) return null;
+    page = pagination.next;
+  }
 }
 
 export async function fetchReleaseByTag(

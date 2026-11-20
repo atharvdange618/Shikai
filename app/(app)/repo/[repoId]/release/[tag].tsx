@@ -10,7 +10,7 @@ import {
   Spacing,
   useTheme,
 } from "@/constants/theme";
-import { useRelease, useReleases } from "@/hooks/useReleases";
+import { usePreviousReleaseTag, useRelease } from "@/hooks/useReleases";
 import { decodeRepoId, formatBytes, relativeTime, shouldDismissSheet } from "@/lib/utils";
 import { Octicons } from "@expo/vector-icons";
 import * as Clipboard from "expo-clipboard";
@@ -65,11 +65,11 @@ function ReleaseDetailScreenContent() {
 
   const { data: release, isLoading, isError } = useRelease(owner, repoName, tag ?? "");
 
-  const { releases } = useReleases(owner, repoName);
-  const prevTag = useMemo(() => {
-    const i = releases.findIndex((r) => r.tag_name === tag);
-    return i >= 0 ? (releases[i + 1]?.tag_name ?? null) : null;
-  }, [releases, tag]);
+  const {
+    data: prevTag,
+    isError: previousReleaseError,
+    refetch: retryPreviousRelease,
+  } = usePreviousReleaseTag(owner, repoName, release?.draft ? undefined : release?.tag_name);
 
   useEffect(() => {
     try {
@@ -142,6 +142,7 @@ function ReleaseDetailScreenContent() {
 
       {prevTag && (
         <Pressable
+          accessibilityRole="button"
           style={({ pressed }) => [
             s.compareLink,
             { borderColor: colors.border },
@@ -150,12 +151,27 @@ function ReleaseDetailScreenContent() {
           onPress={() =>
             router.push({
               pathname: "/(app)/repo/[repoId]/compare",
-              params: { repoId: repoId ?? "", base: prevTag, head: release.tag_name },
+              params: {
+                repoId: repoId ?? "",
+                base: encodeURIComponent(prevTag),
+                head: encodeURIComponent(release.tag_name),
+              },
             })
           }
         >
           <Octicons name="git-compare" size={14} color={colors.accent} />
           <Text style={[s.compareText, { color: colors.accent }]}>Compare to {prevTag}</Text>
+        </Pressable>
+      )}
+      {previousReleaseError && !prevTag && (
+        <Pressable
+          accessibilityRole="button"
+          style={[s.compareLink, { borderColor: colors.border }]}
+          onPress={() => void retryPreviousRelease()}
+        >
+          <Text style={[s.compareText, { color: colors.accent }]}>
+            Retry finding previous release
+          </Text>
         </Pressable>
       )}
 
