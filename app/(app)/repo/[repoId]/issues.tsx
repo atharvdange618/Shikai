@@ -383,6 +383,8 @@ function buildStyles(colors: ColorTokens) {
       borderRadius: Radius.md,
       paddingHorizontal: Spacing.lg,
       paddingVertical: Spacing.sm,
+      minHeight: 48,
+      justifyContent: "center",
     },
     retryText: {
       fontFamily: FontFamily.semiBold,

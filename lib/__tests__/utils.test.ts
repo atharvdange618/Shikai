@@ -15,6 +15,7 @@ import {
   isVideoFile,
   parseTargetLine,
   relativeTime,
+  shouldDismissSheet,
 } from "@/lib/utils";
 
 describe("formatCount", () => {
@@ -178,5 +179,29 @@ describe("parseTargetLine", () => {
     expect(parseTargetLine("-3")).toBeUndefined();
     expect(parseTargetLine("2x")).toBeUndefined();
     expect(parseTargetLine("1.5")).toBeUndefined();
+  });
+});
+
+describe("shouldDismissSheet", () => {
+  const height = 240;
+
+  it("closes when dragged past 35% of the sheet", () => {
+    expect(shouldDismissSheet(90, 0, height)).toBe(true);
+  });
+
+  it("stays open on a short slow drag", () => {
+    expect(shouldDismissSheet(60, 200, height)).toBe(false);
+  });
+
+  it("closes on a fast downward flick, even a short one", () => {
+    expect(shouldDismissSheet(20, 1200, height)).toBe(true);
+  });
+
+  it("stays open on a fast upward flick, even after a long drag", () => {
+    expect(shouldDismissSheet(200, -1200, height)).toBe(false);
+  });
+
+  it("treats the exact thresholds as staying open", () => {
+    expect(shouldDismissSheet(height * 0.35, 800, height)).toBe(false);
   });
 });

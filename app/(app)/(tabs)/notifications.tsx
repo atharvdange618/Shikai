@@ -412,7 +412,7 @@ export default function NotificationsScreen() {
             )}
           </View>
           {unreadCount > 0 && (
-            <Pressable onPress={handleMarkAllRead} style={s.markAllBtn}>
+            <Pressable onPress={handleMarkAllRead} style={s.markAllBtn} accessibilityRole="button">
               <Text style={s.markAllText}>Mark all read</Text>
             </Pressable>
           )}
@@ -541,6 +541,8 @@ function buildStyles(colors: ColorTokens, isDark: boolean) {
     markAllBtn: {
       paddingHorizontal: Spacing.md,
       paddingVertical: Spacing.xs,
+      minHeight: 48,
+      justifyContent: "center",
       borderRadius: Radius.sm,
       backgroundColor: colors.surfaceSecondary,
     },

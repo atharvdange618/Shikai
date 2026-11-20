@@ -11,7 +11,7 @@ import {
   useTheme,
 } from "@/constants/theme";
 import { useRelease, useReleases } from "@/hooks/useReleases";
-import { decodeRepoId, formatBytes, relativeTime } from "@/lib/utils";
+import { decodeRepoId, formatBytes, relativeTime, shouldDismissSheet } from "@/lib/utils";
 import { Octicons } from "@expo/vector-icons";
 import * as Clipboard from "expo-clipboard";
 import { Image } from "expo-image";
@@ -28,15 +28,20 @@ import {
   Text,
   View,
 } from "react-native";
+import {
+  GestureDetector,
+  GestureHandlerRootView,
+  usePanGesture,
+} from "react-native-gesture-handler";
 import Animated, {
-  FadeIn,
-  FadeOut,
-  SlideOutDown,
+  interpolate,
   useAnimatedStyle,
   useSharedValue,
+  withSpring,
   withTiming,
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { scheduleOnRN } from "react-native-worklets";
 
 // What the action menu needs from an asset or a source archive.
 type DownloadTarget = { name: string; url: string };
@@ -271,21 +276,55 @@ function AssetActionMenu({
   // Modal lays out short by the status bar height, then grows to full
   // screen; a layout animation keeps the first frame, so the sheet ends up
   // floating above the bottom edge.
+  // Every close path (drag, backdrop, back button, a menu row) runs through
+  // `slide`, so the sheet always leaves from where it is. The backdrop dims
+  // with the same value and follows the finger. Reanimated's default
+  // ReduceMotion.System makes these timings and springs jump to the end when
+  // the system asks for reduced motion.
+  const sheetHeight = useSharedValue(400);
   const slide = useSharedValue(400);
   const slideStyle = useAnimatedStyle(() => ({
     transform: [{ translateY: slide.value }],
   }));
+  const backdropStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(slide.value, [0, sheetHeight.value], [1, 0], "clamp"),
+  }));
 
   useEffect(() => {
     if (!target) return;
-    slide.set(400);
+    slide.set(sheetHeight.get());
     slide.set(withTiming(0, { duration: 220 }));
-  }, [target, slide]);
+  }, [target, slide, sheetHeight]);
+
+  const dismiss = () => {
+    "worklet";
+    slide.set(
+      withTiming(sheetHeight.get(), { duration: 180 }, (finished) => {
+        if (finished) scheduleOnRN(onClose);
+      }),
+    );
+  };
+
+  // activeOffsetY: 10 only activates on a downward drag, so taps on the rows
+  // still land and an upward drag does nothing.
+  const pan = usePanGesture({
+    activeOffsetY: 10,
+    onUpdate: (e) => {
+      slide.set(Math.max(0, e.translationY));
+    },
+    onDeactivate: (e) => {
+      if (shouldDismissSheet(e.translationY, e.velocityY, sheetHeight.get())) {
+        dismiss();
+      } else {
+        slide.set(withSpring(0, { velocity: e.velocityY, damping: 30, stiffness: 300 }));
+      }
+    },
+  });
 
   if (!target) return null;
 
   const run = (fn: () => Promise<unknown>) => {
-    onClose();
+    dismiss();
     fn().catch(() => console.error("Could not open or share release link"));
   };
 
@@ -294,71 +333,94 @@ function AssetActionMenu({
     setCopied(true);
     setTimeout(() => {
       setCopied(false);
-      onClose();
+      dismiss();
     }, 1200);
   };
 
   return (
-    <Modal visible transparent animationType="none" statusBarTranslucent onRequestClose={onClose}>
-      <Animated.View
-        entering={FadeIn.duration(150)}
-        exiting={FadeOut.duration(120)}
-        style={[s.menuBackdrop, { backgroundColor: "rgba(0,0,0,0.4)" }]}
-      >
-        <Pressable style={StyleSheet.absoluteFill} onPress={onClose} />
+    <Modal visible transparent animationType="none" statusBarTranslucent onRequestClose={dismiss}>
+      {/* On Android a Modal renders outside the app's GestureHandlerRootView. */}
+      <GestureHandlerRootView style={s.menuBackdrop}>
         <Animated.View
-          exiting={SlideOutDown.duration(140)}
-          style={[
-            s.menuSheet,
-            slideStyle,
-            {
-              backgroundColor: colors.surface,
-              borderColor: colors.border,
-              paddingBottom: insets.bottom + Spacing.sm,
-            },
-          ]}
+          style={[StyleSheet.absoluteFill, { backgroundColor: "rgba(0,0,0,0.4)" }, backdropStyle]}
         >
-          <Text style={[s.menuHeader, { color: colors.textMuted }]} numberOfLines={1}>
-            {target.name}
-          </Text>
           <Pressable
-            style={({ pressed }) => [
-              s.menuRow,
-              pressed && { backgroundColor: colors.surfaceSecondary },
-            ]}
-            onPress={() => run(() => Share.share({ message: target.url }))}
-          >
-            <Octicons name="share" size={16} color={colors.textSecondary} />
-            <Text style={[s.menuRowText, { color: colors.textPrimary }]}>Share</Text>
-          </Pressable>
-          <Pressable
-            style={({ pressed }) => [
-              s.menuRow,
-              pressed && { backgroundColor: colors.surfaceSecondary },
-            ]}
-            onPress={handleCopy}
-          >
-            <Octicons
-              name={copied ? "check" : "link"}
-              size={16}
-              color={copied ? colors.success : colors.textSecondary}
-            />
-            <Text style={[s.menuRowText, { color: copied ? colors.success : colors.textPrimary }]}>
-              {copied ? "Copied" : "Copy link"}
-            </Text>
-          </Pressable>
-          <Pressable
-            style={({ pressed }) => [
-              s.menuRow,
-              pressed && { backgroundColor: colors.surfaceSecondary },
-            ]}
-            onPress={() => run(() => Linking.openURL(target.url))}
-          >
-            <Octicons name="download" size={16} color={colors.textSecondary} />
-            <Text style={[s.menuRowText, { color: colors.textPrimary }]}>Download</Text>
-          </Pressable>
+            style={StyleSheet.absoluteFill}
+            onPress={dismiss}
+            accessibilityRole="button"
+            accessibilityLabel="Close menu"
+          />
         </Animated.View>
-      </Animated.View>
+        <GestureDetector gesture={pan}>
+          <Animated.View
+            onLayout={(e) => sheetHeight.set(e.nativeEvent.layout.height)}
+            style={[
+              s.menuSheet,
+              slideStyle,
+              {
+                backgroundColor: colors.surface,
+                borderColor: colors.border,
+                paddingBottom: insets.bottom + Spacing.sm,
+              },
+            ]}
+          >
+            <View style={s.menuHandle}>
+              <View style={[s.menuHandleBar, { backgroundColor: colors.border }]} />
+            </View>
+            <View style={s.menuHeaderRow}>
+              <Text style={[s.menuHeader, { color: colors.textMuted }]} numberOfLines={1}>
+                {target.name}
+              </Text>
+              <Pressable
+                onPress={dismiss}
+                hitSlop={12}
+                accessibilityRole="button"
+                accessibilityLabel="Close menu"
+              >
+                <Octicons name="x" size={16} color={colors.textMuted} />
+              </Pressable>
+            </View>
+            <Pressable
+              style={({ pressed }) => [
+                s.menuRow,
+                pressed && { backgroundColor: colors.surfaceSecondary },
+              ]}
+              onPress={() => run(() => Share.share({ message: target.url }))}
+            >
+              <Octicons name="share" size={16} color={colors.textSecondary} />
+              <Text style={[s.menuRowText, { color: colors.textPrimary }]}>Share</Text>
+            </Pressable>
+            <Pressable
+              style={({ pressed }) => [
+                s.menuRow,
+                pressed && { backgroundColor: colors.surfaceSecondary },
+              ]}
+              onPress={handleCopy}
+            >
+              <Octicons
+                name={copied ? "check" : "link"}
+                size={16}
+                color={copied ? colors.success : colors.textSecondary}
+              />
+              <Text
+                style={[s.menuRowText, { color: copied ? colors.success : colors.textPrimary }]}
+              >
+                {copied ? "Copied" : "Copy link"}
+              </Text>
+            </Pressable>
+            <Pressable
+              style={({ pressed }) => [
+                s.menuRow,
+                pressed && { backgroundColor: colors.surfaceSecondary },
+              ]}
+              onPress={() => run(() => Linking.openURL(target.url))}
+            >
+              <Octicons name="download" size={16} color={colors.textSecondary} />
+              <Text style={[s.menuRowText, { color: colors.textPrimary }]}>Download</Text>
+            </Pressable>
+          </Animated.View>
+        </GestureDetector>
+      </GestureHandlerRootView>
     </Modal>
   );
 }
@@ -484,14 +546,29 @@ const s = StyleSheet.create({
     borderTopWidth: 1,
     borderTopLeftRadius: Radius.xl,
     borderTopRightRadius: Radius.xl,
-    paddingTop: Spacing.md,
+    paddingTop: Spacing.sm,
     paddingHorizontal: Spacing.sm,
   },
-  menuHeader: {
-    fontFamily: FontFamily.medium,
-    fontSize: FontSize.caption,
+  menuHandle: {
+    alignItems: "center",
+    paddingBottom: Spacing.sm,
+  },
+  menuHandleBar: {
+    width: 36,
+    height: 4,
+    borderRadius: 2,
+  },
+  menuHeaderRow: {
+    flexDirection: "row",
+    alignItems: "center",
     paddingHorizontal: Spacing.md,
     paddingBottom: Spacing.sm,
+    gap: Spacing.md,
+  },
+  menuHeader: {
+    flex: 1,
+    fontFamily: FontFamily.medium,
+    fontSize: FontSize.caption,
   },
   menuRow: {
     flexDirection: "row",

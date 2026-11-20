@@ -230,3 +230,18 @@ export function getLanguage(filename: string): string {
       return "text";
   }
 }
+
+/**
+ * Whether a released drag on a bottom sheet should close it: dragged past
+ * 35% of the sheet's height, or flicked down faster than 800 dp/s. A fast
+ * upward flick keeps it open even when dragged far.
+ */
+export function shouldDismissSheet(
+  translationY: number,
+  velocityY: number,
+  sheetHeight: number,
+): boolean {
+  "worklet";
+  if (velocityY < -800) return false;
+  return velocityY > 800 || translationY > sheetHeight * 0.35;
+}

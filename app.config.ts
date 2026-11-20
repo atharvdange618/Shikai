@@ -37,7 +37,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       backgroundColor: "#FAF9F6",
       foregroundImage: "./assets/images/adaptive-icon.png",
     },
-    predictiveBackGestureEnabled: false,
+    predictiveBackGestureEnabled: true,
     package: "com.atharvdange618.Shikai",
     versionCode: 12,
     // No autoVerify: Shikai just shows up in the chooser for github.com links.

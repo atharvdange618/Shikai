@@ -1,6 +1,7 @@
+import { Octicons } from "@expo/vector-icons";
 import { FlashList, type FlashListProps } from "@shopify/flash-list";
 import { useCallback, useMemo, useState } from "react";
-import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
 
 import { ListItemSeparator } from "@/components/shared/ListItemSeparator";
 import { PullToRefresh } from "@/components/shared/PullToRefresh";
@@ -10,6 +11,7 @@ import {
   FontFamily,
   FontSize,
   Layout,
+  Radius,
   Spacing,
   useTheme,
 } from "@/constants/theme";
@@ -56,9 +58,17 @@ export function PagedList<T>({
     <View style={s.centered}>
       <ActivityIndicator size="large" color={colors.accent} />
     </View>
+  ) : isError ? (
+    <View style={s.centered}>
+      <Octicons name="alert" size={24} color={colors.danger} />
+      <Text style={s.emptyTitle}>{errorText}</Text>
+      <Pressable style={s.retryButton} accessibilityRole="button" onPress={() => void refetch()}>
+        <Text style={s.retryText}>Try again</Text>
+      </Pressable>
+    </View>
   ) : (
     <View style={s.centered}>
-      <Text style={s.emptyTitle}>{isError ? errorText : emptyText}</Text>
+      <Text style={s.emptyTitle}>{emptyText}</Text>
     </View>
   );
 
@@ -107,6 +117,19 @@ function buildStyles(colors: ColorTokens) {
       fontFamily: FontFamily.semiBold,
       fontSize: FontSize.body,
       color: colors.textSecondary,
+    },
+    retryButton: {
+      backgroundColor: colors.accent,
+      borderRadius: Radius.md,
+      paddingHorizontal: Spacing.lg,
+      paddingVertical: Spacing.sm,
+      minHeight: 48,
+      justifyContent: "center",
+    },
+    retryText: {
+      fontFamily: FontFamily.semiBold,
+      fontSize: FontSize.body,
+      color: colors.textOnAccent,
     },
     footerLoader: {
       paddingVertical: Spacing.lg,

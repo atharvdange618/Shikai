@@ -196,6 +196,8 @@ function buildStyles(colors: ColorTokens, shadows: object) {
     retryButton: {
       paddingHorizontal: Spacing.lg,
       paddingVertical: Spacing.sm,
+      minHeight: 48,
+      justifyContent: "center",
       borderRadius: Radius.md,
       backgroundColor: colors.accentSubtle,
     },

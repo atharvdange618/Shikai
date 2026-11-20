@@ -574,6 +574,8 @@ function buildStyles(colors: ColorTokens, bottomInset: number) {
       borderRadius: Radius.md,
       paddingHorizontal: Spacing.lg,
       paddingVertical: Spacing.sm,
+      minHeight: 48,
+      justifyContent: "center",
       marginTop: Spacing.sm,
     },
 

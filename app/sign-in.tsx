@@ -542,7 +542,7 @@ export default function SignInScreen() {
                   <Text style={s.buttonText}>Set up repo access</Text>
                 )}
               </AnimatedPressable>
-              <Pressable onPress={handleSkipInstall} disabled={isLoading}>
+              <Pressable onPress={handleSkipInstall} disabled={isLoading} style={s.secondaryButton}>
                 <Text style={s.secondaryLink}>Skip for now</Text>
               </Pressable>
             </>
@@ -626,7 +626,11 @@ export default function SignInScreen() {
                   </>
                 )}
               </AnimatedPressable>
-              <Pressable onPress={() => setShowTokenInput(true)} disabled={isLoading}>
+              <Pressable
+                onPress={() => setShowTokenInput(true)}
+                disabled={isLoading}
+                style={s.secondaryButton}
+              >
                 <Text style={s.secondaryLink}>Sign in with a token</Text>
               </Pressable>
             </>
@@ -789,6 +793,10 @@ function buildStyles(
       backgroundColor: colors.surfaceInset,
     },
 
+    secondaryButton: {
+      minHeight: 48,
+      justifyContent: "center",
+    },
     secondaryLink: {
       fontFamily: FontFamily.medium,
       fontSize: FontSize.caption,
