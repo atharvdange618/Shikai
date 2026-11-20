@@ -4,7 +4,6 @@ import type { ColorTokens } from "@/constants/theme";
 import { getEventDisplay, sortEventsNewestFirst } from "@/lib/github-utils";
 import type { GitHubEvent } from "@/types/github.types";
 
-// getEventDisplay reads only three color tokens.
 const colors = {
   accent: "#58a6ff",
   success: "#3fb950",

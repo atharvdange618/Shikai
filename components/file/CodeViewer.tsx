@@ -32,9 +32,6 @@ import {
 
 import { FileError } from "./FileError";
 
-// react-native-webview 14 publishes type stubs that drop the imperative handle
-// its runtime forwards (see its src/WebView.android.tsx), so the ref is typed
-// here to match what a mounted WebView actually exposes.
 type WebViewHandle = { injectJavaScript: (script: string) => void };
 
 const RefWebView = WebView as unknown as ComponentType<
@@ -61,10 +58,6 @@ export function CodeViewer({ content, fileName, targetLine, diff = false }: Code
   const [wrap, setWrap] = useState(true);
   const { copied, copy } = useCopyToClipboard();
 
-  // Highlighting blocks the JS thread, so let the loading state paint first.
-  // It runs outside render, where the screen's ErrorBoundary can't catch a
-  // throw, so catch it here. The reset runs inside the timeout, not in the
-  // effect body, so highlighting a new file never cascades an extra render.
   useEffect(() => {
     const id = setTimeout(() => {
       setFile(null);
@@ -93,8 +86,6 @@ export function CodeViewer({ content, fileName, targetLine, diff = false }: Code
     [file, colors, syntaxTheme, targetLine],
   );
 
-  // Toggled in place so the page keeps its scroll position. Also re-sent on
-  // load, since a theme change rebuilds the page with wrap on.
   const syncWrap = useCallback((on: boolean) => {
     webViewRef.current?.injectJavaScript(`setWrap(${on}); true;`);
   }, []);
@@ -144,8 +135,6 @@ export function CodeViewer({ content, fileName, targetLine, diff = false }: Code
           source={{ html }}
           style={s.webview}
           originWhitelist={["about:*", "data:*"]}
-          // D-018: the page never navigates. The code is escaped text, so
-          // this only guards against a bug in that escaping.
           onShouldStartLoadWithRequest={(req) => !/^https?:/i.test(req.url)}
           onLoadEnd={() => syncWrap(wrap)}
           javaScriptEnabled
@@ -211,7 +200,6 @@ function buildStyles(colors: ColorTokens) {
       color: colors.accent,
     },
 
-    // 48dp touch target; the negative margin keeps the toolbar's height.
     iconButton: {
       minWidth: 48,
       minHeight: 48,

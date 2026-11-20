@@ -100,8 +100,6 @@ describe("planAlerts", () => {
     expect(nextMarker).toBe(MARKER);
   });
 
-  // Gaps taken from real threads: preloaded email images read in 1 to 5s,
-  // the user's own activity leaves last_read_at behind updated_at.
   describe("threads GitHub already marked read", () => {
     function readThread(id: string, updatedAt: string, lastReadAt: string) {
       return { ...thread(id, updatedAt, false), last_read_at: lastReadAt };
@@ -160,7 +158,6 @@ describe("pollNotifications", () => {
       await expect(pollNotifications()).resolves.toEqual({ kind: "seeded" });
       expect(store.get(MARKER_KEY)).toBe("2026-10-15T10:10:00Z");
       expect(store.get(ETAG_KEY)).toBe('"etag-2"');
-      // No marker yet, so the stale ETag is not sent.
       expect(fetchParticipatingNotifications).toHaveBeenCalledWith("ghp_abc", null);
     });
 

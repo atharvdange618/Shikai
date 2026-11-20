@@ -25,9 +25,6 @@ async function graphql<T>(query: string, variables?: Record<string, unknown>): P
     errors?: { message: string }[];
   }>(GRAPHQL_ENDPOINT, { query, variables });
 
-  // A partial response (e.g. a repo with Discussions disabled) still carries
-  // usable `data` alongside `errors`. Only throw when there's nothing to use;
-  // callers already null-check the fields they read.
   if (Array.isArray(data.errors) && data.errors.length > 0 && data.data == null) {
     const messages = data.errors.map((e) => e.message).join(", ");
     throw new Error(`GraphQL error: ${messages}`);
@@ -168,9 +165,6 @@ export async function fetchRepoIssuesPRStats(
   };
 }
 
-// blame lives on Commit, not Blob, despite how it reads ("blame this file") —
-// resolve `ref` to its tip commit, then blame `path` from there. The blob
-// text comes along in the same request via an aliased `object(expression)`.
 const BLAME_QUERY = `
   query Blame($owner: String!, $name: String!, $ref: String!, $expression: String!, $path: String!) {
     repository(owner: $owner, name: $name) {

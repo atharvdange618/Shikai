@@ -21,7 +21,6 @@ export default function RepoLayout() {
         headerShadowVisible: false,
         headerBackButtonDisplayMode: "minimal",
         headerBackTitle: "",
-        // Most screens set their title with navigation.setOptions.
         title: "",
       }}
     >

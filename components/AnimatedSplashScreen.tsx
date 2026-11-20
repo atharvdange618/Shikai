@@ -24,9 +24,6 @@ export function AnimatedSplashScreen({ onComplete, isReady }: AnimatedSplashScre
   const logoScale = useSharedValue(0.3);
   const containerOpacity = useSharedValue(1);
 
-  // The native splash is only there to cover the gap before this view paints.
-  // Handing over on the first layout means the logo animation runs while boot
-  // finishes, instead of a frozen image sitting on top of a static one.
   const nativeSplashHidden = useRef(false);
   const hideNativeSplash = useCallback(() => {
     if (nativeSplashHidden.current) return;

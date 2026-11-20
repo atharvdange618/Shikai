@@ -30,8 +30,6 @@ export function relativeTime(dateStr: string): string {
   return timeAgo(dateStr, false);
 }
 
-// Elapsed time between two ISO dates as "45s", "3m 12s" or "1h 5m".
-// Null end means still running, measured to now.
 export function formatDuration(start: string, end: string | null): string {
   const endMs = end ? new Date(end).getTime() : Date.now();
   const total = Math.max(0, Math.round((endMs - new Date(start).getTime()) / 1000));
@@ -100,8 +98,6 @@ export type FileKind = "image" | "video" | "pdf" | "markdown" | "binary" | "text
 
 const MARKDOWN_EXTENSIONS = [".md", ".mdx", ".markdown"];
 
-// Common binaries the contents API still returns as base64, which would
-// render as noise in the code viewer.
 const BINARY_EXTENSIONS = [
   ".zip",
   ".gz",

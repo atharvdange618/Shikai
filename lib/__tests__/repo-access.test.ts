@@ -1,6 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
 
-// github-rest pulls in lib/axios, which reports errors through Sentry.
 vi.mock("@sentry/react-native", () => ({}));
 
 import {
@@ -39,8 +38,6 @@ describe("hasOwnInstallation", () => {
     expect(hasOwnInstallation([install("octocat", "selected")], "octocat")).toBe(true);
   });
 
-  // /user/installations also lists installs on accounts the user collaborates
-  // with, so a non-empty list doesn't mean the user installed the app.
   it("is false when the only install belongs to another account", () => {
     expect(hasOwnInstallation([install("someone-else", "all")], "octocat")).toBe(false);
   });

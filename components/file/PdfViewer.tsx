@@ -13,13 +13,11 @@ interface PdfViewerProps {
 type Download =
   { status: "loading" } | { status: "ready"; uri: string } | { status: "error"; message: string };
 
-// Covers the body download too, so it is longer than the API timeout.
 const DOWNLOAD_TIMEOUT_MS = 60_000;
 
 const isTimeout = (e: unknown): boolean =>
   typeof e === "object" && e !== null && "name" in e && e.name === "TimeoutError";
 
-// Outside the component: React Compiler can't compile a `throw` inside `try`.
 async function fetchPdfBase64(url: string): Promise<string> {
   try {
     return await downloadPdfBase64(url);
@@ -55,17 +53,12 @@ export function PdfViewer({ url }: PdfViewerProps) {
   const [download, setDownload] = useState<Download>({ status: "loading" });
   const [renderError, setRenderError] = useState<string | null>(null);
 
-  // Reset to loading during render when the URL changes, not in the effect
-  // below, so switching files never cascades an extra render.
   const [prevUrl, setPrevUrl] = useState(url);
   if (prevUrl !== url) {
     setPrevUrl(url);
     setDownload({ status: "loading" });
   }
 
-  // react-native-pdf downloads a remote URL through react-native-blob-util,
-  // which chokes on GitHub's redirect. Fetch the bytes with RN's own stack
-  // (straight to GitHub, no third party) and hand the viewer a data URI.
   useEffect(() => {
     let cancelled = false;
 

@@ -10,8 +10,6 @@ interface FakePre {
 }
 type RawLang = (code: FakeCode | null, pre: FakePre) => string;
 
-// The page's script reads a raw <pre> block's language in one statement. Pull
-// that statement out of the HTML the WebView receives and run it on fake nodes.
 function detectLang(codeClass: string | null, langAttr: string | null): string {
   const statement = /var rawLang = [^\n]+;/.exec(buildHtml("", false, 16))?.[0];
   if (!statement) throw new Error("rawLang statement not found in page script");

@@ -8,11 +8,6 @@ import { Image } from "expo-image";
 import { useMemo } from "react";
 import { StyleSheet, Text, View } from "react-native";
 
-/**
- * Flat, chronological list of PR review threads. Each thread carries its own
- * diff_hunk as context, so a reader doesn't need to expand the file diff and
- * hunt for the commented line.
- */
 export function ReviewThreadList({
   reviewComments,
   colors,

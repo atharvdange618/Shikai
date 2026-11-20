@@ -45,8 +45,6 @@ export default function CommitsScreen() {
   const { data: repo } = useRepo(owner, repoName);
   const { data: branches, isLoading: branchesLoading } = useBranches(owner, repoName);
 
-  // Default to the repo's default branch until the user picks one. Set
-  // during render, not in an effect, so it never cascades an extra render.
   if (repo?.default_branch && !selectedBranch) {
     setSelectedBranch(repo.default_branch);
   }

@@ -24,8 +24,6 @@ import { queryKeys } from "@/lib/query-client";
 import { useAuthStore } from "@/stores/auth.store";
 import type { GitHubRepo, GitHubTreeItem } from "@/types/github.types";
 
-// Every prefetch below that calls GitHub returns early while isRateLimited():
-// prefetch is optional work, and requests sent then only fail with 403s.
 export function prefetchRoute(href: string) {
   router.prefetch(href as Parameters<typeof router.prefetch>[0]);
 }

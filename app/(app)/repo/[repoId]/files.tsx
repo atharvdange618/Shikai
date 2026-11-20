@@ -146,9 +146,6 @@ export default function FileExplorerScreen() {
 
   const [owner, repoName] = decodeRepoId(repoId ?? "");
   const [expandedPaths, setExpandedPaths] = useState<Set<string>>(() => {
-    // A shared /tree/{ref}/{path} link names a directory. Expand every
-    // ancestor folder plus the target itself up front, so the row is visible
-    // once the tree loads (see the pendingScrollPath scroll below).
     if (!targetPath) return new Set<string>();
     const parts = targetPath.split("/");
     return new Set(parts.map((_, i) => parts.slice(0, i + 1).join("/")));
@@ -162,8 +159,6 @@ export default function FileExplorerScreen() {
   const { data: repo } = useRepo(owner, repoName);
   const { data: branches, isLoading: branchesLoading } = useBranches(owner, repoName);
 
-  // Default to the repo's default branch until the user picks one. Set
-  // during render, not in an effect, so it never cascades an extra render.
   if (repo?.default_branch && !selectedBranch) {
     setSelectedBranch(repo.default_branch);
   }
@@ -174,9 +169,7 @@ export default function FileExplorerScreen() {
         title: `${repo?.name ?? "Repository"} Files`,
         headerBackTitle: repo?.name ?? "Back",
       });
-    } catch {
-      /* navigator not ready yet */
-    }
+    } catch {}
   }, [navigation, repo?.name]);
 
   const { data: fileTreeData, isLoading } = useFileTree(owner, repoName, selectedBranch, true);
@@ -258,9 +251,6 @@ export default function FileExplorerScreen() {
     return results;
   }, [tree, flattenedTree, searchQuery]);
 
-  // The ancestors are already expanded above, so scroll to the row once it
-  // shows up in the flattened list, then drop the pending path on the next
-  // tick so the scroll doesn't repeat.
   useEffect(() => {
     if (!pendingScrollPath) return;
     const index = displayTree.findIndex((item) => item.node.path === pendingScrollPath);

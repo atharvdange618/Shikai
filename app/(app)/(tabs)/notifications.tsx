@@ -159,7 +159,6 @@ function itemStyles(colors: ColorTokens) {
       paddingVertical: Spacing.md,
       paddingHorizontal: Spacing.lg,
       gap: Spacing.md,
-      // Opaque so the swipe action underneath stays hidden until the row slides.
       backgroundColor: colors.background,
     },
     pressed: {
@@ -240,8 +239,6 @@ function itemStyles(colors: ColorTokens) {
 const FILTERS = ["all", "unread", "attention"] as const;
 type Filter = (typeof FILTERS)[number];
 
-// Unread items that need a decision (review/mention/assign) float above
-// everything else, so they aren't buried under routine activity noise.
 function sortByAttention(notifications: GitHubNotification[]): GitHubNotification[] {
   return [...notifications].sort((a, b) => {
     const aAttention = a.unread && ATTENTION_REASONS.has(a.reason) ? 1 : 0;
@@ -304,13 +301,6 @@ export default function NotificationsScreen() {
     [pat],
   );
 
-  // Marking read is instant in the UI: patch the cached pages directly so
-  // the read state, badge counts, and swipe-ability flip immediately,
-  // instead of waiting on a network round trip (or worse, GitHub's PATCH
-  // followed by a full refetch of every loaded page via invalidateQueries,
-  // which is what made this feel laggy with more than a page of history).
-  // The actual API call runs in the background; a failure falls back to a
-  // real refetch to resync.
   const markRead = useCallback(
     (notification: GitHubNotification) => {
       queryClient.setQueryData<InfiniteData<FetchNotificationsResult>>(
@@ -365,8 +355,6 @@ export default function NotificationsScreen() {
     );
 
     markAllNotificationsAsRead(pat).catch(() => {
-      // Roll back first: offline, the refetch below fails too and would
-      // leave every thread showing as read.
       queryClient.setQueryData(notificationsQueryKey, previous);
       void queryClient.invalidateQueries({ queryKey: notificationsQueryKey });
       alert.show({

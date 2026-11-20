@@ -35,8 +35,6 @@ export function getCheckDisplay(
   return getRunDisplay(status, conclusion, colors);
 }
 
-// Shared by check runs, workflow runs and workflow jobs: the check types are
-// subsets of the workflow ones, so one mapping covers all three.
 export function getRunDisplay(
   status: GitHubWorkflowRunStatus,
   conclusion: GitHubWorkflowRunConclusion,

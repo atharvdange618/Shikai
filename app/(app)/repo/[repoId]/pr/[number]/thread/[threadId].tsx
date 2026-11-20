@@ -27,7 +27,6 @@ function Thread() {
   const { colors } = useTheme();
   const query = usePullRequestReviewComments(owner, repo, Number(number));
   const { hasNextPage, isFetchingNextPage, isError, fetchNextPage } = query;
-  // Replies can arrive on later pages even when the root comment is already loaded.
   useEffect(() => {
     if (hasNextPage && !isFetchingNextPage && !isError) void fetchNextPage();
   }, [hasNextPage, isFetchingNextPage, isError, fetchNextPage]);

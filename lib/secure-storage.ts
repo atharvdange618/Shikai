@@ -31,13 +31,10 @@ async function safeRead<T>(fn: () => Promise<T>, fallback: T): Promise<T> {
   }
 }
 
-// Silent fail - callers keep the in-memory (Zustand) value regardless.
 async function safeWrite(fn: () => Promise<void>): Promise<void> {
   try {
     await fn();
-  } catch {
-    // ignore
-  }
+  } catch {}
 }
 
 export const getStoredToken = (): Promise<string | null> =>

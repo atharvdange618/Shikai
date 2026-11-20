@@ -7,11 +7,6 @@ export interface ContributorSummary {
   deletions: number;
 }
 
-/**
- * Top contributors by commit count, with lifetime line totals. `hasLineCounts`
- * is false when every contributor reports zero additions and deletions, which
- * is what GitHub sends for repos with 10,000+ commits.
- */
 export function summarizeContributors(
   stats: GitHubContributorStats[],
   limit: number,

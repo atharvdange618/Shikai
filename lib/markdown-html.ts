@@ -1,6 +1,3 @@
-// Page builder for MarkdownRenderer's WebView. Kept out of the component so
-// Vitest can check it without React Native.
-
 export function buildHtml(html: string, isDark: boolean, bodyPadding: number): string {
   const text = isDark ? "#E6EDF3" : "#1A2332";
   const textSecondary = isDark ? "#8B949E" : "#5A6B7B";
@@ -38,8 +35,6 @@ export function buildHtml(html: string, isDark: boolean, bodyPadding: number): s
     font-size: 15px;
     line-height: 1.6;
     color: ${text};
-    /* Transparent so the markdown sits on whatever surface its container
-       provides; an opaque body painted a second background inside cards. */
     background: transparent;
     padding: ${bodyPadding}px;
     -webkit-text-size-adjust: 100%;
@@ -355,7 +350,6 @@ export function buildHtml(html: string, isDark: boolean, bodyPadding: number): s
   function init() {
     window.__mermaidBlocks = [];
 
-    // 1. New GitHub-native mermaid section elements
     var sections = document.querySelectorAll('.markdown-body section[data-type="mermaid"], .markdown-body .render-needs-enrichment[data-type="mermaid"]');
     sections.forEach(function(section) {
       var pre = section.querySelector('pre');
@@ -369,7 +363,6 @@ export function buildHtml(html: string, isDark: boolean, bodyPadding: number): s
       }
     });
 
-    // 2. Standard highlight code blocks
     var highlights = document.querySelectorAll('.markdown-body .highlight[class*="highlight-source"]');
 
     highlights.forEach(function(hl) {
@@ -386,7 +379,6 @@ export function buildHtml(html: string, isDark: boolean, bodyPadding: number): s
       wrapBlock(hl, lang, function() { return pre ? pre.textContent : hl.textContent; });
     });
 
-    // 3. Raw pre elements
     document.querySelectorAll('.markdown-body pre').forEach(function(pre) {
       if (pre.closest('.code-block-wrapper') || pre.closest('.highlight') || pre.closest('section[data-type="mermaid"]') || pre.closest('.render-needs-enrichment')) return;
       var code = pre.querySelector('code');
@@ -415,10 +407,6 @@ export function buildHtml(html: string, isDark: boolean, bodyPadding: number): s
     }
   }
 
-  // The WebView doesn't scroll (the native ScrollView around it does) and has
-  // no base URL, so default link handling either does nothing or navigates to
-  // a blank page. Hand every tap to React Native instead: #fragments as the
-  // target's offset, everything else as the raw href.
   document.addEventListener('click', function(e) {
     var a = e.target.closest && e.target.closest('a[href]');
     if (!a || !window.ReactNativeWebView) return;

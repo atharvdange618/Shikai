@@ -1,6 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-// Stub the native package so importing lib/sentry works under Node.
 const { captureMessage } = vi.hoisted(() => ({ captureMessage: vi.fn() }));
 vi.mock("@sentry/react-native", () => ({ captureMessage }));
 
@@ -67,8 +66,6 @@ describe("apiEndpoint", () => {
 });
 
 describe("reportApiError", () => {
-  // Each test starts more than a minute after the last, so the dedupe window
-  // from an earlier test never hides a report.
   let clock = 1_000_000;
   beforeEach(() => {
     captureMessage.mockClear();

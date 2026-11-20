@@ -12,10 +12,6 @@ const SIGN: Partial<Record<DiffLine["kind"], string>> = {
   context: " ",
 };
 
-/**
- * A short diff (a review comment's diff_hunk) rendered natively, so a list of
- * threads doesn't spin up one WebView each. Long lines wrap.
- */
 export function DiffHunk({ hunk, fileName }: { hunk: string; fileName: string }) {
   const { colors, syntaxTheme } = useTheme();
   const s = useMemo(() => buildStyles(colors), [colors]);

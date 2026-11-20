@@ -27,17 +27,14 @@ export function useNotificationTaps(enabled: boolean) {
     const id = response.notification.request.identifier;
     if (handledId.current === id) return;
     handledId.current = id;
-    // Otherwise the same tap routes again on the next launch.
     Notifications.clearLastNotificationResponseAsync().catch(() => {});
 
     const data = response.notification.request.content.data;
     const subjectUrl = typeof data?.subjectUrl === "string" ? data.subjectUrl : null;
     const threadId = typeof data?.threadId === "string" ? data.threadId : null;
 
-    // The "N more" summary has no thread, so it opens the tab.
     router.push((parseGitHubApiUrl(subjectUrl) ?? NOTIFICATIONS_TAB) as Href);
 
-    // Same as tapping the row in the notifications tab.
     const pat = useAuthStore.getState().pat;
     if (threadId && threadId !== "dev-test" && pat) {
       markNotificationAsRead(threadId, pat).catch(() => {});

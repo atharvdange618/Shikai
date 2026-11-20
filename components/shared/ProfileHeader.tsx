@@ -43,7 +43,6 @@ interface ProfileHeaderProps {
   emptyBio?: ReactNode;
 }
 
-/** Avatar, name, bio, counts and links, shared by your Profile and other users' profiles. */
 export function ProfileHeader({
   user,
   isLoading,
@@ -139,7 +138,6 @@ export function ProfileHeader({
 
 function LinkRow({ link, colors }: { link: ProfileLink; colors: ColorTokens }) {
   const iconColor = colors.textMuted;
-  // Profile text is user-written; only web and mail links become tappable.
   const url = link.url && isSafeExternalUrl(link.url) ? link.url : undefined;
   const content = (
     <View style={linkStyles.row}>

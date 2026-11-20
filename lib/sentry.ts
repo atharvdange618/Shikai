@@ -1,32 +1,7 @@
-/**
- * lib/sentry.ts
- *
- * Sentry setup for crash and performance reporting.
- *
- * Choices:
- *   - Off in dev (`enabled: !__DEV__`) so local noise stays out of the project.
- *     Test with a preview or release build, where __DEV__ is false.
- *   - No PII: `sendDefaultPii: false`, no `Sentry.setUser`. Reports carry the
- *     device model, OS, app version, and OTA update id, nothing that names a
- *     person.
- *   - `beforeSend` strips the GitHub token before anything leaves the device.
- *     The app auths every GitHub call with a Bearer token or a PAT, and a
- *     crash payload could otherwise carry it in a header, an error message,
- *     or a breadcrumb.
- *   - `reportApiError` sends GitHub API failures that point at a real problem
- *     (5xx, or a status Shikai never expects). React Query swallows request
- *     errors, so without this none of them reach Sentry. See D-030.
- *
- * The DSN is read from EXPO_PUBLIC_SENTRY_DSN so it stays out of the public
- * repo. Without it, init is a no-op.
- */
-
 import * as Sentry from "@sentry/react-native";
 
 const dsn = process.env.EXPO_PUBLIC_SENTRY_DSN;
 
-// gh[pousr]_ covers PATs (ghp_), OAuth (gho_), and the other GitHub token
-// prefixes; github_pat_ covers fine-grained PATs.
 const TOKEN_RE = /\b(gh[pousr]_[A-Za-z0-9]{16,}|github_pat_[A-Za-z0-9_]{20,})\b/g;
 
 function redact(value: string): string {
@@ -97,21 +72,11 @@ export function initSentry(): void {
   });
 }
 
-// Statuses GitHub sends for ordinary reasons: signed out (401), rate limit or
-// no access (403), private or deleted (404), empty repo (409), gone (410),
-// page cap (422), secondary rate limit (429), legal block (451). See
-// notes/GITHUB-QUIRKS.md. 0 means no response at all: offline, timeout, or
-// cancelled.
 const EXPECTED_STATUSES = new Set([0, 401, 403, 404, 409, 410, 422, 429, 451]);
 
-// React Query retries a failed query, and several screens can share one, so a
-// single outage repeats the same failure. Send each one at most once a minute
-// to save the free event quota.
 const DEDUPE_MS = 60_000;
 const lastSent = new Map<string, number>();
 
-// Path segments safe to send as-is. Anything else (owner, repo, username, id,
-// branch, file path) becomes ":x", so the endpoint tag never names a person.
 const ENDPOINT_WORDS = new Set([
   "actions",
   "annotations",
@@ -187,7 +152,6 @@ export function reportApiError(
   Sentry.captureMessage(`GitHub ${status} on ${verb} ${endpoint}`, {
     level: "error",
     tags: { "http.status_code": String(status), endpoint },
-    // One issue per endpoint and status, not one per owner/repo.
     fingerprint: ["github-api", verb, endpoint, String(status)],
   });
 }

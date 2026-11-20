@@ -7,18 +7,10 @@ import type { GitHubNotification } from "@/types/github.types";
 /** Alerts posted per poll; anything past this becomes an "and N more" count. */
 export const MAX_ALERTS = 3;
 
-// clearAllMMKV wipes these on sign-in and sign-out, so a new account starts
-// from a fresh marker.
 const MARKER_KEY = "notification-alerts.marker";
 const ETAG_KEY = "notification-alerts.etag";
 const LAST_POLL_KEY = "notification-alerts.last-poll";
 const EPOCH = new Date(0).toISOString();
-/**
- * GitHub marks a thread read when anything loads the tracking image in its
- * email. Mail clients that preload images (Apple Mail Privacy Protection,
- * some scanners) do that within seconds of delivery, so a read this soon
- * after the update counts as unread. See D-022 in notes/DECISIONS.md.
- */
 const READ_ON_DELIVERY_MS = 2 * 60_000;
 
 export interface NotificationAlert {
@@ -39,12 +31,6 @@ export type PollResult =
   /** `alerts` is empty when the list changed but nothing is newer than the marker. */
   | { kind: "checked"; alerts: NotificationAlert[]; overflow: number };
 
-/**
- * True for threads the user hasn't seen: unread, or read within
- * READ_ON_DELIVERY_MS after the update. The user's own activity moves
- * `updated_at` past `last_read_at`, so it never counts.
- * ponytail: a time window, not proof. Widen it if a slower preloader shows up.
- */
 function isUnseen(n: GitHubNotification): boolean {
   if (n.unread) return true;
   if (!n.last_read_at) return false;
@@ -99,8 +85,6 @@ export async function pollNotifications(): Promise<PollResult> {
   if (!pat) return { kind: "no-pat" };
 
   const marker = mmkv.getString(MARKER_KEY) ?? null;
-  // Without a marker, a stale ETag could get a 304 and hide the threads we
-  // need to seed from, so skip the conditional request.
   const etag = marker ? (mmkv.getString(ETAG_KEY) ?? null) : null;
 
   let result;
@@ -117,9 +101,6 @@ export async function pollNotifications(): Promise<PollResult> {
   if (result.etag) mmkv.set(ETAG_KEY, result.etag);
 
   if (!marker) {
-    // Seed from GitHub's own clock so a phone running fast can't skip
-    // threads. ponytail: falls back to the phone clock when the list is
-    // empty; a skewed clock could miss threads updated in that gap.
     const { nextMarker } = planAlerts(result.notifications, EPOCH);
     mmkv.set(MARKER_KEY, nextMarker === EPOCH ? new Date().toISOString() : nextMarker);
     return { kind: "seeded" };

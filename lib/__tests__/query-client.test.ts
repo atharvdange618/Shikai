@@ -70,9 +70,6 @@ describe("statsRetryDelay", () => {
   });
 });
 
-// D-043: the persister saves whatever is in memory, so a query that leaves
-// memory early also leaves the disk copy. Unused queries must stay in memory
-// for as long as the persister promises to keep them.
 describe("cache lifetime", () => {
   const key = ["test", "cache-lifetime"];
   const minute = 60 * 1000;

@@ -2,7 +2,6 @@ import { fetchCommitActivity, fetchContributorStats, fetchPunchCard } from "@/li
 import { queryKeys, statsRetry, statsRetryDelay } from "@/lib/query-client";
 import { queryOptions, useQuery } from "@tanstack/react-query";
 
-// Stats only change when the default branch moves, so an hour is plenty.
 const STATS_STALE_TIME = 1000 * 60 * 60;
 
 export function useCommitActivity(owner: string, repo: string) {

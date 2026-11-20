@@ -92,8 +92,6 @@ export function checksIcon(
     : "circle-slash";
 }
 
-// A comment-only review leaves the reviewer's earlier approval or change
-// request in force on GitHub, so it only counts when there is no decision yet.
 const isDecision = (review: GitHubReview) =>
   review.state !== "COMMENTED" && review.state !== "PENDING";
 

@@ -1,0 +1,15 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "side-tab",
+        "value": "*",
+        "files": ["lib/markdown-html.ts"],
+        "createdAt": "2026-11-20T17:47:26.627Z",
+        "reason": "Agent reviewed: the existing border marks a rendered Markdown blockquote so readers can distinguish quoted text from surrounding prose."
+      }
+    ]
+  }
+}

@@ -20,8 +20,6 @@ interface BranchSelectorProps {
   selectedBranch: string;
   onBranchChange: (branch: string) => void;
   isLoading?: boolean;
-  // When set, each non-selected branch gets a compare button that fires
-  // with that branch as the head (base is the current selection).
   onCompare?: (headBranch: string) => void;
 }
 

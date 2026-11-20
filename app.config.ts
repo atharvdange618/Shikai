@@ -40,7 +40,6 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     predictiveBackGestureEnabled: true,
     package: "com.atharvdange618.Shikai",
     versionCode: 12,
-    // No autoVerify: Shikai just shows up in the chooser for github.com links.
     intentFilters: [
       {
         action: "VIEW",
@@ -59,9 +58,6 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   plugins: [
     "expo-router",
     "expo-secure-store",
-    // Puts Shikai in the Android share sheet for text/URL shares. This is the
-    // path that actually works: github.com verified app links send taps
-    // straight to the GitHub app, but a shared link comes through here.
     "expo-share-intent",
     [
       "expo-splash-screen",
@@ -78,12 +74,9 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     ],
     "expo-web-browser",
     "expo-updates",
-    // expo-background-task and expo-task-manager have plugins too, but they
-    // only edit iOS Info.plist. Autolinking covers their Android side.
     [
       "expo-notifications",
       {
-        // White-on-transparent; regenerate with scripts/create-notification-icon.py.
         icon: "./assets/images/notification-icon.png",
         color: "#3B82F6",
       },
@@ -96,7 +89,6 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     [
       "@sentry/react-native/expo",
       {
-        // EU region: the merc-with-a-mouth org lives on de.sentry.io.
         url: "https://de.sentry.io/",
         organization: "merc-with-a-mouth",
         project: "shikai",

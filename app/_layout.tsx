@@ -56,8 +56,6 @@ function ThemeEffects() {
   return <StatusBar barStyle={theme.isDark ? "light-content" : "dark-content"} />;
 }
 
-// Rendered inside AlertProvider so it can prompt the user instead of
-// silently reloading the app out from under them mid-session.
 function OTAUpdateEffects() {
   const alert = useAlert();
   const { updateReady, reload } = useOTAUpdates();
@@ -120,9 +118,6 @@ export default Sentry.wrap(function RootLayout() {
 
   const fontsReady = Boolean(fontsLoaded || fontError);
 
-  // Runs on mount, independent of fonts and of auth boot, so a blocked device
-  // never gets its stored token restored or used. Fonts only decide when text
-  // can paint, so they must not sit in front of this.
   useEffect(() => {
     if (state.phase !== "checkingSecurity") return;
 
@@ -146,7 +141,6 @@ export default Sentry.wrap(function RootLayout() {
       let hasSession = false;
 
       try {
-        // Both are Keystore round trips, so read them together.
         const [storedPAT, storedToken] = await Promise.all([getStoredPAT(), getStoredToken()]);
 
         if (storedPAT) setPat(storedPAT);
@@ -155,22 +149,15 @@ export default Sentry.wrap(function RootLayout() {
           hasSession = true;
           useAuthStore.getState().setToken(storedToken);
 
-          // Best effort: the persisted query cache may still be restoring. The
-          // profile only feeds the greeting; useUser() covers the rest.
           const cached = queryClient.getQueryData<GitHubUser>(queryKeys.user());
           if (cached) setUser(cached);
         }
       } catch {
-        // Storage failed. Routing sends the user to sign-in.
       } finally {
-        // Boot ends here, not on a network round trip. GET /user can take up
-        // to the axios timeout, and a splash is the wrong place to wait.
         dispatch({ type: "AUTH_RESTORE_COMPLETE" });
         setAuthReady(true);
       }
 
-      // Checked after the app is already on screen. A 401 signs out, anything
-      // else leaves the session as restored.
       if (hasSession) void revalidateSession(queryClient);
     }
 
@@ -281,9 +268,6 @@ function AppStack({
     router.replace(lastRoutedToken ? "/(app)/(tabs)/overview" : "/sign-in");
   }, [lastRoutedToken, router]);
 
-  // Called after the replace above and gated on it, so a link, share or alert
-  // tap that arrives during boot opens on top of overview instead of being
-  // replaced.
   const routed = Boolean(token) && lastRoutedToken === token;
   useDeepLinks(routed);
   useNotificationTaps(routed);

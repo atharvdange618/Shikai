@@ -4,7 +4,6 @@ import { Octicons } from "@expo/vector-icons";
 import type { ComponentProps } from "react";
 import { type StyleProp, Text, type TextStyle } from "react-native";
 
-/** Icon and color for a changed file's status, shared by every file list. */
 export function getFileStatusDisplay(
   status: GitHubPullRequestFile["status"],
   colors: ColorTokens,
@@ -21,10 +20,6 @@ export function getFileStatusDisplay(
   }
 }
 
-/**
- * `+12 / −3`, green and red. The one place a diff's counts get a color, so a
- * list that tints them green/red reads the same as every other list.
- */
 export function DiffStat({
   additions,
   deletions,

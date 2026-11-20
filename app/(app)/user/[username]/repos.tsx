@@ -48,9 +48,7 @@ export default function UserReposScreen() {
   useEffect(() => {
     try {
       navigation.setOptions({ title: "Repositories" });
-    } catch {
-      /* navigator not ready yet */
-    }
+    } catch {}
   }, [navigation]);
 
   const onRefresh = useCallback(async () => {

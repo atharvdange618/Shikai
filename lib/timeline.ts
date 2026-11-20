@@ -18,10 +18,6 @@ const RENDERABLE_EVENTS = new Set([
   "cross-referenced",
 ]);
 
-// Named directly (not derived via Exclude<GitHubTimelineEvent, Unknown>):
-// GitHubTimelineUnknownEvent's `event: string` is a supertype of every other
-// variant's literal `event`, so Exclude would collapse the whole union to
-// `never` instead of narrowing it.
 export type RenderableTimelineEvent =
   | GitHubTimelineLabelEvent
   | GitHubTimelineStateEvent
@@ -46,12 +42,6 @@ export interface EventItem {
 
 export type TimelineItem = CommentItem | EventItem;
 
-/**
- * The timeline API already returns comments interleaved with events, but we
- * keep using the existing (well-tested) comments fetch for the comment cards
- * themselves and only pull the timeline for the event types it doesn't
- * cover, merging both by created_at.
- */
 export function mergeCommentsWithTimeline(
   comments: GitHubComment[],
   events: GitHubTimelineEvent[],

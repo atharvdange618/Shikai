@@ -1,12 +1,3 @@
-/**
- * Why separate hooks instead of one big hook?
- * Each piece of data has a different staleTime and loading state.
- * The README is big and slow - it shouldn't block the stats from showing.
- * The file tree is only fetched when the user opens the code panel.
- * Splitting them means each query loads independently and the screen
- * progressively fills in rather than waiting for everything at once.
- */
-
 import { fetchCommitCount, fetchRepoIssuesPRStats } from "@/lib/github-graphql";
 import {
   fetchBranches,

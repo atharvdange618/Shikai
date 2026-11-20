@@ -10,7 +10,6 @@ set -e
 echo "=== Shikai Test Account Setup ==="
 echo ""
 
-# Check if gh is authenticated
 if ! gh auth status &>/dev/null; then
     echo "ERROR: gh CLI not authenticated."
     echo "Run: gh auth login"
@@ -21,7 +20,6 @@ USERNAME=$(gh api user --jq '.login')
 echo "Setting up repos for: $USERNAME"
 echo ""
 
-# Create repos with sample content
 create_repo() {
     local name=$1
     local desc=$2
@@ -37,10 +35,8 @@ create_repo() {
         cd "$name"
     }
 
-    # Create README
     echo "$readme_content" > README.md
 
-    # Create additional files if provided
     if [ -n "$files" ]; then
         eval "$files"
     fi
@@ -54,7 +50,6 @@ create_repo() {
     echo ""
 }
 
-# Repo 1: Sample React App
 create_repo "sample-react-app" "A simple React demo app" \
 "# Sample React App
 
@@ -144,7 +139,6 @@ cat > package.json << 'PKGEOF'
 PKGEOF
 "
 
-# Repo 2: Python Scripts
 create_repo "python-scripts" "Collection of Python utility scripts" \
 "# Python Scripts
 
@@ -241,7 +235,6 @@ def organize(directory: str) -> None:
 PYEOF
 "
 
-# Repo 3: Android Project
 create_repo "android-project" "Sample Android project with Kotlin" \
 "# Android Sample Project
 
@@ -314,7 +307,6 @@ MIT
 RDEOF
 "
 
-# Repo 4: Documentation
 create_repo "documentation" "Project documentation and notes" \
 "# Documentation
 

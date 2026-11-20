@@ -31,8 +31,6 @@ module.exports = function withReleaseSigning(config) {
       );
     }
 
-    // Build type first: once the release signing block exists, a lazy
-    // `release {` match could land inside signingConfigs instead.
     contents = contents.replace(buildType, "$1signingConfigs.release");
     contents = contents.replace(debugConfig, `$1\n${RELEASE_SIGNING_CONFIG}\n`);
 

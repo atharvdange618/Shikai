@@ -23,9 +23,6 @@ const m = vi.hoisted(() => ({
   },
 }));
 
-// Effects run inline on each call, and every call gets fresh refs, so calling
-// the hook again is a re-render. For the cold-start tests it also stands in for
-// the next JS start, where the refs are new but MMKV is not.
 vi.mock("react", () => ({
   useCallback: <T>(callback: T) => callback,
   useEffect: (effect: () => void) => effect(),
@@ -106,8 +103,6 @@ describe("useDeepLinks cold-start links", () => {
     expect(m.push).toHaveBeenCalledWith("/(app)/repo/facebook~~react/pr/1");
   });
 
-  // Android hands back the intent that created the task on every start, so the
-  // same URL is "initial" again after a reload or a launcher launch.
   it("ignores the same link on the next start", async () => {
     m.initialUrl =
       "shikai://repo/facebook~~react/diff?filename=scripts%2Futils.js&source=pr&number=37778";
@@ -131,8 +126,6 @@ describe("useDeepLinks cold-start links", () => {
     expect(m.push).toHaveBeenCalledTimes(2);
   });
 
-  // A plain start has no link intent, so the marker can go and a later tap of
-  // the same link opens again.
   it("forgets the link when the app starts without one", async () => {
     m.initialUrl = "shikai://repo/facebook~~react/pull/1";
     useDeepLinks(true);
@@ -152,8 +145,6 @@ describe("useDeepLinks cold-start links", () => {
     useDeepLinks(true);
     await vi.waitFor(() => expect(m.push).toHaveBeenCalledOnce());
 
-    // The dev client launches the app on every reload and rebuild. That is a
-    // start without an app link, so it has to clear the marker.
     m.initialUrl = "shikai://expo-development-client/?url=http%3A%2F%2F10.0.0.2%3A8081";
     useDeepLinks(true);
     await new Promise((r) => setTimeout(r, 0));

@@ -9,7 +9,7 @@ viewfinder ring and center dot cut out.
 from PIL import Image, ImageDraw
 
 SIZE = 96
-SCALE = 8  # draw large, then downsample for smooth edges
+SCALE = 8
 VIEWBOX = 512
 
 WHITE = (255, 255, 255, 255)
@@ -27,10 +27,10 @@ def main():
     img = Image.new("RGBA", (big, big), CLEAR)
     draw = ImageDraw.Draw(img)
 
-    circle(draw, 200, WHITE, k)  # main disk
-    circle(draw, 86, CLEAR, k)  # viewfinder ring (r=80, stroke 12)...
-    circle(draw, 74, WHITE, k)  # ...cut out as a transparent band
-    circle(draw, 16, CLEAR, k)  # center focus point
+    circle(draw, 200, WHITE, k)
+    circle(draw, 86, CLEAR, k)
+    circle(draw, 74, WHITE, k)
+    circle(draw, 16, CLEAR, k)
 
     output_path = "assets/images/notification-icon.png"
     img.resize((SIZE, SIZE), Image.LANCZOS).save(output_path)

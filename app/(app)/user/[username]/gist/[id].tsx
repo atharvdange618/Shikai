@@ -44,9 +44,7 @@ export default function GistDetailScreen() {
       navigation.setOptions({
         title: files[0]?.filename ?? "Gist",
       });
-    } catch {
-      /* navigator not ready yet */
-    }
+    } catch {}
   }, [navigation, files]);
 
   if (isLoading) {

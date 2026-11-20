@@ -157,7 +157,7 @@ export interface GitHubTree {
 export interface GitHubTreeItem {
   path: string;
   mode: string;
-  type: "blob" | "tree" | "commit"; // blob=file, tree=folder, commit=submodule
+  type: "blob" | "tree" | "commit";
   sha: string;
   size?: number;
   url: string;
@@ -413,10 +413,6 @@ export interface GitHubComment {
   reactions: GitHubReactions;
 }
 
-// The timeline API returns every event type GitHub has ever added (reviews,
-// mentions, project moves, ...). We only render a known subset (labels,
-// cross-refs, closed/reopened/merged, force-pushes) and fall through anything
-// else via GitHubTimelineUnknownEvent.
 export interface GitHubTimelineActor {
   login: string;
   avatar_url: string;

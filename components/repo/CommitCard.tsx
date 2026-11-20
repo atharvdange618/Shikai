@@ -17,14 +17,6 @@ import { useRouter } from "expo-router";
 import { memo, useCallback, useMemo, useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
-/**
- * One commit as a card: avatar, subject, author and age, plus a SHA badge that
- * copies. Shared so the repo's commits list and a PR's commit list read the
- * same.
- *
- * `prNumber` is forwarded to the commit screen, which uses it to offer the PR
- * diff for that commit.
- */
 export const CommitCard = memo(function CommitCard({
   commit,
   repoId,

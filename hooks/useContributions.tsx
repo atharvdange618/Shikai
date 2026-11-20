@@ -1,10 +1,3 @@
-/**
- * Fetches the authenticated user's contribution calendar via GraphQL.
- * This data is not available via REST - GraphQL only.
- *
- * staleTime: 15 minutes. The graph only updates once per day anyway.
- */
-
 import { getContributionStats } from "@/lib/contribution-stats";
 import { fetchContributionGraph } from "@/lib/github-graphql";
 import { queryKeys } from "@/lib/query-client";
@@ -32,7 +25,6 @@ export function useContributions() {
 
   useEffect(() => {
     let timer: ReturnType<typeof setTimeout>;
-    // The day can change while the app is backgrounded or the time zone changes.
     function scheduleNextDay(now: Date) {
       const midnight = new Date(now);
       midnight.setHours(24, 0, 0, 0);

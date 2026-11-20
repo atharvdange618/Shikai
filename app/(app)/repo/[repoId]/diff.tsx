@@ -40,11 +40,8 @@ function DiffScreenContent() {
   const [owner, repoName] = decodeRepoId(params.repoId ?? "");
   const filename = params.filename ?? "";
   const baseName = filename.split("/").pop() ?? filename;
-  // PR diffs carry the PR as `number`; a commit opened from a PR passes `prNumber`.
   const prContext = params.source === "pr" ? params.number : params.prNumber;
 
-  // All three hooks run, but only the one matching the source is enabled. Each
-  // query is already cached by the screen that pushed this one.
   const pr = usePullRequestFile(
     owner,
     repoName,
@@ -73,9 +70,7 @@ function DiffScreenContent() {
   useEffect(() => {
     try {
       navigation.setOptions({ title: baseName });
-    } catch {
-      /* navigator not ready yet */
-    }
+    } catch {}
   }, [navigation, baseName]);
 
   function renderDiff() {

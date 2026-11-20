@@ -26,7 +26,7 @@
     "android": "expo run:android",
     "ios": "expo run:ios",
     "web": "expo start --web",
-    "lint": "oxlint .",
+    "lint": "oxlint . && npm run lint:comments",
     "test": "vitest run",
     "deploy": "npx expo export -p web && wrangler deploy",
     "preview": "npx expo export -p web && wrangler dev",
@@ -38,10 +38,11 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "lint:fix": "oxlint . --fix",
-    "lint:strict": "oxlint . --deny-warnings",
+    "lint:strict": "oxlint . --deny-warnings && npm run lint:comments",
     "prepare": "husky",
     "typecheck": "tsc --noEmit",
-    "doctor": "npx react-doctor@latest"
+    "doctor": "npx react-doctor@latest",
+    "lint:comments": "oxlint -c scripts/oxlint-comments.json ."
   },
   "dependencies": {
     "@expo-google-fonts/inter": "^0.4.2",
@@ -142,6 +143,7 @@
     "*.{js,jsx,cjs,mjs,ts,tsx}": [
       "oxlint --fix",
       "oxlint",
+      "oxlint -c scripts/oxlint-comments.json",
       "prettier --write"
     ]
   },

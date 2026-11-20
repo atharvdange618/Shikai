@@ -1,7 +1,5 @@
 import { encodeRepoId } from "./utils";
 
-// After the optional protocol and `www.`, the host must be exactly github.com.
-// Keeps out api.github.com, gist.github.com, raw.githubusercontent.com, etc.
 const GITHUB_HOST_RE = /^(?:https?:\/\/)?(?:www\.)?github\.com(?=\/|$)/i;
 
 export const isGitHubUrl = (url: string): boolean => GITHUB_HOST_RE.test(url.trim());
@@ -9,29 +7,16 @@ export const isGitHubUrl = (url: string): boolean => GITHUB_HOST_RE.test(url.tri
 export const isOAuthRedirect = (url: string): boolean =>
   url.startsWith("shikai:") && /[?&]code=/.test(url);
 
-/**
- * The dev client uses `shikai://?__expo_url=…` on SDK 58 and
- * `shikai://expo-development-client/?url=…` on older builds.
- * It loads the bundle natively and is not a route, so the router must not
- * navigate to it.
- */
 export const isDevClientUrl = (url: string): boolean =>
   url.startsWith("shikai:") &&
   (url.startsWith("shikai://expo-development-client") || /[?&]__expo_url=/.test(url.split("#")[0]));
 
-/**
- * The router path for an in-app `shikai://` link, e.g.
- * `shikai://repo/a~~b/diff?…` → `/repo/a~~b/diff?…`. Null for other URLs, the
- * bare scheme, the OAuth redirect, which sign-in handles itself, and the dev
- * client link, which has no route.
- */
 export function appLinkPath(url: string): string | null {
   const rest = /^shikai:\/\/\/?(.+)$/.exec(url)?.[1];
   if (!rest || isOAuthRedirect(url) || isDevClientUrl(url)) return null;
   return `/${rest}`;
 }
 
-// First path segments that are github.com's own pages, not a user or org.
 const RESERVED_FIRST_SEGMENT = new Set([
   "orgs",
   "sponsors",
@@ -57,13 +42,6 @@ const RESERVED_FIRST_SEGMENT = new Set([
 
 const PR_TABS = new Set(["files", "commits", "checks"]);
 
-/**
- * Maps a github.com web URL to an in-app route string, or returns null when the
- * app has no screen for it (the caller should then open the URL in the browser).
- *
- * Pure. The route string is cast to `Href` by callers; typed-routes can't check
- * an interpolated string, so keep the paths here in sync with the route tree.
- */
 export function parseGitHubUrl(url: string): string | null {
   const trimmed = url?.trim();
   if (!trimmed || !GITHUB_HOST_RE.test(trimmed)) return null;
@@ -79,7 +57,6 @@ export function parseGitHubUrl(url: string): string | null {
   if (seg.length === 0) return null;
   if (RESERVED_FIRST_SEGMENT.has(seg[0].toLowerCase())) return null;
 
-  // /{user}
   if (seg.length === 1) return `/(app)/user/${seg[0]}`;
 
   const [owner, repo, kind, a] = seg;
@@ -91,7 +68,6 @@ export function parseGitHubUrl(url: string): string | null {
   switch (kind) {
     case "pull": {
       if (!a) return `${repoBase}/pull-requests`;
-      // GitHub's PR tabs map to the PR section screens; other tabs land on Overview.
       const tab = seg[4];
       return tab && PR_TABS.has(tab) ? `${repoBase}/pr/${a}/${tab}` : `${repoBase}/pr/${a}`;
     }
@@ -104,7 +80,6 @@ export function parseGitHubUrl(url: string): string | null {
     case "commits":
       return `${repoBase}/commits`;
     case "compare": {
-      // range is `base...head` (or the two-dot form); refs may contain dots.
       const [base, head] = (a ?? "").split(/\.\.\.?/);
       if (!base || !head) return null;
       return `${repoBase}/compare?base=${encodeURIComponent(
@@ -119,27 +94,18 @@ export function parseGitHubUrl(url: string): string | null {
       return `${repoBase}/releases`;
     }
     case "actions": {
-      // /actions/runs/{id}, optionally /job/{jobId} after it: the run screen
-      // lists that job. Anything else under /actions opens the runs list.
       const runId = a === "runs" ? seg[4] : undefined;
       return runId && /^\d+$/.test(runId) ? `${repoBase}/run/${runId}` : `${repoBase}/actions`;
     }
-    // GitHub's Insights tab: /pulse and every /graphs/* chart.
     case "pulse":
     case "graphs":
       return `${repoBase}/insights`;
     case "tree": {
-      // /tree/{ref}/{...path}. The ref is dropped, same as blob below: the
-      // files screen reads the default branch.
       const treePath = seg.slice(4).join("/");
       if (!treePath) return `${repoBase}/files`;
       return `${repoBase}/files?path=${encodeURIComponent(treePath)}`;
     }
     case "blob": {
-      // /blob/{ref}/{...path}#L10-L20. The file viewer fetches from the
-      // default branch, so the ref is dropped, but the line range survives
-      // as a `line` param (start line only — the viewer approximates a
-      // scroll position, not an exact highlight).
       const filePath = seg.slice(4).join("/");
       if (!filePath) return `${repoBase}/files`;
       const fileName = seg[seg.length - 1];

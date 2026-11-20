@@ -212,8 +212,6 @@ function CheckRunScreenContent() {
 
         <Pressable
           onPress={() =>
-            // details_url comes from whichever app made the check, so fall
-            // back to GitHub's own page when it isn't a web link.
             Linking.openURL(
               run.details_url && isSafeExternalUrl(run.details_url)
                 ? run.details_url

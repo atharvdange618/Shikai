@@ -48,7 +48,6 @@ function Overview() {
   const threads = usePullRequestReviewComments(owner, repo, Number(number));
   const checks = useChecks(owner, repo, pr?.head.sha ?? "");
   const { hasNextPage, isFetchingNextPage, isError, fetchNextPage } = reviews;
-  // A later review can reverse an earlier decision, so summaries need every page.
   useEffect(() => {
     if (hasNextPage && !isFetchingNextPage && !isError) void fetchNextPage();
   }, [hasNextPage, isFetchingNextPage, isError, fetchNextPage]);

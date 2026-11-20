@@ -1,6 +1,3 @@
-// Decides when to show Play's in-app review sheet. No React or native
-// imports, so Vitest covers it; hooks/useReviewPrompt.ts calls the API.
-
 export const LAUNCHES_BEFORE_REVIEW = 5;
 
 const LAUNCHES_KEY = "launches";

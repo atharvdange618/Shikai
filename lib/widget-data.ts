@@ -2,8 +2,6 @@ import { getStoredToken } from "./secure-storage";
 import { reportApiError } from "./sentry";
 
 const GRAPHQL_URL = "https://api.github.com/graphql";
-// Same limit as lib/axios. A stalled request would otherwise hold the
-// widget's background task until Android kills it.
 const TIMEOUT_MS = 15_000;
 
 const CONTRIBUTION_QUERY = `
@@ -62,8 +60,6 @@ export async function fetchContributionsForWidget(): Promise<WidgetContributionD
   });
 
   if (!response.ok) {
-    // The widget uses fetch, not lib/axios, so the interceptor never sees
-    // this failure. See D-030.
     reportApiError(response.status, "POST", GRAPHQL_URL);
     return null;
   }

@@ -1,8 +1,5 @@
 const { withAppBuildGradle } = require("expo/config-plugins");
 
-// Per-ABI APKs plus a universal one for local release builds. Disabled for
-// bundle tasks (the AAB splits itself) and skipped on EAS, which expects a
-// single APK artifact.
 const SPLITS_BLOCK = `    splits {
         abi {
             enable !project.gradle.startParameter.taskNames.any { it.toLowerCase().contains('bundle') }

@@ -11,7 +11,6 @@ const m = vi.hoisted(() => ({
   },
 }));
 
-// Effects run inline, so each call to the hook is one render.
 vi.mock("react", () => ({
   useEffect: (effect: () => void) => effect(),
 }));

@@ -4,7 +4,6 @@ import { useWatchlistStore } from "@/stores/watchlist.store";
 
 export const mmkv = createMMKV({ id: "shikai-cache" });
 
-// Read by ThemeContext and the widget task handler.
 export const THEME_KEY = "shikai-theme";
 
 export const mmkvStorage = {

@@ -36,12 +36,8 @@ interface BlameLine {
   tint: 0 | 1;
 }
 
-// Ranges from the API already coalesce consecutive lines sharing a commit,
-// so a change in commit oid is exactly a range boundary.
 function buildLines(text: string, ranges: BlameRange[]): BlameLine[] {
   const rawLines = text.split("\n");
-  // A trailing newline produces one extra empty element that blame ranges
-  // never cover (they're 1-indexed up to the last real line).
   const maxLine = ranges.reduce((max, r) => Math.max(max, r.endingLine), 0);
   const lines =
     rawLines.length === maxLine + 1 && rawLines[rawLines.length - 1] === ""

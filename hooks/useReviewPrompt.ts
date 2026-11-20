@@ -4,11 +4,8 @@ import { createMMKV } from "react-native-mmkv";
 
 import { recordLaunch } from "@/lib/review-prompt";
 
-// Its own instance so clearAllMMKV() on sign-in and sign-out doesn't reset
-// the count. It holds no account data.
 const reviewMMKV = createMMKV({ id: "shikai-review" });
 
-// Gives the first screen time to load before the sheet covers it.
 const ASK_DELAY_MS = 3000;
 
 let launchRecorded = false;

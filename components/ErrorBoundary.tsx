@@ -8,10 +8,6 @@ import { FontFamily, FontSize, Radius, Spacing, useTheme } from "@/constants/the
 
 interface Props {
   children: ReactNode;
-  // "home" (default) resets all the way to Overview - for the app-wide
-  // boundary. "back" returns to the previous screen - for a boundary
-  // scoped to one deep screen, so a crash there doesn't dump the user
-  // out of the whole app.
   fallback?: "home" | "back";
 }
 

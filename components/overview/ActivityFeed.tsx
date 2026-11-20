@@ -1,20 +1,3 @@
-/**
- * Renders recent GitHub activity using REST API events.
- *
- * Shows various event types:
- *   - PushEvent: commits pushed to repository
- *   - WatchEvent: starred a repository
- *   - ForkEvent: forked a repository
- *   - CreateEvent: created repo/branch/tag
- *   - PullRequestEvent: opened/closed/merged PR
- *   - IssuesEvent: opened/closed issue
- *   - ReleaseEvent: published a release
- *   - PublicEvent: made repository public
- *
- * Groups consecutive events of the same type from the same repo/branch.
- * Each item is tappable and opens the relevant URL in browser.
- */
-
 import { Octicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { type Href, useRouter } from "expo-router";

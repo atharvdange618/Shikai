@@ -19,7 +19,6 @@ class DeveloperOptionsChecker {
         reasons.add("Developer options enabled")
       }
     } catch (_: Exception) {
-      // Some OEMs may not expose this setting
     }
 
     try {
@@ -32,7 +31,6 @@ class DeveloperOptionsChecker {
         reasons.add("USB debugging enabled")
       }
     } catch (_: Exception) {
-      // Setting may not exist on all devices
     }
 
     try {
@@ -45,7 +43,6 @@ class DeveloperOptionsChecker {
         reasons.add("ADB enabled")
       }
     } catch (_: Exception) {
-      // Setting may not exist on all devices
     }
 
     return CheckResult(passed = reasons.isEmpty(), reasons = reasons)

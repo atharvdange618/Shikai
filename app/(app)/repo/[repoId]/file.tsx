@@ -89,9 +89,7 @@ function FileViewerScreenContent() {
             </View>
           ),
         });
-      } catch {
-        /* navigator not ready yet */
-      }
+      } catch {}
     }
   }, [navigation, router, fileName, repoId, path, colors.accent, canBlame, repo?.default_branch]);
 
@@ -105,7 +103,6 @@ function FileViewerScreenContent() {
       return <FileError title="Binary file" message="Shikai can't preview this file type." />;
     }
 
-    // GitHub's contents API leaves out the body of files over 1 MB.
     if ((kind === "text" || kind === "markdown") && file.meta.encoding === "none") {
       return (
         <FileError

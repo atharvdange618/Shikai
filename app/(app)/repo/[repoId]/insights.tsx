@@ -61,9 +61,7 @@ export default function InsightsScreen() {
           </Pressable>
         ),
       });
-    } catch {
-      /* navigator not ready yet */
-    }
+    } catch {}
   }, [navigation, owner, repoName, colors.accent]);
 
   const onRefresh = useCallback(async () => {
@@ -97,11 +95,6 @@ export default function InsightsScreen() {
   );
 }
 
-/**
- * Shared loading/error shell. While GitHub answers 202 the query stays in its
- * loading state through the retries, so `failureReason` tells us to say
- * "building" instead of a bare spinner.
- */
 function StatsSection<T>({
   title,
   query,
@@ -212,7 +205,6 @@ function ContributorList({
     return <Text style={s.muted}>No contributors yet.</Text>;
   }
 
-  // ponytail: plain map, not FlashList; capped at TOP_CONTRIBUTORS rows.
   return (
     <View>
       {top.map((c, i) => {

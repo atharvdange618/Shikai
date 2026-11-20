@@ -64,7 +64,6 @@ function getContributionColor(
     }
   }
 
-  // Fallback to count-based mapping if level is undefined (e.g. from persisted cache)
   if (count === 0) return colors.contributeEmpty;
   if (count <= 2) return colors.contributeL1;
   if (count <= 4) return colors.contributeL2;
@@ -96,8 +95,6 @@ export function ContributionGraph({
 
   const s = useMemo(() => buildStyles(colors), [colors]);
 
-  // Captured once on mount: the staleness label only needs to know whether
-  // the data was already old when this screen opened.
   const [mountedAt] = useState(() => Date.now());
   const isStale = dataUpdatedAt != null && mountedAt - dataUpdatedAt > 1000 * 60 * 5;
 
@@ -128,9 +125,6 @@ export function ContributionGraph({
     const month = weekStart.getMonth();
     if (month !== lastMonth) {
       lastMonth = month;
-      // Only label a month at the column that holds its 1st-7th. A leading
-      // partial week (e.g. one day of Aug) would otherwise stack its label
-      // one STEP away from the next month's, rendering as "AuSept".
       if (weekStart.getDate() <= 7) {
         monthLabels.push({
           label: weekStart.toLocaleString("default", { month: "short" }),
@@ -140,7 +134,6 @@ export function ContributionGraph({
     }
   });
 
-  // Extra room so the trailing month label isn't clipped by the SVG edge.
   const svgWidth = weeks.length * STEP + 24;
 
   return (

@@ -27,14 +27,12 @@ export const MAX_HIGHLIGHT_CHARS = 200_000;
  */
 export function languageFor(fileName: string): string {
   const ext = fileName.split(".").pop()?.toLowerCase() ?? "";
-  // The highlighter's aliases miss .gradle.
   const byExtension = highlighter.normalizeLanguage(ext === "gradle" ? "groovy" : ext);
   if (byExtension !== "plaintext") return byExtension;
   return highlighter.normalizeLanguage(getLanguage(fileName));
 }
 
 export interface HighlightedFile {
-  /** `<pre>` markup with one `.th-line[data-line]` element per line. */
   html: string;
   lang: string;
   lineCount: number;
@@ -45,7 +43,6 @@ export function highlightFile(
   fileName: string,
   targetLine?: number,
 ): HighlightedFile {
-  // Files end with a newline, which would otherwise render an empty last line.
   const code = content.endsWith("\n") ? content.slice(0, -1) : content;
   const lineCount = code.split("\n").length;
   const lang =
@@ -105,7 +102,6 @@ export function highlightDiff(patch: string, fileName: string): HighlightedDiff 
   const flush = () => {
     if (!hunk || hunk.code.length === 0) return;
     const { tokens } = highlighter.tokenize(hunk.code.join("\n"), { lang });
-    // lineNumbers makes renderTokens wrap each line in its own element.
     const rendered = renderTokens(tokens, { lineNumbers: true }).filter(
       (node) => node.type === "element",
     );
@@ -127,7 +123,6 @@ export function highlightDiff(patch: string, fileName: string): HighlightedDiff 
       hunk = { code: [], lines: [] };
       continue;
     }
-    // "\ No newline at end of file", or text before the first hunk.
     if (raw.startsWith("\\") || !hunk) {
       flush();
       lines.push(textLine("meta", raw));

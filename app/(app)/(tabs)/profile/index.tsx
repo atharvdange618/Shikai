@@ -28,8 +28,6 @@ import {
 } from "@/constants/theme";
 import type { GitHubUser } from "@/types/github.types";
 
-// Your own profile also reads social accounts, which carry LinkedIn and can
-// override the X handle and blog on the user record.
 function buildLinks(
   user: GitHubUser | undefined,
   socialUrls: string[],
@@ -166,7 +164,6 @@ export default function ProfileScreen() {
         }
       />
 
-      {/* See all opens the Repos tab, which includes your private repos. */}
       <RecentRepos
         repos={recentRepos?.repos}
         isLoading={reposLoading || isLoading}

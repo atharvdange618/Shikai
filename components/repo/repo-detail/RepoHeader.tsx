@@ -119,7 +119,6 @@ export function RepoHeader({
         <Pressable
           style={s.websiteRow}
           onPress={() => {
-            // The repo owner writes this field; don't open other apps' schemes.
             if (!isSafeExternalUrl(repo.homepage!)) return;
             Linking.openURL(repo.homepage!).catch(() => console.error("Could not open homepage"));
           }}

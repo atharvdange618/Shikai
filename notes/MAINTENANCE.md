@@ -85,6 +85,10 @@ Google Play requires updates to target a recent Android API level and usually ra
 - **OAuth proxy** (`oauth-proxy/`): a separate Cloudflare Worker. `GITHUB_CLIENT_SECRET` is a Wrangler secret. When you rotate the GitHub App's client secret, run `npx wrangler secret put GITHUB_CLIENT_SECRET -c oauth-proxy/wrangler.toml` from the repo root. Deploy with `npx wrangler deploy -c oauth-proxy/wrangler.toml`. Without `-c`, Wrangler reads the root `wrangler.jsonc`, even from inside `oauth-proxy/`, and targets the web worker.
 - **Web build:** `npm run deploy`.
 
+### Play review account
+
+Create a separate GitHub account for Play Console reviewers. Authenticate as that account with `gh auth login`, then run `bash scripts/setup-test-account.sh` to create the sample repositories.
+
 ## Things only you hold
 
 Keep an offline backup of each. None of them are in the repo.

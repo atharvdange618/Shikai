@@ -50,7 +50,6 @@ export function TabBarIcon({ name, filledName, color, size, focused }: TabBarIco
 
   return (
     <Animated.View style={animatedStyle}>
-      {/* RN 0.88 types ColorValue as an opaque internal type; icons still take a string. */}
       <Octicons name={iconName} size={size} color={color as string} />
     </Animated.View>
   );

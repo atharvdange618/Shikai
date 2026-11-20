@@ -139,7 +139,6 @@ describe("parseGitHubApiUrl", () => {
   });
 
   it("returns null for types without a screen", () => {
-    // Release subjects carry a numeric release id, not a tag.
     expect(parseGitHubApiUrl(`${api}/releases/987`)).toBeNull();
     expect(parseGitHubApiUrl(`${api}/check-runs/5`)).toBeNull();
     expect(parseGitHubApiUrl(`${api}/pulls`)).toBeNull();

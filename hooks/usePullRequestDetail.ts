@@ -68,7 +68,6 @@ export function usePullRequestReviewComments(owner: string, repo: string, number
   return { ...query, comments: query.items };
 }
 
-// GitHub's max page size. The endpoint stops at 3000 files.
 const FILES_PER_PAGE = 100;
 
 export function usePullRequestFiles(owner: string, repo: string, number: number) {
@@ -155,8 +154,6 @@ export interface CheckSummaryItem {
   name: string;
   conclusion: GitHubCheckConclusion | "pending" | "error";
   url: string | null;
-  // Set for GitHub Actions check-runs, which have an in-app detail screen.
-  // Undefined for legacy commit statuses (external CI), which only link out.
   runId?: number;
   /** Raw run state, so a row can carry the same status icon as the Actions list. */
   status: GitHubCheckStatus;
@@ -166,9 +163,6 @@ export interface CheckSummaryItem {
   completedAt: string | null;
 }
 
-// Merges GitHub Actions check-runs with legacy commit statuses (Vercel,
-// Netlify, and other external CI still report through the older API), since
-// GitHub's own PR page treats both as one "checks" list.
 export function useChecks(owner: string, repo: string, ref: string) {
   const runs = useInfinitePagedQuery(
     {
@@ -212,8 +206,6 @@ export function useChecks(owner: string, repo: string, ref: string) {
           ? status.state
           : "pending",
     url: status.target_url,
-    // The legacy API has no "queued" vs "running": a pending status is the
-    // closest thing to a run in flight.
     status: status.state === "pending" ? "in_progress" : "completed",
     startedAt: status.created_at || null,
     completedAt: status.updated_at,
@@ -223,8 +215,6 @@ export function useChecks(owner: string, repo: string, ref: string) {
     data: [
       ...new Map([...fromCheckRuns, ...fromStatuses].map((check) => [check.key, check])).values(),
     ],
-    // GitHub's own counts from the first page of each source, so the Checks
-    // screen can show loaded rows against the real total.
     total:
       runs.data && statuses.data
         ? (runs.data.pages[0]?.total ?? 0) + (statuses.data.pages[0]?.total_count ?? 0)

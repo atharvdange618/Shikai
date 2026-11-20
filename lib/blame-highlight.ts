@@ -5,11 +5,6 @@ export interface Token {
   kind: TokenKind;
 }
 
-// One shared, language-agnostic tokenizer for comments/strings/numbers/
-// keywords, reused across C-like, Python, and similar languages instead of
-// a per-language grammar. Approximate and per-line only: no cross-line block
-// comments or strings.
-// ponytail: regex approximation across languages, add per-language grammars if people ask
 const TOKEN_RE =
   /(\/\/.*|#.*)|("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|`(?:[^`\\]|\\.)*`)|(\b\d+(?:\.\d+)?\b)|(\b(?:if|else|elif|for|foreach|while|do|return|function|func|fn|def|class|struct|interface|enum|type|const|let|var|public|private|protected|static|void|null|nil|none|undefined|true|false|self|this|new|import|export|from|as|try|catch|except|finally|throw|raise|switch|case|default|break|continue|async|await|yield|match|package|namespace|extends|implements|super|in|of|instanceof|typeof)\b)/g;
 
@@ -43,8 +38,6 @@ export function tokenizeLine(text: string): Token[] {
   return tokens;
 }
 
-// Matches MarkdownRenderer's pl-k / pl-c / pl-s / pl-kos colors so blame and
-// the file viewer read as the same highlighting.
 export function tokenColor(kind: TokenKind, isDark: boolean): string | undefined {
   switch (kind) {
     case "keyword":

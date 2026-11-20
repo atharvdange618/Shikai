@@ -99,8 +99,6 @@ export function MarkdownRenderer({
     };
   }, [markdown, isDark, context, filePath, bodyPadding]);
 
-  // Hide the WebView until its content has painted and reported a height. A new
-  // html string means a reload, so drop back to hidden and wait for that one.
   useEffect(() => {
     opacity.setValue(0);
   }, [html, opacity]);
@@ -113,10 +111,6 @@ export function MarkdownRenderer({
     }).start();
   }, [opacity]);
 
-  // GitHub's /markdown output is sanitized, but a tapped link would still
-  // navigate this WebView in place, with no browser chrome. Send http(s)
-  // links to the system browser and let everything else (about:blank, the
-  // data: document, the bridge) load.
   const onShouldStartLoad = useCallback((request: { url: string }) => {
     const { url } = request;
     if (/^https?:\/\//i.test(url)) {
@@ -152,9 +146,7 @@ export function MarkdownRenderer({
         } else if (data.type === "copy" && "text" in data && typeof data.text === "string") {
           Clipboard.setStringAsync(data.text).catch(() => {});
         }
-      } catch {
-        // ignore parse errors
-      }
+      } catch {}
     },
     [reveal, onHeightChange, onAnchorOffset, context, filePath, router],
   );

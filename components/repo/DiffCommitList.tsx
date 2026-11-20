@@ -7,10 +7,6 @@ import * as Clipboard from "expo-clipboard";
 import { useMemo, useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
-/**
- * Collapsible "N commits" card. Each row opens the commit detail screen;
- * the SHA badge still copies. Used by the PR detail and compare screens.
- */
 export function DiffCommitList({
   commits,
   colors,

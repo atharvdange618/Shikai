@@ -18,8 +18,6 @@ const POLL_INTERVAL_MINUTES = 15;
 /** Set when the task turned itself off because GitHub rejected the PAT. */
 const PAT_REJECTED_KEY = "notification-alerts.pat-rejected";
 
-// Without a handler, expo-notifications drops alerts posted while Shikai is
-// open. List them in the shade quietly instead.
 Notifications.setNotificationHandler({
   handleNotification: () =>
     Promise.resolve({
@@ -30,8 +28,6 @@ Notifications.setNotificationHandler({
     }),
 });
 
-// Must run at module load, outside React: when WorkManager wakes the app
-// headless, only index.ts and its imports run before the task fires.
 TaskManager.defineTask(ALERTS_TASK, async () => {
   try {
     const result = await pollNotifications();
@@ -57,11 +53,6 @@ TaskManager.defineTask(ALERTS_TASK, async () => {
   }
 });
 
-/**
- * True when signing out or removing the PAT should stop alerts. Every
- * sign-out path (Settings, a 401 mid-session, a failed token check at boot)
- * ends in clearAuth, which nulls the token; removing the PAT nulls `pat`.
- */
 export function lostAlertsAccess(
   prev: { token: string | null; pat: string | null },
   next: { token: string | null; pat: string | null },
@@ -69,10 +60,6 @@ export function lostAlertsAccess(
   return (Boolean(prev.token) && !next.token) || (Boolean(prev.pat) && !next.pat);
 }
 
-// The task reads the PAT from SecureStore, and a 401 mid-session or a failed
-// token check at boot leaves it there, so a registered task would keep
-// alerting a signed-out phone. Stop it here, once, instead of at each
-// sign-out call site.
 useAuthStore.subscribe((next, prev) => {
   if (lostAlertsAccess(prev, next)) void disableAlerts();
 });
@@ -83,7 +70,6 @@ async function postAlerts(alerts: NotificationAlert[], overflow: number): Promis
       content: {
         title: alert.title,
         body: alert.repoFullName,
-        // Read by the tap handler to open the thread in the app.
         data: { ...alert },
       },
       trigger: { channelId: CHANNEL_ID },

@@ -1,5 +1,3 @@
-// Public POST endpoint. Per-IP rate limiting is a Cloudflare dashboard rule,
-// not code here. See README.md.
 interface Env {
   GITHUB_CLIENT_SECRET: string;
   GITHUB_CLIENT_ID: string;
@@ -49,8 +47,6 @@ export default {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 30000);
 
-    // GitHub answers bad codes with a 200 and an `error` field, so only a
-    // failed call, a non-2xx (a 5xx HTML page) or a non-JSON body lands here.
     let data: unknown = null;
     try {
       const response = await fetch("https://github.com/login/oauth/access_token", {
@@ -64,7 +60,6 @@ export default {
       });
       if (response.ok) data = await response.json();
     } catch {
-      // Timeout, network failure or a non-JSON body: answered below.
     } finally {
       clearTimeout(timeoutId);
     }

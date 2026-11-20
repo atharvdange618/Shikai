@@ -1,8 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
 
-// index.ts is what Android runs for a headless WorkManager wake, where
-// app/_layout.tsx never loads. Sentry has to start here, or poller errors
-// never reach it (D-030).
 const calls = vi.hoisted(() => [] as string[]);
 
 vi.mock("expo-router/entry", () => ({}));

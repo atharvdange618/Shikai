@@ -1,8 +1,3 @@
-/**
- * staleTime: 15 minutes. Pinned repos are curated manually and
- * almost never change during an active session.
- */
-
 import { fetchPinnedRepos } from "@/lib/github-graphql";
 import { queryKeys } from "@/lib/query-client";
 import { queryOptions, useQuery } from "@tanstack/react-query";

@@ -1,0 +1,6 @@
+{
+  "$schema": "../node_modules/oxlint/configuration_schema.json",
+  "categories": { "correctness": "off" },
+  "jsPlugins": ["./oxlint-comments.config.mjs"],
+  "rules": { "shikai/jsdoc-only": "error" }
+}

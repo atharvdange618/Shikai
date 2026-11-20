@@ -22,7 +22,6 @@ interface RecentReposProps {
   onSeeAll: () => void;
 }
 
-// fetchUserRepos sorts by "updated", so this is recent activity, not stars.
 /** A profile's five most recently updated public repos. Renders nothing when there are none. */
 export function RecentRepos({ repos, isLoading, onSeeAll }: RecentReposProps) {
   const { colors } = useTheme();

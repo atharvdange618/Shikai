@@ -31,7 +31,6 @@ interface PagedListProps<T> extends Pick<
   errorText: string;
 }
 
-/** Infinite list shell: loading, empty and error states, pull to refresh, next page on scroll. */
 export function PagedList<T>({
   data,
   isLoading,

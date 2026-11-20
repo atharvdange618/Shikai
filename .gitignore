@@ -1,15 +1,11 @@
-# Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
 
-# dependencies
 node_modules/
 
-# Expo
 .expo/
 dist/
 web-build/
 expo-env.d.ts
 
-# Native
 .kotlin/
 *.orig.*
 *.jks
@@ -19,41 +15,32 @@ expo-env.d.ts
 *.key
 *.mobileprovision
 
-# Release keystore (backed up outside android/ for prebuild safety)
 keystore/
 
-# Metro
 .metro-health-check*
 
-# debug
 npm-debug.*
 yarn-debug.*
 yarn-error.*
 
-# macOS
 .DS_Store
 *.pem
 
-# local env files
 .env*.local
 
-# typescript
 *.tsbuildinfo
 
 app-example
 
-# generated native folders
 /ios
 /android
 
-# local module build artifacts
 modules/*/android/build/
 
 /misc
 
 .env
 
-# wrangler files
 .wrangler
 .dev.vars*
 !.dev.vars.example
@@ -65,13 +52,10 @@ GITHUB-RELEASE.md
 releases/
 close-testing-email.txt
 
-# Sentry: project-scoped MCP config the wizard drops for local editors
 .mcp.json
 .vscode/mcp.json
 .codex/
 
-# Subagent-driven-development scratch workspace (ledgers, briefs, review packages)
 .superpowers/
 
-# graphify knowledge graph output
 graphify-out/

@@ -49,7 +49,6 @@ const APP_SLUG = process.env.EXPO_PUBLIC_GITHUB_APP_SLUG!;
 const OAUTH_PROXY_URL = process.env.EXPO_PUBLIC_OAUTH_PROXY_URL!;
 const SCOPES = ["read:user", "user:email", "repo:status", "read:repo"].join(",");
 
-// Classic-token scopes that cover every read path in the app.
 const NEW_TOKEN_URL =
   "https://github.com/settings/tokens/new?scopes=repo,read:user&description=Shikai";
 
@@ -64,8 +63,6 @@ const FEATURES: {
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
-// Completes any lingering auth session when the app returns from the browser
-// (Android cold start). Must run at module load for openAuthSessionAsync.
 WebBrowser.maybeCompleteAuthSession();
 
 function base64Url(bytes: Iterable<number>): string {
@@ -75,9 +72,6 @@ function base64Url(bytes: Iterable<number>): string {
     .replace(/\//g, "_");
 }
 
-// PKCE verifier and S256 challenge. The helpers below sit outside the
-// component because the React Compiler bails on loops, ternaries and
-// optional chaining inside a try.
 async function createPkcePair(): Promise<{ codeVerifier: string; codeChallenge: string }> {
   const codeVerifier = base64Url(Crypto.getRandomBytes(32));
   const hexDigest = await Crypto.digestStringAsync(
@@ -97,15 +91,12 @@ function codeFromRedirect(url: string): string | null {
   return typeof code === "string" && code ? code : null;
 }
 
-// The token held while the user installs the app, or null once it expired.
 function freshPendingToken(): string | null {
   const { pendingToken, pendingTokenExpiry } = useSignInStore.getState();
   if (!pendingToken || (pendingTokenExpiry && Date.now() > pendingTokenExpiry)) return null;
   return pendingToken;
 }
 
-// Module level so the React Compiler can still build SignInScreen: it bails
-// on try/finally and on a try without a catch.
 async function completeSignIn(
   code: string,
   codeVerifier: string,
@@ -212,12 +203,8 @@ export default function SignInScreen() {
 
   const redirectUri = makeRedirectUri({ scheme: "shikai" });
 
-  // The OAuth redirect fires both as a Linking event and as the
-  // openAuthSessionAsync result. Without this guard the code gets exchanged
-  // twice and the second exchange fails because GitHub codes are single-use.
   const processingCodeRef = useRef<string | null>(null);
 
-  // Warm the Custom Tab so the GitHub page opens fast.
   useEffect(() => {
     WebBrowser.warmUpAsync().catch(() => {});
     return () => {
@@ -225,8 +212,6 @@ export default function SignInScreen() {
     };
   }, []);
 
-  // Shared tail for every sign-in path: persist the token, restore any stored
-  // PAT, seed the caches, and refresh the widget.
   const finalizeSession = useCallback(
     async (accessToken: string, user: GitHubUser) => {
       await saveToken(accessToken);
@@ -351,8 +336,6 @@ export default function SignInScreen() {
         `&code_challenge=${codeChallenge}` +
         `&code_challenge_method=S256`;
 
-      // Auth session (Custom Tab) dismisses itself on redirect, unlike
-      // Linking.openURL which left the Chrome tab open behind the app.
       const result = await WebBrowser.openAuthSessionAsync(authUrl, redirectUri);
 
       if (result.type !== "success") {
@@ -363,8 +346,6 @@ export default function SignInScreen() {
 
       const receivedCode = codeFromRedirect(result.url);
       if (!receivedCode) {
-        // The Linking listener may already be handling this redirect; if it
-        // cleared the pending auth, it owns the exchange.
         const stillPending = await getPendingAuth();
         if (!stillPending) return;
         setError("Could not get access token. Please try again.");
@@ -429,8 +410,6 @@ export default function SignInScreen() {
     }
   }, [redirectUri, setUser, setToken, setPat]);
 
-  // For users who only need repos from accounts that already have the app,
-  // like an org. Settings and the Repos tab still link to the install page.
   const handleSkipInstall = useCallback(async () => {
     const { setLoading, setError, setNeedsInstall, setPendingToken } = useSignInStore.getState();
 
@@ -449,9 +428,6 @@ export default function SignInScreen() {
     setLoading(false);
   }, [finalizeSession]);
 
-  // Self-contained sign-in for anyone who would rather paste a token than run
-  // the browser OAuth flow. A classic or fine-grained PAT with repo and
-  // read:user scopes covers every read path in the app.
   const handleTokenSignIn = useCallback(async () => {
     const trimmed = tokenInput.trim();
     if (!trimmed.startsWith("ghp_") && !trimmed.startsWith("github_pat_")) {
@@ -500,8 +476,6 @@ export default function SignInScreen() {
             <Text style={s.tagline}>Your GitHub dashboard, at a glance.</Text>
           </Animated.View>
 
-          {/* Hidden in token mode: the keyboard leaves no room for it, and
-            someone pasting a token has already decided to sign in. */}
           {!showTokenInput && (
             <Animated.View
               entering={FadeInDown.delay(80).duration(400).springify()}
@@ -666,8 +640,6 @@ function buildStyles(
       gap: Spacing.xl,
     },
 
-    // Takes the space above the actions, so the buttons sit at the bottom
-    // within thumb reach.
     intro: {
       flex: 1,
       justifyContent: "center",

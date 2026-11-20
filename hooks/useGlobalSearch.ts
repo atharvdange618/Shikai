@@ -79,7 +79,6 @@ export function useGlobalSearch({ query, tab, enabled = true }: UseGlobalSearchO
     [usersQuery.data],
   );
 
-  // A disabled query keeps its cache, so drop PAT results once the PAT is gone.
   const issues = useMemo(
     () => (pat ? (issuesQuery.data?.pages.flatMap((p) => p.issues) ?? []) : []),
     [issuesQuery.data, pat],

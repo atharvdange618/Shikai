@@ -62,9 +62,7 @@ export default function DiscussionsScreen() {
           </Pressable>
         ),
       });
-    } catch {
-      /* navigator not ready yet */
-    }
+    } catch {}
   }, [navigation, owner, repoName, colors.accent]);
 
   const onRefresh = useCallback(async () => {

@@ -12,9 +12,7 @@ export function useInAppUpdates() {
         if (result.updateAvailable) {
           await ExpoInAppUpdates.startUpdate();
         }
-      } catch {
-        // silent fail - don't block app usage
-      }
+      } catch {}
     };
 
     void check();

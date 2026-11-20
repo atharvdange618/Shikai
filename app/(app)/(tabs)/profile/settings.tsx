@@ -41,7 +41,6 @@ import { refreshWidgetTheme } from "@/lib/widget-refresh";
 import { useAuthStore } from "@/stores/auth.store";
 import { useQueryClient } from "@tanstack/react-query";
 
-// A lookup, not a ternary: the React Compiler bails on a ternary inside try.
 const NOT_ENABLED_MESSAGE = {
   denied: "Shikai needs permission to show notifications.",
   unavailable: "Android isn't allowing background work for Shikai right now.",
@@ -56,8 +55,6 @@ export default function SettingsScreen() {
   const s = useMemo(() => buildStyles(colors), [colors]);
   const { data: user } = useUser();
 
-  // Three and a half cards fit on any screen width, so the cut-off card at
-  // the edge shows the strip scrolls.
   const { width: windowWidth } = useWindowDimensions();
   const themeCardWidth = (windowWidth - Spacing.lg - Spacing.md * 3) / 3.5;
 
@@ -67,9 +64,6 @@ export default function SettingsScreen() {
   const [validating, setValidating] = useState(false);
   const [patError, setPatError] = useState<string | null>(null);
 
-  // rateLimit is a plain mutable object updated by the axios interceptor,
-  // not reactive state, so snapshot it fresh each time this screen is
-  // focused rather than trying to subscribe to it.
   const [rateLimitSnapshot, setRateLimitSnapshot] = useState(() => ({
     ...rateLimit,
   }));
@@ -140,10 +134,6 @@ export default function SettingsScreen() {
   const [patRejected, setPatRejected] = useState(false);
   const [lastPoll, setLastPoll] = useState<LastPoll | null>(null);
 
-  // Read fresh on focus: the task can turn itself off in the background (PAT
-  // rejected), and the user can block notifications in system settings.
-  // Also re-read when the PAT changes: removing it turns alerts off without
-  // leaving this screen.
   useFocusEffect(
     useCallback(() => {
       setPatRejected(wasPatRejected());
@@ -201,7 +191,6 @@ export default function SettingsScreen() {
           message: "Couldn't change notification alerts. Please try again.",
         });
       }
-      // After the try, not in a finally: the React Compiler bails on finally.
       setAlertsBusy(false);
     },
     [alert],
@@ -564,7 +553,6 @@ function buildStyles(colors: ColorTokens) {
       color: colors.textPrimary,
     },
 
-    // Bleeds past the screen padding so cards scroll to the screen edge.
     themeStrip: {
       marginHorizontal: -Spacing.lg,
     },

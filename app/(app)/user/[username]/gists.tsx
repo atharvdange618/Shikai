@@ -42,9 +42,7 @@ export default function GistsScreen() {
   useEffect(() => {
     try {
       navigation.setOptions({ title: "Gists" });
-    } catch {
-      /* navigator not ready yet */
-    }
+    } catch {}
   }, [navigation]);
 
   const onRefresh = useCallback(async () => {

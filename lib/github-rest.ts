@@ -110,8 +110,6 @@ export async function fetchUserInstallations(): Promise<GitHubInstallation[]> {
   return data.installations;
 }
 
-// Installs the app when the account has none, or offers Configure when it does.
-// settings/installations only lists existing installs, a dead end for new users.
 export const MANAGE_REPO_ACCESS_URL = `https://github.com/apps/${process.env.EXPO_PUBLIC_GITHUB_APP_SLUG}/installations/new`;
 
 function findOwnInstallation(
@@ -121,14 +119,10 @@ function findOwnInstallation(
   return installations.find((i) => i.account.login.toLowerCase() === login.toLowerCase());
 }
 
-// /user/installations also returns installs on accounts the user collaborates
-// with, so a non-empty list doesn't mean the user's own repos are covered.
 export function hasOwnInstallation(installations: GitHubInstallation[], login: string): boolean {
   return findOwnInstallation(installations, login) !== undefined;
 }
 
-// The app only sees repos its installation covers. True when the user's own
-// account has no installation (only orgs) or was installed on select repos.
 export function hasPartialRepoAccess(installations: GitHubInstallation[], login: string): boolean {
   return findOwnInstallation(installations, login)?.repository_selection !== "all";
 }
@@ -362,7 +356,6 @@ export async function searchIssues(
   totalCount: number;
   pagination: GitHubPagination;
 }> {
-  // The App token gets 0 results here for every query, so callers pass the PAT (D-027).
   const { data, headers } = await githubAxios.get<GitHubSearchResult<GitHubIssue>>(
     "/search/issues",
     {
@@ -411,8 +404,6 @@ export async function fetchContributors(owner: string, repo: string): Promise<Gi
   return data;
 }
 
-// GitHub answers 422 past page 400 on big lists like stargazers and forks, so
-// stop offering a next page there instead of letting the last fetch fail.
 export const MAX_LIST_PAGE = 400;
 
 async function fetchPagedList<T>(
@@ -430,8 +421,6 @@ async function fetchPagedList<T>(
   return { items: data, pagination };
 }
 
-// GitHub App tokens need Contents: write for this list, which Shikai doesn't
-// ask for, so it always goes out with the PAT (D-023).
 export function fetchStargazers(owner: string, repo: string, page: number, pat: string | null) {
   return fetchPagedList<GitHubSimpleUser>(
     `/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/stargazers`,
@@ -457,10 +446,6 @@ export function fetchFollowing(username: string, page: number) {
   return fetchPagedList<GitHubSimpleUser>(`/users/${encodeURIComponent(username)}/following`, page);
 }
 
-// GitHub caches /stats per default-branch SHA. On a cache miss it answers 202
-// with an empty body and builds the stats in the background. axios treats any
-// 2xx as success, so throw on 202 to make React Query retry instead of caching
-// the empty body. 204 means the repo has no commits: a real empty result.
 async function getStats<T>(
   owner: string,
   repo: string,
@@ -571,8 +556,6 @@ export async function fetchUserEvents(
   per_page: number = 20,
   pat?: string | null,
 ): Promise<FetchEventsResult> {
-  // GitHub App user tokens never get private events from this endpoint, even
-  // with the Events permission granted. A classic PAT with repo scope does.
   const { data, headers } = await githubAxios.get<GitHubEvent[]>(
     `/users/${encodeURIComponent(username)}/events`,
     { params: { page, per_page }, headers: patHeaders(pat) },
@@ -714,8 +697,6 @@ export interface FetchNotificationsResult {
   pagination: GitHubPagination;
 }
 
-// A PAT auths a request in place of the active OAuth session; the axios
-// interceptor leaves an explicitly-set Authorization header alone.
 function patHeaders(pat?: string | null): { Authorization: string } | undefined {
   return pat ? { Authorization: `Bearer ${pat}` } : undefined;
 }
@@ -744,14 +725,6 @@ export type ParticipatingNotificationsResult =
       etag: string | null;
     };
 
-/**
- * Unread threads that involve the user directly (review requests, mentions,
- * assignments), for background alerts. Sends If-None-Match so a quiet poll
- * comes back 304, which GitHub doesn't count against the rate limit. ETag,
- * not Last-Modified: GitHub leaves Last-Modified off when the list is empty.
- * 304 is accepted as a normal response: the interceptor would otherwise turn
- * it into a GitHubApiError.
- */
 export async function fetchParticipatingNotifications(
   pat: string,
   etag: string | null,
@@ -870,7 +843,6 @@ export async function fetchPullRequestCommits(
     { params: { page, per_page: 100 } },
   );
   const pagination = parseLinkHeader(headers["link"]);
-  // GitHub only exposes the first 250 PR commits through this endpoint.
   if (page >= 3) delete pagination.next;
   return {
     commits: data.slice(0, Math.max(0, 250 - (page - 1) * 100)),
@@ -925,11 +897,6 @@ export async function fetchCheckRunAnnotations(
   return data;
 }
 
-// The Checks API doesn't give a workflow job id directly, but an
-// Actions-backed check run's details_url points at its job page
-// (.../actions/runs/{runId}/job/{jobId}). Non-Actions checks (external CI)
-// have a details_url that won't match, so callers fall back to "open on
-// GitHub" for those.
 export function parseActionsJobId(detailsUrl: string | null): number | null {
   if (!detailsUrl) return null;
   const match = detailsUrl.match(/\/actions\/runs\/\d+\/jobs?\/(\d+)/);
@@ -981,7 +948,6 @@ export async function fetchWorkflowRun(
   return data;
 }
 
-// Jobs of the run's latest attempt. 100 covers all but huge matrix builds.
 export async function fetchWorkflowRunJobs(
   owner: string,
   repo: string,
@@ -994,8 +960,6 @@ export async function fetchWorkflowRunJobs(
   return data.jobs;
 }
 
-// A job's check_run_url ends in /check-runs/{id}; that id opens the existing
-// check-run screen, which already shows the job's log tail.
 export function parseCheckRunId(checkRunUrl: string | null): number | null {
   const match = checkRunUrl?.match(/\/check-runs\/(\d+)$/);
   return match ? Number(match[1]) : null;

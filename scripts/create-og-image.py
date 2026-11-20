@@ -41,16 +41,13 @@ def main():
     img = create_gradient(WIDTH, HEIGHT, BG_DARK, BG_MID)
     draw = ImageDraw.Draw(img)
 
-    # Grid background
     for x in range(0, WIDTH, 40):
         draw.line([(x, 0), (x, HEIGHT)], fill=(30, 41, 59), width=1)
     for y in range(0, HEIGHT, 40):
         draw.line([(0, y), (WIDTH, y)], fill=(30, 41, 59), width=1)
 
-    # Logo
     draw_logo(img, 160, 315, 120)
 
-    # Fonts
     font_paths = [
         "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
         "/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf",
@@ -70,16 +67,12 @@ def main():
 
     draw = ImageDraw.Draw(img)
 
-    # Title
     draw.text((340, 220), "Shikai", fill=TEXT_WHITE, font=title_font)
 
-    # Subtitle
     draw.text((340, 300), "Privacy Policy", fill=ACCENT, font=subtitle_font)
 
-    # Tagline
     draw.text((340, 360), "A read-only GitHub companion for Android", fill=TEXT_DIM, font=body_font)
 
-    # Bottom bar
     draw.rectangle([(0, HEIGHT - 6), (WIDTH, HEIGHT)], fill=ACCENT)
 
     output_path = "docs/og-image.png"

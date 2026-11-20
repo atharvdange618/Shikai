@@ -101,9 +101,6 @@ describe("revalidateSession", () => {
   });
 
   it("keeps the session when the check can't reach GitHub", async () => {
-    // Status 0 is offline, a timeout or a cancelled request (lib/sentry.ts).
-    // Boot used to clear auth on it, so opening the app without signal signed
-    // the user out.
     const fetchQuery = vi.fn().mockRejectedValue(new m.GitHubApiError(0, "Network Error"));
 
     await revalidateSession(client(fetchQuery));

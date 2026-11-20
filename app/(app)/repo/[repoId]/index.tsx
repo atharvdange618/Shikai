@@ -113,9 +113,6 @@ export default function RepoDetailsScreen() {
   const onRefresh = useCallback(async () => {
     if (!owner || !repoName) return;
     setRefreshing(true);
-    // The whole screen's queries share the ["repo", owner, repo] prefix, so one
-    // invalidate refreshes the header, stats, activity, languages, contributors,
-    // README, latest release and workflow runs. Only mounted queries refetch.
     await queryClient.invalidateQueries({
       queryKey: queryKeys.repo(owner, repoName),
     });
@@ -142,7 +139,6 @@ export default function RepoDetailsScreen() {
     )
       return "failure" as const;
     if (checks.some((c) => c.conclusion === "pending")) return "pending" as const;
-    // Missing or unloaded results can hide a failure, so claim nothing.
     if (checksLoading || checksError || moreChecks) return null;
     if (checks.every((c) => c.conclusion === "success")) return "success" as const;
     return null;
@@ -155,9 +151,7 @@ export default function RepoDetailsScreen() {
           title: repo.name,
           headerBackVisible: true,
         });
-      } catch {
-        /* navigator not ready yet */
-      }
+      } catch {}
     }
   }, [repo?.name, navigation]);
 
@@ -218,9 +212,7 @@ export default function RepoDetailsScreen() {
       if (meta.length > 0) parts.push(meta.join("  ·  "));
       parts.push(repo.html_url);
       await Share.share({ message: parts.join("\n") });
-    } catch {
-      /* share cancelled */
-    }
+    } catch {}
   }, [repo]);
 
   const handleShareLongPress = useCallback(async () => {

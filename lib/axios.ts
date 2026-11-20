@@ -46,7 +46,6 @@ export class GitHubApiError extends Error {
   }
 }
 
-// eslint-disable-next-line import/no-named-as-default-member
 export const githubAxios: AxiosInstance = axios.create({
   baseURL: GITHUB_API_BASE,
   timeout: 15_000,
@@ -57,9 +56,6 @@ export const githubAxios: AxiosInstance = axios.create({
   },
 });
 
-// A 401 should only clear the OAuth session if that session's token is what
-// actually got rejected. A request authed with an explicit override (a PAT,
-// or validateToken's candidate token) failing shouldn't sign out the session.
 function usedSessionToken(config: InternalAxiosRequestConfig | undefined): boolean {
   const usedAuth = config?.headers.get("Authorization");
   const sessionToken = useAuthStore.getState().token;
@@ -68,8 +64,6 @@ function usedSessionToken(config: InternalAxiosRequestConfig | undefined): boole
 }
 
 githubAxios.interceptors.request.use((config: InternalAxiosRequestConfig) => {
-  // A request that already set its own Authorization header (e.g. to
-  // validate a token that isn't the active session's) keeps it as-is.
   if (!config.headers.has("Authorization")) {
     const token = useAuthStore.getState().token;
 

@@ -8,7 +8,6 @@ export function useCommitDetail(owner: string, repo: string, sha: string) {
       queryKey: queryKeys.commitDetail(owner, repo, sha),
       queryFn: () => fetchCommit(owner, repo, sha),
       enabled: Boolean(owner && repo && sha),
-      // A commit's diff never changes once it exists.
       staleTime: 1000 * 60 * 60,
       meta: { persist: false },
     }),

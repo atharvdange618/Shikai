@@ -6,14 +6,13 @@ import math
 
 WIDTH, HEIGHT = 1024, 500
 
-# Colors
-BG_DARK = (15, 23, 42)       # Deep navy
-BG_MID = (30, 41, 59)        # Slate
-ACCENT = (88, 166, 255)      # GitHub blue
-ACCENT_LIGHT = (147, 197, 253)  # Light blue
-TEXT_WHITE = (250, 249, 246)  # Off-white
-TEXT_DIM = (148, 163, 184)    # Slate-400
-HIGHLIGHT = (59, 130, 246)   # Blue-500
+BG_DARK = (15, 23, 42)
+BG_MID = (30, 41, 59)
+ACCENT = (88, 166, 255)
+ACCENT_LIGHT = (147, 197, 253)
+TEXT_WHITE = (250, 249, 246)
+TEXT_DIM = (148, 163, 184)
+HIGHLIGHT = (59, 130, 246)
 
 
 def create_gradient(width, height, color1, color2, direction="horizontal"):
@@ -43,13 +42,9 @@ def draw_logo(img, cx, cy, size):
     draw = ImageDraw.Draw(img)
     r = size // 2
 
-    # Outer circle with gradient feel
     draw_circle(draw, cx, cy, r, fill=ACCENT)
-    # Inner accent ring
     draw_circle(draw, cx, cy, int(r * 0.7), fill=None, outline=ACCENT_LIGHT, width=3)
-    # Lens/viewfinder circle
     draw_circle(draw, cx, cy, int(r * 0.4), fill=None, outline=TEXT_WHITE, width=6)
-    # Center dot
     draw_circle(draw, cx, cy, int(r * 0.1), fill=TEXT_WHITE)
 
 
@@ -74,22 +69,17 @@ def draw_glow(img, cx, cy, radius, color, alpha=30):
 
 
 def main():
-    # Create base with vertical gradient
     img = create_gradient(WIDTH, HEIGHT, BG_DARK, BG_MID, "vertical")
     draw = ImageDraw.Draw(img)
 
-    # Subtle grid
     draw_decorative_grid(draw, WIDTH, HEIGHT)
 
-    # Glow effects
     draw_glow(img, 200, 250, 200, ACCENT, alpha=20)
     draw_glow(img, 800, 250, 150, HIGHLIGHT, alpha=15)
 
-    # Draw logo on the left
     logo_x, logo_y = 200, 250
     draw_logo(img, logo_x, logo_y, 180)
 
-    # Try to use a good font, fallback to default
     font_paths = [
         "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
         "/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf",
@@ -114,23 +104,18 @@ def main():
         subtitle_font = ImageFont.load_default()
         tagline_font = ImageFont.load_default()
 
-    # Title text
     draw = ImageDraw.Draw(img)
     title_x = 340
 
-    # "Shikai" title
     draw.text((title_x, 170), "Shikai", fill=TEXT_WHITE, font=title_font)
 
-    # Tagline
     draw.text((title_x, 260), "Your read-only GitHub companion", fill=ACCENT_LIGHT, font=subtitle_font)
 
-    # Feature highlights
     features = ["Repos", "Contributions", "Activity", "Themes"]
     feature_x = title_x
     feature_y = 330
 
     for i, feat in enumerate(features):
-        # Pill background
         bbox = draw.textbbox((0, 0), feat, font=tagline_font)
         pill_w = bbox[2] - bbox[0] + 24
         pill_h = bbox[3] - bbox[1] + 14
@@ -138,7 +123,6 @@ def main():
         pill_x = feature_x
         pill_y = feature_y
 
-        # Draw pill
         draw.rounded_rectangle(
             [pill_x, pill_y, pill_x + pill_w, pill_y + pill_h],
             radius=12,
@@ -150,7 +134,6 @@ def main():
 
         feature_x += pill_w + 12
 
-    # Decorative dots on the right
     for i in range(5):
         for j in range(3):
             dx = 820 + i * 30
@@ -158,7 +141,6 @@ def main():
             alpha = max(0, 255 - (i + j) * 40)
             draw_circle(draw, dx, dy, 3, fill=(*ACCENT, alpha) if alpha > 0 else None)
 
-    # Save
     output_path = "assets/images/feature-graphic.png"
     img.save(output_path, "PNG")
     print(f"Feature graphic saved to {output_path}")

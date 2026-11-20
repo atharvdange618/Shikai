@@ -54,9 +54,7 @@ export default function ActionsScreen() {
           </Pressable>
         ),
       });
-    } catch {
-      /* navigator not ready yet */
-    }
+    } catch {}
   }, [navigation, owner, repoName, colors.accent]);
 
   const onRefresh = useCallback(async () => {
