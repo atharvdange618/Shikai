@@ -32,11 +32,45 @@ import {
   fetchPunchCard,
   fetchStargazers,
   fetchUserEvents,
+  fetchWorkflowRun,
+  fetchWorkflowRunJobs,
   MAX_LIST_PAGE,
   parseActionsJobId,
   parseCheckRunId,
   searchIssues,
 } from "@/lib/github-rest";
+
+describe("workflow run jobs", () => {
+  beforeEach(() => get.mockReset());
+
+  it("follows the next page while keeping both pages on the selected attempt", async () => {
+    const endpoint = "/repos/o/r/actions/runs/42/attempts/2/jobs";
+    const firstPage = Array.from({ length: 100 }, (_, index) => ({ id: index + 1 }));
+    const lastJob = { id: 101, check_run_url: "https://api.github.com/repos/o/r/check-runs/101" };
+    get
+      .mockResolvedValueOnce({
+        data: { jobs: firstPage },
+        headers: { link: `<https://api.github.com${endpoint}?page=2>; rel="next"` },
+      })
+      .mockResolvedValueOnce({ data: { jobs: [lastJob] }, headers: {} });
+
+    const first = await fetchWorkflowRunJobs("o", "r", 42, 2, 1);
+    expect(first.jobs).toHaveLength(100);
+    expect(first.pagination.next).toBe(2);
+    const second = await fetchWorkflowRunJobs("o", "r", 42, 2, first.pagination.next ?? 1);
+    expect(second.jobs).toEqual([lastJob]);
+    expect(second.pagination.next).toBeUndefined();
+    expect(get).toHaveBeenNthCalledWith(1, endpoint, { params: { page: 1, per_page: 100 } });
+    expect(get).toHaveBeenNthCalledWith(2, endpoint, { params: { page: 2, per_page: 100 } });
+  });
+
+  it("loads the matching run metadata when a link selects an attempt", async () => {
+    const run = { id: 42, run_attempt: 2 };
+    get.mockResolvedValueOnce({ data: run });
+    await expect(fetchWorkflowRun("o", "r", 42, 2)).resolves.toBe(run);
+    expect(get).toHaveBeenCalledExactlyOnceWith("/repos/o/r/actions/runs/42/attempts/2");
+  });
+});
 
 describe("repository files", () => {
   beforeEach(() => get.mockReset());

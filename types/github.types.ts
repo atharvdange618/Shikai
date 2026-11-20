@@ -564,6 +564,7 @@ export interface GitHubWorkflowRun {
   name: string | null;
   display_title: string;
   run_number: number;
+  run_attempt: number;
   event: string;
   status: GitHubWorkflowRunStatus;
   conclusion: GitHubWorkflowRunConclusion;

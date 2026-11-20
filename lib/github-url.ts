@@ -95,7 +95,10 @@ export function parseGitHubUrl(url: string): string | null {
     }
     case "actions": {
       const runId = a === "runs" ? seg[4] : undefined;
-      return runId && /^\d+$/.test(runId) ? `${repoBase}/run/${runId}` : `${repoBase}/actions`;
+      if (!runId || !/^\d+$/.test(runId)) return `${repoBase}/actions`;
+      const attempt = seg[5] === "attempts" ? seg[6] : undefined;
+      const query = attempt && /^[1-9]\d*$/.test(attempt) ? `?attempt=${attempt}` : "";
+      return `${repoBase}/run/${runId}${query}`;
     }
     case "pulse":
     case "graphs":

@@ -137,9 +137,9 @@ const RunItem = memo(function RunItem({
   const handlePress = useCallback(() => {
     router.push({
       pathname: "/(app)/repo/[repoId]/run/[runId]",
-      params: { repoId, runId: String(run.id) },
+      params: { repoId, runId: String(run.id), attempt: String(run.run_attempt) },
     });
-  }, [router, repoId, run.id]);
+  }, [router, repoId, run.id, run.run_attempt]);
 
   return (
     <Pressable

@@ -96,6 +96,9 @@ describe("parseGitHubUrl", () => {
     expect(parseGitHubUrl("https://github.com/facebook/react/actions/runs/123/job/456")).toBe(
       `${base}/run/123`,
     );
+    expect(parseGitHubUrl("https://github.com/facebook/react/actions/runs/123/attempts/2")).toBe(
+      `${base}/run/123?attempt=2`,
+    );
     expect(parseGitHubUrl("https://github.com/facebook/react/actions/workflows/ci.yml")).toBe(
       `${base}/actions`,
     );

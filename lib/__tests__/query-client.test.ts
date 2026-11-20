@@ -99,3 +99,9 @@ it("keeps file contents at different refs in separate cache entries", () => {
     queryKeys.repoFile("o", "r", "src/main.ts", "main"),
   );
 });
+
+it("keeps workflow jobs from different attempts in separate cache entries", () => {
+  expect(queryKeys.workflowRunJobs("o", "r", 42, 1)).not.toEqual(
+    queryKeys.workflowRunJobs("o", "r", 42, 2),
+  );
+});

@@ -15,10 +15,11 @@ import { getRunDisplay } from "@/lib/run-display";
 import { decodeRepoId, formatDuration, relativeTime } from "@/lib/utils";
 import type { GitHubWorkflowJob } from "@/types/github.types";
 import { Octicons } from "@expo/vector-icons";
+import { FlashList } from "@shopify/flash-list";
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
 import { useEffect } from "react";
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
 
 export default function WorkflowRunScreen() {
   return (
@@ -29,9 +30,10 @@ export default function WorkflowRunScreen() {
 }
 
 function WorkflowRunScreenContent() {
-  const { repoId, runId } = useLocalSearchParams<{
+  const { repoId, runId, attempt } = useLocalSearchParams<{
     repoId: string;
     runId: string;
+    attempt?: string;
   }>();
   const navigation = useNavigation();
   const router = useRouter();
@@ -39,13 +41,20 @@ function WorkflowRunScreenContent() {
 
   const [owner, repoName] = decodeRepoId(repoId ?? "");
   const id = Number(runId);
+  const attemptNumber = Number(attempt);
+  const requestedAttempt =
+    Number.isSafeInteger(attemptNumber) && attemptNumber > 0 ? attemptNumber : undefined;
 
-  const { data: run, isLoading, isError } = useWorkflowRun(owner, repoName, id);
+  const { data: run, isLoading, isError } = useWorkflowRun(owner, repoName, id, requestedAttempt);
   const {
-    data: jobs = [],
+    items: jobs,
     isLoading: isJobsLoading,
     isError: isJobsError,
-  } = useWorkflowRunJobs(owner, repoName, id);
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+    refetch: refetchJobs,
+  } = useWorkflowRunJobs(owner, repoName, id, requestedAttempt ?? run?.run_attempt);
 
   useEffect(() => {
     try {
@@ -93,99 +102,126 @@ function WorkflowRunScreenContent() {
   };
 
   return (
-    <ScrollView
+    <FlashList
       style={[s.scroll, { backgroundColor: colors.background }]}
       contentContainerStyle={s.content}
       showsVerticalScrollIndicator={false}
-    >
-      <View style={s.titleRow}>
-        <Octicons name={status.icon} size={22} color={status.color} />
-        <Text style={[s.title, { color: colors.textPrimary }]} numberOfLines={4}>
-          {run.display_title}
-        </Text>
-      </View>
+      data={jobs}
+      keyExtractor={(job) => String(job.id)}
+      renderItem={({ item: job }) => {
+        const jobStatus = getRunDisplay(job.status, job.conclusion, colors);
+        return (
+          <Pressable
+            onPress={() => openJob(job)}
+            accessibilityRole="button"
+            accessibilityLabel={`${job.name}, ${jobStatus.label}`}
+            style={({ pressed }) => [
+              s.jobRow,
+              { backgroundColor: colors.surface, borderColor: colors.border },
+              pressed && { opacity: 0.6 },
+            ]}
+          >
+            <Octicons name={jobStatus.icon} size={16} color={jobStatus.color} />
+            <Text style={[s.jobName, { color: colors.textPrimary }]} numberOfLines={2}>
+              {job.name}
+            </Text>
+            {job.status !== "queued" && (
+              <Text style={[s.jobDuration, { color: colors.textMuted }]}>
+                {formatDuration(job.started_at, job.completed_at)}
+              </Text>
+            )}
+            <Octicons name="chevron-right" size={12} color={colors.textMuted} />
+          </Pressable>
+        );
+      }}
+      ListHeaderComponent={
+        <View style={s.header}>
+          <View style={s.titleRow}>
+            <Octicons name={status.icon} size={22} color={status.color} />
+            <Text style={[s.title, { color: colors.textPrimary }]} numberOfLines={4}>
+              {run.display_title}
+            </Text>
+          </View>
 
-      <Text style={[s.statusLine, { color: colors.textMuted }]}>
-        <Text style={{ color: status.color }}>{status.label}</Text>
-        {finished
-          ? ` · took ${formatDuration(startedAt, run.updated_at)} · ${relativeTime(run.updated_at)}`
-          : ` · started ${relativeTime(startedAt)}`}
-      </Text>
+          <Text style={[s.statusLine, { color: colors.textMuted }]}>
+            <Text style={{ color: status.color }}>{status.label}</Text>
+            {finished
+              ? ` · took ${formatDuration(startedAt, run.updated_at)} · ${relativeTime(run.updated_at)}`
+              : ` · started ${relativeTime(startedAt)}`}
+            {` · Attempt ${run.run_attempt}`}
+          </Text>
 
-      <View style={[s.metaCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-        {run.head_branch && (
-          <MetaRow icon="git-branch" colors={colors} mono>
-            {run.head_branch}
-          </MetaRow>
-        )}
-        <Pressable
-          onPress={() =>
-            router.push({
-              pathname: "/(app)/repo/[repoId]/commit/[sha]",
-              params: { repoId: repoId ?? "", sha: run.head_sha },
-            })
-          }
-          style={({ pressed }) => pressed && { opacity: 0.6 }}
-        >
-          <MetaRow icon="git-commit" colors={colors} mono accent>
-            {run.head_sha.slice(0, 7)}
-          </MetaRow>
-        </Pressable>
-        <MetaRow icon="zap" colors={colors}>
-          {run.event}
-          {run.actor ? ` by ${run.actor.login}` : ""}
-        </MetaRow>
-      </View>
+          <View
+            style={[s.metaCard, { backgroundColor: colors.surface, borderColor: colors.border }]}
+          >
+            {run.head_branch && (
+              <MetaRow icon="git-branch" colors={colors} mono>
+                {run.head_branch}
+              </MetaRow>
+            )}
+            <Pressable
+              onPress={() =>
+                router.push({
+                  pathname: "/(app)/repo/[repoId]/commit/[sha]",
+                  params: { repoId: repoId ?? "", sha: run.head_sha },
+                })
+              }
+              style={({ pressed }) => pressed && { opacity: 0.6 }}
+            >
+              <MetaRow icon="git-commit" colors={colors} mono accent>
+                {run.head_sha.slice(0, 7)}
+              </MetaRow>
+            </Pressable>
+            <MetaRow icon="zap" colors={colors}>
+              {run.event}
+              {run.actor ? ` by ${run.actor.login}` : ""}
+            </MetaRow>
+          </View>
 
-      <View style={s.jobs}>
-        <Text style={[s.sectionTitle, { color: colors.textPrimary }]}>
-          Jobs{jobs.length > 0 ? ` (${jobs.length})` : ""}
-        </Text>
-
-        {isJobsLoading ? (
-          <ActivityIndicator size="small" color={colors.accent} />
-        ) : isJobsError ? (
-          <Text style={[s.statusLine, { color: colors.danger }]}>Failed to load jobs</Text>
-        ) : jobs.length === 0 ? (
-          <Text style={[s.statusLine, { color: colors.textMuted }]}>No jobs yet</Text>
-        ) : (
-          jobs.map((job) => {
-            const jobStatus = getRunDisplay(job.status, job.conclusion, colors);
-            return (
-              <Pressable
-                key={job.id}
-                onPress={() => openJob(job)}
-                accessibilityLabel={`${job.name}, ${jobStatus.label}`}
-                style={({ pressed }) => [
-                  s.jobRow,
-                  { backgroundColor: colors.surface, borderColor: colors.border },
-                  pressed && { opacity: 0.6 },
-                ]}
-              >
-                <Octicons name={jobStatus.icon} size={16} color={jobStatus.color} />
-                <Text style={[s.jobName, { color: colors.textPrimary }]} numberOfLines={2}>
-                  {job.name}
-                </Text>
-                {job.status !== "queued" && (
-                  <Text style={[s.jobDuration, { color: colors.textMuted }]}>
-                    {formatDuration(job.started_at, job.completed_at)}
-                  </Text>
-                )}
-                <Octicons name="chevron-right" size={12} color={colors.textMuted} />
-              </Pressable>
-            );
-          })
-        )}
-      </View>
-
-      <Pressable
-        onPress={() => WebBrowser.openBrowserAsync(run.html_url)}
-        style={({ pressed }) => [s.linkButton, pressed && { opacity: 0.6 }]}
-      >
-        <Octicons name="link-external" size={14} color={colors.accent} />
-        <Text style={[s.linkButtonText, { color: colors.accent }]}>View on GitHub</Text>
-      </Pressable>
-    </ScrollView>
+          <Text style={[s.sectionTitle, { color: colors.textPrimary }]}>
+            Jobs{jobs.length > 0 ? ` (${jobs.length})` : ""}
+          </Text>
+        </View>
+      }
+      ListFooterComponent={
+        <View>
+          {(isJobsLoading || isFetchingNextPage) && (
+            <ActivityIndicator
+              size="small"
+              color={colors.accent}
+              accessibilityLabel="Loading jobs"
+            />
+          )}
+          {isJobsError && (
+            <Text style={[s.statusLine, { color: colors.danger }]}>
+              {jobs.length > 0 ? "Failed to load more jobs" : "Failed to load jobs"}
+            </Text>
+          )}
+          {!isJobsLoading && !isJobsError && jobs.length === 0 && !hasNextPage && (
+            <Text style={[s.statusLine, { color: colors.textMuted }]}>No jobs yet</Text>
+          )}
+          {!isFetchingNextPage && (hasNextPage || isJobsError) && (
+            <Pressable
+              accessibilityRole="button"
+              style={({ pressed }) => [s.linkButton, pressed && { opacity: 0.6 }]}
+              onPress={() => void (hasNextPage ? fetchNextPage() : refetchJobs())}
+            >
+              <Text style={[s.linkButtonText, { color: colors.accent }]}>
+                {isJobsError ? "Retry jobs" : "Load more jobs"}
+              </Text>
+            </Pressable>
+          )}
+          <Pressable
+            accessibilityRole="link"
+            onPress={() => WebBrowser.openBrowserAsync(run.html_url)}
+            style={({ pressed }) => [s.linkButton, pressed && { opacity: 0.6 }]}
+          >
+            <Octicons name="link-external" size={14} color={colors.accent} />
+            <Text style={[s.linkButtonText, { color: colors.accent }]}>View on GitHub</Text>
+          </Pressable>
+        </View>
+      }
+    />
   );
 }
 
@@ -222,15 +258,18 @@ function MetaRow({
 const s = StyleSheet.create({
   scroll: {
     flex: 1,
+    maxWidth: 680,
+    width: "100%",
+    alignSelf: "center",
   },
   content: {
     paddingHorizontal: Layout.screenPadding,
     paddingTop: Spacing.lg,
     paddingBottom: Spacing.xxl + 60 + Spacing.lg,
+  },
+  header: {
     gap: Spacing.md,
-    maxWidth: 680,
-    width: "100%",
-    alignSelf: "center",
+    paddingBottom: Spacing.sm,
   },
   centered: {
     flex: 1,
@@ -273,9 +312,6 @@ const s = StyleSheet.create({
     fontFamily: FontFamily.regular,
     fontSize: FontSize.caption,
   },
-  jobs: {
-    gap: Spacing.sm,
-  },
   sectionTitle: {
     fontFamily: FontFamily.semiBold,
     fontSize: FontSize.body,
@@ -288,6 +324,7 @@ const s = StyleSheet.create({
     borderRadius: Radius.lg,
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.sm + 2,
+    marginBottom: Spacing.sm,
   },
   jobName: {
     flex: 1,
@@ -304,6 +341,7 @@ const s = StyleSheet.create({
     justifyContent: "center",
     gap: Spacing.xs,
     paddingVertical: Spacing.sm,
+    minHeight: 48,
     borderRadius: Radius.md,
   },
   linkButtonText: {

@@ -19,11 +19,11 @@ export function useWorkflowRuns(owner: string, repo: string) {
   return { runs, ...rest };
 }
 
-export function useWorkflowRun(owner: string, repo: string, runId: number) {
+export function useWorkflowRun(owner: string, repo: string, runId: number, attempt?: number) {
   return useQuery(
     queryOptions({
-      queryKey: queryKeys.workflowRun(owner, repo, runId),
-      queryFn: () => fetchWorkflowRun(owner, repo, runId),
+      queryKey: queryKeys.workflowRun(owner, repo, runId, attempt),
+      queryFn: () => fetchWorkflowRun(owner, repo, runId, attempt),
       enabled: Boolean(owner && repo && runId),
       staleTime: 1000 * 30,
       meta: { persist: false },
@@ -31,14 +31,15 @@ export function useWorkflowRun(owner: string, repo: string, runId: number) {
   );
 }
 
-export function useWorkflowRunJobs(owner: string, repo: string, runId: number) {
-  return useQuery(
-    queryOptions({
-      queryKey: queryKeys.workflowRunJobs(owner, repo, runId),
-      queryFn: () => fetchWorkflowRunJobs(owner, repo, runId),
-      enabled: Boolean(owner && repo && runId),
+export function useWorkflowRunJobs(owner: string, repo: string, runId: number, attempt?: number) {
+  return useInfinitePagedQuery(
+    {
+      queryKey: queryKeys.workflowRunJobs(owner, repo, runId, attempt),
+      queryFn: ({ pageParam }) => fetchWorkflowRunJobs(owner, repo, runId, attempt ?? 1, pageParam),
+      enabled: Boolean(owner && repo && runId && attempt),
       staleTime: 1000 * 30,
       meta: { persist: false },
-    }),
+    },
+    (data) => data?.pages.flatMap((page) => page.jobs) ?? [],
   );
 }

@@ -932,9 +932,10 @@ export async function fetchWorkflowRun(
   owner: string,
   repo: string,
   runId: number,
+  attempt?: number,
 ): Promise<GitHubWorkflowRun> {
   const { data } = await githubAxios.get<GitHubWorkflowRun>(
-    `/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/actions/runs/${runId}`,
+    `/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/actions/runs/${runId}${attempt ? `/attempts/${attempt}` : ""}`,
   );
   return data;
 }
@@ -943,12 +944,14 @@ export async function fetchWorkflowRunJobs(
   owner: string,
   repo: string,
   runId: number,
-): Promise<GitHubWorkflowJob[]> {
-  const { data } = await githubAxios.get<{ jobs: GitHubWorkflowJob[] }>(
-    `/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/actions/runs/${runId}/jobs`,
-    { params: { per_page: 100 } },
+  attempt: number,
+  page: number,
+): Promise<{ jobs: GitHubWorkflowJob[]; pagination: GitHubPagination }> {
+  const { data, headers } = await githubAxios.get<{ jobs: GitHubWorkflowJob[] }>(
+    `/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/actions/runs/${runId}/attempts/${attempt}/jobs`,
+    { params: { page, per_page: 100 } },
   );
-  return data.jobs;
+  return { jobs: data.jobs, pagination: parseLinkHeader(headers["link"]) };
 }
 
 export function parseCheckRunId(checkRunUrl: string | null): number | null {
