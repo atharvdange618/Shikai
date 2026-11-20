@@ -13,22 +13,14 @@ interface MarkdownViewerProps {
   /** `owner/repo`, for GitHub's markdown rendering context. */
   repoContext: string;
   gitRef?: string;
-  targetLine?: number;
 }
 
-export function MarkdownViewer({
-  content,
-  path,
-  repoContext,
-  gitRef,
-  targetLine,
-}: MarkdownViewerProps) {
+export function MarkdownViewer({ content, path, repoContext, gitRef }: MarkdownViewerProps) {
   const { colors } = useTheme();
   const s = useMemo(() => buildStyles(colors), [colors]);
   const { copied, copy } = useCopyToClipboard();
 
   const contentScrollRef = useRef<ScrollViewInstance>(null);
-  const hasScrolledToLineRef = useRef(false);
 
   const rendererY = useRef(0);
   const handleAnchorOffset = useCallback((y: number) => {
@@ -38,41 +30,12 @@ export function MarkdownViewer({
     });
   }, []);
 
-  // Rendered prose doesn't map 1:1 to source lines and GitHub's HTML carries
-  // no source positions, so this jumps to the line's proportional position
-  // in the WebView's total height. Set once, on the first height report.
-  // The scroll waits for onContentSizeChange: the ScrollView hasn't grown to
-  // that height yet, and Android clamps an earlier scrollTo to 0.
-  const pendingOffsetRef = useRef<number | null>(null);
-  const handleMarkdownHeightChange = useCallback(
-    (height: number) => {
-      if (hasScrolledToLineRef.current || targetLine === undefined) {
-        return;
-      }
-      const totalLines = content.split("\n").length;
-      const fraction = Math.min((targetLine - 1) / totalLines, 1);
-      pendingOffsetRef.current = Math.max(fraction * height - Spacing.xxl * 2, 0);
-      hasScrolledToLineRef.current = true;
-    },
-    [targetLine, content],
-  );
-
-  const handleContentSizeChange = useCallback(() => {
-    if (pendingOffsetRef.current === null) return;
-    contentScrollRef.current?.scrollTo({
-      y: pendingOffsetRef.current,
-      animated: true,
-    });
-    pendingOffsetRef.current = null;
-  }, []);
-
   return (
     <ScrollView
       ref={contentScrollRef}
       style={s.contentScroll}
       contentContainerStyle={s.content}
       showsVerticalScrollIndicator={false}
-      onContentSizeChange={handleContentSizeChange}
     >
       <View style={s.codeHeader}>
         <Pressable
@@ -103,7 +66,6 @@ export function MarkdownViewer({
           context={repoContext}
           filePath={path}
           gitRef={gitRef}
-          onHeightChange={handleMarkdownHeightChange}
           onAnchorOffset={handleAnchorOffset}
         />
       </View>

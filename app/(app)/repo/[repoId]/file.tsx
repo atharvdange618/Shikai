@@ -38,7 +38,8 @@ function FileViewerScreenContent() {
 
   const [owner, repoName] = decodeRepoId(repoId ?? "");
   const { data: repo } = useRepo(owner, repoName);
-  const kind = getFileKind(fileName ?? "");
+  const targetLine = parseTargetLine(line);
+  const kind = getFileKind(fileName ?? "", targetLine);
   const canBlame = kind === "text" || kind === "markdown";
 
   useEffect(() => {
@@ -115,7 +116,6 @@ function FileViewerScreenContent() {
 
   function renderViewer(file: NonNullable<typeof data>) {
     const url = file.meta.download_url;
-    const targetLine = parseTargetLine(line);
 
     if (kind === "binary") {
       return <FileError title="Binary file" message="Shikai can't preview this file type." />;
@@ -149,7 +149,6 @@ function FileViewerScreenContent() {
           path={path ?? ""}
           repoContext={`${owner}/${repoName}`}
           gitRef={ref}
-          targetLine={targetLine}
         />
       );
     }

@@ -3,13 +3,6 @@ import { fileURLToPath } from "node:url";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
 const baseline = {
-  "components/file/MarkdownViewer.tsx": [
-    "// Rendered prose doesn't map 1:1 to source lines and GitHub's HTML carries",
-    "// no source positions, so this jumps to the line's proportional position",
-    "// in the WebView's total height. Set once, on the first height report.",
-    "// The scroll waits for onContentSizeChange: the ScrollView hasn't grown to",
-    "// that height yet, and Android clamps an earlier scrollTo to 0.",
-  ],
   "lib/__tests__/markdown-html.test.ts": [
     "// eslint-disable-next-line typescript/no-implied-eval -- runs the page's own script line",
   ],

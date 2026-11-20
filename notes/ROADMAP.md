@@ -158,16 +158,13 @@ the longest matching ref prefix to a commit, then uses that commit for the file 
 `tree/{ref}/{...path}` passes the path to `files.tsx`, which expands every ancestor
 folder plus the target directory and scrolls the `FlashList` to it. `blob/{ref}/{...path}#L10`
 passes the starting line number as `line`. Code files open in `CodeViewer`, which marks and
-scrolls to that line exactly; markdown files keep a proportional-height scroll, since rendered
-prose has no per-line anchors. A `shikai://` link that cold-started the app is held by
+scrolls to that line exactly. Markdown source-line links use the same source viewer. A
+`shikai://` link that cold-started the app is held by
 `app/+native-intent.tsx` until the boot replace runs, then opens the linked screen with
 Overview behind it, so Back works.
 
-History: the proportional scroll and later an exact `Range.getBoundingClientRect()` lookup
-(with `onLineOffset`) lived in `MarkdownRenderer`. D-025 moved code files to `CodeViewer` on
-2026-10-27 and removed both from `MarkdownRenderer`; markdown keeps the proportional fallback.
-
-Not done: line highlight in markdown files (the rough position scrolls into view but no line is marked).
+Markdown links without a source line still open the rendered preview. Heading links within
+that preview still scroll to their headings.
 
 #### 3.3 In-app check annotations · shipped
 

@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { themes } from "@/constants/themes";
 import { buildCodeHtml, buildDiffHtml, buildSvgHtml } from "@/lib/file-html";
 import { highlightDiff, highlightFile } from "@/lib/highlight";
+import { getFileKind, parseTargetLine } from "@/lib/utils";
 
 const { colors, syntaxTheme } = themes.dark;
 
@@ -41,6 +42,36 @@ describe("buildCodeHtml", () => {
     expect(buildCodeHtml(file, colors, syntaxTheme, 2)).toMatch(
       /\.th-target \{[^}]*box-shadow: inset 3px 0 0/,
     );
+  });
+
+  it("shows the exact Markdown source line even when sections render at different heights", () => {
+    const markdown = [
+      "# Main heading",
+      "",
+      "![A tall image](artwork.png)",
+      "",
+      "```ts",
+      "const first = 1;",
+      "const second = 2;",
+      "```",
+      "",
+      "## Final instructions",
+      "",
+      "Keep this paragraph in view.",
+    ].join("\n");
+    const fileName = "guide.md";
+    const target = parseTargetLine("10");
+    expect(getFileKind(fileName)).toBe("markdown");
+    expect(getFileKind(fileName, target)).toBe("text");
+
+    const html = buildCodeHtml(
+      highlightFile(markdown, fileName, target),
+      colors,
+      syntaxTheme,
+      target,
+    );
+    expect(html).toContain(`querySelector('[data-line="10"]')`);
+    expect(html).toMatch(/class="[^"]*th-target[^"]*"[^>]*data-line="10"[^\n]*Final instructions/);
   });
 });
 

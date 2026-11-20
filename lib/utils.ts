@@ -136,12 +136,14 @@ const BINARY_EXTENSIONS = [
 ];
 
 /** Picks the viewer for a file. SVGs count as images. */
-export function getFileKind(filename: string): FileKind {
+export function getFileKind(filename: string, targetLine?: number): FileKind {
   const lower = filename.toLowerCase();
   if (isImageFile(lower)) return "image";
   if (isVideoFile(lower)) return "video";
   if (lower.endsWith(".pdf")) return "pdf";
-  if (MARKDOWN_EXTENSIONS.some((ext) => lower.endsWith(ext))) return "markdown";
+  if (MARKDOWN_EXTENSIONS.some((ext) => lower.endsWith(ext))) {
+    return targetLine === undefined ? "markdown" : "text";
+  }
   if (BINARY_EXTENSIONS.some((ext) => lower.endsWith(ext))) return "binary";
   return "text";
 }
