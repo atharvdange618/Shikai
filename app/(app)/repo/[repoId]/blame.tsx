@@ -1,4 +1,5 @@
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { renderSyntaxNodes } from "@/components/file/renderSyntaxNodes";
 import {
   FontFamily,
   FontSize,
@@ -8,9 +9,9 @@ import {
   type ColorTokens,
 } from "@/constants/theme";
 import { useBlame } from "@/hooks/useBlame";
-import { tokenColor, tokenizeLine, type Token } from "@/lib/blame-highlight";
+import { buildBlameLines, type BlameLine } from "@/lib/blame-highlight";
 import { decodeRepoId, relativeTime } from "@/lib/utils";
-import type { BlameRange } from "@/types/github-graphql.types";
+import type { HighlightTheme } from "@tanstack/highlight/theme";
 import { Octicons } from "@expo/vector-icons";
 import { FlashList } from "@shopify/flash-list";
 import { router, useLocalSearchParams, useNavigation } from "expo-router";
@@ -27,56 +28,6 @@ export default function BlameScreen() {
   );
 }
 
-interface BlameLine {
-  lineNumber: number;
-  text: string;
-  tokens: Token[];
-  range: BlameRange;
-  isRangeStart: boolean;
-  tint: 0 | 1;
-}
-
-function buildLines(text: string, ranges: BlameRange[]): BlameLine[] {
-  const rawLines = text.split("\n");
-  const maxLine = ranges.reduce((max, r) => Math.max(max, r.endingLine), 0);
-  const lines =
-    rawLines.length === maxLine + 1 && rawLines[rawLines.length - 1] === ""
-      ? rawLines.slice(0, -1)
-      : rawLines;
-
-  const rangeByLine = new Map<number, BlameRange>();
-  for (const range of ranges) {
-    for (let ln = range.startingLine; ln <= range.endingLine; ln++) {
-      rangeByLine.set(ln, range);
-    }
-  }
-
-  let lastOid: string | null = null;
-  let tint: 0 | 1 = 0;
-  const result: BlameLine[] = [];
-
-  lines.forEach((lineText, index) => {
-    const lineNumber = index + 1;
-    const range = rangeByLine.get(lineNumber);
-    if (!range) return;
-    const isRangeStart = range.commit.oid !== lastOid;
-    if (isRangeStart) {
-      tint = tint === 0 ? 1 : 0;
-      lastOid = range.commit.oid;
-    }
-    result.push({
-      lineNumber,
-      text: lineText,
-      tokens: tokenizeLine(lineText),
-      range,
-      isRangeStart,
-      tint,
-    });
-  });
-
-  return result;
-}
-
 function BlameScreenContent() {
   const { repoId, path, ref, fileName } = useLocalSearchParams<{
     repoId: string;
@@ -85,7 +36,7 @@ function BlameScreenContent() {
     fileName?: string;
   }>();
   const navigation = useNavigation();
-  const { colors, isDark } = useTheme();
+  const { colors, syntaxTheme } = useTheme();
 
   const [owner, repoName] = decodeRepoId(repoId ?? "");
   const { data, isLoading, isError } = useBlame(owner, repoName, ref ?? "", path ?? "");
@@ -94,7 +45,10 @@ function BlameScreenContent() {
     navigation.setOptions({ title: fileName ?? "Blame" });
   }, [navigation, fileName]);
 
-  const lines = useMemo(() => (data?.text ? buildLines(data.text, data.ranges) : []), [data]);
+  const lines = useMemo(
+    () => (data?.text ? buildBlameLines(data.text, data.ranges, fileName ?? path ?? "") : []),
+    [data, fileName, path],
+  );
 
   const s = useMemo(() => buildStyles(colors), [colors]);
 
@@ -141,7 +95,13 @@ function BlameScreenContent() {
       data={lines}
       keyExtractor={(item) => String(item.lineNumber)}
       renderItem={({ item }) => (
-        <BlameLineRow line={item} colors={colors} isDark={isDark} s={s} repoId={repoId ?? ""} />
+        <BlameLineRow
+          line={item}
+          colors={colors}
+          syntaxTheme={syntaxTheme}
+          s={s}
+          repoId={repoId ?? ""}
+        />
       )}
       drawDistance={400}
       style={{ backgroundColor: colors.background }}
@@ -152,13 +112,13 @@ function BlameScreenContent() {
 const BlameLineRow = memo(function BlameLineRow({
   line,
   colors,
-  isDark,
+  syntaxTheme,
   s,
   repoId,
 }: {
   line: BlameLine;
   colors: ColorTokens;
-  isDark: boolean;
+  syntaxTheme: HighlightTheme;
   s: ReturnType<typeof buildStyles>;
   repoId: string;
 }) {
@@ -186,19 +146,8 @@ const BlameLineRow = memo(function BlameLineRow({
         )}
       </View>
       <Text style={[s.lineNumber, { color: colors.textMuted }]}>{line.lineNumber}</Text>
-      <Text style={[s.code, { color: colors.textPrimary }]} numberOfLines={1}>
-        {line.text.length > 0
-          ? line.tokens.map((token, i) => {
-              const color = tokenColor(token.kind, isDark);
-              return color ? (
-                <Text key={i} style={{ color }}>
-                  {token.text}
-                </Text>
-              ) : (
-                token.text
-              );
-            })
-          : " "}
+      <Text style={[s.code, { color: syntaxTheme.foreground }]} numberOfLines={1}>
+        {line.nodes.length ? renderSyntaxNodes(line.nodes, syntaxTheme) : " "}
       </Text>
     </Pressable>
   );

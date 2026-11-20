@@ -38,6 +38,24 @@ export interface HighlightedFile {
   lineCount: number;
 }
 
+function languageForContent(code: string, lineCount: number, fileName: string): string {
+  return lineCount > MAX_HIGHLIGHT_LINES || code.length > MAX_HIGHLIGHT_CHARS
+    ? "plaintext"
+    : languageFor(fileName);
+}
+
+function renderCodeLines(code: string, lang: string): HighlightRenderNode[][] {
+  const { tokens } = highlighter.tokenize(code, { lang });
+  return renderTokens(tokens, { lineNumbers: true })
+    .filter((node) => node.type === "element")
+    .map((node) => node.children);
+}
+
+export function highlightFileLines(lines: string[], fileName: string): HighlightRenderNode[][] {
+  const code = lines.join("\n");
+  return renderCodeLines(code, languageForContent(code, lines.length, fileName));
+}
+
 export function highlightFile(
   content: string,
   fileName: string,
@@ -45,10 +63,7 @@ export function highlightFile(
 ): HighlightedFile {
   const code = content.endsWith("\n") ? content.slice(0, -1) : content;
   const lineCount = code.split("\n").length;
-  const lang =
-    lineCount > MAX_HIGHLIGHT_LINES || code.length > MAX_HIGHLIGHT_CHARS
-      ? "plaintext"
-      : languageFor(fileName);
+  const lang = languageForContent(code, lineCount, fileName);
   const hasTarget = targetLine !== undefined && targetLine >= 1 && targetLine <= lineCount;
 
   const { html } = highlighter.highlight(code, {
@@ -89,10 +104,7 @@ function textLine(kind: DiffLineKind, value: string): DiffLine {
 export function highlightDiff(patch: string, fileName: string): HighlightedDiff {
   const text = patch.endsWith("\n") ? patch.slice(0, -1) : patch;
   const rawLines = text.split("\n");
-  const lang =
-    rawLines.length > MAX_HIGHLIGHT_LINES || text.length > MAX_HIGHLIGHT_CHARS
-      ? "plaintext"
-      : languageFor(fileName);
+  const lang = languageForContent(text, rawLines.length, fileName);
 
   const lines: DiffLine[] = [];
   let hunk: { code: string[]; lines: DiffLine[] } | null = null;
@@ -101,13 +113,9 @@ export function highlightDiff(patch: string, fileName: string): HighlightedDiff 
 
   const flush = () => {
     if (!hunk || hunk.code.length === 0) return;
-    const { tokens } = highlighter.tokenize(hunk.code.join("\n"), { lang });
-    const rendered = renderTokens(tokens, { lineNumbers: true }).filter(
-      (node) => node.type === "element",
-    );
+    const rendered = renderCodeLines(hunk.code.join("\n"), lang);
     hunk.lines.forEach((line, i) => {
-      const node = rendered[i];
-      line.nodes = node?.type === "element" ? node.children : [];
+      line.nodes = rendered[i] ?? [];
     });
     lines.push(...hunk.lines);
     hunk = null;

@@ -487,6 +487,8 @@ Entries D-001 to D-021 were backfilled on 2026-10-15 from commits, the changelog
 - **React Native.** A Modal needs its own GestureHandlerRootView on Android. Animate the release panel with a transform because the first layout omits the status bar height. Route every dismissal through the same animation, and use its progress for backdrop opacity. Keep the downward activation threshold so taps still work. WebView 14's published types omit the handle its Android component forwards. React Native's opaque ColorValue also needs narrowing for icon color props.
 - **Interaction and tests.** Keep the trailing theme card partly visible to signal horizontal scroll. Keep hit targets at 48 dp around compact viewer controls. The settings rate-limit snapshot updates on focus because the Axios object is mutable. Keep unsupported try/finally, ternary and throw combinations outside compiler-sensitive render paths. Pure WebView builders and the review prompt can run in Vitest without React Native. Hook tests that replace effects or refs model render and restart behavior explicitly; they complement device tests. The full-size logo reserves an adaptive icon safe zone, and the simplified icon serves small surfaces.
 
+- **Blame highlighting (#53).** Tokenize the whole file before attaching commit ranges. Multiline syntax can cross a range boundary, and each row keeps its original source line number.
+
 ## D-047: Store implementation rationale in ADRs and ratchet down source comments
 
 **Date.** 2026-11-20. **Status.** Accepted.

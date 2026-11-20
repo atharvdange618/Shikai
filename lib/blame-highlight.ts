@@ -1,54 +1,42 @@
-export type TokenKind = "comment" | "string" | "number" | "keyword" | "plain";
+import type { HighlightRenderNode } from "@tanstack/highlight/core";
 
-export interface Token {
-  text: string;
-  kind: TokenKind;
+import { highlightFileLines } from "@/lib/highlight";
+import type { BlameRange } from "@/types/github-graphql.types";
+
+export interface BlameLine {
+  lineNumber: number;
+  nodes: HighlightRenderNode[];
+  range: BlameRange;
+  isRangeStart: boolean;
+  tint: 0 | 1;
 }
 
-const TOKEN_RE =
-  /(\/\/.*|#.*)|("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|`(?:[^`\\]|\\.)*`)|(\b\d+(?:\.\d+)?\b)|(\b(?:if|else|elif|for|foreach|while|do|return|function|func|fn|def|class|struct|interface|enum|type|const|let|var|public|private|protected|static|void|null|nil|none|undefined|true|false|self|this|new|import|export|from|as|try|catch|except|finally|throw|raise|switch|case|default|break|continue|async|await|yield|match|package|namespace|extends|implements|super|in|of|instanceof|typeof)\b)/g;
+export function buildBlameLines(text: string, ranges: BlameRange[], fileName: string): BlameLine[] {
+  const rawLines = text.split("\n");
+  const maxLine = ranges.reduce((max, range) => Math.max(max, range.endingLine), 0);
+  if (rawLines.length === maxLine + 1 && rawLines.at(-1) === "") rawLines.pop();
 
-export function tokenizeLine(text: string): Token[] {
-  if (!text) return [];
-
-  const tokens: Token[] = [];
-  let lastIndex = 0;
-  TOKEN_RE.lastIndex = 0;
-  let match: RegExpExecArray | null;
-
-  while ((match = TOKEN_RE.exec(text)) !== null) {
-    if (match.index > lastIndex) {
-      tokens.push({ text: text.slice(lastIndex, match.index), kind: "plain" });
+  const highlighted = highlightFileLines(rawLines, fileName);
+  const rangeByLine = new Map<number, BlameRange>();
+  for (const range of ranges) {
+    for (let line = range.startingLine; line <= range.endingLine; line++) {
+      rangeByLine.set(line, range);
     }
-    const kind: TokenKind = match[1]
-      ? "comment"
-      : match[2]
-        ? "string"
-        : match[3]
-          ? "number"
-          : "keyword";
-    tokens.push({ text: match[0], kind });
-    lastIndex = match.index + match[0].length;
   }
 
-  if (lastIndex < text.length) {
-    tokens.push({ text: text.slice(lastIndex), kind: "plain" });
+  let lastOid: string | null = null;
+  let tint: 0 | 1 = 0;
+  const result: BlameLine[] = [];
+  for (let i = 0; i < rawLines.length; i++) {
+    const lineNumber = i + 1;
+    const range = rangeByLine.get(lineNumber);
+    if (!range) continue;
+    const isRangeStart = range.commit.oid !== lastOid;
+    if (isRangeStart) {
+      tint = tint === 0 ? 1 : 0;
+      lastOid = range.commit.oid;
+    }
+    result.push({ lineNumber, nodes: highlighted[i] ?? [], range, isRangeStart, tint });
   }
-
-  return tokens;
-}
-
-export function tokenColor(kind: TokenKind, isDark: boolean): string | undefined {
-  switch (kind) {
-    case "keyword":
-      return isDark ? "#F47067" : "#d73a49";
-    case "comment":
-      return isDark ? "#768390" : "#6a737d";
-    case "string":
-      return isDark ? "#96D0FF" : "#032f62";
-    case "number":
-      return isDark ? "#F69D50" : "#e36209";
-    default:
-      return undefined;
-  }
+  return result;
 }
