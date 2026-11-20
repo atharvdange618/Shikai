@@ -25,20 +25,19 @@ import {
   useTheme,
   type ColorTokens,
 } from "@/constants/theme";
-import { githubAxios } from "@/lib/axios";
-import {
-  fetchAuthenticatedUser,
-  fetchUserInstallations,
-  hasOwnInstallation,
-  validateToken,
-} from "@/lib/github-rest";
+import { fetchUserInstallations, hasOwnInstallation, validateToken } from "@/lib/github-rest";
 import type { GitHubUser } from "@/types/github.types";
 import { clearAllMMKV } from "@/lib/mmkv";
 import { prefetchOverview } from "@/lib/prefetch";
 import { queryClient, queryKeys } from "@/lib/query-client";
-import { restorePATFor } from "@/lib/session";
+import { persistSessionCredentials } from "@/lib/session";
 import { fetchContributionsForWidget } from "@/lib/widget-data";
-import { clearPendingAuth, getPendingAuth, savePendingAuth, saveToken } from "@/lib/secure-storage";
+import {
+  clearPendingAuth,
+  CredentialStorageError,
+  getPendingAuth,
+  savePendingAuth,
+} from "@/lib/secure-storage";
 import { useAuthStore } from "@/stores/auth.store";
 import { useSignInStore } from "@/stores/signin.store";
 import { ContributionWidget } from "@/widgets/ContributionWidget";
@@ -153,11 +152,9 @@ async function completeSignIn(
 
     await clearPendingAuth();
 
-    githubAxios.defaults.headers.common["Authorization"] = `Bearer ${accessToken}`;
-
     const [installations, user] = await Promise.all([
-      fetchUserInstallations(),
-      fetchAuthenticatedUser(),
+      fetchUserInstallations(accessToken),
+      validateToken(accessToken),
     ]);
 
     if (!hasOwnInstallation(installations, user.login)) {
@@ -170,10 +167,14 @@ async function completeSignIn(
     await finalizeSession(accessToken, user);
 
     setLoading(false);
-  } catch {
-    setError("Something went wrong. Check your connection and try again.");
+  } catch (error) {
+    setError(
+      error instanceof CredentialStorageError
+        ? error.message
+        : "Something went wrong. Check your connection and try again.",
+    );
     setLoading(false);
-    await clearPendingAuth();
+    await clearPendingAuth().catch(() => {});
   }
 }
 
@@ -214,10 +215,7 @@ export default function SignInScreen() {
 
   const finalizeSession = useCallback(
     async (accessToken: string, user: GitHubUser) => {
-      await saveToken(accessToken);
-
-      const storedPAT = await restorePATFor(user.login);
-      if (storedPAT) setPat(storedPAT);
+      setPat(await persistSessionCredentials(accessToken, user.login));
 
       setToken(accessToken);
       setUser(user);
@@ -294,16 +292,6 @@ export default function SignInScreen() {
     return () => subscription.remove();
   }, [completeAuth]);
 
-  useEffect(() => {
-    const recoverPendingAuth = async () => {
-      const pendingAuth = await getPendingAuth();
-      if (pendingAuth) {
-        useSignInStore.getState().setLoading(true);
-      }
-    };
-    void recoverPendingAuth();
-  }, []);
-
   const buttonScale = useSharedValue(1);
   const buttonStyle = useAnimatedStyle(() => ({
     transform: [{ scale: buttonScale.value }],
@@ -355,10 +343,14 @@ export default function SignInScreen() {
       }
 
       await completeAuth(receivedCode, codeVerifier);
-    } catch {
-      setError("Something went wrong. Check your connection and try again.");
+    } catch (error) {
+      setError(
+        error instanceof CredentialStorageError
+          ? error.message
+          : "Something went wrong. Check your connection and try again.",
+      );
       setLoading(false);
-      await clearPendingAuth();
+      await clearPendingAuth().catch(() => {});
     }
   }, [redirectUri, completeAuth]);
 
@@ -385,14 +377,9 @@ export default function SignInScreen() {
         setNeedsInstall(false);
         return;
       }
+      const user = await validateToken(pendingToken);
+      setPat(await persistSessionCredentials(pendingToken, user.login));
       setPendingToken(null);
-
-      githubAxios.defaults.headers.common["Authorization"] = `Bearer ${pendingToken}`;
-
-      const [, user] = await Promise.all([saveToken(pendingToken), fetchAuthenticatedUser()]);
-
-      const storedPAT = await restorePATFor(user.login);
-      if (storedPAT) setPat(storedPAT);
 
       setToken(pendingToken);
       setUser(user);
@@ -404,8 +391,12 @@ export default function SignInScreen() {
 
       setLoading(false);
       setNeedsInstall(false);
-    } catch {
-      setError("Installation failed. You can set it up later from settings.");
+    } catch (error) {
+      setError(
+        error instanceof CredentialStorageError
+          ? error.message
+          : "Installation failed. You can set it up later from settings.",
+      );
       setLoading(false);
     }
   }, [redirectUri, setUser, setToken, setPat]);
@@ -414,16 +405,25 @@ export default function SignInScreen() {
     const { setLoading, setError, setNeedsInstall, setPendingToken } = useSignInStore.getState();
 
     const pendingToken = freshPendingToken();
-    setPendingToken(null);
-    setNeedsInstall(false);
-    if (!pendingToken) return;
+    if (!pendingToken) {
+      setPendingToken(null);
+      setNeedsInstall(false);
+      return;
+    }
 
     setLoading(true);
+    setError(null);
     try {
-      const user = await fetchAuthenticatedUser();
+      const user = await validateToken(pendingToken);
       await finalizeSession(pendingToken, user);
-    } catch {
-      setError("Something went wrong. Check your connection and try again.");
+      setPendingToken(null);
+      setNeedsInstall(false);
+    } catch (error) {
+      setError(
+        error instanceof CredentialStorageError
+          ? error.message
+          : "Something went wrong. Check your connection and try again.",
+      );
     }
     setLoading(false);
   }, [finalizeSession]);
@@ -442,8 +442,12 @@ export default function SignInScreen() {
       const user = await validateToken(trimmed);
       await finalizeSession(trimmed, user);
       setTokenInput("");
-    } catch {
-      setTokenError("That token didn't work. Check it has the repo and read:user scopes.");
+    } catch (error) {
+      setTokenError(
+        error instanceof CredentialStorageError
+          ? error.message
+          : "That token didn't work. Check it has the repo and read:user scopes.",
+      );
       setTokenLoading(false);
     }
   }, [tokenInput, finalizeSession]);

@@ -102,11 +102,11 @@ export interface GitHubInstallation {
   suspended_at: string | null;
 }
 
-export async function fetchUserInstallations(): Promise<GitHubInstallation[]> {
+export async function fetchUserInstallations(token?: string): Promise<GitHubInstallation[]> {
   const { data } = await githubAxios.get<{
     total_count: number;
     installations: GitHubInstallation[];
-  }>("/user/installations");
+  }>("/user/installations", token ? { headers: { Authorization: `Bearer ${token}` } } : undefined);
   return data.installations;
 }
 

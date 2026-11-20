@@ -5,6 +5,7 @@ const m = vi.hoisted(() => ({
   deleteToken: vi.fn(),
   deletePAT: vi.fn(),
   getStoredPAT: vi.fn(),
+  saveToken: vi.fn(),
   fetchPATOwner: vi.fn(),
   fetchAuthenticatedUser: vi.fn(),
   clearAllMMKV: vi.fn(),
@@ -23,6 +24,7 @@ vi.mock("@/lib/secure-storage", () => ({
   deleteToken: m.deleteToken,
   deletePAT: m.deletePAT,
   getStoredPAT: m.getStoredPAT,
+  saveToken: m.saveToken,
 }));
 vi.mock("@/lib/github-rest", () => ({
   fetchPATOwner: m.fetchPATOwner,
@@ -32,13 +34,19 @@ vi.mock("@/lib/mmkv", () => ({ clearAllMMKV: m.clearAllMMKV }));
 vi.mock("@/lib/axios", () => ({ GitHubApiError: m.GitHubApiError }));
 vi.mock("@/lib/query-client", () => ({ queryKeys: { user: () => ["user"] } }));
 
-import { revalidateSession, restorePATFor, signOut } from "@/lib/session";
+import {
+  persistSessionCredentials,
+  revalidateSession,
+  restorePATFor,
+  signOut,
+} from "@/lib/session";
 import { useAuthStore } from "@/stores/auth.store";
 
 beforeEach(() => {
   vi.clearAllMocks();
   m.deleteToken.mockResolvedValue(undefined);
   m.deletePAT.mockResolvedValue(undefined);
+  m.saveToken.mockResolvedValue(undefined);
 });
 
 describe("signOut", () => {
@@ -71,6 +79,33 @@ describe("signOut", () => {
     expect(useAuthStore.getState()).toMatchObject({ token: null, user: null, pat: null });
     expect(clear).toHaveBeenCalled();
     expect(m.clearAllMMKV).toHaveBeenCalled();
+  });
+
+  it("keeps the session intact when PAT deletion fails", async () => {
+    const failure = new Error("Device storage unavailable");
+    m.deletePAT.mockRejectedValueOnce(failure);
+
+    await expect(signOut(queryClient)).rejects.toBe(failure);
+
+    expect(m.deleteToken).not.toHaveBeenCalled();
+    expect(useAuthStore.getState()).toMatchObject({ token: "t", pat: "ghp_abc" });
+    expect(clear).not.toHaveBeenCalled();
+    expect(m.clearAllMMKV).not.toHaveBeenCalled();
+  });
+
+  it("clears the removed PAT from memory and lets sign-out be retried", async () => {
+    const failure = new Error("Device storage unavailable");
+    m.deleteToken.mockRejectedValueOnce(failure);
+
+    await expect(signOut(queryClient)).rejects.toBe(failure);
+
+    expect(m.deletePAT).toHaveBeenCalled();
+    expect(useAuthStore.getState()).toMatchObject({ token: "t", pat: null });
+    expect(clear).not.toHaveBeenCalled();
+    expect(m.clearAllMMKV).not.toHaveBeenCalled();
+
+    await signOut(queryClient);
+    expect(useAuthStore.getState()).toMatchObject({ token: null, pat: null });
   });
 });
 
@@ -142,5 +177,33 @@ describe("restorePATFor", () => {
     m.fetchPATOwner.mockRejectedValue(new Error("Bad credentials"));
     await expect(restorePATFor("octocat")).resolves.toBeNull();
     expect(m.deletePAT).toHaveBeenCalled();
+  });
+});
+
+describe("persistSessionCredentials", () => {
+  it("rejects when the session token cannot be stored", async () => {
+    const failure = new Error("Device storage unavailable");
+    m.getStoredPAT.mockResolvedValue(null);
+    m.saveToken.mockRejectedValueOnce(failure);
+
+    await expect(persistSessionCredentials("new-token", "octocat")).rejects.toBe(failure);
+  });
+
+  it("keeps a new session off disk if an unverified PAT cannot be removed", async () => {
+    const failure = new Error("Device storage unavailable");
+    m.getStoredPAT.mockResolvedValue("ghp_abc");
+    m.fetchPATOwner.mockResolvedValue("someone-else");
+    m.deletePAT.mockRejectedValueOnce(failure);
+
+    await expect(persistSessionCredentials("new-token", "octocat")).rejects.toBe(failure);
+    expect(m.saveToken).not.toHaveBeenCalled();
+  });
+
+  it("returns the matching PAT once the session token is stored", async () => {
+    m.getStoredPAT.mockResolvedValue("ghp_abc");
+    m.fetchPATOwner.mockResolvedValue("octocat");
+
+    await expect(persistSessionCredentials("new-token", "octocat")).resolves.toBe("ghp_abc");
+    expect(m.saveToken).toHaveBeenCalledWith("new-token");
   });
 });

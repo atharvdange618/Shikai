@@ -31,10 +31,20 @@ async function safeRead<T>(fn: () => Promise<T>, fallback: T): Promise<T> {
   }
 }
 
-async function safeWrite(fn: () => Promise<void>): Promise<void> {
+export class CredentialStorageError extends Error {
+  constructor(action: "save" | "remove") {
+    const location = action === "save" ? "on" : "from";
+    super(`Could not ${action} credentials ${location} this device. Please try again.`);
+    this.name = "CredentialStorageError";
+  }
+}
+
+async function writeCredential(action: "save" | "remove", fn: () => Promise<void>): Promise<void> {
   try {
     await fn();
-  } catch {}
+  } catch {
+    throw new CredentialStorageError(action);
+  }
 }
 
 export const getStoredToken = (): Promise<string | null> =>
@@ -44,10 +54,10 @@ export const getStoredToken = (): Promise<string | null> =>
   }, null);
 
 export const saveToken = (token: string): Promise<void> =>
-  safeWrite(() => SecureStore.setItemAsync(KEYS.GITHUB_TOKEN, token));
+  writeCredential("save", () => SecureStore.setItemAsync(KEYS.GITHUB_TOKEN, token));
 
 export const deleteToken = (): Promise<void> =>
-  safeWrite(() => SecureStore.deleteItemAsync(KEYS.GITHUB_TOKEN));
+  writeCredential("remove", () => SecureStore.deleteItemAsync(KEYS.GITHUB_TOKEN));
 
 export const getStoredPAT = (): Promise<string | null> =>
   safeRead(async () => {
@@ -56,13 +66,13 @@ export const getStoredPAT = (): Promise<string | null> =>
   }, null);
 
 export const savePAT = (pat: string): Promise<void> =>
-  safeWrite(() => SecureStore.setItemAsync(KEYS.GITHUB_PAT, pat));
+  writeCredential("save", () => SecureStore.setItemAsync(KEYS.GITHUB_PAT, pat));
 
 export const deletePAT = (): Promise<void> =>
-  safeWrite(() => SecureStore.deleteItemAsync(KEYS.GITHUB_PAT));
+  writeCredential("remove", () => SecureStore.deleteItemAsync(KEYS.GITHUB_PAT));
 
 export const savePendingAuth = (codeVerifier: string): Promise<void> =>
-  safeWrite(() => {
+  writeCredential("save", () => {
     const data: PendingAuth = { codeVerifier, timestamp: Date.now() };
     return SecureStore.setItemAsync(KEYS.PENDING_AUTH, JSON.stringify(data));
   });
@@ -89,4 +99,4 @@ export const getPendingAuth = (): Promise<PendingAuth | null> =>
   }, null);
 
 export const clearPendingAuth = (): Promise<void> =>
-  safeWrite(() => SecureStore.deleteItemAsync(KEYS.PENDING_AUTH));
+  writeCredential("remove", () => SecureStore.deleteItemAsync(KEYS.PENDING_AUTH));

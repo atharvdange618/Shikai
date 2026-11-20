@@ -1,11 +1,53 @@
 import { describe, expect, it, vi } from "vitest";
 
-const { getItemAsync } = vi.hoisted(() => ({
+const { getItemAsync, setItemAsync, deleteItemAsync } = vi.hoisted(() => ({
   getItemAsync: vi.fn<() => Promise<string | null>>(),
+  setItemAsync: vi.fn<() => Promise<void>>(),
+  deleteItemAsync: vi.fn<() => Promise<void>>(),
 }));
-vi.mock("expo-secure-store", () => ({ getItemAsync }));
+vi.mock("expo-secure-store", () => ({ getItemAsync, setItemAsync, deleteItemAsync }));
 
-import { getPendingAuth, isValidPAT, isValidToken } from "@/lib/secure-storage";
+import {
+  clearPendingAuth,
+  CredentialStorageError,
+  deletePAT,
+  deleteToken,
+  getPendingAuth,
+  isValidPAT,
+  isValidToken,
+  savePAT,
+  savePendingAuth,
+  saveToken,
+} from "@/lib/secure-storage";
+
+describe("credential writes", () => {
+  const privateValue = "test-private-value";
+
+  it.each([saveToken, savePAT, savePendingAuth])("reports failed saves safely", async (save) => {
+    setItemAsync.mockRejectedValueOnce(new Error(privateValue));
+    const result = save(privateValue);
+    await expect(result).rejects.toBeInstanceOf(CredentialStorageError);
+    await expect(result).rejects.toHaveProperty(
+      "message",
+      "Could not save credentials on this device. Please try again.",
+    );
+    await expect(result).rejects.not.toHaveProperty("cause");
+  });
+
+  it.each([deleteToken, deletePAT, clearPendingAuth])(
+    "reports failed deletes safely",
+    async (remove) => {
+      deleteItemAsync.mockRejectedValueOnce(new Error(privateValue));
+      const result = remove();
+      await expect(result).rejects.toBeInstanceOf(CredentialStorageError);
+      await expect(result).rejects.toHaveProperty(
+        "message",
+        "Could not remove credentials from this device. Please try again.",
+      );
+      await expect(result).rejects.not.toHaveProperty("cause");
+    },
+  );
+});
 
 describe("getPendingAuth", () => {
   it("preserves a valid stored verifier", async () => {

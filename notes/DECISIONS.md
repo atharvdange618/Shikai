@@ -458,6 +458,8 @@ Entries D-001 to D-021 were backfilled on 2026-10-15 from commits, the changelog
 - **Headless work.** `index.ts` loads the alert task and Sentry before WorkManager can dispatch. The Android task and task-manager libraries autolink. The task reads SecureStore, so clearAuth must stop polling even if a 401 leaves the PAT on disk. A foreground handler allows the shade to list alerts posted while Shikai is open. Settings reads the registration and system permission again on focus, and rereads when the PAT changes.
 - **Account data.** An explicit Authorization header takes precedence over the session header, and only a rejected session token can end the session. PAT ownership checks compare GitHub logins case-insensitively. Account changes wipe the query cache, watchlist, recent searches and alert markers. Theme and the Play review counter have device-wide lifetimes.
 
+- **Credential storage failures (#56).** SecureStore write errors use fixed messages without native error details. Sign-in resolves PAT ownership before committing the new session to disk because boot reads both credentials together. Sign-out deletes the PAT first. If OAuth deletion fails, the user stays signed in with the PAT already removed and can retry.
+
 ## D-045: Keep GitHub paging and cache behavior aligned with the UI
 
 **Date.** 2026-11-20. **Status.** Accepted. This records existing behavior.

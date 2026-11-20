@@ -2,7 +2,7 @@ import { Octicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import * as Linking from "expo-linking";
 import { useFocusEffect, useRouter } from "expo-router";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Pressable,
@@ -30,7 +30,7 @@ import {
 import { MANAGE_REPO_ACCESS_URL, validatePAT } from "@/lib/github-rest";
 import { clearAllMMKV } from "@/lib/mmkv";
 import { getLastPoll, type LastPoll } from "@/lib/notification-poller";
-import { deletePAT, savePAT } from "@/lib/secure-storage";
+import { CredentialStorageError, deletePAT, savePAT } from "@/lib/secure-storage";
 import { signOut } from "@/lib/session";
 import { format24HourTime, relativeTime } from "@/lib/utils";
 
@@ -61,8 +61,21 @@ export default function SettingsScreen() {
   const pat = useAuthStore((s) => s.pat);
   const setPat = useAuthStore((s) => s.setPat);
   const [patInput, setPatInput] = useState("");
-  const [validating, setValidating] = useState(false);
+  const [credentialBusy, setCredentialBusy] = useState(false);
+  const credentialChangeInProgress = useRef(false);
   const [patError, setPatError] = useState<string | null>(null);
+
+  const runCredentialChange = useCallback(async (change: () => Promise<void>) => {
+    if (credentialChangeInProgress.current) return;
+    credentialChangeInProgress.current = true;
+    setCredentialBusy(true);
+    try {
+      await change();
+    } finally {
+      credentialChangeInProgress.current = false;
+      setCredentialBusy(false);
+    }
+  }, []);
 
   const [rateLimitSnapshot, setRateLimitSnapshot] = useState(() => ({
     ...rateLimit,
@@ -83,27 +96,27 @@ export default function SettingsScreen() {
       return;
     }
 
-    setValidating(true);
-    setPatError(null);
-
     try {
-      const valid = await validatePAT(trimmed);
-      setValidating(false);
+      await runCredentialChange(async () => {
+        setPatError(null);
+        if (!(await validatePAT(trimmed))) {
+          setPatError("Invalid token. Make sure it has the 'notifications' scope.");
+          return;
+        }
 
-      if (!valid) {
-        setPatError("Invalid token. Make sure it has the 'notifications' scope.");
-        return;
-      }
-
-      await savePAT(trimmed);
-      setPat(trimmed);
-      setPatInput("");
-      void queryClient.invalidateQueries({ queryKey: ["notifications"] });
-    } catch {
-      setValidating(false);
-      setPatError("Something went wrong. Please try again.");
+        await savePAT(trimmed);
+        setPat(trimmed);
+        setPatInput("");
+        void queryClient.invalidateQueries({ queryKey: ["notifications"] });
+      });
+    } catch (error) {
+      setPatError(
+        error instanceof CredentialStorageError
+          ? error.message
+          : "Something went wrong. Please try again.",
+      );
     }
-  }, [patInput, setPat, queryClient]);
+  }, [patInput, setPat, queryClient, runCredentialChange]);
 
   const handleRemovePAT = useCallback(() => {
     async function removePAT() {
@@ -123,11 +136,19 @@ export default function SettingsScreen() {
         {
           text: "Remove",
           style: "destructive",
-          onPress: () => void removePAT(),
+          onPress: () => {
+            runCredentialChange(removePAT).catch(() => {
+              alert.show({
+                variant: "danger",
+                title: "Could not remove token",
+                message: "Shikai couldn't remove the token from this device. Please try again.",
+              });
+            });
+          },
         },
       ],
     });
-  }, [alert, setPat, queryClient]);
+  }, [alert, setPat, queryClient, runCredentialChange]);
 
   const [alertsOn, setAlertsOn] = useState(false);
   const [alertsBusy, setAlertsBusy] = useState(false);
@@ -217,18 +238,19 @@ export default function SettingsScreen() {
           text: "Sign out",
           style: "destructive",
           onPress: () => {
-            signOut(queryClient).catch(() => {
+            runCredentialChange(() => signOut(queryClient)).catch((error) => {
               alert.show({
                 variant: "danger",
                 title: "Could not sign out",
-                message: "Please try again.",
+                message:
+                  error instanceof CredentialStorageError ? error.message : "Please try again.",
               });
             });
           },
         },
       ],
     });
-  }, [alert, queryClient]);
+  }, [alert, queryClient, runCredentialChange]);
 
   return (
     <KeyboardAvoid>
@@ -377,6 +399,7 @@ export default function SettingsScreen() {
                 <Pressable
                   style={({ pressed }) => [s.removeBtn, pressed && s.pressed]}
                   onPress={handleRemovePAT}
+                  disabled={credentialBusy}
                   hitSlop={8}
                 >
                   <Text style={s.removeText}>Remove</Text>
@@ -415,14 +438,15 @@ export default function SettingsScreen() {
                   autoCapitalize="none"
                   autoCorrect={false}
                   secureTextEntry
+                  editable={!credentialBusy}
                 />
                 {patError && <Text style={s.patError}>{patError}</Text>}
                 <Pressable
-                  style={({ pressed }) => [s.saveBtn, (pressed || validating) && s.pressed]}
+                  style={({ pressed }) => [s.saveBtn, (pressed || credentialBusy) && s.pressed]}
                   onPress={handleSavePAT}
-                  disabled={validating || !patInput.trim()}
+                  disabled={credentialBusy || !patInput.trim()}
                 >
-                  {validating ? (
+                  {credentialBusy ? (
                     <ActivityIndicator size="small" color={colors.textOnAccent} />
                   ) : (
                     <Text style={s.saveBtnText}>Save</Text>
@@ -448,6 +472,7 @@ export default function SettingsScreen() {
             <Pressable
               style={({ pressed }) => [s.row, s.rowDivider, pressed && s.pressed]}
               onPress={handleSignOut}
+              disabled={credentialBusy}
             >
               <Octicons name="sign-out" size={IconSize.md} color={colors.danger} />
               <Text style={[s.rowLabel, s.dangerText]}>Sign out</Text>

@@ -4,7 +4,7 @@ import { GitHubApiError } from "@/lib/axios";
 import { fetchAuthenticatedUser, fetchPATOwner } from "@/lib/github-rest";
 import { clearAllMMKV } from "@/lib/mmkv";
 import { queryKeys } from "@/lib/query-client";
-import { deletePAT, deleteToken, getStoredPAT } from "@/lib/secure-storage";
+import { deletePAT, deleteToken, getStoredPAT, saveToken } from "@/lib/secure-storage";
 import { useAuthStore } from "@/stores/auth.store";
 
 export async function revalidateSession(queryClient: QueryClient): Promise<void> {
@@ -27,11 +27,21 @@ export async function revalidateSession(queryClient: QueryClient): Promise<void>
  * goes too, so it can't follow this account into the next one.
  */
 export async function signOut(queryClient: QueryClient): Promise<void> {
-  await deleteToken();
   await deletePAT();
+  useAuthStore.getState().setPat(null);
+  await deleteToken();
   useAuthStore.getState().clearAuth();
   queryClient.clear();
   clearAllMMKV();
+}
+
+export async function persistSessionCredentials(
+  token: string,
+  login: string,
+): Promise<string | null> {
+  const pat = await restorePATFor(login);
+  await saveToken(token);
+  return pat;
 }
 
 export async function restorePATFor(login: string): Promise<string | null> {
