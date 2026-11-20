@@ -1,6 +1,6 @@
 import { Octicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useLayoutEffect, useMemo, useState } from "react";
 import { Linking, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { ProfileHeader, type ProfileLink } from "@/components/shared/ProfileHeader";
@@ -71,7 +71,7 @@ export default function UserProfileScreen() {
 
   const [refreshing, setRefreshing] = useState(false);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (user?.name) {
       navigation.setOptions({ title: user.name });
     } else if (user?.login) {

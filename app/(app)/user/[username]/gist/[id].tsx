@@ -1,7 +1,7 @@
 import { Octicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useNavigation } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
-import { useEffect, useMemo } from "react";
+import { useLayoutEffect, useMemo } from "react";
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { MarkdownRenderer } from "@/components/shared/MarkdownRenderer";
@@ -39,12 +39,10 @@ export default function GistDetailScreen() {
 
   const files = useMemo(() => (gist ? Object.values(gist.files) : []), [gist]);
 
-  useEffect(() => {
-    try {
-      navigation.setOptions({
-        title: files[0]?.filename ?? "Gist",
-      });
-    } catch {}
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      title: files[0]?.filename ?? "Gist",
+    });
   }, [navigation, files]);
 
   if (isLoading) {

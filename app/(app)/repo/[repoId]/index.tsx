@@ -25,7 +25,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import * as Clipboard from "expo-clipboard";
 import * as Haptics from "expo-haptics";
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import {
   Pressable,
   ScrollView,
@@ -144,14 +144,12 @@ export default function RepoDetailsScreen() {
     return null;
   }, [checks, checksLoading, checksError, moreChecks]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (repo?.name) {
-      try {
-        navigation.setOptions({
-          title: repo.name,
-          headerBackVisible: true,
-        });
-      } catch {}
+      navigation.setOptions({
+        title: repo.name,
+        headerBackVisible: true,
+      });
     }
   }, [repo?.name, navigation]);
 

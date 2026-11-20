@@ -15,7 +15,7 @@ import type { DiscussionComment } from "@/types/github-graphql.types";
 import { Octicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
-import { useEffect, useState } from "react";
+import { useLayoutEffect, useState } from "react";
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 export default function DiscussionDetailScreen() {
@@ -51,10 +51,8 @@ function DiscussionDetailScreenContent() {
     loadMoreReplies.mutate({ commentId, after }, { onSettled: () => setLoadingReplyFor(null) });
   };
 
-  useEffect(() => {
-    try {
-      navigation.setOptions({ title: `#${discussionNumber}` });
-    } catch {}
+  useLayoutEffect(() => {
+    navigation.setOptions({ title: `#${discussionNumber}` });
   }, [navigation, discussionNumber]);
 
   if (isLoading) {

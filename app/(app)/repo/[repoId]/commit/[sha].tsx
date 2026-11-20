@@ -16,7 +16,7 @@ import { Octicons } from "@expo/vector-icons";
 import * as Clipboard from "expo-clipboard";
 import { Image } from "expo-image";
 import { useLocalSearchParams, useNavigation } from "expo-router";
-import { useEffect, useState } from "react";
+import { useLayoutEffect, useState } from "react";
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 export default function CommitDetailScreen() {
@@ -42,10 +42,8 @@ function CommitDetailScreenContent() {
 
   const [copied, setCopied] = useState(false);
 
-  useEffect(() => {
-    try {
-      navigation.setOptions({ title: (sha ?? "").slice(0, 7) });
-    } catch {}
+  useLayoutEffect(() => {
+    navigation.setOptions({ title: (sha ?? "").slice(0, 7) });
   }, [navigation, sha]);
 
   if (isLoading) {

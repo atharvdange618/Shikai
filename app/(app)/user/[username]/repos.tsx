@@ -1,7 +1,7 @@
 import { FlashList } from "@shopify/flash-list";
 import { useQueryClient } from "@tanstack/react-query";
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useLayoutEffect, useMemo, useState } from "react";
 import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 
 import { RepoCard } from "@/components/repo/RepoCard";
@@ -45,10 +45,8 @@ export default function UserReposScreen() {
   const { repos, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, isError } =
     useUserAllRepos(username ?? "");
 
-  useEffect(() => {
-    try {
-      navigation.setOptions({ title: "Repositories" });
-    } catch {}
+  useLayoutEffect(() => {
+    navigation.setOptions({ title: "Repositories" });
   }, [navigation]);
 
   const onRefresh = useCallback(async () => {

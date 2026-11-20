@@ -16,7 +16,7 @@ import { Octicons } from "@expo/vector-icons";
 import * as Clipboard from "expo-clipboard";
 import { Image } from "expo-image";
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Linking,
@@ -71,10 +71,8 @@ function ReleaseDetailScreenContent() {
     refetch: retryPreviousRelease,
   } = usePreviousReleaseTag(owner, repoName, release?.draft ? undefined : release?.tag_name);
 
-  useEffect(() => {
-    try {
-      navigation.setOptions({ title: tag ?? "Release" });
-    } catch {}
+  useLayoutEffect(() => {
+    navigation.setOptions({ title: tag ?? "Release" });
   }, [navigation, tag]);
 
   const sourceTargets: DownloadTarget[] = useMemo(() => {

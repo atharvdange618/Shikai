@@ -1,5 +1,5 @@
 import { useLocalSearchParams, useNavigation } from "expo-router";
-import { useEffect } from "react";
+import { useLayoutEffect } from "react";
 import { StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -67,10 +67,8 @@ function DiffScreenContent() {
           (f) => f.filename === filename,
         );
 
-  useEffect(() => {
-    try {
-      navigation.setOptions({ title: baseName });
-    } catch {}
+  useLayoutEffect(() => {
+    navigation.setOptions({ title: baseName });
   }, [navigation, baseName]);
 
   function renderDiff() {

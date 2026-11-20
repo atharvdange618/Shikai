@@ -6,7 +6,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Image } from "expo-image";
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
-import { memo, useCallback, useEffect, useMemo, useState } from "react";
+import { memo, useCallback, useLayoutEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { useIssues } from "@/hooks/useIssues";
@@ -42,23 +42,21 @@ export default function IssuesScreen() {
   const { issues, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, isError, refetch } =
     useIssues(owner, repoName, state);
 
-  useEffect(() => {
-    try {
-      navigation.setOptions({
-        title: "Issues",
-        headerRight: () => (
-          <Pressable
-            hitSlop={12}
-            style={{ marginRight: Spacing.sm, padding: Spacing.xs }}
-            onPress={() =>
-              WebBrowser.openBrowserAsync(`https://github.com/${owner}/${repoName}/issues`)
-            }
-          >
-            <Octicons name="link-external" size={16} color={colors.accent} />
-          </Pressable>
-        ),
-      });
-    } catch {}
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      title: "Issues",
+      headerRight: () => (
+        <Pressable
+          hitSlop={12}
+          style={{ marginRight: Spacing.sm, padding: Spacing.xs }}
+          onPress={() =>
+            WebBrowser.openBrowserAsync(`https://github.com/${owner}/${repoName}/issues`)
+          }
+        >
+          <Octicons name="link-external" size={16} color={colors.accent} />
+        </Pressable>
+      ),
+    });
   }, [navigation, owner, repoName, colors.accent]);
 
   const onRefresh = useCallback(async () => {

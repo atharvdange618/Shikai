@@ -14,7 +14,7 @@ import { useComparison } from "@/hooks/useComparison";
 import { decodeRepoId } from "@/lib/utils";
 import { Octicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useNavigation } from "expo-router";
-import { useEffect } from "react";
+import { useLayoutEffect } from "react";
 import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from "react-native";
 
 export default function CompareScreen() {
@@ -38,10 +38,8 @@ function CompareScreenContent() {
 
   const { data, isLoading, isError } = useComparison(owner, repoName, base ?? "", head ?? "");
 
-  useEffect(() => {
-    try {
-      navigation.setOptions({ title: "Compare" });
-    } catch {}
+  useLayoutEffect(() => {
+    navigation.setOptions({ title: "Compare" });
   }, [navigation]);
 
   if (isLoading) {

@@ -2,7 +2,7 @@ import { Octicons } from "@expo/vector-icons";
 import { FlashList, type FlashListRef } from "@shopify/flash-list";
 import { useQueryClient } from "@tanstack/react-query";
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -169,13 +169,11 @@ export default function FileExplorerScreen() {
 
   const selectedRef = selectedBranch || ref || repo?.default_branch || "";
 
-  useEffect(() => {
-    try {
-      navigation.setOptions({
-        title: `${repo?.name ?? "Repository"} Files`,
-        headerBackTitle: repo?.name ?? "Back",
-      });
-    } catch {}
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      title: `${repo?.name ?? "Repository"} Files`,
+      headerBackTitle: repo?.name ?? "Back",
+    });
   }, [navigation, repo?.name]);
 
   const { data: fileTreeData, isLoading, error } = useFileTree(owner, repoName, selectedRef, true);

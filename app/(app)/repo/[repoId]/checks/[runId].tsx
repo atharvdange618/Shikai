@@ -19,7 +19,7 @@ import { decodeRepoId, relativeTime } from "@/lib/utils";
 import type { GitHubCheckAnnotationLevel } from "@/types/github.types";
 import { Octicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useNavigation } from "expo-router";
-import { useEffect, useMemo, useState } from "react";
+import { useLayoutEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Linking,
@@ -68,10 +68,8 @@ function CheckRunScreenContent() {
 
   const logTail = useMemo(() => (jobLog ? formatJobLogTail(jobLog) : null), [jobLog]);
 
-  useEffect(() => {
-    try {
-      navigation.setOptions({ title: run?.name ?? "Check" });
-    } catch {}
+  useLayoutEffect(() => {
+    navigation.setOptions({ title: run?.name ?? "Check" });
   }, [navigation, run?.name]);
 
   if (isLoading) {

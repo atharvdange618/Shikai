@@ -18,7 +18,7 @@ import { Octicons } from "@expo/vector-icons";
 import { FlashList } from "@shopify/flash-list";
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
-import { useEffect } from "react";
+import { useLayoutEffect } from "react";
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
 
 export default function WorkflowRunScreen() {
@@ -56,12 +56,10 @@ function WorkflowRunScreenContent() {
     refetch: refetchJobs,
   } = useWorkflowRunJobs(owner, repoName, id, requestedAttempt ?? run?.run_attempt);
 
-  useEffect(() => {
-    try {
-      navigation.setOptions({
-        title: run ? `${run.name ?? "Workflow"} #${run.run_number}` : "Run",
-      });
-    } catch {}
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      title: run ? `${run.name ?? "Workflow"} #${run.run_number}` : "Run",
+    });
   }, [navigation, run]);
 
   if (isLoading) {

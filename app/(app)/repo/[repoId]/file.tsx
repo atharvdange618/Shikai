@@ -1,6 +1,6 @@
 import { Octicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
-import { useEffect } from "react";
+import { useLayoutEffect } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -42,57 +42,55 @@ function FileViewerScreenContent() {
   const kind = getFileKind(fileName ?? "", targetLine);
   const canBlame = kind === "text" || kind === "markdown";
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (fileName) {
-      try {
-        navigation.setOptions({
-          title: fileName,
-          headerRight: () => (
-            <View style={s.headerActions}>
-              {canBlame && (
-                <Pressable
-                  onPress={() =>
-                    router.push({
-                      pathname: "/(app)/repo/[repoId]/blame",
-                      params: {
-                        repoId: repoId ?? "",
-                        path: encodeURIComponent(path ?? ""),
-                        ref: encodeURIComponent(ref ?? repo?.default_branch ?? "HEAD"),
-                        fileName: encodeURIComponent(fileName),
-                      },
-                    })
-                  }
-                  hitSlop={8}
-                  style={s.headerButton}
-                  accessibilityRole="button"
-                  accessibilityLabel="Blame"
-                >
-                  <Octicons name="feed-person" size={20} color={colors.accent} />
-                </Pressable>
-              )}
+      navigation.setOptions({
+        title: fileName,
+        headerRight: () => (
+          <View style={s.headerActions}>
+            {canBlame && (
               <Pressable
                 onPress={() =>
                   router.push({
-                    pathname: "/(app)/repo/[repoId]/commits",
+                    pathname: "/(app)/repo/[repoId]/blame",
                     params: {
                       repoId: repoId ?? "",
                       path: encodeURIComponent(path ?? ""),
+                      ref: encodeURIComponent(ref ?? repo?.default_branch ?? "HEAD"),
                       fileName: encodeURIComponent(fileName),
-                      ref: ref ? encodeURIComponent(ref) : undefined,
                     },
                   })
                 }
                 hitSlop={8}
                 style={s.headerButton}
                 accessibilityRole="button"
-                accessibilityLabel="File history"
+                accessibilityLabel="Blame"
               >
-                <Octicons name="history" size={20} color={colors.accent} />
+                <Octicons name="feed-person" size={20} color={colors.accent} />
               </Pressable>
-            </View>
-          ),
-        });
-      } catch {}
+            )}
+            <Pressable
+              onPress={() =>
+                router.push({
+                  pathname: "/(app)/repo/[repoId]/commits",
+                  params: {
+                    repoId: repoId ?? "",
+                    path: encodeURIComponent(path ?? ""),
+                    fileName: encodeURIComponent(fileName),
+                    ref: ref ? encodeURIComponent(ref) : undefined,
+                  },
+                })
+              }
+              hitSlop={8}
+              style={s.headerButton}
+              accessibilityRole="button"
+              accessibilityLabel="File history"
+            >
+              <Octicons name="history" size={20} color={colors.accent} />
+            </Pressable>
+          </View>
+        ),
+      });
     }
   }, [
     navigation,

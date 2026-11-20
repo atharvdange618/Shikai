@@ -18,7 +18,7 @@ import type { GitHubLabel } from "@/types/github.types";
 import { Octicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
-import { useEffect, useMemo } from "react";
+import { useLayoutEffect, useMemo } from "react";
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 export default function IssueDetailScreen() {
@@ -53,10 +53,8 @@ function IssueDetailScreenContent() {
   const isOpen = issue?.state === "open";
   const stateColor = isOpen ? colors.success : colors.textMuted;
 
-  useEffect(() => {
-    try {
-      navigation.setOptions({ title: `#${issueNumber}` });
-    } catch {}
+  useLayoutEffect(() => {
+    navigation.setOptions({ title: `#${issueNumber}` });
   }, [navigation, issueNumber]);
 
   if (isLoading) {

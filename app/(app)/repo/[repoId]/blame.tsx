@@ -14,7 +14,7 @@ import type { BlameRange } from "@/types/github-graphql.types";
 import { Octicons } from "@expo/vector-icons";
 import { FlashList } from "@shopify/flash-list";
 import { router, useLocalSearchParams, useNavigation } from "expo-router";
-import { memo, useCallback, useEffect, useMemo } from "react";
+import { memo, useCallback, useLayoutEffect, useMemo } from "react";
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
 
 const ROW_HEIGHT = 22;
@@ -90,10 +90,8 @@ function BlameScreenContent() {
   const [owner, repoName] = decodeRepoId(repoId ?? "");
   const { data, isLoading, isError } = useBlame(owner, repoName, ref ?? "", path ?? "");
 
-  useEffect(() => {
-    try {
-      navigation.setOptions({ title: fileName ?? "Blame" });
-    } catch {}
+  useLayoutEffect(() => {
+    navigation.setOptions({ title: fileName ?? "Blame" });
   }, [navigation, fileName]);
 
   const lines = useMemo(() => (data?.text ? buildLines(data.text, data.ranges) : []), [data]);

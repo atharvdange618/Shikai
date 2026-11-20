@@ -2,7 +2,7 @@ import { Octicons } from "@expo/vector-icons";
 import { FlashList } from "@shopify/flash-list";
 import { useQueryClient } from "@tanstack/react-query";
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
-import { memo, useCallback, useEffect, useMemo, useState } from "react";
+import { memo, useCallback, useLayoutEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
 
 import { ListItemSeparator } from "@/components/shared/ListItemSeparator";
@@ -39,10 +39,8 @@ export default function GistsScreen() {
   const { gists, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, isError, refetch } =
     useGists(username ?? "", isSelf);
 
-  useEffect(() => {
-    try {
-      navigation.setOptions({ title: "Gists" });
-    } catch {}
+  useLayoutEffect(() => {
+    navigation.setOptions({ title: "Gists" });
   }, [navigation]);
 
   const onRefresh = useCallback(async () => {

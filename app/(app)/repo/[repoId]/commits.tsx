@@ -4,7 +4,7 @@ import { Octicons } from "@expo/vector-icons";
 import { FlashList } from "@shopify/flash-list";
 import { useQueryClient } from "@tanstack/react-query";
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useLayoutEffect, useMemo, useState } from "react";
 
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
 
@@ -50,11 +50,9 @@ export default function CommitsScreen() {
     setSelectedBranch(repo.default_branch);
   }
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!isFileHistory) return;
-    try {
-      navigation.setOptions({ title: fileName ?? "History" });
-    } catch {}
+    navigation.setOptions({ title: fileName ?? "History" });
   }, [navigation, isFileHistory, fileName]);
 
   const { commits, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, isError, refetch } =
