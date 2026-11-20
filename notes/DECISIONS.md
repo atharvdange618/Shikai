@@ -488,6 +488,7 @@ Entries D-001 to D-021 were backfilled on 2026-10-15 from commits, the changelog
 - **Interaction and tests.** Keep the trailing theme card partly visible to signal horizontal scroll. Keep hit targets at 48 dp around compact viewer controls. The settings rate-limit snapshot updates on focus because the Axios object is mutable. Keep unsupported try/finally, ternary and throw combinations outside compiler-sensitive render paths. Pure WebView builders and the review prompt can run in Vitest without React Native. Hook tests that replace effects or refs model render and restart behavior explicitly; they complement device tests. The full-size logo reserves an adaptive icon safe zone, and the simplified icon serves small surfaces.
 
 - **Blame highlighting (#53).** Tokenize the whole file before attaching commit ranges. Multiline syntax can cross a range boundary, and each row keeps its original source line number.
+- **Code and diff gutters (#59).** Keep the gutter sticky inside the WebView's horizontal scroller. Unwrapped rows share the width of the longest row so a short row's gutter stays in view at the far right.
 
 ## D-047: Store implementation rationale in ADRs and ratchet down source comments
 

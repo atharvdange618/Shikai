@@ -44,6 +44,14 @@ describe("buildCodeHtml", () => {
     );
   });
 
+  it("gives each source row a sticky gutter inside a shared horizontal scroll width", () => {
+    const html = buildCodeHtml(file, colors, syntaxTheme, 2);
+    expect(html).toContain('<span class="th-gutter">2</span>');
+    expect(html).toContain('<span class="th-line-content">b</span>');
+    expect(html).toMatch(/\.th-gutter\s*\{[^}]*position:\s*sticky;[^}]*left:\s*0/);
+    expect(html).toMatch(/body\.nowrap code\s*\{[^}]*width:\s*max-content;[^}]*min-width:\s*100%/);
+  });
+
   it("shows the exact Markdown source line even when sections render at different heights", () => {
     const markdown = [
       "# Main heading",
@@ -83,6 +91,11 @@ describe("buildDiffHtml", () => {
     expect(html).toContain('class="th-line th-del" data-old="9" data-new="" data-sign="-"');
     expect(html).toContain('class="th-line th-add" data-old="" data-new="9" data-sign="+"');
     expect(html).toContain('class="th-line th-context" data-old="10" data-new="10"');
+  });
+
+  it("puts both diff numbers and the sign in one sticky gutter", () => {
+    expect(html).toContain('<span class="th-gutter"><span>10</span><span>10  </span></span>');
+    expect(html).toMatch(/\.th-gutter\s*\{[^}]*position:\s*sticky;[^}]*left:\s*0/);
   });
 
   it("leaves hunk headers without numbers", () => {

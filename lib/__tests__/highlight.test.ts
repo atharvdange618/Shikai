@@ -31,7 +31,7 @@ describe("highlightFile", () => {
   it("renders one element per line with its number", () => {
     const { html, lineCount } = highlightFile("const a = 1;\nlet b;\n", "a.ts");
     expect(lineCount).toBe(2);
-    expect(html.match(/class="th-line[^"]*"/g)).toHaveLength(2);
+    expect(html.match(/class="th-line(?: [^"]*)?"/g)).toHaveLength(2);
     expect(html).toContain('data-line="2"');
   });
 

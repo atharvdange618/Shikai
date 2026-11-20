@@ -1,5 +1,6 @@
 import {
   createHighlighter,
+  renderNodesToHtml,
   renderTokens,
   type HighlightRenderNode,
 } from "@tanstack/highlight/core";
@@ -66,11 +67,23 @@ export function highlightFile(
   const lang = languageForContent(code, lineCount, fileName);
   const hasTarget = targetLine !== undefined && targetLine >= 1 && targetLine <= lineCount;
 
-  const { html } = highlighter.highlight(code, {
-    lang,
+  const { tokens } = highlighter.tokenize(code, { lang });
+  const rows = renderTokens(tokens, {
     lineNumbers: true,
     decorations: hasTarget ? [{ lines: targetLine, className: "th-target" }] : undefined,
   });
+  for (const row of rows) {
+    if (row.type !== "element") continue;
+    row.children = [
+      {
+        type: "element",
+        classNames: ["th-gutter"],
+        children: [{ type: "text", value: row.data?.line ?? "" }],
+      },
+      { type: "element", classNames: ["th-line-content"], children: row.children },
+    ];
+  }
+  const html = `<pre class="th-code"><code>${renderNodesToHtml(rows)}</code></pre>`;
 
   return { html, lang, lineCount };
 }

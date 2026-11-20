@@ -22,22 +22,15 @@ export function buildCodeHtml(
     colors,
     syntaxTheme,
     `
-  .th-line { padding: 0 16px 0 calc(${gutter} + 28px); }
-  .th-line::before {
-    content: attr(data-line);
-    position: absolute;
-    left: 0;
-    width: calc(${gutter} + 12px);
-    text-align: right;
-    color: ${colors.textMuted};
-    user-select: none;
-    -webkit-user-select: none;
-  }
+  .th-gutter { width: calc(${gutter} + 28px); padding-right: 16px; text-align: right; }
   .th-target {
     background: ${colors.accentSubtle};
     box-shadow: inset 3px 0 0 ${colors.accent};
   }
-  .th-target::before { color: ${colors.accent}; }`,
+  .th-target > .th-gutter {
+    color: ${colors.accent};
+    box-shadow: inset 3px 0 0 ${colors.accent};
+  }`,
     file.html,
     scrollToTarget,
   );
@@ -59,11 +52,13 @@ export function buildDiffHtml(
   const body = diff.lines
     .map((line) => {
       const sign = DIFF_SIGN[line.kind];
-      const attrs =
-        sign === undefined
-          ? ""
-          : ` data-old="${line.oldLine ?? ""}" data-new="${line.newLine ?? ""}" data-sign="${sign}"`;
-      return `<span class="th-line th-${line.kind}"${attrs}>${renderNodesToHtml(line.nodes)}</span>`;
+      const content = renderNodesToHtml(line.nodes);
+      if (sign === undefined) return `<span class="th-line th-${line.kind}">${content}</span>`;
+      const oldLine = line.oldLine ?? "";
+      const newLine = line.newLine ?? "";
+      const gutter = `<span class="th-gutter"><span>${oldLine}</span><span>${newLine} ${sign}</span></span>`;
+      const attrs = `data-old="${oldLine}" data-new="${newLine}" data-sign="${sign}"`;
+      return `<span class="th-line th-${line.kind}" ${attrs}>${gutter}<span class="th-line-content">${content}</span></span>`;
     })
     .join("\n");
 
@@ -71,25 +66,19 @@ export function buildDiffHtml(
     colors,
     syntaxTheme,
     `
-  .th-line { padding: 0 16px 0 calc(${col} * 2 + 2ch + 32px); }
-  .th-line[data-sign]::before,
-  .th-line[data-sign]::after {
-    position: absolute;
-    top: 0;
+  .th-gutter {
+    display: grid;
+    grid-template-columns: ${col} calc(${col} + 2ch);
+    column-gap: 8px;
+    padding: 0 16px 0 8px;
     text-align: right;
-    color: ${colors.textMuted};
-    user-select: none;
-    -webkit-user-select: none;
+    white-space: pre;
   }
-  .th-line[data-sign]::before { content: attr(data-old); left: 8px; width: ${col}; }
-  .th-line[data-sign]::after {
-    content: attr(data-new) " " attr(data-sign);
-    left: calc(${col} + 16px);
-    width: calc(${col} + 2ch);
-  }
-  .th-add { background: ${colors.successSubtle}; box-shadow: inset 3px 0 0 ${colors.success}; }
-  .th-del { background: ${colors.dangerSubtle}; box-shadow: inset 3px 0 0 ${colors.danger}; }
-  .th-hunk, .th-meta { padding-left: 16px; color: ${colors.textMuted}; }
+  .th-add { background: ${colors.successSubtle}; }
+  .th-del { background: ${colors.dangerSubtle}; }
+  .th-add > .th-gutter { box-shadow: inset 3px 0 0 ${colors.success}; }
+  .th-del > .th-gutter { box-shadow: inset 3px 0 0 ${colors.danger}; }
+  .th-line.th-hunk, .th-line.th-meta { display: block; padding: 0 16px; color: ${colors.textMuted}; }
   .th-hunk { background: ${colors.surfaceSecondary}; }
   .th-meta { font-style: italic; }`,
     `<pre class="th-code"><code>${body}</code></pre>`,
@@ -131,18 +120,28 @@ function buildPage(
   code { display: block; font: inherit; white-space: normal; }
 
   .th-line {
-    display: block;
-    position: relative;
+    display: flex;
     min-height: 1.6em;
     white-space: pre-wrap;
     overflow-wrap: anywhere;
+    background: ${colors.background};
   }
+  .th-gutter {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    flex: none;
+    box-sizing: border-box;
+    background: inherit;
+    color: ${colors.textMuted};
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  .th-line-content { flex: 1; min-width: 0; padding-right: 16px; }
+  body.nowrap code { width: max-content; min-width: 100%; }
   body.nowrap .th-line {
     white-space: pre;
     overflow-wrap: normal;
-    width: max-content;
-    min-width: 100%;
-    box-sizing: border-box;
   }
   ${lineCss}
 </style>
