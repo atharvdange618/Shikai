@@ -161,17 +161,50 @@ describe("pollNotifications", () => {
       expect(fetchParticipatingNotifications).toHaveBeenCalledWith("ghp_abc", null);
     });
 
-    it("seeds from the phone clock when there are no threads", async () => {
+    it("alerts on the first new thread after an empty poll despite a fast phone clock", async () => {
       vi.useFakeTimers();
       vi.setSystemTime(new Date("2026-10-15T12:00:00Z"));
-      fetchParticipatingNotifications.mockResolvedValue({
-        modified: true,
-        notifications: [],
-        etag: null,
-      });
+      fetchParticipatingNotifications
+        .mockResolvedValueOnce({ modified: true, notifications: [], etag: '"empty"' })
+        .mockResolvedValueOnce({ modified: false })
+        .mockResolvedValue({
+          modified: true,
+          notifications: [thread("new", "2026-10-15T10:15:00Z")],
+          etag: '"new"',
+        });
 
       await expect(pollNotifications()).resolves.toEqual({ kind: "seeded" });
-      expect(store.get(MARKER_KEY)).toBe("2026-10-15T12:00:00.000Z");
+      await expect(pollNotifications()).resolves.toEqual({ kind: "not-modified" });
+      expect(fetchParticipatingNotifications).toHaveBeenNthCalledWith(2, "ghp_abc", '"empty"');
+      await expect(pollNotifications()).resolves.toMatchObject({
+        kind: "checked",
+        alerts: [{ threadId: "new" }],
+      });
+      await expect(pollNotifications()).resolves.toEqual({
+        kind: "checked",
+        alerts: [],
+        overflow: 0,
+      });
+    });
+
+    it("recovers an existing marker that was seeded from the phone clock", async () => {
+      store.set(MARKER_KEY, "2026-10-15T12:00:00.123Z");
+      store.set(ETAG_KEY, '"empty"');
+      fetchParticipatingNotifications
+        .mockResolvedValueOnce({ modified: false })
+        .mockResolvedValueOnce({
+          modified: true,
+          notifications: [thread("new", "2026-10-15T10:15:00Z")],
+          etag: '"new"',
+        });
+
+      await expect(pollNotifications()).resolves.toEqual({ kind: "not-modified" });
+      expect(fetchParticipatingNotifications).toHaveBeenNthCalledWith(1, "ghp_abc", '"empty"');
+      await expect(pollNotifications()).resolves.toMatchObject({
+        kind: "checked",
+        alerts: [{ threadId: "new" }],
+      });
+      expect(store.get(MARKER_KEY)).toBe("2026-10-15T10:15:00Z");
     });
   });
 
@@ -183,6 +216,21 @@ describe("pollNotifications", () => {
     await expect(pollNotifications()).resolves.toEqual({ kind: "not-modified" });
     expect(fetchParticipatingNotifications).toHaveBeenCalledWith("ghp_abc", '"etag-1"');
     expect(store.get(MARKER_KEY)).toBe(MARKER);
+  });
+
+  it("keeps fractional GitHub timestamps distinct from legacy phone timestamps", async () => {
+    fetchParticipatingNotifications.mockResolvedValue({
+      modified: true,
+      notifications: [thread("old", "2026-10-15T10:05:00.123Z")],
+      etag: null,
+    });
+
+    await expect(pollNotifications()).resolves.toEqual({ kind: "seeded" });
+    await expect(pollNotifications()).resolves.toEqual({
+      kind: "checked",
+      alerts: [],
+      overflow: 0,
+    });
   });
 
   it("returns capped alerts and saves the new marker and ETag", async () => {

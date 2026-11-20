@@ -10,7 +10,8 @@ export const MAX_ALERTS = 3;
 const MARKER_KEY = "notification-alerts.marker";
 const ETAG_KEY = "notification-alerts.etag";
 const LAST_POLL_KEY = "notification-alerts.last-poll";
-const EPOCH = new Date(0).toISOString();
+const EPOCH = "1970-01-01T00:00:00Z";
+const LEGACY_DEVICE_TIME = /(\.\d{3})Z$/;
 const READ_ON_DELIVERY_MS = 2 * 60_000;
 
 export interface NotificationAlert {
@@ -100,14 +101,10 @@ export async function pollNotifications(): Promise<PollResult> {
   if (!result.modified) return { kind: "not-modified" };
   if (result.etag) mmkv.set(ETAG_KEY, result.etag);
 
-  if (!marker) {
-    const { nextMarker } = planAlerts(result.notifications, EPOCH);
-    mmkv.set(MARKER_KEY, nextMarker === EPOCH ? new Date().toISOString() : nextMarker);
-    return { kind: "seeded" };
-  }
-
-  const { alerts, overflow, nextMarker } = planAlerts(result.notifications, marker);
-  mmkv.set(MARKER_KEY, nextMarker);
+  const baseline = marker && !LEGACY_DEVICE_TIME.test(marker) ? marker : EPOCH;
+  const { alerts, overflow, nextMarker } = planAlerts(result.notifications, baseline);
+  mmkv.set(MARKER_KEY, nextMarker.replace(LEGACY_DEVICE_TIME, "$1+00:00"));
+  if (!marker) return { kind: "seeded" };
   return { kind: "checked", alerts, overflow };
 }
 
