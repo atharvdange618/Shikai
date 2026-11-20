@@ -42,7 +42,7 @@ The app can hold two GitHub tokens at once, and most of the auth code exists to 
 | On disk         | `expo-secure-store` via `lib/secure-storage.ts`               | Same                                                                                          |
 | Sent by         | The axios request interceptor, by default                     | `patHeaders(pat)`, set per call                                                               |
 
-OAuth opens through `WebBrowser.openAuthSessionAsync` in `app/sign-in.tsx`. Its result and the Linking callback share the completion path; a concurrent-code guard prevents duplicate exchanges. `finalizeSession()` saves the session, and the root layout routes authenticated users to Overview.
+OAuth opens through `WebBrowser.openAuthSessionAsync` in `app/sign-in.tsx`. The browser result and the Linking callback share a completion path with a guard against duplicate exchanges. `persistSessionCredentials()` checks the saved PAT before saving the session token. The screen updates auth state after that succeeds, and the root layout routes the user to Overview.
 
 Dev-client launch URLs are not app routes. `isDevClientUrl()` recognizes both the old `expo-development-client` host and SDK 58's `__expo_url` query parameter. Both `app/+native-intent.tsx` and initial-link replay use this shared filter. Without it, a launch URL can push the blank root index over Overview (D-038). Current QA status lives in [Roadmap](ROADMAP.md).
 
@@ -50,8 +50,10 @@ Rules that must keep holding:
 
 1. **A request that sets its own `Authorization` header keeps it.** The interceptor only fills in the session token when no header is set. That's how PAT calls and token checks share one axios instance.
 2. **A 401 only signs you out if the session token got it.** `usedSessionToken()` in `lib/axios.ts` compares the header on the failed request with the session's token. A bad PAT never signs anyone out.
-3. **A PAT never moves to another account.** Signing out deletes it (`signOut()` in `lib/session.ts`). A 401 mid-session or a failed check at boot keeps it, so the same person gets it back when they sign in again. At sign-in, `restorePATFor(login)` asks GitHub who owns the PAT and deletes it on a mismatch. It also deletes it when it can't tell.
+3. **Check PAT ownership before reusing it.** A 401 on the session token clears auth state in memory and keeps the saved PAT. On the next sign-in, `restorePATFor(login)` checks the owner with GitHub and removes the PAT if the owner differs or can't be confirmed. If that removal fails, sign-in stops before saving the new session.
 4. **Background alerts stop when access goes.** A subscription in `lib/background-notifications.ts` watches the auth store and turns alerts off when the token or the PAT goes from set to null.
+
+SecureStore writes and deletes throw `CredentialStorageError` with a fixed message and no native error details. Settings updates the in-memory PAT after storage succeeds. Sign-out deletes the PAT before the session token. If PAT deletion fails, the session stays intact. If session-token deletion fails next, the user stays signed in without the PAT and can retry. A completed sign-out clears auth and both caches.
 
 ## Boot
 
@@ -71,15 +73,23 @@ The reducer is a pure function with its own tests. Add new boot states there, no
 
 ## Data and caching
 
-- **Server state** lives in React Query (`lib/query-client.ts`). Every key comes from the `queryKeys` table, and each resource has a hook in `hooks/`. Stale times run from 1 minute (commits, events) to 30 minutes (profiles). The comment at the top of `query-client.ts` lists them.
-- **Prefetch.** `lib/prefetch.ts` warms the cache before a screen opens, in three layers. Route prefetch readies the screen. Data prefetch fires on mount or press: for example, search results prefetch repo details as they appear. Chained prefetch fetches what the next screen depends on, like the repo before its file tree. The goal is that screens paint from cache.
-- **Disk cache.** React Query persists to MMKV (`lib/persister.ts`) and keeps entries for 24 hours. A query opts out with `meta: { persist: false }`. Use that for anything short-lived or private, like search, and for long paged lists such as stargazers and followers (D-026).
+- **Server state** lives in React Query (`lib/query-client.ts`). Shared cache keys live in `queryKeys`, and hooks set stale times for individual resources. File content keys include the ref, and workflow job keys include the run attempt.
+- **Prefetch.** `lib/prefetch.ts` loads routes and data before a screen opens. Some requests depend on earlier data, such as the repository's default branch before its file tree. File prefetch uses the same revision as the viewer, and API prefetch entry points skip a known rate limit.
+- **Disk cache.** React Query persists to MMKV (`lib/persister.ts`). Its default in-memory `gcTime` matches the 24-hour disk max age, so a query can survive the full offline window even after its screen unmounts (D-043). A query opts out of disk persistence with `meta: { persist: false }`. Use that for short-lived queries such as search and long paged lists such as stargazers and followers (D-026).
 - **Local state** lives in Zustand stores (`stores/`). The watchlist and recent searches each persist to their own MMKV instance.
 - **Account switches wipe everything.** Sign-in and sign-out call `clearAllMMKV()`, which clears the cache and resets the persisted stores. Any new store that holds account data must join that function, or it leaks into the next account. The one exception is the theme: it's a device setting, not account data, so `clearAllMMKV()` saves and restores it (`THEME_KEY`).
 
-## Rendering code and diffs
+## Repository navigation and pagination
 
-Code files and diffs never go to GitHub's `/markdown` renderer. `components/file/CodeViewer.tsx` builds a WebView page with `buildCodeHtml()` or `buildDiffHtml()` from `lib/file-html.ts`, and `highlightFile()` / `highlightDiff()` in `lib/highlight.ts` color it on device with `@tanstack/highlight`. The diff screen receives only the filename and its source; it reads the patch back from the PR, commit or compare query the previous screen cached, so a large patch never travels in route params. Markdown files still render through `MarkdownRenderer` and GitHub's API.
+- **Shared files and folders.** `parseGitHubUrl()` preserves the path segments. The `linked-path` route asks GitHub for candidate refs in one GraphQL request and picks the longest matching prefix. It replaces itself with the viewer at the resolved commit. Files opened from that tree, blame, file history and relative Markdown links use the same revision.
+- **Headers.** Dynamic titles and actions are applied in the owning route's layout effect. An unexpected setup failure can reach the app's error handling.
+- **Releases and Actions.** Release detail looks up its predecessor in GitHub's ordered release list and can follow the next page without the list screen. Actions job requests use the attempt shown on screen, so loading another page cannot switch to a newer rerun. A page error keeps the jobs already loaded.
+
+## Rendering code, diffs and blame
+
+`CodeViewer.tsx` renders a WebView page built by `lib/file-html.ts`. `highlightFile()` and `highlightDiff()` use `@tanstack/highlight` on-device. With wrapping off, the code gutter and both diff number columns stay visible while the text scrolls horizontally. The diff screen reads the patch from the original PR, commit or compare query using the filename and source in the route params.
+
+Blame tokenizes the whole file before attaching GitHub's line numbers and commit ranges. Markdown source-line links use the numbered source viewer. Ordinary Markdown links use GitHub's rendered preview through `MarkdownRenderer`.
 
 ## Work outside the React tree
 
@@ -93,10 +103,10 @@ read PAT from SecureStore (none → stop)
   └─ GET /notifications?participating=true  (If-None-Match: stored ETag)
        ├─ 304  → nothing new, done (costs no rate limit)
        ├─ 401  → turn alerts off, flag "PAT rejected" for Settings
-       └─ 200  → first run: save a marker, post nothing, so the backlog stays quiet
-                  later runs: keep unread threads updated since the marker
-                  → post up to 3 alerts plus an "N more" summary
-                  → save the new ETag and marker
+       └─ 200  → first run: save the newest GitHub timestamp, or the epoch if empty
+                  → post nothing on this first run
+                  later runs: find unseen threads updated since the marker
+                  → store the marker and available ETag, then post up to 3 alerts and an "N more" summary
 ```
 
 A tap on an alert goes through `hooks/useNotificationTaps.ts` and `parseGitHubApiUrl()`, on both warm and cold starts.

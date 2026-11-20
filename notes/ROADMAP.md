@@ -1,14 +1,18 @@
 # Shikai Roadmap
 
-> **Version:** 1.9.0 · **Last Updated:** November 10, 2026 · **Status:** Active Development
+> **Latest tagged release:** 1.9.0 · **Last updated:** November 21, 2026 · **Status:** Active development
 
 This document tracks the feature backlog and development progress for Shikai.
 
-## Current progress: November 10, 2026
+## Current progress (November 21, 2026)
 
 - **Released:** v1.9.0 (versionCode 12) is live on Play and is GitHub Latest. It is the first Play release since 1.7.0, so Play users also get 1.8.0's SDK 58 upgrade (54 → 55 → 57 → 58, React Native pinned to 0.88.1).
 - **In 1.9.0:** the PR overview and section screens (D-039), React Compiler cleanup with the five rules back to errors (`276b580`), browser auth sessions (`8c1fdcb`), and the fix for the black screen after GitHub sign-in (D-038).
 - **Black-screen fix:** a dev-launch link carrying `__expo_url` pushed the blank root index over Overview. The shared dev-client link filter now handles both launcher URL formats. A fresh browser sign-in reached Overview on the emulator debug build and a release build on the phone (2026-11-07).
+- **Production OTA:** runtime 1.9.0 is on the November 11 Android update from `823ee52`. See [Changelog](../CHANGES.md#v190-ota-updates-november-11-2026).
+- **On GitHub main:** fixes #51–#59 are in the batch through `5353cf4`. That includes release comparisons, cold-link headers, blame colors, shared refs, alert clocks, credential errors, Actions job paging, exact Markdown source lines and pinned gutters. [Main CI](https://github.com/atharvdange618/Shikai/actions/runs/44802224271) · [Unreleased changes](../CHANGES.md#unreleased)
+- **Validation:** all 389 Vitest tests passed. The Android dev emulator covered cold and shared links, release and Actions paging, credential errors, blame, source-line navigation and horizontal scrolling. The alerts check invoked the Expo task directly. WorkManager's scheduled wakeup and release-build behavior for this batch still need verification.
+- **Native build:** predictive back is enabled in source. It takes effect in a new Android build.
 - **Deferred:** the Sentry bump remains tied to Expo's supported version; see [Maintenance](MAINTENANCE.md).
 
 ---
@@ -111,7 +115,7 @@ Already shipped and not repeated below: the PR diff view with review threads (a 
 since 5.1), checks, reviewers, and a commits list; `markNotificationAsRead` /
 `markAllNotificationsAsRead` (the only write calls, and the whole write exception).
 
-**The planned feature backlog is cleared.** All of Phase 1-5, see Completed, plus 5.1-5.4. The critical auth-return verification above remains open.
+**The planned feature backlog is complete.** See Completed for phases 1–5, including 5.1–5.4. Fresh OAuth sign-in reached Overview on both the emulator and the phone on November 7.
 (`DiffFileList` and `DiffCommitList` now exist in `components/repo/`. `parseGitHubUrl` lives in
 `lib/github-url.ts`;
 add route cases there as new screens land.)
@@ -135,11 +139,9 @@ plus the blob text in the same request via an aliased `object(expression: "ref:p
 relative date on each range's first line, alternating tint per range, tap → commit detail.
 Entry is a `feed-person` header button in the file viewer, hidden for images/video/PDF.
 
-Syntax coloring added: `lib/blame-highlight.ts` is a single language-agnostic regex
-tokenizer (comments/strings/numbers/keywords) shared across languages instead of a
-per-language grammar, reusing `MarkdownRenderer`'s color values so the two screens match.
-Approximate by design — no cross-line block comments/strings. `ponytail: regex
-approximation across languages, add per-language grammars if people ask`.
+On `main`, `lib/blame-highlight.ts` tokenizes the full file with the same language grammar
+as the source viewer before pairing each line with its commit. This preserves syntax that
+spans lines even when attribution changes within the same comment. See D-046.
 
 Not done: horizontal scroll for long lines (lines clip at the screen edge; the tap-through
 to commit detail is the way to read a full line for now).

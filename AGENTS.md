@@ -4,10 +4,11 @@
 
 Read-only GitHub companion for Android. React Native + Expo SDK 58, expo-router, TypeScript strict mode.
 
-## Current progress (November 10, 2026)
+## Current progress (November 21, 2026)
 
 - v1.9.0 (versionCode 12) is live on Play and is GitHub Latest, tag `v1.9.0` at `e91e7ba`. It is the first Play release since 1.7.0, so it carries the SDK 58 upgrade from 1.8.0, the PR overview screens (D-039) and the auth fix below.
 - The critical black-screen report traced to SDK 58's `shikai://?__expo_url=…` pushing the blank index over Overview. `isDevClientUrl()` now rejects both launcher URL formats for native routing and initial-link replay. Phone replay, app restart and a fresh GitHub OAuth sign-in (debug build on the emulator, release build on the phone, 2026-11-07) all land on Overview. See D-038 and `notes/ROADMAP.md`.
+- GitHub `main` includes the fixes for #51–#59 through `5353cf4`. See `CHANGES.md` for the release breakdown and `notes/ROADMAP.md` for emulator coverage. Predictive back is enabled in source and needs a new Android binary.
 - Use Git Bash for commands on this machine. Exported build variables live there, not in Command Prompt or PowerShell.
 
 ## Commands
@@ -46,13 +47,13 @@ npx expo export -p web && wrangler dev
 npx vitest run
 ```
 
-Tests live in `lib/__tests__/`. Run `npm run lint`, `npm run typecheck` and `npx vitest run` before considering a change done. The pre-commit hook runs lint-staged (oxlint --fix, Prettier), typecheck and tests; commitlint checks the message. See D-041.
+Tests live in `lib/__tests__/`. Run `npm run lint`, `npm run typecheck` and `npx vitest run` before considering a change done. Lint includes the source comment rule. The pre-commit hook runs lint-staged with Oxlint, the comment rule and Prettier, then typecheck and tests. Commitlint checks the message. See D-041 and D-047.
 
 ## Architecture
 
 Deeper docs: `notes/ARCHITECTURE.md` (data flow, token rules, background work) and `notes/DECISIONS.md` (why things are this way; read an entry before undoing it, and add one when you make a call a future reader would question). `notes/GITHUB-QUIRKS.md` lists GitHub API quirks that make Shikai look broken: read it before debugging an empty list, a missing item or a 4xx, and add an entry in the same change whenever a bug traces back to GitHub.
 
-**Routing**: expo-router file-based routing in `app/`. Entry is `app/_layout.tsx` (root) → `app/(app)/_layout.tsx` → `app/(app)/(tabs)/` (bottom tabs: overview, repos, search, profile).
+**Routing**: expo-router file-based routing in `app/`. Entry is `app/_layout.tsx` (root) → `app/(app)/_layout.tsx` → `app/(app)/(tabs)/` (Overview, Repos, Search and Profile, with Notifications when a PAT is present). Dynamic headers use a layout effect in the owning route. Shared GitHub file and folder links pass through `linked-path.tsx` to resolve the ref to a commit before opening the viewer.
 
 **Boot flow**: `app/_layout.tsx` drives boot through a single reducer, `bootReducer` in `lib/boot-flow.ts` (phases: `checkingSecurity` → `restoringAuth` → `ready`, with a `blocked` phase for failed security checks). Add new boot states there, not as ad hoc effects in the layout.
 
@@ -123,7 +124,7 @@ Deeper docs: `notes/ARCHITECTURE.md` (data flow, token rules, background work) a
 - **Fonts**: Inter (body) and JetBrains Mono (code). Loaded in root layout via `@expo-google-fonts/*`.
 - **Lists**: Use `@shopify/flash-list` `FlashList`, not `FlatList`.
 - **Pull-to-refresh**: Use `PullToRefresh` from `components/shared/PullToRefresh`. A bare `RefreshControl` takes its tray color from the Android platform theme, so a dark app on a light-mode phone draws a white circle.
-- **Code and diffs**: Both render through `components/file/CodeViewer.tsx`, colored on device by `lib/highlight.ts` with the page built by `lib/file-html.ts`. Never send code or patches to GitHub's `/markdown` for coloring.
+- **Code and diffs**: Both render through `components/file/CodeViewer.tsx`, colored on device by `lib/highlight.ts` with the page built by `lib/file-html.ts`. Blame uses the same tokenizer. Markdown line links open this source viewer. Never send code or patches to GitHub's `/markdown` for coloring.
 - **Animations**: `react-native-reanimated` for all animations and gesture-driven interactions.
 - **Android Modals**: No `zIndex` or `elevation` inside a `Modal`: the shadow shows through the dimmed backdrop as a pale column (`126a254`). Don't slide a bottom sheet in with a Reanimated `entering` animation either: the Modal lays out short and then grows, the animation keeps the first frame, and the sheet floats above the bottom edge. Drive `translateY` with a shared value instead (`8d2f657`). `navigationBarTranslucent` and `statusBarTranslucent` do nothing here, since RN forces both on under edge-to-edge.
 - **No iOS**: Android-only app. The `ios` folder is gitignored.
@@ -147,8 +148,8 @@ See `notes/MAINTENANCE.md` for the upgrade schedule, the release steps, and the 
 
 ## Token & Auth Flow
 
-OAuth uses PKCE flow. Tokens are stored in `expo-secure-store` (Keychain/Keystore) via `lib/secure-storage.ts`. PATs (optional, for notifications, alerts, issue search, Your work, and stargazers) use the same storage. Signing out from Settings (`signOut()` in `lib/session.ts`) deletes both. A 401 mid-session or from the boot token check only clears auth state and keeps the PAT, so sign-in restores it through `restorePATFor()`, which checks the PAT's `/user` login against the account signing in and deletes it on a mismatch or when it can't confirm the owner. Auth state is managed in `stores/auth.store.ts`. On boot, `app/_layout.tsx` restores tokens from SecureStore and finishes without waiting on GitHub; `revalidateSession()` in `lib/session.ts` then checks the token with `GET /user` in the background, and only a 401 signs the user out (D-034). On 401, the axios interceptor calls `clearAuth()`.
+OAuth uses PKCE. `lib/secure-storage.ts` stores the session token and optional PAT in `expo-secure-store` and reports failed saves and deletes through sanitized errors. `persistSessionCredentials()` checks the saved PAT's owner before saving the session token. Sign-out deletes the PAT first. If deleting the session token then fails, the user stays signed in without the PAT and can retry. A 401 on the session token clears auth state in memory and leaves the stored PAT for revalidation on the next sign-in. Boot loads both credentials without waiting for the background `GET /user` check. See D-034 and D-044.
 
 ## Caching
 
-MMKV is the disk cache for React Query. Cache is cleared on sign-in and sign-out (`clearAllMMKV()` in `lib/mmkv.ts`). Ephemeral queries (search, etc.) should set `meta.persist = false` to exclude from disk cache. The persister max age is defined in `lib/persister.ts`.
+MMKV is the disk cache for React Query. Completed sign-in and sign-out clear account data through `clearAllMMKV()` in `lib/mmkv.ts`. Ephemeral queries such as search should set `meta.persist = false`. The default React Query `gcTime` matches the 24-hour persister max age in `lib/persister.ts`. File content and its prefetch use a ref-aware key. API prefetch helpers check known rate limits before starting. See D-043 and D-045.

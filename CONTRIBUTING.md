@@ -76,6 +76,7 @@ Use JSDoc for API contracts and put implementation decisions in [the decision lo
 - Fork the repo and add it as a remote with `gh repo fork --remote`, or fork on GitHub and add the remote by hand. Branch off `main` and push the branch to your fork.
 - Use [Conventional Commits](https://www.conventionalcommits.org/) with a scope, such as `fix(search): keep the query after a rotation` or `feat(repos): show archived badge`.
 - Keep each PR to one change. Two unrelated fixes make two PRs.
+- When splitting edits that share files, run the hooks with later changes temporarily set aside. Type-aware lint reads imported files from disk, while lint-staged hides unstaged hunks only in partially staged files.
 - In the PR description, say what changed, why, and how you tested it.
 - Run `git config blame.ignoreRevsFile .git-blame-ignore-revs` to skip the initial Prettier pass when using blame.
 

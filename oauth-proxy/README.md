@@ -3,6 +3,10 @@
 A Cloudflare Worker that swaps a GitHub OAuth `code` for an access token, so the
 GitHub client secret never ships in the app. See `worker.ts`.
 
+If GitHub times out or returns an unavailable or unreadable response, the Worker
+returns HTTP 502 with `{"error":"github_unavailable"}`. Its deployment is separate
+from the Android build and EAS updates.
+
 ## Deploy
 
 Run these from the repo root:

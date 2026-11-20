@@ -1,5 +1,35 @@
 # Changelog
 
+## Unreleased
+
+These changes are on `main`. The latest tagged release is v1.9.0, and the active production Android OTA was built from `823ee52`.
+
+### Fixes
+
+- **Release Compare** finds the previous published release across pages, including when you open a release directly from a shared link. [#51](https://github.com/atharvdange618/Shikai/issues/51)
+- **Screen headers** apply titles and actions in the route's layout phase. Setup failures now reach the app's error handling. [#52](https://github.com/atharvdange618/Shikai/issues/52)
+- **Blame highlighting** uses the file viewer's tokenizer. Multiline syntax keeps its color across commit ranges, with source line numbers and attribution intact. [#53](https://github.com/atharvdange618/Shikai/issues/53)
+- **Shared files and folders** open at the linked branch, tag, or commit, including branch names with slashes. Navigation from the linked viewer keeps the resolved revision. [#54](https://github.com/atharvdange618/Shikai/issues/54)
+- **Notification alerts** can detect new threads after an empty first poll even when the phone clock is ahead. The poller also repairs older phone-based markers. [#55](https://github.com/atharvdange618/Shikai/issues/55)
+- **Credential storage** shows a retry message when Android fails to save or delete a token. If sign-out removes the personal access token but fails to delete the session token, the user can retry while still signed in. [#56](https://github.com/atharvdange618/Shikai/issues/56)
+- **Actions runs** load jobs beyond the first 100 within the same run attempt. A failed page leaves the loaded jobs in view. [#57](https://github.com/atharvdange618/Shikai/issues/57)
+- **Markdown line links** highlight the exact numbered source line. Links without a source anchor still use the rendered preview. [#58](https://github.com/atharvdange618/Shikai/issues/58)
+- **Code and diff gutters** keep line numbers visible when you scroll horizontally with wrapping off. [#59](https://github.com/atharvdange618/Shikai/issues/59)
+- **Offline cache** keeps unused queries in memory for the same 24 hours as the persisted cache. API prefetch helpers skip work during known rate limits. [Cache fix](https://github.com/atharvdange618/Shikai/commit/c659799) · [Prefetch fix](https://github.com/atharvdange618/Shikai/commit/ec19db1)
+- **Android controls** let you retry failed lists, use larger tap targets, and swipe down to dismiss the release asset sheet. [Android changes](https://github.com/atharvdange618/Shikai/commit/f239f25)
+
+### Build and development
+
+- Android predictive back is enabled in source and takes effect in a new Android build. [Android config change](https://github.com/atharvdange618/Shikai/commit/f239f25)
+- Source comment checks now run with lint and in the pre-commit hook. Implementation rationale belongs in the decision log. [Lint change](https://github.com/atharvdange618/Shikai/commit/62bc27f) · [D-047](notes/DECISIONS.md#d-047-store-implementation-rationale-in-adrs-and-ratchet-down-source-comments)
+
+## v1.9.0 OTA updates (November 11, 2026)
+
+Both updates went to the production channel for Android runtime 1.9.0.
+
+- The first update restricts user-written links to web and email URLs, gives widget and PDF requests timeouts, and handles failed sign-in responses before parsing them. It also includes the React Compiler fixes. Update group `7731ce5a-1d63-4ee5-bfb9-4f4b2037081d`. [Update source](https://github.com/atharvdange618/Shikai/commit/0728294)
+- The second update hides notification row actions until you swipe the row. This is the active production update group, `32e33960-8744-4718-a53b-e967f7275926`. [Update source](https://github.com/atharvdange618/Shikai/commit/823ee52)
+
 ## v1.9.0 (November 7, 2026)
 
 The first Play release since 1.7.0, so Play users also get everything in 1.8.0. No native changes since 1.8.0.

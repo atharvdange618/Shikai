@@ -105,9 +105,13 @@ Network state detection with MMKV-backed disk persistence. The app works offline
 
 ### Additional Features
 
+This guide describes the current source. See which changes are in each release in the [changelog](CHANGES.md).
+
 - **OTA Updates** - Over-the-air updates via expo-updates. The app checks on launch and asks before restarting to apply an update.
-- **File Viewer** - Code files highlighted on device with line numbers, a wrap toggle, and the linked line marked. Markdown, SVG, PDF, and video rendering too, with a copy button for text files.
-- **Full-Screen Diffs** - Tap any changed file in a pull request, commit, or comparison to read the whole patch on its own screen, with old and new line numbers, a wrap toggle, and a copy button. Large pull requests load 100 files a page instead of GitHub's default 30.
+- **File Viewer** - Shikai highlights code on-device and keeps line numbers visible when you scroll horizontally with wrapping off. Blame uses the same syntax highlighting and maps each source line to its commit. Markdown, SVG, PDF, and video previews are also available.
+- **Full-Screen Diffs** - Tap a changed file in a pull request, commit, or comparison to read its patch with pinned old and new line numbers, a wrap toggle, and a copy button. Large pull requests load up to 100 files per page.
+- **Release comparisons** - Open a release and compare it with the previous published release, even if you opened it from a shared link or its predecessor is on another page.
+- **Actions jobs** - Load more jobs in large workflow runs. Each page stays on the same run attempt, and a failed page can be retried.
 - **Play Store Updates** - Native in-app update prompt when a new release is on the Play Store
 - **Haptics** - Feedback on pull-to-refresh, tab switch, and bookmark
 - **Reduced Motion** - The Overview fade-in and tab icon animations turn off when the system reduced-motion setting is on
@@ -116,7 +120,7 @@ Network state detection with MMKV-backed disk persistence. The app works offline
 - **Repository Access** - The Repos tab tells you when Shikai can only see some of your repos, and Settings links to GitHub's page for choosing which ones it can read
 - **Saved Repos** - Bookmark any repo. Stars and Watchlist combined in one screen with search and filter
 - **Markdown Preview** - README and markdown files rendered inline with syntax-highlighted code blocks
-- **GitHub URL Deep Links** - Opening or sharing a github.com link routes straight into the matching in-app screen, including a shared folder link (drills into and expands that folder) or a file link with a `#L10` line number (scrolls to it)
+- **GitHub URL Deep Links** - Shared file and folder links preserve the branch, tag, or commit. File links with a `#L10` anchor highlight that exact source line, including in Markdown files. Markdown links without a line anchor open the rendered preview.
 
 ---
 
@@ -142,7 +146,7 @@ Shikai takes security seriously:
 - **Root/debugger detection** - Blocks usage on compromised environments
 - **Token safety** - PATs and OAuth tokens are used only for direct GitHub API calls, and are stripped from crash reports before they are sent
 - **Crash reporting** - Released builds send anonymous crash and performance diagnostics to Sentry (EU). No PII, no repository contents, no session recording. Off in development. See the [privacy policy](store/privacy-policy.md).
-- **Cache hygiene** - MMKV cache cleared on sign-in and sign-out, with your theme kept
+- **Cache hygiene** - Completing sign-in or sign-out clears account data from the local cache and keeps your theme. Shikai shows a retry message if it cannot save or remove credentials.
 
 Developer mode is blocked by default on release builds. Developers can override this after accepting a risk warning.
 

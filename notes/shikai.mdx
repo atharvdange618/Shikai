@@ -23,7 +23,7 @@ stack:
   - "Sentry"
   - "Vitest"
 startedAt: "2026-04-06"
-updatedAt: "2026-11-16"
+updatedAt: "2026-11-21"
 github: "https://github.com/atharvdange618/Shikai"
 live: "https://play.google.com/store/apps/details?id=com.atharvdange618.Shikai"
 description: "A beautifully crafted, read-only GitHub dashboard for Android. Browse repos, explore code, track your contribution streak, and share your profile - without the pressure of taking action."
@@ -140,19 +140,19 @@ I wanted screens to feel instant. To get there, I built a prefetch system in `li
 
 **Layer 3: Cascading prefetches.** Data dependencies chain together. `prefetchFileTree` checks if the default branch is already in cache; if not, it fetches the repo first, then chains the file tree request. `prefetchCommonFiles` batch-prefetches up to 3 common files (README, package.json, etc.) in parallel. `prefetchRepoCommits` prefetches the first page of commits while the user is still on the repo detail screen.
 
-By the time a screen renders, TanStack Query has the data and the UI paints from cache.
+When a prefetch finishes before navigation, the next screen can paint from cache. The API prefetch helpers check for a known GitHub rate limit before starting. Unused queries stay in memory for the same 24 hours as the persisted cache.
 
 ### 3. The File Explorer
 
-I wanted users to read actual code files on their phones. The file explorer has a recursive tree UI with branch selection, a WebView code viewer, and a markdown renderer for READMEs. All of it flows through the prefetch system, so files load from cache instead of the network. The native highlighters (react-native-syntax-highlighter) are unmaintained, so code shows in a WebView. It started with Prism.js; now `@tanstack/highlight` colors each file and diff on the device, so code never goes to GitHub's markdown renderer.
+I wanted users to read actual code files on their phones. The file explorer has a recursive tree with branch selection, a WebView source viewer, and a Markdown preview. A shared file or folder link resolves its Git ref to a commit before opening, so the tree, files and history stay on that revision. I started with Prism.js and now use `@tanstack/highlight` on-device for source, diffs and blame. Line numbers stay visible during horizontal scrolling, and Markdown line links open the exact line in the source viewer.
 
 ### 4. Authentication: PAT to OAuth
 
 Shikai started with Personal Access Token auth. It worked, but asking users to generate a PAT was a bad onboarding experience. I replaced it with GitHub OAuth using PKCE. The token exchange happens on a Cloudflare Worker that acts as an OAuth proxy, keeping the client secret off the device. You need the proxy because GitHub requires `client_secret` in the token exchange, and you cannot ship that on a mobile app. Tokens go into expo-secure-store.
 
-Notifications are the exception: GitHub's notifications API does not work with OAuth tokens. It requires a PAT with the `notifications` scope. So PATs are still supported as an optional layer for notifications, alerts, issue search, Your work, and stargazers. PAT-based endpoints use the same axios instance and pass the PAT as an explicit `Authorization` header. The request interceptor only attaches the OAuth token from Zustand when no header is set, so the PAT wins. The response interceptor checks which token got rejected before it signs anyone out, so a revoked PAT fails its own request without ending the OAuth session.
+GitHub's notifications API does not accept Shikai's GitHub App token. It needs a classic PAT with the `notifications` scope. PATs are optional and also support alerts, issue search, Your work and stargazers. PAT-based endpoints use the same axios instance with an explicit `Authorization` header. The interceptor fills in the session token only when the request has no authorization header. A rejected PAT leaves the OAuth session in place. [GitHub's notification token support](https://docs.github.com/en/rest/activity/notifications#list-notifications-for-the-authenticated-user)
 
-On a 401 from the session token, the axios response interceptor calls `clearAuth()` to sign out. A boot check against `GET /user` runs in the background, so a slow network never blocks launch. This prevents users from seeing broken screens when their token expires or gets revoked. On sign-in and sign-out, MMKV is cleared to prevent stale data from a previous account leaking to the current one.
+On a 401 from the session token, the axios interceptor clears auth state in memory. The boot check runs in the background, so a slow `GET /user` doesn't hold up launch. Completed sign-in and sign-out clear the account cache. If Android rejects a credential write or delete, Shikai shows a retry message without exposing the native error or token.
 
 ### 5. The Security Module
 
