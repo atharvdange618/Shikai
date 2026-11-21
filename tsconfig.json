@@ -12,5 +12,6 @@
       "shikai-security": ["./modules/shikai-security"]
     }
   },
-  "include": ["plugins/**/*.js", "**/*.ts", "**/*.tsx", ".expo/types/**/*.ts", "expo-env.d.ts"]
+  "include": ["plugins/**/*.js", "**/*.ts", "**/*.tsx", ".expo/types/**/*.ts", "expo-env.d.ts"],
+  "exclude": ["node_modules", "site"]
 }
