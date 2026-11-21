@@ -34,7 +34,6 @@
     "android:assemble": "cd android && SENTRY_DISABLE_AUTO_UPLOAD=true ./gradlew assembleRelease",
     "android:bundle": "cd android && ./gradlew bundleRelease",
     "sentry:sourcemaps": "sentry-expo-upload-sourcemaps dist",
-    "commit": "cz",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "lint:fix": "oxlint . --fix",
@@ -99,19 +98,17 @@
     "zustand": "^5.0.12"
   },
   "devDependencies": {
-    "@types/react": "~19.3.0",
-    "typescript": "^7.0.2",
-    "vitest": "^3.2.7",
-    "wrangler": "^4.88.0",
     "@commitlint/cli": "^21.2.4",
     "@commitlint/config-conventional": "^21.2.4",
-    "@commitlint/cz-commitlint": "^21.2.4",
-    "commitizen": "^4.3.2",
+    "@types/react": "~19.3.0",
     "husky": "^9.1.7",
     "lint-staged": "^17.6.0",
     "oxlint": "^1.92.0",
     "oxlint-tsgolint": "^7.0.2006",
-    "prettier": "^3.9.10"
+    "prettier": "^3.9.10",
+    "typescript": "^7.0.2",
+    "vitest": "^3.2.7",
+    "wrangler": "^4.88.0"
   },
   "private": true,
   "overrides": {
@@ -146,10 +143,5 @@
       "oxlint -c scripts/oxlint-comments.json",
       "prettier --write"
     ]
-  },
-  "config": {
-    "commitizen": {
-      "path": "@commitlint/cz-commitlint"
-    }
   }
 }
