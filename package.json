@@ -141,8 +141,8 @@
       "prettier --write"
     ],
     "*.{js,jsx,cjs,mjs,ts,tsx}": [
-      "oxlint --fix",
-      "oxlint",
+      "oxlint --fix --no-error-on-unmatched-pattern",
+      "oxlint --no-error-on-unmatched-pattern",
       "oxlint -c scripts/oxlint-comments.json",
       "prettier --write"
     ]
