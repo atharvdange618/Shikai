@@ -59,7 +59,7 @@ describe("extractMermaidBlocks", () => {
   it("reads an indented fence and an info string", () => {
     const markdown = "- step\n\n  ```mermaid title=Flow\n  flowchart LR\n    A --> B\n  ```";
 
-    expect(extractMermaidBlocks(markdown)).toEqual(["  flowchart LR\n    A --> B"]);
+    expect(extractMermaidBlocks(markdown)).toEqual(["flowchart LR\n  A --> B"]);
   });
 
   it("keeps a shorter fence inside a longer one", () => {

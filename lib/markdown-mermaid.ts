@@ -22,7 +22,7 @@ export type MermaidSvgs = Record<string, string>;
 const MAX_DIAGRAMS = 20;
 
 /** Up to three spaces of indent, a code fence, then an optional info string. */
-const FENCE_OPEN = /^ {0,3}(`{3,}|~{3,})[ \t]*([^\s`]*)/;
+const FENCE_OPEN = /^( {0,3})(`{3,}|~{3,})[ \t]*([^\s`]*)/;
 
 /**
  * The key both sides match on: this map here, and the `pre` text the page
@@ -42,7 +42,7 @@ function* findMermaidBlocks(lines: string[]) {
       continue;
     }
 
-    const fence = open[1];
+    const [, indent, fence, language] = open;
     const marker = fence[0] === "`" ? "`" : "~";
     const closer = new RegExp("^ {0,3}" + marker + "{" + fence.length + ",}[ \\t]*$");
     const start = index;
@@ -52,8 +52,11 @@ function* findMermaidBlocks(lines: string[]) {
       index += 1;
     }
 
-    if (open[2].toLowerCase() === "mermaid") {
-      yield { start, end: index + 1, source: lines.slice(start + 1, index).join("\n") };
+    if (language.toLowerCase() === "mermaid") {
+      const content = lines.slice(start + 1, index);
+      const leadingSpaces = new RegExp("^ {0," + indent.length + "}");
+      const source = content.map((line) => line.replace(leadingSpaces, "")).join("\n");
+      yield { start, end: index + 1, source };
     }
     index += 1;
   }

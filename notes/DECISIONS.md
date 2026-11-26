@@ -508,4 +508,4 @@ The comment rule uses Oxlint's own JavaScript and TypeScript comment tokens. It 
 
 **Rejected.** The full `pele` entry, 268 KB gzip against 120 KB for the nine registered types; the long tail is 24 types that rarely appear. Shipping the renderer inside the WebView would put 733 KB of JavaScript in every page.
 
-**Consequences.** When GitHub's Markdown endpoint is unavailable, Shikai renders Mermaid fences from the source it already has and displays the surrounding Markdown as plain text. Adding a type takes one import and one argument to `register()`. Diagrams use Pele's layout. The GitHub-rendered view keeps its link, copy, height reporting and anchor behavior.
+**Consequences.** Shikai renders Mermaid fences from the source it already has and displays the surrounding Markdown as plain text while GitHub's request is pending. A successful response replaces that preview with GitHub's HTML. Adding a type takes one import and one argument to `register()`. Diagrams use Pele's layout. The GitHub-rendered view keeps its link, copy, height reporting and anchor behavior.

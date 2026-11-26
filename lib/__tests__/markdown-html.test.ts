@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { buildHtml } from "@/lib/markdown-html";
-import { normalizeMermaidSource } from "@/lib/markdown-mermaid";
+import { normalizeMermaidSource, renderMermaidBlocks } from "@/lib/markdown-mermaid";
 
 /** Builds a function the way the WebView builds the page's own script. */
 function pageFunction(body: string, ...args: string[]): (...values: string[]) => string {
@@ -89,5 +89,20 @@ describe("buildHtml mermaid data", () => {
     expect(key("\r\n flowchart LR\r\n  A --> B \r\n")).toBe(
       normalizeMermaidSource("\r\n flowchart LR\r\n  A --> B \r\n"),
     );
+  });
+
+  it("matches an indented fence to the dedented source in GitHub HTML", () => {
+    const markdown = "  ```mermaid\n  flowchart LR\n    A --> B\n  ```";
+    const githubText = "flowchart LR\n  A --> B\n";
+    const page = buildHtml("", false, 16, renderMermaidBlocks(markdown));
+    const keyFunction = /function mermaidKey\(source\) \{[\s\S]*?\n  \}/.exec(page)?.[0];
+    const data = /id="pele-svgs">([^<]*)<\/script>/.exec(page)?.[1];
+    const lookup = pageFunction(
+      `${keyFunction ?? ""}\nreturn JSON.parse(data)[mermaidKey(source)];`,
+      "source",
+      "data",
+    );
+
+    expect(lookup(githubText, data ?? "{}")).toContain("pele-flowchart");
   });
 });
