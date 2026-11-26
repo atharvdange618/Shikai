@@ -1,6 +1,14 @@
 import { describe, expect, it } from "vitest";
 
 import { buildHtml } from "@/lib/markdown-html";
+import { normalizeMermaidSource } from "@/lib/markdown-mermaid";
+
+/** Builds a function the way the WebView builds the page's own script. */
+function pageFunction(body: string, ...args: string[]): (...values: string[]) => string {
+  // eslint-disable-next-line typescript/no-implied-eval -- compiles and runs the page's own script text
+  const run = new Function(...args, body) as (...values: string[]) => string;
+  return run;
+}
 
 interface FakeCode {
   className: string;
@@ -40,5 +48,46 @@ describe("buildHtml raw code block language", () => {
 
   it("finds no language on a plain block", () => {
     expect(detectLang("notranslate", null)).toBe("");
+  });
+});
+
+describe("buildHtml mermaid data", () => {
+  it("embeds the rendered SVG record for the page script", () => {
+    const page = buildHtml("", false, 16, {
+      "flowchart LR\n  A --> B": '<svg class="pele"></svg>',
+    });
+
+    expect(page).toContain('id="pele-svgs"');
+    expect(page).toContain('\\u003csvg class=\\"pele\\"');
+  });
+
+  it("keeps a closing script tag in a label from ending the data block", () => {
+    const page = buildHtml("", false, 16, { source: "<script>alert(1)</script>" });
+
+    expect(page).not.toContain("<script>alert(1)</script>");
+  });
+
+  it("leaves an empty record when there are no diagrams", () => {
+    expect(buildHtml("", false, 16)).toContain('id="pele-svgs">{}</script>');
+  });
+
+  it("generates a page script that parses", () => {
+    const page = buildHtml("", true, 16, { source: "<svg></svg>" });
+    const script = /<script>\n([\s\S]*?)<\/script>/.exec(page)?.[1];
+
+    expect(script).toBeTruthy();
+    expect(() => pageFunction(script ?? "")).not.toThrow();
+  });
+
+  it("normalizes a diagram key the same way the renderer does", () => {
+    const page = buildHtml("", false, 16);
+    const keyFunction = /function mermaidKey\(source\) \{[\s\S]*?\n  \}/.exec(page)?.[0];
+
+    expect(keyFunction).toBeTruthy();
+    const key = pageFunction(`${keyFunction ?? ""}\nreturn mermaidKey(source);`, "source");
+
+    expect(key("\r\n flowchart LR\r\n  A --> B \r\n")).toBe(
+      normalizeMermaidSource("\r\n flowchart LR\r\n  A --> B \r\n"),
+    );
   });
 });

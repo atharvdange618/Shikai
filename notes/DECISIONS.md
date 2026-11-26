@@ -497,3 +497,15 @@ Entries D-001 to D-021 were backfilled on 2026-10-15 from commits, the changelog
 Use JSDoc for declaration contracts and checked-JavaScript types. Record implementation rationale in this log. File an issue when a comment points to a shortcut with a concrete fix. Remove obsolete comments and comments that repeat the code.
 
 The comment rule uses Oxlint's own JavaScript and TypeScript comment tokens. It runs separately so it can include config scripts without changing the normal lint rules for those files. The baseline matches existing lint directives and comments kept in review by path, exact text and occurrence. New comments outside JSDoc and duplicates fail the check. When a baselined comment goes away, remove its entry in the same change. Native code, scripts, config formats and source embedded in strings were reviewed manually. The rule covers JavaScript and TypeScript syntax, including JSX.
+
+## D-048: Render Mermaid diagrams on device with pele
+
+**Date.** 2026-11-26. **Status.** Accepted. Supersedes the CDN half of D-018.
+
+**Context.** Markdown pages fetched `mermaid@11.17.2` from jsDelivr inside the WebView before drawing a diagram. GitHub's markdown API returns a mermaid fence as highlighted code, so the page had to swap the blocks after load. That costs 745 KB on a cold cache, and a cached README read offline showed "Could not load Mermaid renderer" because the fetch could not run.
+
+**Decision.** `lib/markdown-mermaid.ts` renders fenced mermaid blocks with `pele`, pinned at 1.13.0, with the core entry plus flowchart, sequence, class, state, er, gantt, pie and gitGraph registered. Rendering runs in React Native before the page is built, and `buildHtml` inlines the SVG in a JSON script block that the page reads, so the WebView executes no diagram code. The SVG inherits the page theme through `--pele-*` variables on `.mermaid-wrapper`. A block whose type is not registered, or that does not parse, stays as source in a normal code block with a copy button. At most 20 diagrams render per document, because rendering is synchronous on the JS thread and a README is untrusted input. The page script and the renderer match blocks on the source text normalized by `normalizeMermaidSource`, and a mismatch falls back to source rather than breaking the page.
+
+**Rejected.** The full `pele` entry, 268 KB gzip against 120 KB for the nine registered types; the long tail is 24 types that rarely appear. Shipping the renderer inside the WebView would put 733 KB of JavaScript in every page.
+
+**Consequences.** When GitHub's Markdown endpoint is unavailable, Shikai renders Mermaid fences from the source it already has and displays the surrounding Markdown as plain text. Adding a type takes one import and one argument to `register()`. Diagrams use Pele's layout. The GitHub-rendered view keeps its link, copy, height reporting and anchor behavior.

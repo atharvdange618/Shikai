@@ -2,6 +2,7 @@ import { useTheme } from "@/constants/theme";
 import { githubAxios } from "@/lib/axios";
 import { parseGitHubUrl } from "@/lib/github-url";
 import { buildHtml } from "@/lib/markdown-html";
+import { buildMarkdownFallback, renderMermaidBlocks } from "@/lib/markdown-mermaid";
 import { resolveMarkdownLink } from "@/lib/markdown-links";
 import * as Clipboard from "expo-clipboard";
 import { useRouter, type Href } from "expo-router";
@@ -65,6 +66,7 @@ export function MarkdownRenderer({
     let cancelled = false;
 
     async function render() {
+      let githubHtml: string | undefined;
       try {
         const { data } = await githubAxios.post<string>(
           "/markdown",
@@ -80,19 +82,15 @@ export function MarkdownRenderer({
           },
         );
 
-        if (!cancelled) {
-          setHtml(buildHtml(resolveImageUrls(data, context, gitRef), isDark, bodyPadding));
-        }
-      } catch {
-        if (!cancelled) {
-          const escaped = markdown
-            .replace(/&/g, "&amp;")
-            .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;")
-            .replace(/\n/g, "<br>");
-          setHtml(buildHtml(`<pre>${escaped}</pre>`, isDark, bodyPadding));
-        }
-      }
+        githubHtml = data;
+      } catch {}
+
+      if (cancelled) return;
+      const body =
+        githubHtml === undefined
+          ? buildMarkdownFallback(markdown)
+          : resolveImageUrls(githubHtml, context, gitRef);
+      setHtml(buildHtml(body, isDark, bodyPadding, renderMermaidBlocks(markdown)));
     }
 
     void render();
