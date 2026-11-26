@@ -1,4 +1,5 @@
 import { escapeHtml } from "@tanstack/highlight/core";
+import { renderHtml } from "@tanstack/markdown/html";
 import { render, register, supports } from "pele/core";
 import classDiagram from "pele/diagrams/class";
 import erDiagram from "pele/diagrams/er";
@@ -21,9 +22,6 @@ export type MermaidSvgs = Record<string, string>;
  */
 const MAX_DIAGRAMS = 20;
 
-/** Up to three spaces of indent, a code fence, then an optional info string. */
-const FENCE_OPEN = /^( {0,3})(`{3,}|~{3,})[ \t]*([^\s`]*)/;
-
 /**
  * The key both sides match on: this map here, and the `pre` text the page
  * script reads back out of GitHub's HTML.
@@ -32,89 +30,46 @@ export function normalizeMermaidSource(source: string): string {
   return source.replace(/\r\n/g, "\n").trim();
 }
 
-function* findMermaidBlocks(lines: string[]) {
-  let index = 0;
-
-  while (index < lines.length) {
-    const open = FENCE_OPEN.exec(lines[index]);
-    if (!open) {
-      index += 1;
-      continue;
-    }
-
-    const [, indent, fence, language] = open;
-    const marker = fence[0] === "`" ? "`" : "~";
-    const closer = new RegExp("^ {0,3}" + marker + "{" + fence.length + ",}[ \\t]*$");
-    const start = index;
-
-    index += 1;
-    while (index < lines.length && !closer.test(lines[index])) {
-      index += 1;
-    }
-
-    if (language.toLowerCase() === "mermaid") {
-      const content = lines.slice(start + 1, index);
-      const leadingSpaces = new RegExp("^ {0," + indent.length + "}");
-      const source = content.map((line) => line.replace(leadingSpaces, "")).join("\n");
-      yield { start, end: index + 1, source };
-    }
-    index += 1;
-  }
+interface MarkdownPreview {
+  html: string;
+  mermaidSvgs: MermaidSvgs;
 }
 
-/**
- * Every ```mermaid fenced block in a document, in order. Reads backtick and
- * tilde fences, indented fences, and an info string after the language.
- */
-export function extractMermaidBlocks(markdown: string): string[] {
-  return Array.from(findMermaidBlocks(markdown.split(/\r?\n/)), (block) => block.source);
-}
-
-/** Keeps source readable and marks Mermaid fences for the WebView's diagram pass. */
-export function buildMarkdownFallback(markdown: string): string {
-  const lines = markdown.split(/\r?\n/);
-  const html: string[] = [];
-  let start = 0;
-
-  for (const block of findMermaidBlocks(lines)) {
-    if (block.start > start) {
-      html.push(
-        `<pre><code>${escapeHtml(lines.slice(start, block.start).join("\n"))}</code></pre>`,
-      );
-    }
-    html.push(`<pre><code class="language-mermaid">${escapeHtml(block.source)}</code></pre>`);
-    start = block.end;
-  }
-
-  if (start < lines.length) {
-    html.push(`<pre><code>${escapeHtml(lines.slice(start).join("\n"))}</code></pre>`);
-  }
-
-  return html.join("\n");
-}
-
-/**
- * Renders a document's diagrams ahead of the page build, so the WebView inlines
- * finished SVG and never fetches a renderer. A block that fails to parse, or
- * whose type is not registered, is left out and shown as source instead.
- */
-export function renderMermaidBlocks(markdown: string): MermaidSvgs {
-  const svgs: MermaidSvgs = {};
+/** Share one Markdown parse between the local preview and GitHub's diagram replacement pass. */
+export function buildMarkdownPreview(markdown: string): MarkdownPreview {
+  const mermaidSvgs: MermaidSvgs = {};
   let rendered = 0;
 
-  for (const block of extractMermaidBlocks(markdown)) {
-    if (rendered >= MAX_DIAGRAMS) break;
+  const html = renderHtml(markdown, {
+    allowHtml: false,
+    frontmatter: false,
+    extensions: [
+      {
+        name: "shikai-markdown-preview",
+        renderHtml(node, context) {
+          if (node.type === "image") return escapeHtml(node.alt);
+          if (node.type === "link") return node.children.map(context.renderInline).join("");
+          if (node.type !== "code" || node.lang?.toLowerCase() !== "mermaid") return undefined;
 
-    const source = normalizeMermaidSource(block);
-    if (source === "" || Object.hasOwn(svgs, source) || !supports(source)) continue;
+          const source = normalizeMermaidSource(node.value);
+          if (
+            rendered < MAX_DIAGRAMS &&
+            source !== "" &&
+            !Object.hasOwn(mermaidSvgs, source) &&
+            supports(source)
+          ) {
+            try {
+              mermaidSvgs[source] = render(source, { links: false, images: false }).svg;
+              rendered += 1;
+            } catch {
+              /** The WebView displays the original source when there is no SVG. */
+            }
+          }
+          return `<pre><code class="language-mermaid">${escapeHtml(node.value)}</code></pre>`;
+        },
+      },
+    ],
+  });
 
-    try {
-      svgs[source] = render(source, { links: false }).svg;
-      rendered += 1;
-    } catch {
-      continue;
-    }
-  }
-
-  return svgs;
+  return { html, mermaidSvgs };
 }

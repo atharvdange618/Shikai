@@ -59,6 +59,6 @@ describe("MarkdownRenderer", () => {
     await request.promise;
 
     expect(renderedHtml(markdown)).toContain("<h1>GitHub heading</h1>");
-    expect(renderedHtml("# Another document")).toContain("# Another document");
+    expect(renderedHtml("# Another document")).toMatch(/<h1[^>]*>Another document<\/h1>/);
   });
 });

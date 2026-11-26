@@ -2,8 +2,8 @@ import { useTheme } from "@/constants/theme";
 import { githubAxios } from "@/lib/axios";
 import { parseGitHubUrl } from "@/lib/github-url";
 import { buildHtml } from "@/lib/markdown-html";
-import { buildMarkdownFallback, renderMermaidBlocks } from "@/lib/markdown-mermaid";
 import { resolveMarkdownLink } from "@/lib/markdown-links";
+import { buildMarkdownPreview } from "@/lib/markdown-mermaid";
 import * as Clipboard from "expo-clipboard";
 import { useRouter, type Href } from "expo-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -68,7 +68,7 @@ export function MarkdownRenderer({
   const [githubMarkdown, setGitHubMarkdown] = useState<GitHubMarkdown>();
   const [height, setHeight] = useState(300);
   const [opacity] = useState(() => new Animated.Value(0));
-  const mermaidSvgs = useMemo(() => renderMermaidBlocks(markdown), [markdown]);
+  const preview = useMemo(() => buildMarkdownPreview(markdown), [markdown]);
   const githubHtml =
     githubMarkdown?.markdown === markdown &&
     githubMarkdown.context === context &&
@@ -77,11 +77,9 @@ export function MarkdownRenderer({
       : undefined;
   const html = useMemo(() => {
     const body =
-      githubHtml === undefined
-        ? buildMarkdownFallback(markdown)
-        : resolveImageUrls(githubHtml, context, gitRef);
-    return buildHtml(body, isDark, bodyPadding, mermaidSvgs);
-  }, [githubHtml, markdown, context, gitRef, isDark, bodyPadding, mermaidSvgs]);
+      githubHtml === undefined ? preview.html : resolveImageUrls(githubHtml, context, gitRef);
+    return buildHtml(body, isDark, bodyPadding, preview.mermaidSvgs);
+  }, [githubHtml, context, gitRef, isDark, bodyPadding, preview]);
 
   useEffect(() => {
     let cancelled = false;
