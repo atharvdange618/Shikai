@@ -5,6 +5,7 @@ const root = fileURLToPath(new URL("../", import.meta.url));
 const baseline = {
   "lib/__tests__/markdown-html.test.ts": [
     "// eslint-disable-next-line typescript/no-implied-eval -- runs the page's own script line",
+    "// eslint-disable-next-line typescript/no-implied-eval -- compiles and runs the page's own script text",
   ],
   "lib/highlight.ts": [
     "// ponytail: files past either cap render as plaintext. Highlighting runs on",

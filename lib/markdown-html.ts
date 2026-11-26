@@ -1,4 +1,16 @@
-export function buildHtml(html: string, isDark: boolean, bodyPadding: number): string {
+import type { MermaidSvgs } from "@/lib/markdown-mermaid";
+
+/** The SVG record is JSON, so every `<` becomes an escape that cannot close the tag. */
+function serializeMermaidSvgs(svgs: MermaidSvgs): string {
+  return JSON.stringify(svgs).replace(/</g, "\\u003c");
+}
+
+export function buildHtml(
+  html: string,
+  isDark: boolean,
+  bodyPadding: number,
+  mermaidSvgs: MermaidSvgs = {},
+): string {
   const text = isDark ? "#E6EDF3" : "#1A2332";
   const textSecondary = isDark ? "#8B949E" : "#5A6B7B";
   const border = isDark ? "#30363D" : "#D9D3C7";
@@ -127,20 +139,19 @@ export function buildHtml(html: string, isDark: boolean, bodyPadding: number): s
     -webkit-overflow-scrolling: touch;
     display: flex;
     justify-content: center;
+    --pele-bg: transparent;
+    --pele-fg: ${text};
+    --pele-muted: ${textSecondary};
+    --pele-line: ${textSecondary};
+    --pele-surface: ${surfaceSecondary};
+    --pele-surface-alt: ${codeHeaderBg};
+    --pele-border: ${border};
+    --pele-accent: ${accent};
+    --pele-radius: 6px;
   }
   .mermaid-wrapper svg {
     max-width: 100%;
     height: auto;
-  }
-  .mermaid-error {
-    margin-bottom: 16px;
-    padding: 12px 14px;
-    border-radius: 10px;
-    border: 1px solid ${isDark ? "#F47067" : "#d73a49"};
-    background: ${isDark ? "rgba(244,112,103,0.08)" : "rgba(215,58,73,0.06)"};
-    font-family: 'JetBrains Mono', 'SF Mono', monospace;
-    font-size: 12px;
-    color: ${isDark ? "#F47067" : "#d73a49"};
   }
 
   .markdown-body .highlight,
@@ -211,6 +222,7 @@ export function buildHtml(html: string, isDark: boolean, bodyPadding: number): s
 </head>
 <body>
 <div class="markdown-body">${html}</div>
+<script type="application/json" id="pele-svgs">${serializeMermaidSvgs(mermaidSvgs)}</script>
 <script>
   var LANG_LABELS = {
     javascript:'JavaScript',typescript:'TypeScript',js:'JavaScript',ts:'TypeScript',
@@ -277,77 +289,39 @@ export function buildHtml(html: string, isDark: boolean, bodyPadding: number): s
     return Array.from(el.classList).some(function(c) { return c === 'highlight-source-mermaid'; });
   }
 
+  var PELE_SVGS = {};
+
+  function loadMermaidSvgs() {
+    var data = document.getElementById('pele-svgs');
+    if (!data) return;
+    try {
+      PELE_SVGS = JSON.parse(data.textContent || '{}');
+    } catch (err) {
+      PELE_SVGS = {};
+    }
+  }
+
+  function mermaidKey(source) {
+    return source.replace(/\\r\\n/g, '\\n').trim();
+  }
+
   function renderMermaid(blocks) {
-    if (blocks.length === 0) return;
-    var isDark = ${isDark ? "true" : "false"};
-
     blocks.forEach(function(item) {
-      var placeholder = document.createElement('div');
-      placeholder.className = 'mermaid-wrapper';
-      placeholder.style.color = isDark ? '#8B949E' : '#5A6B7B';
-      placeholder.style.fontStyle = 'italic';
-      placeholder.style.fontSize = '13px';
-      placeholder.textContent = 'Loading diagram\\u2026';
-      item.el.parentNode.replaceChild(placeholder, item.el);
-      item._placeholder = placeholder;
+      var svg = PELE_SVGS[mermaidKey(item.source)];
+      if (typeof svg !== 'string') {
+        var pre = item.el.querySelector('pre') || item.el;
+        wrapBlock(item.el, 'Mermaid', function() { return pre.textContent; });
+        return;
+      }
+      var wrapper = document.createElement('div');
+      wrapper.className = 'mermaid-wrapper';
+      wrapper.innerHTML = svg;
+      item.el.parentNode.replaceChild(wrapper, item.el);
     });
-    postHeight();
-
-    fetch('https://cdn.jsdelivr.net/npm/mermaid@11.17.2/dist/mermaid.min.js')
-      .then(function(r) {
-        return r.text();
-      })
-      .then(function(code) {
-        var s = document.createElement('script');
-        s.textContent = code;
-        document.head.appendChild(s);
-
-        mermaid.initialize({
-          startOnLoad: false,
-          theme: isDark ? 'dark' : 'default',
-          securityLevel: 'strict',
-          fontFamily: 'ui-sans-serif, system-ui, -apple-system, sans-serif',
-          fontSize: 14,
-        });
-        var pending = blocks.length;
-        blocks.forEach(function(item, i) {
-          var id = 'mermaid-diagram-' + i + '-' + Date.now();
-          mermaid.render(id, item.source)
-            .then(function(result) {
-              var wrapper = document.createElement('div');
-              wrapper.className = 'mermaid-wrapper';
-              wrapper.innerHTML = result.svg;
-              if (item._placeholder.parentNode) {
-                item._placeholder.parentNode.replaceChild(wrapper, item._placeholder);
-              }
-            })
-            .catch(function(err) {
-              var errDiv = document.createElement('div');
-              errDiv.className = 'mermaid-error';
-              errDiv.textContent = 'Mermaid diagram failed to render';
-              if (item._placeholder.parentNode) {
-                item._placeholder.parentNode.replaceChild(errDiv, item._placeholder);
-              }
-            })
-            .finally(function() {
-              pending--;
-              if (pending === 0) { postHeight(); setTimeout(postHeight, 150); }
-            });
-        });
-      })
-      .catch(function(err) {
-        blocks.forEach(function(item) {
-          if (item._placeholder.parentNode) {
-            item._placeholder.textContent = 'Could not load Mermaid renderer';
-            item._placeholder.className = 'mermaid-error';
-            item._placeholder.style.fontStyle = '';
-          }
-        });
-        postHeight();
-      });
   }
 
   function init() {
+    loadMermaidSvgs();
     window.__mermaidBlocks = [];
 
     var sections = document.querySelectorAll('.markdown-body section[data-type="mermaid"], .markdown-body .render-needs-enrichment[data-type="mermaid"]');

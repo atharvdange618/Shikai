@@ -3,10 +3,11 @@ import { githubAxios } from "@/lib/axios";
 import { parseGitHubUrl } from "@/lib/github-url";
 import { buildHtml } from "@/lib/markdown-html";
 import { resolveMarkdownLink } from "@/lib/markdown-links";
+import { buildMarkdownPreview } from "@/lib/markdown-mermaid";
 import * as Clipboard from "expo-clipboard";
 import { useRouter, type Href } from "expo-router";
-import { useCallback, useEffect, useState } from "react";
-import { Animated, Linking, StyleSheet, View, type StyleProp, type ViewStyle } from "react-native";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { Animated, Linking, StyleSheet, type StyleProp, type ViewStyle } from "react-native";
 import { WebView, type WebViewMessageEvent } from "react-native-webview";
 
 interface MarkdownRendererProps {
@@ -29,6 +30,13 @@ interface MarkdownRendererProps {
    * align the content with a sibling (a comment's author row, say).
    */
   bodyPadding?: number;
+}
+
+interface GitHubMarkdown {
+  markdown: string;
+  context: string | undefined;
+  filePath: string | undefined;
+  html: string;
 }
 
 function resolveImageUrls(html: string, context?: string, gitRef = "HEAD"): string {
@@ -55,16 +63,28 @@ export function MarkdownRenderer({
   onAnchorOffset,
   bodyPadding = 16,
 }: MarkdownRendererProps) {
-  const { colors, isDark } = useTheme();
+  const { isDark } = useTheme();
   const router = useRouter();
-  const [html, setHtml] = useState<string | null>(null);
+  const [githubMarkdown, setGitHubMarkdown] = useState<GitHubMarkdown>();
   const [height, setHeight] = useState(300);
   const [opacity] = useState(() => new Animated.Value(0));
+  const preview = useMemo(() => buildMarkdownPreview(markdown), [markdown]);
+  const githubHtml =
+    githubMarkdown?.markdown === markdown &&
+    githubMarkdown.context === context &&
+    githubMarkdown.filePath === filePath
+      ? githubMarkdown.html
+      : undefined;
+  const html = useMemo(() => {
+    const body =
+      githubHtml === undefined ? preview.html : resolveImageUrls(githubHtml, context, gitRef);
+    return buildHtml(body, isDark, bodyPadding, preview.mermaidSvgs);
+  }, [githubHtml, context, gitRef, isDark, bodyPadding, preview]);
 
   useEffect(() => {
     let cancelled = false;
 
-    async function render() {
+    async function loadGitHubMarkdown() {
       try {
         const { data } = await githubAxios.post<string>(
           "/markdown",
@@ -80,26 +100,15 @@ export function MarkdownRenderer({
           },
         );
 
-        if (!cancelled) {
-          setHtml(buildHtml(resolveImageUrls(data, context, gitRef), isDark, bodyPadding));
-        }
-      } catch {
-        if (!cancelled) {
-          const escaped = markdown
-            .replace(/&/g, "&amp;")
-            .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;")
-            .replace(/\n/g, "<br>");
-          setHtml(buildHtml(`<pre>${escaped}</pre>`, isDark, bodyPadding));
-        }
-      }
+        if (!cancelled) setGitHubMarkdown({ markdown, context, filePath, html: data });
+      } catch {}
     }
 
-    void render();
+    void loadGitHubMarkdown();
     return () => {
       cancelled = true;
     };
-  }, [markdown, isDark, context, filePath, gitRef, bodyPadding]);
+  }, [markdown, context, filePath]);
 
   useEffect(() => {
     opacity.setValue(0);
@@ -153,18 +162,6 @@ export function MarkdownRenderer({
     [reveal, onHeightChange, onAnchorOffset, context, filePath, gitRef, router],
   );
 
-  if (!html) {
-    return (
-      <View style={[s.loading, { padding: bodyPadding }, style]}>
-        <View style={[s.skeletonLine, { backgroundColor: colors.surfaceSecondary }]} />
-        <View
-          style={[s.skeletonLine, s.skeletonShort, { backgroundColor: colors.surfaceSecondary }]}
-        />
-        <View style={[s.skeletonLine, { backgroundColor: colors.surfaceSecondary }]} />
-      </View>
-    );
-  }
-
   return (
     <Animated.View style={[{ opacity }, style]}>
       <WebView
@@ -184,18 +181,6 @@ export function MarkdownRenderer({
 }
 
 const s = StyleSheet.create({
-  loading: {
-    gap: 8,
-    padding: 16,
-  },
-  skeletonLine: {
-    height: 14,
-    borderRadius: 4,
-    width: "100%",
-  },
-  skeletonShort: {
-    width: "60%",
-  },
   webview: {
     flex: 0,
     backgroundColor: "transparent",
